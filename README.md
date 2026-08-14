@@ -1,5 +1,7 @@
 # ComfyUI-Z-Image-Prompt-Builder
 
+> [English](README.en.md) | 中文
+
 由 VividMuse 开发的 ComfyUI 中文写真提示词节点。通过写真预设、结构化下拉字段和可复现的随机组合，生成适用于 Z-Image 与 Z-Image-Turbo 的中文自然语言正向提示词。
 
 ## 功能
@@ -44,7 +46,7 @@
 在 ComfyUI 的 `custom_nodes` 目录中执行：
 
 ```bash
-git clone https://github.com/VividMuse/ComfyUI-Z-Image-Prompt-Builder.git
+git clone https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder.git
 ```
 
 重新启动 ComfyUI，并对浏览器执行一次强制刷新。节点位于：
@@ -169,8 +171,8 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 ## 发布信息
 
 - 当前版本：`0.1.0`
-- GitHub：[VividMuse/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse/ComfyUI-Z-Image-Prompt-Builder)
-- Comfy Registry Publisher ID：`VividMuse`
+- GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
+- Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上
 - 许可证：MIT
 

@@ -19,7 +19,7 @@ Documentation = "https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder
 "Bug Tracker" = "https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/issues"
 
 [tool.comfy]
-PublisherId = "VividMuse"
+PublisherId = "VividMuse-AGI"
 DisplayName = "Z-Image 中文提示词生成器"
 requires-comfyui = ">=0.31.1"
 
