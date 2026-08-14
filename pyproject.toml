@@ -14,9 +14,9 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/VividMuse/ComfyUI-Z-Image-Prompt-Builder"
-Documentation = "https://github.com/VividMuse/ComfyUI-Z-Image-Prompt-Builder#readme"
-"Bug Tracker" = "https://github.com/VividMuse/ComfyUI-Z-Image-Prompt-Builder/issues"
+Repository = "https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder"
+Documentation = "https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder#readme"
+"Bug Tracker" = "https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/issues"
 
 [tool.comfy]
 PublisherId = "VividMuse"
