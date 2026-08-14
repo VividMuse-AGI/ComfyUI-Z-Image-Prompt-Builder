@@ -1,0 +1,1115 @@
+{
+  "schema_version": "1.0.0",
+  "language": "zh-CN",
+  "target_models": [
+    "Z-Image",
+    "Z-Image-Turbo"
+  ],
+  "validation": {
+    "language_rules": "passed",
+    "model_image_tests": "pending"
+  },
+  "fields": {
+    "capture.medium": {
+      "category": "画面基础",
+      "label": "成像媒介",
+      "template": "呈现{value}",
+      "options": [
+        {
+          "id": "professional_digital",
+          "label": "专业数码相机摄影",
+          "value": "专业数码相机拍摄的真实照片质感"
+        },
+        {
+          "id": "full_frame_mirrorless",
+          "label": "全画幅微单摄影",
+          "value": "全画幅微单相机拍摄的清晰自然质感"
+        },
+        {
+          "id": "crop_mirrorless",
+          "label": "半画幅微单摄影",
+          "value": "半画幅微单相机拍摄的轻便自然质感"
+        },
+        {
+          "id": "digital_slr",
+          "label": "数码单反摄影",
+          "value": "数码单反相机拍摄的扎实摄影质感"
+        },
+        {
+          "id": "medium_format_digital",
+          "label": "中画幅数码摄影",
+          "value": "中画幅数码相机拍摄的细腻层次与平滑色调"
+        },
+        {
+          "id": "smartphone_computational",
+          "label": "手机计算摄影",
+          "value": "智能手机计算摄影的自然高动态范围质感"
+        },
+        {
+          "id": "compact_digital",
+          "label": "便携数码相机摄影",
+          "value": "便携数码相机直出的轻快生活感"
+        },
+        {
+          "id": "early_ccd_digital",
+          "label": "早期CCD数码摄影",
+          "value": "早期CCD数码相机的直接闪光与轻微色彩偏移质感"
+        },
+        {
+          "id": "film_35mm",
+          "label": "35毫米胶片摄影",
+          "value": "35毫米胶片拍摄的自然颗粒与柔和高光质感"
+        },
+        {
+          "id": "medium_format_film",
+          "label": "中画幅胶片摄影",
+          "value": "中画幅胶片拍摄的细密颗粒与丰富色调层次"
+        },
+        {
+          "id": "instant_film",
+          "label": "即时成像相纸摄影",
+          "value": "即时成像相纸的白色边框、柔和细节与自然显影色彩"
+        },
+        {
+          "id": "disposable_film",
+          "label": "一次性胶片相机摄影",
+          "value": "一次性胶片相机的固定焦点、直接闪光与随拍颗粒感"
+        }
+      ]
+    },
+    "theme.category": {
+      "category": "画面基础",
+      "label": "写真大类",
+      "template": "归入{value}",
+      "options": [
+        {
+          "id": "lifestyle",
+          "label": "日常生活",
+          "value": "日常生活人像"
+        },
+        {
+          "id": "fashion_editorial",
+          "label": "时尚编辑",
+          "value": "时尚编辑人像"
+        },
+        {
+          "id": "commercial",
+          "label": "商业广告",
+          "value": "商业广告人像"
+        },
+        {
+          "id": "beauty",
+          "label": "美妆美容",
+          "value": "美妆美容人像"
+        },
+        {
+          "id": "urban",
+          "label": "都市叙事",
+          "value": "都市叙事人像"
+        },
+        {
+          "id": "nature_outdoor",
+          "label": "自然户外",
+          "value": "自然户外人像"
+        },
+        {
+          "id": "travel",
+          "label": "旅行度假",
+          "value": "旅行度假人像"
+        },
+        {
+          "id": "sport",
+          "label": "运动健康",
+          "value": "运动健康人像"
+        },
+        {
+          "id": "oriental",
+          "label": "中式美学",
+          "value": "中式美学人像"
+        },
+        {
+          "id": "retro",
+          "label": "复古年代",
+          "value": "复古年代人像"
+        },
+        {
+          "id": "cinematic",
+          "label": "电影叙事",
+          "value": "电影叙事人像"
+        },
+        {
+          "id": "fantasy_concept",
+          "label": "幻想概念",
+          "value": "幻想概念人像"
+        }
+      ]
+    },
+    "theme.subject": {
+      "category": "画面基础",
+      "label": "写真主题",
+      "template": "以{value}为写真主题",
+      "options": [
+        {
+          "id": "japanese_summer_forest",
+          "label": "日系森系夏日写真",
+          "value": "日系森系夏日女性写真",
+          "tags": [
+            "nature_outdoor"
+          ]
+        },
+        {
+          "id": "japanese_cafe_life",
+          "label": "日系咖啡馆生活写真",
+          "value": "日系咖啡馆生活女性写真",
+          "tags": [
+            "lifestyle"
+          ]
+        },
+        {
+          "id": "cream_window_life",
+          "label": "窗边奶油暖调生活写真",
+          "value": "窗边奶油暖调生活女性写真",
+          "tags": [
+            "lifestyle"
+          ]
+        },
+        {
+          "id": "home_morning_relaxed",
+          "label": "居家晨光松弛写真",
+          "value": "居家晨光松弛女性写真",
+          "tags": [
+            "lifestyle"
+          ]
+        },
+        {
+          "id": "flower_shop_fresh",
+          "label": "花店日常清新写真",
+          "value": "花店日常清新女性写真",
+          "tags": [
+            "lifestyle"
+          ]
+        },
+        {
+          "id": "rainy_indoor_quiet",
+          "label": "雨天室内安静写真",
+          "value": "雨天室内安静女性写真",
+          "tags": [
+            "lifestyle"
+          ]
+        },
+        {
+          "id": "weekend_bookstore_reading",
+          "label": "书店周末阅读写真",
+          "value": "书店周末阅读女性写真",
+          "tags": [
+            "lifestyle"
+          ]
+        },
+        {
+          "id": "kitchen_baking_daily",
+          "label": "厨房烘焙日常写真",
+          "value": "厨房烘焙日常女性写真",
+          "tags": [
+            "lifestyle"
+          ]
+        },
+        {
+          "id": "record_store_leisure",
+          "label": "唱片店闲逛写真",
+          "value": "唱片店闲逛女性写真",
+          "tags": [
+            "lifestyle"
+          ]
+        },
+        {
+          "id": "artist_studio_daily",
+          "label": "画室创作日常写真",
+          "value": "画室创作日常女性写真",
+          "tags": [
+            "lifestyle"
+          ]
+        },
+        {
+          "id": "weekend_market_stroll",
+          "label": "周末市集漫步写真",
+          "value": "周末市集漫步女性写真",
+          "tags": [
+            "lifestyle"
+          ]
+        },
+        {
+          "id": "night_luxury_fashion",
+          "label": "夜间室内轻奢时尚写真",
+          "value": "夜间室内轻奢时尚女性写真",
+          "tags": [
+            "fashion_editorial"
+          ]
+        },
+        {
+          "id": "magazine_studio_editorial",
+          "label": "高级杂志棚拍写真",
+          "value": "高级杂志风格棚拍女性写真",
+          "tags": [
+            "fashion_editorial"
+          ]
+        },
+        {
+          "id": "minimal_black_white_fashion",
+          "label": "极简黑白时尚写真",
+          "value": "极简黑白时尚女性写真",
+          "tags": [
+            "fashion_editorial"
+          ]
+        },
+        {
+          "id": "urban_street_outfit",
+          "label": "都市街头穿搭写真",
+          "value": "都市街头穿搭女性写真",
+          "tags": [
+            "fashion_editorial"
+          ]
+        },
+        {
+          "id": "metallic_future_fashion",
+          "label": "金属未来感时尚写真",
+          "value": "金属未来感时尚女性写真",
+          "tags": [
+            "fashion_editorial"
+          ]
+        },
+        {
+          "id": "red_carpet_gown",
+          "label": "红毯礼服时尚写真",
+          "value": "红毯礼服时尚女性写真",
+          "tags": [
+            "fashion_editorial"
+          ]
+        },
+        {
+          "id": "color_geometry_editorial",
+          "label": "彩色几何棚拍写真",
+          "value": "彩色几何布景时尚女性写真",
+          "tags": [
+            "fashion_editorial"
+          ]
+        },
+        {
+          "id": "minimal_suit_silhouette",
+          "label": "极简西装廓形写真",
+          "value": "极简西装廓形时尚女性写真",
+          "tags": [
+            "fashion_editorial"
+          ]
+        },
+        {
+          "id": "soft_knit_editorial",
+          "label": "柔软针织质感写真",
+          "value": "柔软针织质感时尚女性写真",
+          "tags": [
+            "fashion_editorial"
+          ]
+        },
+        {
+          "id": "experimental_floral_fashion",
+          "label": "实验花艺时尚写真",
+          "value": "实验花艺装置时尚女性写真",
+          "tags": [
+            "fashion_editorial"
+          ]
+        },
+        {
+          "id": "urban_office_luxury",
+          "label": "都市职场轻奢写真",
+          "value": "都市职场轻奢女性写真",
+          "tags": [
+            "commercial"
+          ]
+        },
+        {
+          "id": "professional_business_headshot",
+          "label": "专业商务头像写真",
+          "value": "专业商务女性头像写真",
+          "tags": [
+            "commercial"
+          ]
+        },
+        {
+          "id": "fashion_ecommerce_model",
+          "label": "服装电商模特写真",
+          "value": "服装电商女性模特写真",
+          "tags": [
+            "commercial"
+          ]
+        },
+        {
+          "id": "jewelry_advertising",
+          "label": "珠宝首饰广告写真",
+          "value": "珠宝首饰女性广告写真",
+          "tags": [
+            "commercial"
+          ]
+        },
+        {
+          "id": "perfume_advertising",
+          "label": "香水商业广告写真",
+          "value": "香水商业女性广告写真",
+          "tags": [
+            "commercial"
+          ]
+        },
+        {
+          "id": "luxury_hotel_brand",
+          "label": "高级酒店品牌写真",
+          "value": "高级酒店品牌女性写真",
+          "tags": [
+            "commercial"
+          ]
+        },
+        {
+          "id": "watch_advertising",
+          "label": "腕表商业广告写真",
+          "value": "腕表产品女性商业广告写真",
+          "tags": [
+            "commercial"
+          ]
+        },
+        {
+          "id": "eyewear_advertising",
+          "label": "眼镜商业广告写真",
+          "value": "眼镜产品女性商业广告写真",
+          "tags": [
+            "commercial"
+          ]
+        },
+        {
+          "id": "handbag_advertising",
+          "label": "手袋商业广告写真",
+          "value": "手袋产品女性商业广告写真",
+          "tags": [
+            "commercial"
+          ]
+        },
+        {
+          "id": "bridal_brand_campaign",
+          "label": "婚纱礼服品牌写真",
+          "value": "婚纱礼服品牌女性商业写真",
+          "tags": [
+            "commercial"
+          ]
+        },
+        {
+          "id": "studio_dewy_beauty",
+          "label": "影棚水光妆美容特写",
+          "value": "影棚水光妆女性美容特写",
+          "tags": [
+            "beauty"
+          ]
+        },
+        {
+          "id": "natural_skin_closeup",
+          "label": "自然真实肤质特写",
+          "value": "自然真实肤质女性面部特写",
+          "tags": [
+            "beauty"
+          ]
+        },
+        {
+          "id": "clear_nude_makeup",
+          "label": "清透裸妆美容写真",
+          "value": "清透裸妆女性美容写真",
+          "tags": [
+            "beauty"
+          ]
+        },
+        {
+          "id": "rich_red_lip_closeup",
+          "label": "浓郁红唇妆面特写",
+          "value": "浓郁红唇女性妆面特写",
+          "tags": [
+            "beauty"
+          ]
+        },
+        {
+          "id": "color_eye_makeup",
+          "label": "彩色眼妆创意特写",
+          "value": "彩色眼妆女性创意特写",
+          "tags": [
+            "beauty"
+          ]
+        },
+        {
+          "id": "skincare_clean_ad",
+          "label": "护肤品清洁美容广告",
+          "value": "护肤品清洁女性美容广告写真",
+          "tags": [
+            "beauty"
+          ]
+        },
+        {
+          "id": "soft_matte_beauty",
+          "label": "柔雾哑光妆面特写",
+          "value": "柔雾哑光妆面女性美容特写",
+          "tags": [
+            "beauty"
+          ]
+        },
+        {
+          "id": "pearl_eye_makeup",
+          "label": "珠光眼妆创意特写",
+          "value": "珠光眼妆女性创意美容特写",
+          "tags": [
+            "beauty"
+          ]
+        },
+        {
+          "id": "clear_blush_beauty",
+          "label": "清透腮红妆面写真",
+          "value": "清透腮红妆面女性美容写真",
+          "tags": [
+            "beauty"
+          ]
+        },
+        {
+          "id": "haircare_styling_ad",
+          "label": "护发造型美容广告",
+          "value": "护发造型女性美容广告写真",
+          "tags": [
+            "beauty"
+          ]
+        },
+        {
+          "id": "urban_night_film",
+          "label": "都市夜行叙事写真",
+          "value": "都市夜行叙事女性写真",
+          "tags": [
+            "urban"
+          ]
+        },
+        {
+          "id": "glass_office_commute",
+          "label": "玻璃幕墙通勤写真",
+          "value": "玻璃幕墙都市通勤女性写真",
+          "tags": [
+            "urban"
+          ]
+        },
+        {
+          "id": "subway_platform_urban",
+          "label": "地铁站台都市写真",
+          "value": "地铁站台都市女性写真",
+          "tags": [
+            "urban"
+          ]
+        },
+        {
+          "id": "rainy_neon_street",
+          "label": "雨夜街头霓虹写真",
+          "value": "雨夜街头霓虹女性写真",
+          "tags": [
+            "urban"
+          ]
+        },
+        {
+          "id": "rooftop_blue_hour",
+          "label": "天台蓝调时刻写真",
+          "value": "城市天台蓝调时刻女性写真",
+          "tags": [
+            "urban"
+          ]
+        },
+        {
+          "id": "old_district_documentary",
+          "label": "旧城区巷道纪实写真",
+          "value": "旧城区巷道纪实女性写真",
+          "tags": [
+            "urban"
+          ]
+        },
+        {
+          "id": "night_convenience_store",
+          "label": "便利店夜间叙事写真",
+          "value": "便利店夜间叙事女性写真",
+          "tags": [
+            "urban"
+          ]
+        },
+        {
+          "id": "cool_parking_garage",
+          "label": "停车场冷调都市写真",
+          "value": "停车场冷调都市女性写真",
+          "tags": [
+            "urban"
+          ]
+        },
+        {
+          "id": "crosswalk_documentary",
+          "label": "街道路口纪实写真",
+          "value": "街道路口纪实女性写真",
+          "tags": [
+            "urban"
+          ]
+        },
+        {
+          "id": "overpass_commute",
+          "label": "城市天桥通勤写真",
+          "value": "城市天桥通勤女性写真",
+          "tags": [
+            "urban"
+          ]
+        },
+        {
+          "id": "spring_flower_field",
+          "label": "春日花海清新写真",
+          "value": "春日花海清新女性写真",
+          "tags": [
+            "nature_outdoor"
+          ]
+        },
+        {
+          "id": "lakeside_breeze",
+          "label": "湖畔清风自然写真",
+          "value": "湖畔清风自然女性写真",
+          "tags": [
+            "nature_outdoor"
+          ]
+        },
+        {
+          "id": "open_grassland",
+          "label": "草原旷野环境写真",
+          "value": "草原旷野环境女性写真",
+          "tags": [
+            "nature_outdoor"
+          ]
+        },
+        {
+          "id": "autumn_maple_forest",
+          "label": "秋日枫林氛围写真",
+          "value": "秋日枫林氛围女性写真",
+          "tags": [
+            "nature_outdoor"
+          ]
+        },
+        {
+          "id": "winter_snow_forest",
+          "label": "冬日雪林清冷写真",
+          "value": "冬日雪林清冷女性写真",
+          "tags": [
+            "nature_outdoor"
+          ]
+        },
+        {
+          "id": "quiet_bamboo_forest",
+          "label": "竹林清幽自然写真",
+          "value": "竹林清幽自然女性写真",
+          "tags": [
+            "nature_outdoor"
+          ]
+        },
+        {
+          "id": "coastal_cliff",
+          "label": "海岸悬崖环境写真",
+          "value": "海岸悬崖环境女性写真",
+          "tags": [
+            "nature_outdoor"
+          ]
+        },
+        {
+          "id": "desert_sunset",
+          "label": "沙漠落日旷野写真",
+          "value": "沙漠落日旷野女性写真",
+          "tags": [
+            "nature_outdoor"
+          ]
+        },
+        {
+          "id": "country_lane",
+          "label": "乡间小路生活写真",
+          "value": "乡间小路自然女性写真",
+          "tags": [
+            "nature_outdoor"
+          ]
+        },
+        {
+          "id": "summer_beach_vacation",
+          "label": "海边夏日度假写真",
+          "value": "海边夏日度假女性写真",
+          "tags": [
+            "travel"
+          ]
+        },
+        {
+          "id": "hotel_balcony_morning",
+          "label": "酒店阳台度假写真",
+          "value": "酒店阳台度假女性写真",
+          "tags": [
+            "travel"
+          ]
+        },
+        {
+          "id": "mountain_hiking_travel",
+          "label": "山野徒步旅行写真",
+          "value": "山野徒步旅行女性写真",
+          "tags": [
+            "travel"
+          ]
+        },
+        {
+          "id": "ancient_town_walk",
+          "label": "古镇漫步旅行写真",
+          "value": "古镇漫步旅行女性写真",
+          "tags": [
+            "travel"
+          ]
+        },
+        {
+          "id": "tropical_pool_holiday",
+          "label": "热带泳池假日写真",
+          "value": "热带泳池假日女性写真",
+          "tags": [
+            "travel"
+          ]
+        },
+        {
+          "id": "road_trip_cinema",
+          "label": "公路旅行随行写真",
+          "value": "公路旅行随行女性写真",
+          "tags": [
+            "travel"
+          ]
+        },
+        {
+          "id": "island_town_walk",
+          "label": "海岛小镇漫步写真",
+          "value": "海岛小镇漫步女性写真",
+          "tags": [
+            "travel"
+          ]
+        },
+        {
+          "id": "mountain_camping",
+          "label": "山间露营旅行写真",
+          "value": "山间露营旅行女性写真",
+          "tags": [
+            "travel"
+          ]
+        },
+        {
+          "id": "vineyard_estate",
+          "label": "葡萄园庄园旅行写真",
+          "value": "葡萄园庄园旅行女性写真",
+          "tags": [
+            "travel"
+          ]
+        },
+        {
+          "id": "railway_waiting",
+          "label": "火车站候车旅行写真",
+          "value": "火车站候车旅行女性写真",
+          "tags": [
+            "travel"
+          ]
+        },
+        {
+          "id": "sunny_tennis_sport",
+          "label": "网球场阳光运动写真",
+          "value": "网球场阳光女性运动写真",
+          "tags": [
+            "sport"
+          ]
+        },
+        {
+          "id": "gym_strength_training",
+          "label": "健身房力量训练写真",
+          "value": "健身房女性力量训练写真",
+          "tags": [
+            "sport"
+          ]
+        },
+        {
+          "id": "yoga_pilates_life",
+          "label": "瑜伽普拉提生活写真",
+          "value": "瑜伽普拉提女性生活写真",
+          "tags": [
+            "sport"
+          ]
+        },
+        {
+          "id": "city_jogging_active",
+          "label": "城市慢跑活力写真",
+          "value": "城市慢跑女性活力写真",
+          "tags": [
+            "sport"
+          ]
+        },
+        {
+          "id": "indoor_pool_sport",
+          "label": "室内泳池运动写真",
+          "value": "室内泳池女性运动写真",
+          "tags": [
+            "sport"
+          ]
+        },
+        {
+          "id": "dance_rehearsal_dynamic",
+          "label": "舞蹈排练动态写真",
+          "value": "舞蹈排练女性动态写真",
+          "tags": [
+            "sport"
+          ]
+        },
+        {
+          "id": "boxing_training",
+          "label": "拳击训练力量写真",
+          "value": "拳击训练女性力量写真",
+          "tags": [
+            "sport"
+          ]
+        },
+        {
+          "id": "outdoor_cycling",
+          "label": "户外骑行活力写真",
+          "value": "户外骑行女性活力写真",
+          "tags": [
+            "sport"
+          ]
+        },
+        {
+          "id": "badminton_training",
+          "label": "羽毛球训练写真",
+          "value": "羽毛球训练女性运动写真",
+          "tags": [
+            "sport"
+          ]
+        },
+        {
+          "id": "indoor_climbing",
+          "label": "室内攀岩运动写真",
+          "value": "室内攀岩女性运动写真",
+          "tags": [
+            "sport"
+          ]
+        },
+        {
+          "id": "new_chinese_indoor",
+          "label": "新中式室内写真",
+          "value": "新中式室内女性写真",
+          "tags": [
+            "oriental"
+          ]
+        },
+        {
+          "id": "tearoom_bamboo_shadow",
+          "label": "茶室竹影中式写真",
+          "value": "茶室竹影中式女性写真",
+          "tags": [
+            "oriental"
+          ]
+        },
+        {
+          "id": "qipao_republican_elegance",
+          "label": "旗袍民国雅致写真",
+          "value": "旗袍民国雅致女性写真",
+          "tags": [
+            "oriental"
+          ]
+        },
+        {
+          "id": "song_style_courtyard",
+          "label": "宋韵素雅庭院写真",
+          "value": "宋韵素雅庭院女性写真",
+          "tags": [
+            "oriental"
+          ]
+        },
+        {
+          "id": "tang_luxury_palace",
+          "label": "唐风华贵宫廷写真",
+          "value": "唐风华贵宫廷女性写真",
+          "tags": [
+            "oriental"
+          ]
+        },
+        {
+          "id": "ink_negative_space",
+          "label": "水墨留白中式写真",
+          "value": "水墨留白中式女性写真",
+          "tags": [
+            "oriental"
+          ]
+        },
+        {
+          "id": "jiangnan_garden_rain",
+          "label": "江南园林雨景写真",
+          "value": "江南园林雨景女性写真",
+          "tags": [
+            "oriental"
+          ]
+        },
+        {
+          "id": "dunhuang_mural_inspired",
+          "label": "敦煌壁画灵感写真",
+          "value": "敦煌壁画灵感女性写真",
+          "tags": [
+            "oriental"
+          ]
+        },
+        {
+          "id": "ming_style_courtyard",
+          "label": "明制雅致庭院写真",
+          "value": "明制雅致庭院女性写真",
+          "tags": [
+            "oriental"
+          ]
+        },
+        {
+          "id": "traditional_academy",
+          "label": "传统书院文雅写真",
+          "value": "传统书院文雅女性写真",
+          "tags": [
+            "oriental"
+          ]
+        },
+        {
+          "id": "retro_hongkong_night",
+          "label": "复古港风夜景写真",
+          "value": "复古港风夜景女性写真",
+          "tags": [
+            "retro"
+          ]
+        },
+        {
+          "id": "nineties_home_retro",
+          "label": "九十年代家居写真",
+          "value": "九十年代家居女性写真",
+          "tags": [
+            "retro"
+          ]
+        },
+        {
+          "id": "millennium_digital_flash",
+          "label": "千禧复古派对写真",
+          "value": "千禧复古派对女性写真",
+          "tags": [
+            "retro"
+          ]
+        },
+        {
+          "id": "american_motel_retro",
+          "label": "美式复古汽车旅馆写真",
+          "value": "美式复古汽车旅馆女性写真",
+          "tags": [
+            "retro"
+          ]
+        },
+        {
+          "id": "french_old_apartment_film",
+          "label": "法式旧公寓复古写真",
+          "value": "法式旧公寓复古女性写真",
+          "tags": [
+            "retro"
+          ]
+        },
+        {
+          "id": "eighties_studio_retro",
+          "label": "八十年代影楼复古写真",
+          "value": "八十年代影楼复古女性写真",
+          "tags": [
+            "retro"
+          ]
+        },
+        {
+          "id": "seventies_warm_living_room",
+          "label": "七十年代暖调客厅写真",
+          "value": "七十年代暖调客厅女性写真",
+          "tags": [
+            "retro"
+          ]
+        },
+        {
+          "id": "retro_disco_hall",
+          "label": "复古迪斯科舞厅写真",
+          "value": "复古迪斯科舞厅女性写真",
+          "tags": [
+            "retro"
+          ]
+        },
+        {
+          "id": "classic_railway_traveler",
+          "label": "经典火车站旅人写真",
+          "value": "经典火车站旅人女性写真",
+          "tags": [
+            "retro"
+          ]
+        },
+        {
+          "id": "american_roadside_diner",
+          "label": "美式公路餐厅复古写真",
+          "value": "美式公路餐厅复古女性写真",
+          "tags": [
+            "retro"
+          ]
+        },
+        {
+          "id": "low_key_indoor_cinema",
+          "label": "室内克制情绪电影写真",
+          "value": "室内克制情绪女性电影写真",
+          "tags": [
+            "cinematic"
+          ]
+        },
+        {
+          "id": "warm_tungsten_cinema",
+          "label": "暖调室内电影叙事写真",
+          "value": "暖调室内女性电影叙事写真",
+          "tags": [
+            "cinematic"
+          ]
+        },
+        {
+          "id": "blue_hour_film_still",
+          "label": "蓝调城市电影静帧",
+          "value": "蓝调城市女性电影静帧写真",
+          "tags": [
+            "cinematic"
+          ]
+        },
+        {
+          "id": "suspense_corridor_story",
+          "label": "悬疑走廊叙事写真",
+          "value": "悬疑走廊女性叙事写真",
+          "tags": [
+            "cinematic"
+          ]
+        },
+        {
+          "id": "high_key_dream_cinema",
+          "label": "明亮梦境电影写真",
+          "value": "明亮梦境女性电影写真",
+          "tags": [
+            "cinematic"
+          ]
+        },
+        {
+          "id": "black_white_silver_portrait",
+          "label": "黑白电影肖像",
+          "value": "黑白女性电影肖像",
+          "tags": [
+            "cinematic"
+          ]
+        },
+        {
+          "id": "rainy_night_walk_still",
+          "label": "雨夜独行电影静帧",
+          "value": "雨夜独行女性电影静帧写真",
+          "tags": [
+            "cinematic"
+          ]
+        },
+        {
+          "id": "apartment_solitude_story",
+          "label": "公寓独处剧情写真",
+          "value": "公寓独处女性剧情写真",
+          "tags": [
+            "cinematic"
+          ]
+        },
+        {
+          "id": "hotel_window_still",
+          "label": "旅馆窗边电影静帧",
+          "value": "旅馆窗边女性电影静帧写真",
+          "tags": [
+            "cinematic"
+          ]
+        },
+        {
+          "id": "roadside_stop_story",
+          "label": "公路停靠电影叙事",
+          "value": "公路停靠女性电影叙事写真",
+          "tags": [
+            "cinematic"
+          ]
+        },
+        {
+          "id": "moonlit_forest_fantasy",
+          "label": "月夜森林精灵概念写真",
+          "value": "月夜森林精灵女性概念写真",
+          "tags": [
+            "fantasy_concept"
+          ]
+        },
+        {
+          "id": "gothic_castle_dark",
+          "label": "哥特古堡暗黑写真",
+          "value": "哥特古堡暗黑女性写真",
+          "tags": [
+            "fantasy_concept"
+          ]
+        },
+        {
+          "id": "cyber_future_city",
+          "label": "未来都市赛博写真",
+          "value": "未来都市赛博女性写真",
+          "tags": [
+            "fantasy_concept"
+          ]
+        },
+        {
+          "id": "steampunk_mechanical",
+          "label": "蒸汽机械复古幻想写真",
+          "value": "蒸汽机械复古女性幻想写真",
+          "tags": [
+            "fantasy_concept"
+          ]
+        },
+        {
+          "id": "surreal_dream_garden",
+          "label": "梦境花园超现实写真",
+          "value": "梦境花园超现实女性写真",
+          "tags": [
+            "fantasy_concept"
+          ]
+        },
+        {
+          "id": "nebula_temple",
+          "label": "星云神殿概念写真",
+          "value": "星云神殿女性概念写真",
+          "tags": [
+            "fantasy_concept"
+          ]
+        },
+        {
+          "id": "underwater_illusion",
+          "label": "水下幻境概念写真",
+          "value": "水下幻境女性概念写真",
+          "tags": [
+            "fantasy_concept"
+          ]
+        },
+        {
+          "id": "ice_palace_fantasy",
+          "label": "冰雪宫殿幻想写真",
+          "value": "冰雪宫殿女性幻想写真",
+          "tags": [
+            "fantasy_concept"
+          ]
+        },
+        {
+          "id": "cloud_realm_fantasy",
+          "label": "云雾仙境幻想写真",
+          "value": "云雾仙境女性幻想写真",
+          "tags": [
+            "fantasy_concept"
+          ]
+        },
+        {
+          "id": "petal_storm_concept",
+          "label": "花瓣风暴概念写真",
+          "value": "花瓣风暴女性概念写真",
+          "tags": [
+            "fantasy_concept"
+          ]
+        }
+      ]
+    }
+  }
+}

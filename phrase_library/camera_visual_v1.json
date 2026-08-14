@@ -1,0 +1,2369 @@
+{
+  "schema_version": "1.0.0",
+  "language": "zh-CN",
+  "target_models": [
+    "Z-Image",
+    "Z-Image-Turbo"
+  ],
+  "validation": {
+    "language_rules": "passed",
+    "model_image_tests": "pending"
+  },
+  "fields": {
+    "camera.aspect_ratio": {
+      "category": "摄影构图",
+      "label": "画面比例",
+      "template": "采用{value}",
+      "options": [
+        {
+          "id": "portrait_2_3",
+          "label": "2:3竖构图",
+          "value": "2:3竖构图"
+        },
+        {
+          "id": "portrait_3_4",
+          "label": "3:4竖构图",
+          "value": "3:4竖构图"
+        },
+        {
+          "id": "portrait_4_5",
+          "label": "4:5竖构图",
+          "value": "4:5竖构图"
+        },
+        {
+          "id": "portrait_9_16",
+          "label": "9:16竖构图",
+          "value": "9:16竖构图"
+        },
+        {
+          "id": "square_1_1",
+          "label": "1:1方形构图",
+          "value": "1:1方形构图"
+        },
+        {
+          "id": "landscape_3_2",
+          "label": "3:2横构图",
+          "value": "3:2横构图"
+        },
+        {
+          "id": "landscape_4_3",
+          "label": "4:3横构图",
+          "value": "4:3横构图"
+        },
+        {
+          "id": "landscape_5_4",
+          "label": "5:4横构图",
+          "value": "5:4横构图"
+        },
+        {
+          "id": "landscape_16_9",
+          "label": "16:9横构图",
+          "value": "16:9横构图"
+        }
+      ]
+    },
+    "camera.shot_size": {
+      "category": "摄影构图",
+      "label": "景别",
+      "template": "采用{value}",
+      "options": [
+        {
+          "id": "face_closeup",
+          "label": "面部特写",
+          "value": "面部特写构图"
+        },
+        {
+          "id": "head_shoulders",
+          "label": "头肩近景",
+          "value": "头部与肩部入画的近景构图"
+        },
+        {
+          "id": "chest_up",
+          "label": "胸部以上",
+          "value": "胸部以上近景构图"
+        },
+        {
+          "id": "waist_up",
+          "label": "腰部以上",
+          "value": "腰部以上半身构图"
+        },
+        {
+          "id": "seated_half",
+          "label": "坐姿半身",
+          "value": "坐姿半身构图"
+        },
+        {
+          "id": "three_quarter",
+          "label": "三分之二身",
+          "value": "膝部以上的三分之二身构图"
+        },
+        {
+          "id": "full_body",
+          "label": "全身构图",
+          "value": "从头部到脚部完整入画的全身构图"
+        },
+        {
+          "id": "wide_full_body",
+          "label": "带环境全身",
+          "value": "保留较多周围环境的全身构图"
+        },
+        {
+          "id": "environmental_portrait",
+          "label": "环境人像",
+          "value": "人物与所在空间共同入画的环境人像构图"
+        },
+        {
+          "id": "detail_closeup",
+          "label": "局部特写",
+          "value": "手部、服装或配饰占据主体的局部特写构图"
+        },
+        {
+          "id": "dynamic_full_body",
+          "label": "动态全身",
+          "value": "完整保留肢体动作的动态全身构图"
+        }
+      ]
+    },
+    "camera.composition": {
+      "category": "摄影构图",
+      "label": "画面布局",
+      "template": "人物{value}",
+      "options": [
+        {
+          "id": "centered",
+          "label": "居中构图",
+          "value": "位于画面中央"
+        },
+        {
+          "id": "center_right",
+          "label": "中央偏右",
+          "value": "位于画面中央偏右"
+        },
+        {
+          "id": "center_left",
+          "label": "中央偏左",
+          "value": "位于画面中央偏左"
+        },
+        {
+          "id": "left_third",
+          "label": "左侧三分线",
+          "value": "位于画面左侧三分线附近"
+        },
+        {
+          "id": "right_third",
+          "label": "右侧三分线",
+          "value": "位于画面右侧三分线附近"
+        },
+        {
+          "id": "lower_center",
+          "label": "下方居中",
+          "value": "位于画面下方中央并在上方保留空间"
+        },
+        {
+          "id": "symmetrical",
+          "label": "对称构图",
+          "value": "沿画面中轴排列，周围结构近似对称"
+        },
+        {
+          "id": "doorway_frame",
+          "label": "门框框景",
+          "value": "被门框从两侧围合形成纵向框景"
+        },
+        {
+          "id": "foreground_frame",
+          "label": "前景框景",
+          "value": "被靠近镜头的虚化物体部分遮挡并形成框景"
+        },
+        {
+          "id": "diagonal",
+          "label": "对角线构图",
+          "value": "沿画面对角线展开姿态"
+        },
+        {
+          "id": "negative_space",
+          "label": "留白构图",
+          "value": "位于画面一侧，另一侧保留大面积简洁空间"
+        },
+        {
+          "id": "gaze_space",
+          "label": "视线方向留白",
+          "value": "位于画面一侧，并在视线指向的一侧保留充足空间"
+        },
+        {
+          "id": "edge_cropped",
+          "label": "贴近裁切",
+          "value": "贴近画面边缘，肩部或肢体被自然裁切"
+        },
+        {
+          "id": "triangle",
+          "label": "三角构图",
+          "value": "与环境中元素构成稳定的三角构图"
+        },
+        {
+          "id": "leading_lines",
+          "label": "引导线构图",
+          "value": "位于向画面深处延伸的引导线上"
+        },
+        {
+          "id": "frame_within_frame",
+          "label": "框中框构图",
+          "value": "被环境元素框住形成框中框构图"
+        },
+        {
+          "id": "golden_ratio",
+          "label": "黄金分割",
+          "value": "落在画面的黄金分割点上"
+        }
+      ]
+    },
+    "camera.lens": {
+      "category": "摄影构图",
+      "label": "等效焦段",
+      "template": "使用{value}",
+      "options": [
+        {
+          "id": "lens_28mm",
+          "label": "28mm",
+          "value": "28mm全画幅等效镜头"
+        },
+        {
+          "id": "lens_35mm",
+          "label": "35mm",
+          "value": "35mm全画幅等效镜头"
+        },
+        {
+          "id": "lens_40mm",
+          "label": "40mm",
+          "value": "40mm全画幅等效镜头"
+        },
+        {
+          "id": "lens_50mm",
+          "label": "50mm",
+          "value": "50mm全画幅等效镜头"
+        },
+        {
+          "id": "lens_65mm",
+          "label": "65mm",
+          "value": "65mm全画幅等效镜头"
+        },
+        {
+          "id": "lens_70mm",
+          "label": "70mm",
+          "value": "70mm全画幅等效镜头"
+        },
+        {
+          "id": "lens_85mm",
+          "label": "85mm",
+          "value": "85mm全画幅等效镜头"
+        },
+        {
+          "id": "lens_105mm",
+          "label": "105mm",
+          "value": "105mm全画幅等效镜头"
+        },
+        {
+          "id": "lens_135mm",
+          "label": "135mm",
+          "value": "135mm全画幅等效镜头"
+        },
+        {
+          "id": "phone_main",
+          "label": "手机主摄",
+          "value": "接近24mm等效焦段的手机主摄镜头"
+        }
+      ]
+    },
+    "camera.distance": {
+      "category": "摄影构图",
+      "label": "拍摄距离",
+      "template": "摄影机与人物距离约为{value}",
+      "options": [
+        {
+          "id": "distance_05m",
+          "label": "0.5米",
+          "value": "0.5米"
+        },
+        {
+          "id": "distance_08m",
+          "label": "0.8米",
+          "value": "0.8米"
+        },
+        {
+          "id": "distance_1m",
+          "label": "1米",
+          "value": "1米"
+        },
+        {
+          "id": "distance_15m",
+          "label": "1.5米",
+          "value": "1.5米"
+        },
+        {
+          "id": "distance_2m",
+          "label": "2米",
+          "value": "2米"
+        },
+        {
+          "id": "distance_25m",
+          "label": "2.5米",
+          "value": "2.5米"
+        },
+        {
+          "id": "distance_35m",
+          "label": "3.5米",
+          "value": "3.5米"
+        },
+        {
+          "id": "distance_5m",
+          "label": "5米",
+          "value": "5米"
+        },
+        {
+          "id": "distance_7m",
+          "label": "7米",
+          "value": "7米"
+        }
+      ]
+    },
+    "camera.angle": {
+      "category": "摄影构图",
+      "label": "机位",
+      "template": "摄影机位于{value}",
+      "options": [
+        {
+          "id": "eye_level",
+          "label": "平视",
+          "value": "人物眼睛高度，保持平视"
+        },
+        {
+          "id": "slightly_high",
+          "label": "略高机位",
+          "value": "人物眼睛上方并轻微俯拍"
+        },
+        {
+          "id": "high_angle",
+          "label": "高位俯拍",
+          "value": "人物头部上方，形成明确俯拍角度"
+        },
+        {
+          "id": "slightly_low",
+          "label": "略低机位",
+          "value": "人物眼睛下方并轻微仰拍"
+        },
+        {
+          "id": "low_angle",
+          "label": "低位仰拍",
+          "value": "人物腰部以下高度，形成明确仰拍角度"
+        },
+        {
+          "id": "chest_level",
+          "label": "胸口高度",
+          "value": "人物胸口高度并保持镜头水平"
+        },
+        {
+          "id": "waist_level",
+          "label": "腰部高度",
+          "value": "人物腰部高度并保持镜头水平"
+        },
+        {
+          "id": "overhead",
+          "label": "正上方俯拍",
+          "value": "人物正上方并垂直向下拍摄"
+        },
+        {
+          "id": "ground_level",
+          "label": "贴近地面",
+          "value": "接近地面的位置并向上拍摄"
+        },
+        {
+          "id": "three_quarter_view",
+          "label": "侧前方机位",
+          "value": "人物侧前方约四十五度的位置"
+        },
+        {
+          "id": "profile_view",
+          "label": "侧面机位",
+          "value": "人物正侧方的位置"
+        },
+        {
+          "id": "dutch_angle",
+          "label": "荷兰角",
+          "value": "带轻微倾斜的荷兰角位置"
+        }
+      ]
+    },
+    "camera.depth": {
+      "category": "摄影构图",
+      "label": "景深",
+      "template": "采用{value}",
+      "options": [
+        {
+          "id": "very_shallow",
+          "label": "极浅景深",
+          "value": "极浅景深，只有面部关键区域清晰"
+        },
+        {
+          "id": "shallow",
+          "label": "浅景深",
+          "value": "浅景深，人物清晰而背景明显虚化"
+        },
+        {
+          "id": "moderate_shallow",
+          "label": "中浅景深",
+          "value": "中浅景深，人物清晰并保留少量环境信息"
+        },
+        {
+          "id": "medium",
+          "label": "中等景深",
+          "value": "中等景深，人物完整清晰且背景轻度虚化"
+        },
+        {
+          "id": "deep",
+          "label": "较深景深",
+          "value": "较深景深，人物与主要环境结构均保持清楚"
+        },
+        {
+          "id": "foreground_blur",
+          "label": "前景虚化",
+          "value": "浅景深并让靠近镜头的前景明显失焦"
+        },
+        {
+          "id": "background_compressed",
+          "label": "背景压缩",
+          "value": "浅景深与长焦压缩感，使背景贴近人物"
+        },
+        {
+          "id": "layered_depth",
+          "label": "层次景深",
+          "value": "中等景深，前景、人物和背景形成清晰空间层次"
+        }
+      ]
+    },
+    "camera.focus": {
+      "category": "摄影构图",
+      "label": "对焦位置",
+      "template": "焦点{value}",
+      "options": [
+        {
+          "id": "both_eyes",
+          "label": "双眼与面部",
+          "value": "锁定双眼与面部"
+        },
+        {
+          "id": "near_eye",
+          "label": "近侧眼睛",
+          "value": "锁定离镜头更近的一只眼睛"
+        },
+        {
+          "id": "face",
+          "label": "完整面部",
+          "value": "覆盖完整面部"
+        },
+        {
+          "id": "upper_body",
+          "label": "面部与上半身",
+          "value": "覆盖面部与上半身轮廓"
+        },
+        {
+          "id": "full_figure",
+          "label": "完整人物",
+          "value": "覆盖人物完整身体"
+        },
+        {
+          "id": "hands_prop",
+          "label": "手部与道具",
+          "value": "锁定手部与手中道具"
+        },
+        {
+          "id": "garment_detail",
+          "label": "服装细节",
+          "value": "锁定服装剪裁与面料细节"
+        },
+        {
+          "id": "moving_subject",
+          "label": "运动人物",
+          "value": "跟随运动中的人物主体"
+        },
+        {
+          "id": "face_environment",
+          "label": "人物与环境",
+          "value": "覆盖人物面部与相邻环境结构"
+        }
+      ]
+    },
+    "lighting.source": {
+      "category": "光线设计",
+      "label": "主光来源",
+      "template": "主光来自{value}",
+      "options": [
+        {
+          "id": "window_daylight",
+          "label": "窗户日光",
+          "value": "窗户进入的自然日光"
+        },
+        {
+          "id": "overcast_skylight",
+          "label": "阴天天光",
+          "value": "云层散射形成的均匀天光"
+        },
+        {
+          "id": "direct_sun",
+          "label": "直射阳光",
+          "value": "无遮挡的直射阳光"
+        },
+        {
+          "id": "leaf_filtered_sun",
+          "label": "叶隙阳光",
+          "value": "穿过树叶间隙的阳光"
+        },
+        {
+          "id": "sunset_sun",
+          "label": "日落阳光",
+          "value": "接近地平线的暖色阳光"
+        },
+        {
+          "id": "large_softbox",
+          "label": "大型柔光箱",
+          "value": "靠近人物的大型柔光箱"
+        },
+        {
+          "id": "beauty_dish",
+          "label": "雷达罩美人光",
+          "value": "位于镜头上方的雷达罩柔光"
+        },
+        {
+          "id": "ring_fill",
+          "label": "环形补光",
+          "value": "环绕镜头的柔和环形补光"
+        },
+        {
+          "id": "hard_flash",
+          "label": "镜头方向硬闪",
+          "value": "镜头方向直接发出的硬质闪光"
+        },
+        {
+          "id": "soft_flash",
+          "label": "柔化直闪",
+          "value": "经过柔化的镜头方向闪光"
+        },
+        {
+          "id": "continuous_panel",
+          "label": "柔光灯板",
+          "value": "大面积连续柔光灯板"
+        },
+        {
+          "id": "tungsten_practical",
+          "label": "室内钨丝灯",
+          "value": "画面内暖色钨丝灯具"
+        },
+        {
+          "id": "neon_signs",
+          "label": "霓虹灯牌",
+          "value": "街道霓虹灯牌与店铺灯光"
+        },
+        {
+          "id": "ceiling_ambient",
+          "label": "室内顶光",
+          "value": "室内顶部灯具与环境反射光"
+        },
+        {
+          "id": "storefront_light",
+          "label": "橱窗灯光",
+          "value": "商店橱窗向外投射的灯光"
+        },
+        {
+          "id": "reflected_bounce",
+          "label": "反射补光",
+          "value": "浅色墙面或反光板返回的柔和光线"
+        },
+        {
+          "id": "candlelight",
+          "label": "烛光",
+          "value": "摇曳的烛光"
+        },
+        {
+          "id": "campfire",
+          "label": "篝火",
+          "value": "篝火跃动的火光"
+        },
+        {
+          "id": "phone_screen",
+          "label": "手机屏幕光",
+          "value": "手机屏幕发出的冷光"
+        },
+        {
+          "id": "projector",
+          "label": "投影光",
+          "value": "投影仪打出的光束"
+        },
+        {
+          "id": "car_headlight",
+          "label": "车灯光",
+          "value": "驶近车辆的车灯光"
+        }
+      ]
+    },
+    "lighting.direction": {
+      "category": "光线设计",
+      "label": "光线方向",
+      "template": "光线从{value}",
+      "options": [
+        {
+          "id": "front",
+          "label": "正面",
+          "value": "镜头正面方向照向人物"
+        },
+        {
+          "id": "front_left",
+          "label": "左前方",
+          "value": "人物左前方约四十五度照入"
+        },
+        {
+          "id": "front_right",
+          "label": "右前方",
+          "value": "人物右前方约四十五度照入"
+        },
+        {
+          "id": "side_left",
+          "label": "左侧",
+          "value": "人物左侧横向照入"
+        },
+        {
+          "id": "side_right",
+          "label": "右侧",
+          "value": "人物右侧横向照入"
+        },
+        {
+          "id": "back_left",
+          "label": "左后方",
+          "value": "人物左后方形成轮廓光"
+        },
+        {
+          "id": "back_right",
+          "label": "右后方",
+          "value": "人物右后方形成轮廓光"
+        },
+        {
+          "id": "back",
+          "label": "正后方",
+          "value": "人物正后方照向镜头"
+        },
+        {
+          "id": "top_front",
+          "label": "前上方",
+          "value": "镜头上方偏前的位置向下照射"
+        },
+        {
+          "id": "top",
+          "label": "顶部",
+          "value": "人物正上方向下照射"
+        },
+        {
+          "id": "below_front",
+          "label": "下方补光",
+          "value": "镜头下方向上轻微补亮人物"
+        }
+      ]
+    },
+    "lighting.quality": {
+      "category": "光线设计",
+      "label": "光线质地",
+      "template": "光线呈现{value}",
+      "options": [
+        {
+          "id": "very_soft",
+          "label": "极柔和",
+          "value": "边缘过渡宽缓的极柔和质地"
+        },
+        {
+          "id": "soft_diffused",
+          "label": "柔和散射",
+          "value": "均匀散射、边缘柔软的质地"
+        },
+        {
+          "id": "soft_directional",
+          "label": "柔和定向",
+          "value": "方向明确但阴影边缘柔和的质地"
+        },
+        {
+          "id": "crisp_hard",
+          "label": "清晰硬光",
+          "value": "边缘清楚、反差直接的硬光质地"
+        },
+        {
+          "id": "dappled",
+          "label": "斑驳光影",
+          "value": "被枝叶切分的斑驳光影"
+        },
+        {
+          "id": "glowing_backlight",
+          "label": "发光逆光",
+          "value": "带轻微空气散射的明亮逆光"
+        },
+        {
+          "id": "even_flat",
+          "label": "均匀平光",
+          "value": "亮度均匀、阴影很浅的平光质地"
+        },
+        {
+          "id": "specular",
+          "label": "高光鲜明",
+          "value": "在光滑材质上形成清楚反光的质地"
+        },
+        {
+          "id": "low_key",
+          "label": "低调定向光",
+          "value": "照明范围集中、明暗分区明确的低调质地"
+        },
+        {
+          "id": "mixed_color",
+          "label": "混合色光",
+          "value": "冷暖光源同时存在的混合色光质地"
+        },
+        {
+          "id": "silhouette_backlight",
+          "label": "逆光剪影",
+          "value": "将人物勾成剪影的强逆光"
+        },
+        {
+          "id": "rembrandt",
+          "label": "伦勃朗光",
+          "value": "在脸颊形成三角光斑的伦勃朗光"
+        },
+        {
+          "id": "butterfly",
+          "label": "蝴蝶光",
+          "value": "鼻下形成蝶形阴影的蝴蝶光"
+        }
+      ]
+    },
+    "lighting.target": {
+      "category": "光线设计",
+      "label": "照明落点",
+      "template": "主光主要照亮{value}",
+      "options": [
+        {
+          "id": "face_eyes",
+          "label": "面部与双眼",
+          "value": "人物面部与双眼"
+        },
+        {
+          "id": "face_shoulders",
+          "label": "面部与肩颈",
+          "value": "人物面部、肩颈与锁骨区域"
+        },
+        {
+          "id": "face_hands",
+          "label": "面部与手部",
+          "value": "人物面部与靠近面部的手部动作"
+        },
+        {
+          "id": "upper_body",
+          "label": "上半身",
+          "value": "人物面部与上半身"
+        },
+        {
+          "id": "full_figure",
+          "label": "完整人物",
+          "value": "人物从头部到脚部的完整轮廓"
+        },
+        {
+          "id": "hair_edge",
+          "label": "发丝轮廓",
+          "value": "头发边缘与肩部轮廓"
+        },
+        {
+          "id": "garment_texture",
+          "label": "服装材质",
+          "value": "服装表面的纹理与褶皱"
+        },
+        {
+          "id": "legs_shoes",
+          "label": "腿部与鞋子",
+          "value": "腿部线条与鞋面材质"
+        },
+        {
+          "id": "subject_background",
+          "label": "人物与近处背景",
+          "value": "人物和紧邻人物的背景结构"
+        },
+        {
+          "id": "prop_hands",
+          "label": "道具与双手",
+          "value": "手中道具与双手的接触细节"
+        }
+      ]
+    },
+    "lighting.shadow": {
+      "category": "光线设计",
+      "label": "阴影表现",
+      "template": "阴影呈现{value}",
+      "options": [
+        {
+          "id": "barely_visible",
+          "label": "极浅阴影",
+          "value": "很浅的明暗差，面部轮廓平缓"
+        },
+        {
+          "id": "soft_gradation",
+          "label": "柔和渐变",
+          "value": "边缘宽缓的柔和渐变"
+        },
+        {
+          "id": "natural_contour",
+          "label": "自然轮廓阴影",
+          "value": "沿鼻梁、下颌与颈部形成自然层次"
+        },
+        {
+          "id": "clear_flash",
+          "label": "清晰闪光阴影",
+          "value": "贴近人物轮廓的清晰闪光投影"
+        },
+        {
+          "id": "dappled_leaf",
+          "label": "枝叶投影",
+          "value": "落在面部、肩颈和衣料上的枝叶形状"
+        },
+        {
+          "id": "long_sunset",
+          "label": "日落长影",
+          "value": "方向一致、长度明显的日落投影"
+        },
+        {
+          "id": "deep_side",
+          "label": "深侧影",
+          "value": "一侧明亮、另一侧明显压暗的深侧影"
+        },
+        {
+          "id": "rim_separation",
+          "label": "轮廓分离",
+          "value": "暗部边缘被轮廓光勾亮的分离效果"
+        },
+        {
+          "id": "window_pattern",
+          "label": "窗格投影",
+          "value": "窗框或百叶在人物与墙面上的几何投影"
+        },
+        {
+          "id": "mixed_soft",
+          "label": "多光源软影",
+          "value": "由多处环境光叠加形成的浅软阴影"
+        }
+      ]
+    },
+    "color.palette": {
+      "category": "色彩表现",
+      "label": "主配色",
+      "template": "画面以{value}为主要配色",
+      "options": [
+        {
+          "id": "mint_white",
+          "label": "薄荷绿与白",
+          "value": "嫩绿色、薄荷绿与白色"
+        },
+        {
+          "id": "warm_brown_cream",
+          "label": "暖棕与奶白",
+          "value": "暖棕色、奶油白与自然肤色"
+        },
+        {
+          "id": "warm_gray_black",
+          "label": "暖灰与玄黑",
+          "value": "暖灰色、玄黑色与少量酒红色"
+        },
+        {
+          "id": "cool_gray_blue",
+          "label": "冷灰与蓝",
+          "value": "冷灰色、雾蓝色与低饱和肤色"
+        },
+        {
+          "id": "cream_beige",
+          "label": "奶油米杏",
+          "value": "奶油白、米杏色与浅木色"
+        },
+        {
+          "id": "black_red_gold",
+          "label": "黑红金",
+          "value": "黑色、深红色与少量金色"
+        },
+        {
+          "id": "teal_orange",
+          "label": "青橙对照",
+          "value": "蓝绿色环境光与暖橙色肤光"
+        },
+        {
+          "id": "hongkong_green_red",
+          "label": "港风绿红",
+          "value": "暗绿色、复古红色与钨丝灯黄"
+        },
+        {
+          "id": "new_chinese_wood",
+          "label": "新中式木色",
+          "value": "深木色、宣纸白与低饱和青绿色"
+        },
+        {
+          "id": "sky_blue_sand",
+          "label": "海天蓝与沙色",
+          "value": "天空蓝、海水蓝与暖沙色"
+        },
+        {
+          "id": "white_silver",
+          "label": "白与银灰",
+          "value": "纯白色、银灰色与自然肤色"
+        },
+        {
+          "id": "pink_cream",
+          "label": "裸粉与奶油色",
+          "value": "柔和裸粉色、奶油白与浅杏色"
+        },
+        {
+          "id": "earth_green",
+          "label": "大地绿棕",
+          "value": "苔绿色、泥土棕与低饱和卡其色"
+        },
+        {
+          "id": "purple_blue_neon",
+          "label": "紫蓝霓虹",
+          "value": "深紫色、蓝色与少量洋红色"
+        },
+        {
+          "id": "neutral_product",
+          "label": "商品中性色",
+          "value": "中性白、浅灰与准确还原的商品颜色"
+        },
+        {
+          "id": "monochrome",
+          "label": "黑白灰阶",
+          "value": "从深黑到亮白的连续灰阶"
+        },
+        {
+          "id": "morandi",
+          "label": "莫兰迪色系",
+          "value": "低饱和、带灰调的莫兰迪色系"
+        },
+        {
+          "id": "macaron",
+          "label": "马卡龙色系",
+          "value": "明快甜美的马卡龙色系"
+        },
+        {
+          "id": "sunset_orange_purple",
+          "label": "日落橙紫",
+          "value": "日落橙与暮紫色"
+        },
+        {
+          "id": "forest_green_brown",
+          "label": "森林绿棕",
+          "value": "森林绿与大地棕色"
+        },
+        {
+          "id": "black_white_red",
+          "label": "黑白红",
+          "value": "黑白主调与正红点缀"
+        }
+      ]
+    },
+    "color.temperature": {
+      "category": "色彩表现",
+      "label": "色温",
+      "template": "整体色温{value}",
+      "options": [
+        {
+          "id": "warm",
+          "label": "偏暖",
+          "value": "偏暖，肤色保留自然红润感"
+        },
+        {
+          "id": "slightly_warm",
+          "label": "轻微偏暖",
+          "value": "轻微偏暖，白色区域仍接近中性"
+        },
+        {
+          "id": "neutral",
+          "label": "中性",
+          "value": "保持中性，肤色与白色还原准确"
+        },
+        {
+          "id": "slightly_cool",
+          "label": "轻微偏冷",
+          "value": "轻微偏冷，肤色仍保持自然"
+        },
+        {
+          "id": "cool",
+          "label": "偏冷",
+          "value": "偏冷，环境中的蓝灰色更明显"
+        },
+        {
+          "id": "warm_subject_cool_bg",
+          "label": "人物暖背景冷",
+          "value": "让人物偏暖、背景偏冷"
+        },
+        {
+          "id": "cool_subject_warm_bg",
+          "label": "人物冷背景暖",
+          "value": "让人物偏中性冷色、背景保留暖光"
+        },
+        {
+          "id": "mixed_warm_cool",
+          "label": "冷暖混合",
+          "value": "呈现可辨认的冷暖光源混合"
+        }
+      ]
+    },
+    "color.contrast": {
+      "category": "色彩表现",
+      "label": "反差",
+      "template": "整体反差{value}",
+      "options": [
+        {
+          "id": "very_low",
+          "label": "极低反差",
+          "value": "很低，亮部与暗部过渡平缓"
+        },
+        {
+          "id": "low",
+          "label": "低反差",
+          "value": "偏低，保留柔和灰阶"
+        },
+        {
+          "id": "medium_low",
+          "label": "中低反差",
+          "value": "中等偏低，人物层次清楚但不过硬"
+        },
+        {
+          "id": "natural",
+          "label": "自然反差",
+          "value": "自然，黑白层次接近日常观看效果"
+        },
+        {
+          "id": "medium_high",
+          "label": "中高反差",
+          "value": "中等偏高，轮廓与材质更鲜明"
+        },
+        {
+          "id": "high",
+          "label": "高反差",
+          "value": "较高，明暗区域分界清楚"
+        },
+        {
+          "id": "soft_highlights_deep_blacks",
+          "label": "柔亮深黑",
+          "value": "亮部柔和而黑色区域保持深沉"
+        },
+        {
+          "id": "compressed_tones",
+          "label": "压缩灰阶",
+          "value": "被压缩在较窄灰阶范围内，呈现克制层次"
+        }
+      ]
+    },
+    "finish.capture": {
+      "category": "成像处理",
+      "label": "拍摄介质",
+      "template": "呈现{value}",
+      "options": [
+        {
+          "id": "full_frame_camera",
+          "label": "全画幅相机",
+          "value": "全画幅数码相机的人像摄影质感"
+        },
+        {
+          "id": "portable_digital",
+          "label": "便携数码相机",
+          "value": "便携数码相机直接拍摄的自然质感"
+        },
+        {
+          "id": "phone_camera",
+          "label": "手机摄影",
+          "value": "手机主摄直出的生活摄影质感"
+        },
+        {
+          "id": "ccd_camera",
+          "label": "CCD数码相机",
+          "value": "早期CCD数码相机的轻微偏色与直接锐度"
+        },
+        {
+          "id": "medium_format",
+          "label": "中画幅相机",
+          "value": "中画幅数码相机的细腻层次与平缓过渡"
+        },
+        {
+          "id": "color_negative_film",
+          "label": "彩色负片",
+          "value": "彩色负片扫描后的柔和色彩与宽容度"
+        },
+        {
+          "id": "slide_film",
+          "label": "反转片",
+          "value": "彩色反转片般饱满而清楚的颜色层次"
+        },
+        {
+          "id": "black_white_film",
+          "label": "黑白胶片",
+          "value": "黑白胶片扫描后的银盐灰阶质感"
+        },
+        {
+          "id": "editorial_camera",
+          "label": "时尚画报",
+          "value": "时尚画报摄影的精确布光与清晰结构"
+        },
+        {
+          "id": "direct_flash_snapshot",
+          "label": "直闪抓拍",
+          "value": "近距离直闪抓拍的现场感"
+        },
+        {
+          "id": "instant_film_print",
+          "label": "即时成像相纸",
+          "value": "即时成像相纸的白色边框、柔和细节与自然显影色彩"
+        },
+        {
+          "id": "disposable_film_camera",
+          "label": "一次性胶片相机",
+          "value": "一次性胶片相机固定焦点、直接闪光与随拍颗粒感"
+        },
+        {
+          "id": "commercial_product",
+          "label": "商业商品摄影",
+          "value": "商业商品摄影的准确颜色与清楚细节"
+        },
+        {
+          "id": "cinematic_still",
+          "label": "电影剧照",
+          "value": "电影剧照般受控的明暗与空间色彩"
+        },
+        {
+          "id": "dslr",
+          "label": "数码单反",
+          "value": "数码单反相机拍摄的清晰成像"
+        },
+        {
+          "id": "mirrorless",
+          "label": "微单相机",
+          "value": "微单相机拍摄的细腻成像"
+        }
+      ]
+    },
+    "finish.texture": {
+      "category": "成像处理",
+      "label": "画面质感",
+      "template": "画面质感{value}",
+      "options": [
+        {
+          "id": "natural_detail",
+          "label": "自然细节",
+          "value": "自然，皮肤、发丝和面料细节清楚"
+        },
+        {
+          "id": "slightly_soft",
+          "label": "轻微柔焦",
+          "value": "略微柔化，但双眼与关键纹理仍清楚"
+        },
+        {
+          "id": "clean_crisp",
+          "label": "干净清晰",
+          "value": "干净清晰，轮廓边缘稳定"
+        },
+        {
+          "id": "delicate_retouch",
+          "label": "细腻商业精修",
+          "value": "细腻，商业精修保留真实皮肤纹理"
+        },
+        {
+          "id": "film_softness",
+          "label": "胶片柔度",
+          "value": "带胶片扫描般的轻微柔度"
+        },
+        {
+          "id": "ccd_direct",
+          "label": "CCD直接感",
+          "value": "带早期数码相机的直接锐度与轻微色彩偏移"
+        },
+        {
+          "id": "matte",
+          "label": "哑光质感",
+          "value": "偏哑光，色彩表面克制"
+        },
+        {
+          "id": "glossy_fashion",
+          "label": "光泽时尚",
+          "value": "明亮光洁，服装与配饰反光清楚"
+        },
+        {
+          "id": "atmospheric_haze",
+          "label": "空气薄雾",
+          "value": "带少量空气散射，远处边缘轻柔"
+        },
+        {
+          "id": "documentary_real",
+          "label": "纪实真实",
+          "value": "接近日常现场，保留自然细节与轻微不完美"
+        },
+        {
+          "id": "oil_painting",
+          "label": "油画质感",
+          "value": "如油画般厚实的笔触质感"
+        },
+        {
+          "id": "watercolor",
+          "label": "水彩质感",
+          "value": "轻盈通透的水彩质感"
+        },
+        {
+          "id": "dreamy_soft",
+          "label": "梦幻柔焦",
+          "value": "梦幻朦胧的柔焦质感"
+        },
+        {
+          "id": "matte_grain",
+          "label": "磨砂颗粒",
+          "value": "细腻的磨砂颗粒质感"
+        }
+      ]
+    },
+    "finish.highlight": {
+      "category": "成像处理",
+      "label": "高光处理",
+      "template": "高光{value}",
+      "options": [
+        {
+          "id": "controlled",
+          "label": "受控保留",
+          "value": "受到控制，亮部仍保留颜色与纹理"
+        },
+        {
+          "id": "soft_rolloff",
+          "label": "柔和过渡",
+          "value": "向白色柔和过渡，边缘平缓"
+        },
+        {
+          "id": "slight_bloom",
+          "label": "轻微溢光",
+          "value": "在明亮边缘产生轻微溢光"
+        },
+        {
+          "id": "strong_bloom",
+          "label": "明显光晕",
+          "value": "在逆光区域形成可见柔和光晕"
+        },
+        {
+          "id": "bright_clean",
+          "label": "明亮洁净",
+          "value": "明亮洁净，白色区域接近纯白"
+        },
+        {
+          "id": "specular_crisp",
+          "label": "镜面高光",
+          "value": "在金属、漆皮或玻璃表面形成清楚亮点"
+        },
+        {
+          "id": "warm_glow",
+          "label": "暖色辉光",
+          "value": "带柔和暖色辉光"
+        },
+        {
+          "id": "subdued",
+          "label": "克制高光",
+          "value": "被轻微压低，整体亮度分布平稳"
+        }
+      ]
+    },
+    "finish.grain": {
+      "category": "成像处理",
+      "label": "颗粒",
+      "template": "画面带{value}",
+      "options": [
+        {
+          "id": "fine_grain",
+          "label": "细微颗粒",
+          "value": "均匀细微的胶片颗粒"
+        },
+        {
+          "id": "visible_grain",
+          "label": "可见颗粒",
+          "value": "在中间调与暗部可见的胶片颗粒"
+        },
+        {
+          "id": "coarse_grain",
+          "label": "粗颗粒",
+          "value": "尺寸较大的粗粝胶片颗粒"
+        },
+        {
+          "id": "subtle_digital_noise",
+          "label": "轻微数码噪点",
+          "value": "暗部轻微的数码噪点"
+        },
+        {
+          "id": "ccd_noise",
+          "label": "CCD彩色噪点",
+          "value": "早期数码相机特有的细小彩色噪点"
+        },
+        {
+          "id": "clean_surface",
+          "label": "洁净画面",
+          "value": "干净平滑的成像表面"
+        },
+        {
+          "id": "silver_grain",
+          "label": "银盐颗粒",
+          "value": "黑白影像中分布自然的银盐颗粒"
+        }
+      ]
+    }
+  },
+  "bundles": {
+    "camera_setups": [
+      {
+        "id": "beauty_face_105",
+        "label": "105mm面部美容特写",
+        "fields": {
+          "camera.shot_size": "face_closeup",
+          "camera.composition": "centered",
+          "camera.lens": "lens_105mm",
+          "camera.distance": "distance_08m",
+          "camera.angle": "eye_level",
+          "camera.depth": "very_shallow",
+          "camera.focus": "both_eyes"
+        },
+        "tags": [
+          "美容",
+          "特写"
+        ]
+      },
+      {
+        "id": "headshot_85",
+        "label": "85mm头肩人像",
+        "fields": {
+          "camera.shot_size": "head_shoulders",
+          "camera.composition": "centered",
+          "camera.lens": "lens_85mm",
+          "camera.distance": "distance_1m",
+          "camera.angle": "eye_level",
+          "camera.depth": "shallow",
+          "camera.focus": "near_eye"
+        },
+        "tags": [
+          "人像",
+          "近景"
+        ]
+      },
+      {
+        "id": "forest_chest_85",
+        "label": "森系胸上近景",
+        "fields": {
+          "camera.shot_size": "chest_up",
+          "camera.composition": "center_right",
+          "camera.lens": "lens_85mm",
+          "camera.distance": "distance_15m",
+          "camera.angle": "eye_level",
+          "camera.depth": "foreground_blur",
+          "camera.focus": "both_eyes"
+        },
+        "tags": [
+          "森系",
+          "近景"
+        ]
+      },
+      {
+        "id": "cafe_chest_50",
+        "label": "咖啡馆贴近人像",
+        "fields": {
+          "camera.shot_size": "chest_up",
+          "camera.composition": "centered",
+          "camera.lens": "lens_50mm",
+          "camera.distance": "distance_1m",
+          "camera.angle": "slightly_high",
+          "camera.depth": "shallow",
+          "camera.focus": "both_eyes"
+        },
+        "tags": [
+          "咖啡馆",
+          "生活感"
+        ]
+      },
+      {
+        "id": "classic_waist_85",
+        "label": "经典85mm半身",
+        "fields": {
+          "camera.shot_size": "waist_up",
+          "camera.composition": "center_left",
+          "camera.lens": "lens_85mm",
+          "camera.distance": "distance_2m",
+          "camera.angle": "eye_level",
+          "camera.depth": "shallow",
+          "camera.focus": "both_eyes"
+        },
+        "tags": [
+          "半身",
+          "人像"
+        ]
+      },
+      {
+        "id": "phone_waist",
+        "label": "手机半身随拍",
+        "fields": {
+          "camera.shot_size": "waist_up",
+          "camera.composition": "left_third",
+          "camera.lens": "phone_main",
+          "camera.distance": "distance_15m",
+          "camera.angle": "chest_level",
+          "camera.depth": "moderate_shallow",
+          "camera.focus": "upper_body"
+        },
+        "tags": [
+          "手机",
+          "随拍"
+        ]
+      },
+      {
+        "id": "office_seated_70",
+        "label": "职场坐姿半身",
+        "fields": {
+          "camera.shot_size": "seated_half",
+          "camera.composition": "center_right",
+          "camera.lens": "lens_70mm",
+          "camera.distance": "distance_2m",
+          "camera.angle": "slightly_high",
+          "camera.depth": "shallow",
+          "camera.focus": "both_eyes"
+        },
+        "tags": [
+          "职场",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "sofa_seated_85",
+        "label": "沙发坐姿长焦",
+        "fields": {
+          "camera.shot_size": "seated_half",
+          "camera.composition": "centered",
+          "camera.lens": "lens_85mm",
+          "camera.distance": "distance_25m",
+          "camera.angle": "eye_level",
+          "camera.depth": "background_compressed",
+          "camera.focus": "both_eyes"
+        },
+        "tags": [
+          "室内",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "fashion_three_quarter_70",
+        "label": "时尚三分之二身",
+        "fields": {
+          "camera.shot_size": "three_quarter",
+          "camera.composition": "centered",
+          "camera.lens": "lens_70mm",
+          "camera.distance": "distance_25m",
+          "camera.angle": "slightly_low",
+          "camera.depth": "moderate_shallow",
+          "camera.focus": "upper_body"
+        },
+        "tags": [
+          "时尚",
+          "商业"
+        ]
+      },
+      {
+        "id": "doorway_three_quarter_65",
+        "label": "门框三分之二身",
+        "fields": {
+          "camera.shot_size": "three_quarter",
+          "camera.composition": "doorway_frame",
+          "camera.lens": "lens_65mm",
+          "camera.distance": "distance_25m",
+          "camera.angle": "eye_level",
+          "camera.depth": "medium",
+          "camera.focus": "full_figure"
+        },
+        "tags": [
+          "门框",
+          "室内"
+        ]
+      },
+      {
+        "id": "studio_full_70",
+        "label": "影棚全身人像",
+        "fields": {
+          "camera.shot_size": "full_body",
+          "camera.composition": "centered",
+          "camera.lens": "lens_70mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "waist_level",
+          "camera.depth": "medium",
+          "camera.focus": "full_figure"
+        },
+        "tags": [
+          "影棚",
+          "全身"
+        ]
+      },
+      {
+        "id": "flash_full_65",
+        "label": "硬闪全身写真",
+        "fields": {
+          "camera.shot_size": "full_body",
+          "camera.composition": "doorway_frame",
+          "camera.lens": "lens_65mm",
+          "camera.distance": "distance_35m",
+          "camera.angle": "slightly_low",
+          "camera.depth": "medium",
+          "camera.focus": "full_figure"
+        },
+        "tags": [
+          "硬闪",
+          "全身"
+        ]
+      },
+      {
+        "id": "street_full_50",
+        "label": "街头全身人像",
+        "fields": {
+          "camera.shot_size": "full_body",
+          "camera.composition": "right_third",
+          "camera.lens": "lens_50mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "waist_level",
+          "camera.depth": "layered_depth",
+          "camera.focus": "full_figure"
+        },
+        "tags": [
+          "街拍",
+          "全身"
+        ]
+      },
+      {
+        "id": "sport_dynamic_50",
+        "label": "运动动态全身",
+        "fields": {
+          "camera.shot_size": "dynamic_full_body",
+          "camera.composition": "diagonal",
+          "camera.lens": "lens_50mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "slightly_low",
+          "camera.depth": "medium",
+          "camera.focus": "moving_subject"
+        },
+        "tags": [
+          "运动",
+          "动态"
+        ]
+      },
+      {
+        "id": "low_angle_dynamic_35",
+        "label": "低机位动态广角",
+        "fields": {
+          "camera.shot_size": "dynamic_full_body",
+          "camera.composition": "diagonal",
+          "camera.lens": "lens_35mm",
+          "camera.distance": "distance_35m",
+          "camera.angle": "ground_level",
+          "camera.depth": "deep",
+          "camera.focus": "moving_subject"
+        },
+        "tags": [
+          "动态",
+          "广角"
+        ]
+      },
+      {
+        "id": "travel_environment_35",
+        "label": "旅行环境人像",
+        "fields": {
+          "camera.shot_size": "environmental_portrait",
+          "camera.composition": "left_third",
+          "camera.lens": "lens_35mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "eye_level",
+          "camera.depth": "deep",
+          "camera.focus": "face_environment"
+        },
+        "tags": [
+          "旅行",
+          "环境"
+        ]
+      },
+      {
+        "id": "interior_environment_28",
+        "label": "室内空间人像",
+        "fields": {
+          "camera.shot_size": "environmental_portrait",
+          "camera.composition": "negative_space",
+          "camera.lens": "lens_28mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "chest_level",
+          "camera.depth": "layered_depth",
+          "camera.focus": "face_environment"
+        },
+        "tags": [
+          "室内",
+          "空间"
+        ]
+      },
+      {
+        "id": "landscape_gaze_space_50",
+        "label": "横版视线留白环境人像",
+        "fields": {
+          "camera.shot_size": "environmental_portrait",
+          "camera.composition": "gaze_space",
+          "camera.lens": "lens_50mm",
+          "camera.distance": "distance_35m",
+          "camera.angle": "eye_level",
+          "camera.depth": "layered_depth",
+          "camera.focus": "face_environment"
+        },
+        "tags": [
+          "横版",
+          "环境",
+          "视线留白"
+        ]
+      },
+      {
+        "id": "telephoto_environment_135",
+        "label": "长焦环境压缩",
+        "fields": {
+          "camera.shot_size": "wide_full_body",
+          "camera.composition": "right_third",
+          "camera.lens": "lens_135mm",
+          "camera.distance": "distance_7m",
+          "camera.angle": "eye_level",
+          "camera.depth": "background_compressed",
+          "camera.focus": "full_figure"
+        },
+        "tags": [
+          "长焦",
+          "环境"
+        ]
+      },
+      {
+        "id": "garment_detail_105",
+        "label": "服装材质特写",
+        "fields": {
+          "camera.shot_size": "detail_closeup",
+          "camera.composition": "edge_cropped",
+          "camera.lens": "lens_105mm",
+          "camera.distance": "distance_05m",
+          "camera.angle": "three_quarter_view",
+          "camera.depth": "very_shallow",
+          "camera.focus": "garment_detail"
+        },
+        "tags": [
+          "服装",
+          "细节"
+        ]
+      },
+      {
+        "id": "hands_prop_85",
+        "label": "手部道具特写",
+        "fields": {
+          "camera.shot_size": "detail_closeup",
+          "camera.composition": "centered",
+          "camera.lens": "lens_85mm",
+          "camera.distance": "distance_05m",
+          "camera.angle": "slightly_high",
+          "camera.depth": "very_shallow",
+          "camera.focus": "hands_prop"
+        },
+        "tags": [
+          "手部",
+          "道具"
+        ]
+      },
+      {
+        "id": "symmetry_gallery_40",
+        "label": "美术馆对称全身",
+        "fields": {
+          "camera.shot_size": "wide_full_body",
+          "camera.composition": "symmetrical",
+          "camera.lens": "lens_40mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "waist_level",
+          "camera.depth": "deep",
+          "camera.focus": "face_environment"
+        },
+        "tags": [
+          "建筑",
+          "对称"
+        ]
+      }
+    ],
+    "lighting_plans": [
+      {
+        "id": "forest_dappled_backlight",
+        "label": "林下斑驳逆光",
+        "fields": {
+          "lighting.source": "leaf_filtered_sun",
+          "lighting.direction": "back_left",
+          "lighting.quality": "dappled",
+          "lighting.target": "face_shoulders",
+          "lighting.shadow": "dappled_leaf"
+        },
+        "tags": [
+          "森系",
+          "日光"
+        ]
+      },
+      {
+        "id": "window_soft_side",
+        "label": "窗边柔和侧光",
+        "fields": {
+          "lighting.source": "window_daylight",
+          "lighting.direction": "side_left",
+          "lighting.quality": "soft_directional",
+          "lighting.target": "face_shoulders",
+          "lighting.shadow": "natural_contour"
+        },
+        "tags": [
+          "窗边",
+          "自然光"
+        ]
+      },
+      {
+        "id": "overcast_even",
+        "label": "阴天均匀天光",
+        "fields": {
+          "lighting.source": "overcast_skylight",
+          "lighting.direction": "top_front",
+          "lighting.quality": "very_soft",
+          "lighting.target": "full_figure",
+          "lighting.shadow": "barely_visible"
+        },
+        "tags": [
+          "户外",
+          "阴天"
+        ]
+      },
+      {
+        "id": "golden_backlight",
+        "label": "日落暖色逆光",
+        "fields": {
+          "lighting.source": "sunset_sun",
+          "lighting.direction": "back_right",
+          "lighting.quality": "glowing_backlight",
+          "lighting.target": "hair_edge",
+          "lighting.shadow": "long_sunset"
+        },
+        "tags": [
+          "日落",
+          "逆光"
+        ]
+      },
+      {
+        "id": "direct_sun_side",
+        "label": "晴日侧向硬光",
+        "fields": {
+          "lighting.source": "direct_sun",
+          "lighting.direction": "side_right",
+          "lighting.quality": "crisp_hard",
+          "lighting.target": "full_figure",
+          "lighting.shadow": "natural_contour"
+        },
+        "tags": [
+          "晴天",
+          "硬光"
+        ]
+      },
+      {
+        "id": "camera_hard_flash",
+        "label": "镜头方向直接硬闪",
+        "fields": {
+          "lighting.source": "hard_flash",
+          "lighting.direction": "front",
+          "lighting.quality": "crisp_hard",
+          "lighting.target": "full_figure",
+          "lighting.shadow": "clear_flash"
+        },
+        "tags": [
+          "硬闪",
+          "夜间"
+        ]
+      },
+      {
+        "id": "ccd_soft_flash",
+        "label": "CCD柔化直闪",
+        "fields": {
+          "lighting.source": "soft_flash",
+          "lighting.direction": "front",
+          "lighting.quality": "soft_directional",
+          "lighting.target": "face_shoulders",
+          "lighting.shadow": "mixed_soft"
+        },
+        "tags": [
+          "CCD",
+          "直闪"
+        ]
+      },
+      {
+        "id": "studio_large_softbox",
+        "label": "影棚大型柔光箱",
+        "fields": {
+          "lighting.source": "large_softbox",
+          "lighting.direction": "front_left",
+          "lighting.quality": "soft_directional",
+          "lighting.target": "upper_body",
+          "lighting.shadow": "soft_gradation"
+        },
+        "tags": [
+          "影棚",
+          "商业"
+        ]
+      },
+      {
+        "id": "beauty_clamshell",
+        "label": "美容蝶形光",
+        "fields": {
+          "lighting.source": "beauty_dish",
+          "lighting.direction": "top_front",
+          "lighting.quality": "soft_directional",
+          "lighting.target": "face_eyes",
+          "lighting.shadow": "natural_contour"
+        },
+        "tags": [
+          "美容",
+          "面部"
+        ]
+      },
+      {
+        "id": "ring_light_beauty",
+        "label": "环形平光美容",
+        "fields": {
+          "lighting.source": "ring_fill",
+          "lighting.direction": "front",
+          "lighting.quality": "even_flat",
+          "lighting.target": "face_eyes",
+          "lighting.shadow": "barely_visible"
+        },
+        "tags": [
+          "美容",
+          "平光"
+        ]
+      },
+      {
+        "id": "low_key_side_panel",
+        "label": "低调侧向连续光",
+        "fields": {
+          "lighting.source": "continuous_panel",
+          "lighting.direction": "side_left",
+          "lighting.quality": "low_key",
+          "lighting.target": "face_shoulders",
+          "lighting.shadow": "deep_side"
+        },
+        "tags": [
+          "低调",
+          "电影感"
+        ]
+      },
+      {
+        "id": "cafe_warm_ambient",
+        "label": "咖啡馆暖色环境光",
+        "fields": {
+          "lighting.source": "ceiling_ambient",
+          "lighting.direction": "top_front",
+          "lighting.quality": "soft_diffused",
+          "lighting.target": "face_shoulders",
+          "lighting.shadow": "mixed_soft"
+        },
+        "tags": [
+          "咖啡馆",
+          "暖光"
+        ]
+      },
+      {
+        "id": "tungsten_practical_side",
+        "label": "钨丝灯侧光",
+        "fields": {
+          "lighting.source": "tungsten_practical",
+          "lighting.direction": "side_right",
+          "lighting.quality": "soft_directional",
+          "lighting.target": "face_hands",
+          "lighting.shadow": "natural_contour"
+        },
+        "tags": [
+          "复古",
+          "室内"
+        ]
+      },
+      {
+        "id": "neon_mixed_side",
+        "label": "都市霓虹混合侧光",
+        "fields": {
+          "lighting.source": "neon_signs",
+          "lighting.direction": "side_left",
+          "lighting.quality": "mixed_color",
+          "lighting.target": "upper_body",
+          "lighting.shadow": "deep_side"
+        },
+        "tags": [
+          "夜景",
+          "霓虹"
+        ]
+      },
+      {
+        "id": "storefront_night",
+        "label": "夜间橱窗柔光",
+        "fields": {
+          "lighting.source": "storefront_light",
+          "lighting.direction": "front_right",
+          "lighting.quality": "soft_directional",
+          "lighting.target": "upper_body",
+          "lighting.shadow": "soft_gradation"
+        },
+        "tags": [
+          "街头",
+          "夜间"
+        ]
+      },
+      {
+        "id": "bounce_front_fill",
+        "label": "正面反射补光",
+        "fields": {
+          "lighting.source": "reflected_bounce",
+          "lighting.direction": "front",
+          "lighting.quality": "very_soft",
+          "lighting.target": "face_eyes",
+          "lighting.shadow": "barely_visible"
+        },
+        "tags": [
+          "补光",
+          "自然"
+        ]
+      },
+      {
+        "id": "fashion_specular_softbox",
+        "label": "时尚材质高光",
+        "fields": {
+          "lighting.source": "large_softbox",
+          "lighting.direction": "front_right",
+          "lighting.quality": "specular",
+          "lighting.target": "garment_texture",
+          "lighting.shadow": "soft_gradation"
+        },
+        "tags": [
+          "时尚",
+          "材质"
+        ]
+      },
+      {
+        "id": "product_even_panel",
+        "label": "商品均匀布光",
+        "fields": {
+          "lighting.source": "continuous_panel",
+          "lighting.direction": "front_left",
+          "lighting.quality": "even_flat",
+          "lighting.target": "garment_texture",
+          "lighting.shadow": "barely_visible"
+        },
+        "tags": [
+          "电商",
+          "商品"
+        ]
+      },
+      {
+        "id": "doorway_ceiling_flash",
+        "label": "走廊顶光与硬闪",
+        "fields": {
+          "lighting.source": "hard_flash",
+          "lighting.direction": "front",
+          "lighting.quality": "crisp_hard",
+          "lighting.target": "legs_shoes",
+          "lighting.shadow": "clear_flash"
+        },
+        "tags": [
+          "走廊",
+          "时尚"
+        ]
+      },
+      {
+        "id": "rim_light_separation",
+        "label": "暗背景轮廓光",
+        "fields": {
+          "lighting.source": "continuous_panel",
+          "lighting.direction": "back",
+          "lighting.quality": "low_key",
+          "lighting.target": "hair_edge",
+          "lighting.shadow": "rim_separation"
+        },
+        "tags": [
+          "轮廓光",
+          "暗调"
+        ]
+      },
+      {
+        "id": "window_pattern_light",
+        "label": "窗格几何投影",
+        "fields": {
+          "lighting.source": "window_daylight",
+          "lighting.direction": "side_right",
+          "lighting.quality": "crisp_hard",
+          "lighting.target": "subject_background",
+          "lighting.shadow": "window_pattern"
+        },
+        "tags": [
+          "窗影",
+          "几何"
+        ]
+      }
+    ],
+    "visual_profiles": [
+      {
+        "id": "japanese_summer_film",
+        "label": "日系夏日胶片",
+        "fields": {
+          "color.palette": "mint_white",
+          "color.temperature": "slightly_warm",
+          "color.contrast": "low",
+          "finish.capture": "color_negative_film",
+          "finish.texture": "film_softness",
+          "finish.highlight": "slight_bloom",
+          "finish.grain": "fine_grain"
+        },
+        "tags": [
+          "日系",
+          "夏日"
+        ]
+      },
+      {
+        "id": "warm_cafe_digital",
+        "label": "暖调咖啡馆数码",
+        "fields": {
+          "color.palette": "warm_brown_cream",
+          "color.temperature": "warm",
+          "color.contrast": "medium_low",
+          "finish.capture": "portable_digital",
+          "finish.texture": "slightly_soft",
+          "finish.highlight": "controlled",
+          "finish.grain": "clean_surface"
+        },
+        "tags": [
+          "咖啡馆",
+          "暖调"
+        ]
+      },
+      {
+        "id": "office_luxury_clean",
+        "label": "职场轻奢精修",
+        "fields": {
+          "color.palette": "warm_gray_black",
+          "color.temperature": "neutral",
+          "color.contrast": "natural",
+          "finish.capture": "full_frame_camera",
+          "finish.texture": "delicate_retouch",
+          "finish.highlight": "controlled",
+          "finish.grain": "clean_surface"
+        },
+        "tags": [
+          "职场",
+          "轻奢"
+        ]
+      },
+      {
+        "id": "night_flash_fashion",
+        "label": "夜间直闪时尚",
+        "fields": {
+          "color.palette": "black_red_gold",
+          "color.temperature": "slightly_warm",
+          "color.contrast": "medium_high",
+          "finish.capture": "direct_flash_snapshot",
+          "finish.texture": "glossy_fashion",
+          "finish.highlight": "specular_crisp",
+          "finish.grain": "subtle_digital_noise"
+        },
+        "tags": [
+          "直闪",
+          "时尚"
+        ]
+      },
+      {
+        "id": "clean_beauty_editorial",
+        "label": "洁净美容画报",
+        "fields": {
+          "color.palette": "pink_cream",
+          "color.temperature": "neutral",
+          "color.contrast": "medium_low",
+          "finish.capture": "editorial_camera",
+          "finish.texture": "delicate_retouch",
+          "finish.highlight": "bright_clean",
+          "finish.grain": "clean_surface"
+        },
+        "tags": [
+          "美容",
+          "画报"
+        ]
+      },
+      {
+        "id": "studio_neutral_commercial",
+        "label": "影棚中性商业",
+        "fields": {
+          "color.palette": "white_silver",
+          "color.temperature": "neutral",
+          "color.contrast": "natural",
+          "finish.capture": "medium_format",
+          "finish.texture": "clean_crisp",
+          "finish.highlight": "controlled",
+          "finish.grain": "clean_surface"
+        },
+        "tags": [
+          "影棚",
+          "商业"
+        ]
+      },
+      {
+        "id": "ecommerce_accurate",
+        "label": "电商准确还原",
+        "fields": {
+          "color.palette": "neutral_product",
+          "color.temperature": "neutral",
+          "color.contrast": "natural",
+          "finish.capture": "commercial_product",
+          "finish.texture": "natural_detail",
+          "finish.highlight": "controlled",
+          "finish.grain": "clean_surface"
+        },
+        "tags": [
+          "电商",
+          "商品"
+        ]
+      },
+      {
+        "id": "ccd_lifestyle",
+        "label": "CCD生活随拍",
+        "fields": {
+          "color.palette": "cream_beige",
+          "color.temperature": "slightly_warm",
+          "color.contrast": "natural",
+          "finish.capture": "ccd_camera",
+          "finish.texture": "ccd_direct",
+          "finish.highlight": "bright_clean",
+          "finish.grain": "ccd_noise"
+        },
+        "tags": [
+          "CCD",
+          "生活感"
+        ]
+      },
+      {
+        "id": "phone_natural",
+        "label": "手机自然直出",
+        "fields": {
+          "color.palette": "cream_beige",
+          "color.temperature": "neutral",
+          "color.contrast": "natural",
+          "finish.capture": "phone_camera",
+          "finish.texture": "documentary_real",
+          "finish.highlight": "controlled",
+          "finish.grain": "subtle_digital_noise"
+        },
+        "tags": [
+          "手机",
+          "自然"
+        ]
+      },
+      {
+        "id": "hongkong_tungsten_film",
+        "label": "港风钨丝胶片",
+        "fields": {
+          "color.palette": "hongkong_green_red",
+          "color.temperature": "warm",
+          "color.contrast": "medium_high",
+          "finish.capture": "color_negative_film",
+          "finish.texture": "film_softness",
+          "finish.highlight": "warm_glow",
+          "finish.grain": "visible_grain"
+        },
+        "tags": [
+          "港风",
+          "胶片"
+        ]
+      },
+      {
+        "id": "new_chinese_matte",
+        "label": "新中式低饱和哑光",
+        "fields": {
+          "color.palette": "new_chinese_wood",
+          "color.temperature": "slightly_warm",
+          "color.contrast": "compressed_tones",
+          "finish.capture": "full_frame_camera",
+          "finish.texture": "matte",
+          "finish.highlight": "subdued",
+          "finish.grain": "fine_grain"
+        },
+        "tags": [
+          "新中式",
+          "克制"
+        ]
+      },
+      {
+        "id": "urban_neon_cinema",
+        "label": "都市霓虹电影感",
+        "fields": {
+          "color.palette": "teal_orange",
+          "color.temperature": "warm_subject_cool_bg",
+          "color.contrast": "high",
+          "finish.capture": "cinematic_still",
+          "finish.texture": "atmospheric_haze",
+          "finish.highlight": "strong_bloom",
+          "finish.grain": "visible_grain"
+        },
+        "tags": [
+          "都市",
+          "电影感"
+        ]
+      },
+      {
+        "id": "purple_neon_digital",
+        "label": "紫蓝霓虹数码",
+        "fields": {
+          "color.palette": "purple_blue_neon",
+          "color.temperature": "mixed_warm_cool",
+          "color.contrast": "medium_high",
+          "finish.capture": "full_frame_camera",
+          "finish.texture": "glossy_fashion",
+          "finish.highlight": "specular_crisp",
+          "finish.grain": "clean_surface"
+        },
+        "tags": [
+          "霓虹",
+          "时尚"
+        ]
+      },
+      {
+        "id": "beach_vacation",
+        "label": "海边明亮假日",
+        "fields": {
+          "color.palette": "sky_blue_sand",
+          "color.temperature": "slightly_warm",
+          "color.contrast": "medium_low",
+          "finish.capture": "portable_digital",
+          "finish.texture": "natural_detail",
+          "finish.highlight": "bright_clean",
+          "finish.grain": "clean_surface"
+        },
+        "tags": [
+          "海边",
+          "旅行"
+        ]
+      },
+      {
+        "id": "earthy_outdoor",
+        "label": "大地色户外纪实",
+        "fields": {
+          "color.palette": "earth_green",
+          "color.temperature": "warm",
+          "color.contrast": "natural",
+          "finish.capture": "full_frame_camera",
+          "finish.texture": "documentary_real",
+          "finish.highlight": "soft_rolloff",
+          "finish.grain": "fine_grain"
+        },
+        "tags": [
+          "户外",
+          "纪实"
+        ]
+      },
+      {
+        "id": "sport_bright_crisp",
+        "label": "运动明快清晰",
+        "fields": {
+          "color.palette": "cool_gray_blue",
+          "color.temperature": "slightly_cool",
+          "color.contrast": "medium_high",
+          "finish.capture": "full_frame_camera",
+          "finish.texture": "clean_crisp",
+          "finish.highlight": "controlled",
+          "finish.grain": "clean_surface"
+        },
+        "tags": [
+          "运动",
+          "明快"
+        ]
+      },
+      {
+        "id": "low_key_warm_black",
+        "label": "暖黑低调电影感",
+        "fields": {
+          "color.palette": "warm_gray_black",
+          "color.temperature": "cool_subject_warm_bg",
+          "color.contrast": "soft_highlights_deep_blacks",
+          "finish.capture": "cinematic_still",
+          "finish.texture": "matte",
+          "finish.highlight": "subdued",
+          "finish.grain": "visible_grain"
+        },
+        "tags": [
+          "低调",
+          "电影感"
+        ]
+      },
+      {
+        "id": "black_white_silver",
+        "label": "黑白银盐人像",
+        "fields": {
+          "color.palette": "monochrome",
+          "color.temperature": "neutral",
+          "color.contrast": "high",
+          "finish.capture": "black_white_film",
+          "finish.texture": "film_softness",
+          "finish.highlight": "soft_rolloff",
+          "finish.grain": "silver_grain"
+        },
+        "tags": [
+          "黑白",
+          "胶片"
+        ]
+      },
+      {
+        "id": "slide_film_color",
+        "label": "反转片鲜明色彩",
+        "fields": {
+          "color.palette": "earth_green",
+          "color.temperature": "slightly_warm",
+          "color.contrast": "medium_high",
+          "finish.capture": "slide_film",
+          "finish.texture": "clean_crisp",
+          "finish.highlight": "controlled",
+          "finish.grain": "fine_grain"
+        },
+        "tags": [
+          "反转片",
+          "色彩"
+        ]
+      },
+      {
+        "id": "instant_film_snapshot",
+        "label": "即时成像相纸随拍",
+        "fields": {
+          "color.palette": "cream_beige",
+          "color.temperature": "slightly_warm",
+          "color.contrast": "medium_low",
+          "finish.capture": "instant_film_print",
+          "finish.texture": "slightly_soft",
+          "finish.highlight": "warm_glow",
+          "finish.grain": "fine_grain"
+        },
+        "tags": [
+          "即时成像",
+          "相纸"
+        ]
+      },
+      {
+        "id": "disposable_film_snapshot",
+        "label": "一次性胶片随拍",
+        "fields": {
+          "color.palette": "cream_beige",
+          "color.temperature": "slightly_warm",
+          "color.contrast": "medium_high",
+          "finish.capture": "disposable_film_camera",
+          "finish.texture": "film_softness",
+          "finish.highlight": "specular_crisp",
+          "finish.grain": "visible_grain"
+        },
+        "tags": [
+          "一次性相机",
+          "胶片"
+        ]
+      }
+    ]
+  }
+}

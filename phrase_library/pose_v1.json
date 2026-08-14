@@ -1,0 +1,1324 @@
+{
+  "schema_version": "1.0.0",
+  "language": "zh-CN",
+  "target_models": [
+    "Z-Image",
+    "Z-Image-Turbo"
+  ],
+  "validation": {
+    "language_rules": "passed",
+    "model_image_tests": "pending"
+  },
+  "fields": {
+    "pose.base": {
+      "category": "姿态动作",
+      "label": "基础姿态",
+      "template": "人物{value}",
+      "options": [
+        {
+          "id": "standing_relaxed",
+          "label": "自然站立",
+          "value": "自然站立，躯干保持舒展"
+        },
+        {
+          "id": "standing_three_quarter",
+          "label": "侧身站立",
+          "value": "以三分之二侧身方向站立"
+        },
+        {
+          "id": "standing_doorway",
+          "label": "门框间站立",
+          "value": "站在半开的门框之间"
+        },
+        {
+          "id": "leaning_wall",
+          "label": "墙边轻靠",
+          "value": "肩背轻靠简洁墙面站立"
+        },
+        {
+          "id": "walking_pause",
+          "label": "行走中停步",
+          "value": "在向前行走时短暂停步"
+        },
+        {
+          "id": "sitting_chair_edge",
+          "label": "椅子前缘坐姿",
+          "value": "坐在椅子前缘，背部自然挺直"
+        },
+        {
+          "id": "sitting_sofa_forward",
+          "label": "沙发前倾坐姿",
+          "value": "坐在沙发边缘并轻微向镜头前倾"
+        },
+        {
+          "id": "sitting_sofa_relaxed",
+          "label": "沙发放松坐姿",
+          "value": "坐在沙发上，身体轻微后靠"
+        },
+        {
+          "id": "sitting_booth_relaxed",
+          "label": "卡座放松坐姿",
+          "value": "坐在卡座上，身体轻微后靠"
+        },
+        {
+          "id": "sitting_stool",
+          "label": "高脚椅坐姿",
+          "value": "坐在高脚椅前缘，躯干稳定舒展"
+        },
+        {
+          "id": "crouching_sport",
+          "label": "运动式低位蹲姿",
+          "value": "以稳定的运动式低位姿态蹲下，背部自然前倾"
+        },
+        {
+          "id": "squat",
+          "label": "蹲姿",
+          "value": "呈低位蹲姿"
+        },
+        {
+          "id": "kneel_sit",
+          "label": "跪坐",
+          "value": "以跪坐姿势"
+        },
+        {
+          "id": "cross_legged",
+          "label": "盘腿而坐",
+          "value": "盘腿而坐"
+        },
+        {
+          "id": "hand_on_hip",
+          "label": "叉腰站立",
+          "value": "叉腰站立"
+        }
+      ]
+    },
+    "pose.body_direction": {
+      "category": "姿态动作",
+      "label": "身体方向",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "front",
+          "label": "正面朝向镜头",
+          "value": "身体正面朝向镜头"
+        },
+        {
+          "id": "left_quarter",
+          "label": "左侧三分之二身",
+          "value": "身体轻微转向画面左侧，保留三分之二正面"
+        },
+        {
+          "id": "right_quarter",
+          "label": "右侧三分之二身",
+          "value": "身体轻微转向画面右侧，保留三分之二正面"
+        },
+        {
+          "id": "left_profile",
+          "label": "左侧侧身",
+          "value": "身体侧向画面左侧"
+        },
+        {
+          "id": "right_profile",
+          "label": "右侧侧身",
+          "value": "身体侧向画面右侧"
+        },
+        {
+          "id": "back_turn_left",
+          "label": "背身向左回转",
+          "value": "身体背向镜头并向左侧轻微回转"
+        },
+        {
+          "id": "back_turn_right",
+          "label": "背身向右回转",
+          "value": "身体背向镜头并向右侧轻微回转"
+        },
+        {
+          "id": "diagonal_forward",
+          "label": "斜向镜头前方",
+          "value": "身体沿画面对角线朝镜头方向展开"
+        },
+        {
+          "id": "three_quarter_back",
+          "label": "四分之三背身",
+          "value": "四分之三背身朝向右后方"
+        }
+      ]
+    },
+    "pose.weight": {
+      "category": "姿态动作",
+      "label": "身体重心",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "balanced_both_feet",
+          "label": "双脚均衡承重",
+          "value": "身体重心均衡落在双脚之间"
+        },
+        {
+          "id": "left_leg",
+          "label": "左腿承重",
+          "value": "身体重心主要落在左腿"
+        },
+        {
+          "id": "right_leg",
+          "label": "右腿承重",
+          "value": "身体重心主要落在右腿"
+        },
+        {
+          "id": "forward",
+          "label": "重心轻微前移",
+          "value": "身体重心轻微前移"
+        },
+        {
+          "id": "back",
+          "label": "重心轻微后移",
+          "value": "身体重心轻微后移"
+        },
+        {
+          "id": "left_hip",
+          "label": "重心落向左侧坐骨",
+          "value": "坐姿重心自然落向左侧坐骨"
+        },
+        {
+          "id": "right_hip",
+          "label": "重心落向右侧坐骨",
+          "value": "坐姿重心自然落向右侧坐骨"
+        },
+        {
+          "id": "centered_seated",
+          "label": "坐姿重心居中",
+          "value": "坐姿重心稳定居中"
+        }
+      ]
+    },
+    "pose.shoulders": {
+      "category": "姿态动作",
+      "label": "肩颈状态",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "relaxed_level",
+          "label": "双肩放松平稳",
+          "value": "双肩自然放松并保持平稳"
+        },
+        {
+          "id": "relaxed_inward",
+          "label": "肩膀轻微内收",
+          "value": "双肩轻微内收，肩颈线条柔和"
+        },
+        {
+          "id": "one_shoulder_forward",
+          "label": "一侧肩膀前移",
+          "value": "靠近镜头的一侧肩膀轻微前移"
+        },
+        {
+          "id": "one_shoulder_lower",
+          "label": "一侧肩膀降低",
+          "value": "一侧肩膀自然降低，形成轻微高低变化"
+        },
+        {
+          "id": "open_chest",
+          "label": "肩背舒展",
+          "value": "肩背自然舒展，颈部保持挺直"
+        },
+        {
+          "id": "forward_relaxed",
+          "label": "前倾时肩颈放松",
+          "value": "上身前倾时双肩保持放松，颈部自然延伸"
+        },
+        {
+          "id": "shrug",
+          "label": "轻微耸肩",
+          "value": "轻微耸肩"
+        },
+        {
+          "id": "shoulders_back",
+          "label": "双肩向后打开",
+          "value": "双肩向后打开"
+        }
+      ]
+    },
+    "pose.hand_action": {
+      "category": "姿态动作",
+      "label": "手部动作",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "arms_relaxed_sides",
+          "label": "双臂自然垂落",
+          "value": "双臂沿身体两侧自然垂落，手指保持放松"
+        },
+        {
+          "id": "hands_folded_front",
+          "label": "双手身前轻握",
+          "value": "双手在身前轻轻交叠，手指关系清楚"
+        },
+        {
+          "id": "one_hand_waist",
+          "label": "一手轻扶腰侧",
+          "value": "一只手轻扶腰侧，另一只手自然垂落"
+        },
+        {
+          "id": "one_hand_pocket",
+          "label": "一手插入口袋",
+          "value": "一只手自然插入口袋，另一只手沿身体侧边放松"
+        },
+        {
+          "id": "adjust_collar",
+          "label": "一手轻扶衣领",
+          "value": "一只手轻扶衣领边缘，另一只手自然垂落"
+        },
+        {
+          "id": "adjust_glasses",
+          "label": "一手轻扶镜框",
+          "value": "一只手轻扶眼镜镜框，另一只手保持自然放松",
+          "requires": {
+            "clothing.accessory": [
+              "rectangle_glasses",
+              "round_glasses"
+            ]
+          }
+        },
+        {
+          "id": "glasses_and_folder",
+          "label": "扶镜框并拿文件夹",
+          "value": "一只手轻扶眼镜镜框，另一只手拿住文件夹边缘",
+          "requires": {
+            "clothing.accessory": [
+              "rectangle_glasses",
+              "round_glasses"
+            ],
+            "prop": [
+              "folder"
+            ]
+          }
+        },
+        {
+          "id": "touch_hair",
+          "label": "一手整理脸侧发丝",
+          "value": "一只手轻触脸侧发丝，手指与发丝关系清楚"
+        },
+        {
+          "id": "hold_hat_brim",
+          "label": "一手轻扶帽檐",
+          "value": "一只手轻扶帽檐，另一只手自然垂落",
+          "requires": {
+            "hair.headwear": [
+              "straw_hat",
+              "wide_brim_hat",
+              "baseball_cap"
+            ]
+          }
+        },
+        {
+          "id": "bouquet_and_hat",
+          "label": "抱花束并扶帽檐",
+          "value": "一只手臂抱住花束，另一只手轻扶帽檐",
+          "requires": {
+            "prop": [
+              "flower_bouquet"
+            ],
+            "hair.headwear": [
+              "straw_hat",
+              "wide_brim_hat"
+            ]
+          }
+        },
+        {
+          "id": "hold_coffee_cup",
+          "label": "双手托住咖啡杯",
+          "value": "双手自然托住咖啡杯，杯身位于胸部下方",
+          "requires": {
+            "prop": [
+              "coffee_cup"
+            ]
+          }
+        },
+        {
+          "id": "cup_and_table",
+          "label": "一手托杯一手扶桌",
+          "value": "一只手托住咖啡杯，另一只手轻扶桌沿",
+          "requires": {
+            "prop": [
+              "coffee_cup",
+              "table"
+            ]
+          }
+        },
+        {
+          "id": "hold_folder",
+          "label": "双手拿文件夹",
+          "value": "双手拿住竖立的文件夹，手指沿文件夹边缘自然展开",
+          "requires": {
+            "prop": [
+              "folder"
+            ]
+          }
+        },
+        {
+          "id": "pen_and_folder",
+          "label": "签字笔与文件夹",
+          "value": "一只手握住文件夹，另一只手夹着签字笔轻触太阳穴",
+          "requires": {
+            "prop": [
+              "folder",
+              "pen"
+            ]
+          }
+        },
+        {
+          "id": "door_handle_and_fan",
+          "label": "门把手与折扇",
+          "value": "一只手握住门把手，另一只手在肩侧举起折扇",
+          "requires": {
+            "prop": [
+              "door_handle",
+              "folding_fan"
+            ]
+          }
+        },
+        {
+          "id": "hold_handbag",
+          "label": "双手轻握手袋",
+          "value": "双手在身前轻握手袋提手，手袋位于身体侧前方",
+          "requires": {
+            "clothing.accessory": [
+              "structured_handbag"
+            ]
+          }
+        },
+        {
+          "id": "touch_railing",
+          "label": "一手轻扶栏杆",
+          "value": "一只手轻扶栏杆，另一只手沿身体侧边放松",
+          "requires": {
+            "prop": [
+              "railing"
+            ]
+          }
+        },
+        {
+          "id": "touch_curtain",
+          "label": "一手轻触窗帘",
+          "value": "一只手轻触窗帘边缘，另一只手自然放在腰侧",
+          "requires": {
+            "prop": [
+              "curtain"
+            ]
+          }
+        },
+        {
+          "id": "hold_umbrella",
+          "label": "单手握伞",
+          "value": "一只手稳定握住伞柄，另一只手自然垂落",
+          "requires": {
+            "prop": [
+              "umbrella"
+            ]
+          }
+        },
+        {
+          "id": "hands_on_thighs",
+          "label": "双手自然放在大腿上",
+          "value": "双手自然放在大腿上方，手指保持放松"
+        },
+        {
+          "id": "elbow_on_knee",
+          "label": "一侧手肘支在膝上",
+          "value": "一侧手肘轻支在膝上，另一只手自然放在腿侧"
+        },
+        {
+          "id": "adjust_shoelace",
+          "label": "双手整理鞋带",
+          "value": "双手整理一侧鞋带，手指与鞋带关系清楚",
+          "requires": {
+            "prop": [
+              "shoelace"
+            ]
+          }
+        },
+        {
+          "id": "arms_crossed",
+          "label": "双臂抱胸",
+          "value": "双臂抱在胸前"
+        },
+        {
+          "id": "hand_on_chin",
+          "label": "一手托腮",
+          "value": "一手托腮"
+        },
+        {
+          "id": "peace_sign",
+          "label": "比耶手势",
+          "value": "举起比耶手势"
+        },
+        {
+          "id": "point_distance",
+          "label": "指向远方",
+          "value": "伸手指向远方"
+        },
+        {
+          "id": "tuck_hair",
+          "label": "别发到耳后",
+          "value": "把碎发别到耳后"
+        }
+      ]
+    },
+    "pose.leg_action": {
+      "category": "姿态动作",
+      "label": "腿部动作",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "feet_parallel",
+          "label": "双脚自然平行",
+          "value": "双脚自然平行站立，腿部线条稳定"
+        },
+        {
+          "id": "one_foot_forward",
+          "label": "一脚轻微向前",
+          "value": "靠近镜头的一只脚轻微向前迈出"
+        },
+        {
+          "id": "ankles_crossed",
+          "label": "脚踝交叉",
+          "value": "双腿自然靠近，脚踝轻微交叉"
+        },
+        {
+          "id": "one_knee_bent",
+          "label": "一腿轻微屈膝",
+          "value": "承重腿保持稳定，另一条腿轻微屈膝"
+        },
+        {
+          "id": "raised_crossed_leg",
+          "label": "屈膝抬腿交叉",
+          "value": "一条腿稳定支撑身体，另一条腿屈膝抬起并贴近支撑腿"
+        },
+        {
+          "id": "walking_step",
+          "label": "自然迈步",
+          "value": "双腿形成自然行走步幅，前脚即将落地"
+        },
+        {
+          "id": "knees_together",
+          "label": "坐姿双膝并拢",
+          "value": "坐姿双膝自然并拢，小腿稳定垂落"
+        },
+        {
+          "id": "knees_side",
+          "label": "坐姿双腿偏向一侧",
+          "value": "坐姿双膝靠近并偏向画面一侧"
+        },
+        {
+          "id": "one_leg_extended",
+          "label": "坐姿一腿稍向前",
+          "value": "坐姿一条腿轻微向前延伸，另一条腿保持稳定"
+        },
+        {
+          "id": "legs_crossed_knee",
+          "label": "膝部交叠坐姿",
+          "value": "坐姿双腿在膝部自然交叠，脚尖方向一致"
+        },
+        {
+          "id": "stool_foot_rest",
+          "label": "一脚踩高脚椅横杆",
+          "value": "一只脚稳定踩在高脚椅横杆上，另一条腿自然垂落"
+        },
+        {
+          "id": "sport_crouch",
+          "label": "运动式屈膝支撑",
+          "value": "双膝屈曲形成稳定低位支撑，双脚完整着地"
+        },
+        {
+          "id": "cross_legged_sit",
+          "label": "盘腿而坐",
+          "value": "双腿盘起而坐"
+        },
+        {
+          "id": "one_leg_raised",
+          "label": "单腿后勾",
+          "value": "一条腿向后勾起"
+        },
+        {
+          "id": "knee_up",
+          "label": "屈膝抱腿",
+          "value": "屈膝将腿抱在身前"
+        }
+      ]
+    },
+    "pose.head_direction": {
+      "category": "姿态动作",
+      "label": "头部方向",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "front",
+          "label": "头部正对镜头",
+          "value": "头部自然正对镜头"
+        },
+        {
+          "id": "turn_left",
+          "label": "头部转向左侧",
+          "value": "头部轻微转向画面左侧"
+        },
+        {
+          "id": "turn_right",
+          "label": "头部转向右侧",
+          "value": "头部轻微转向画面右侧"
+        },
+        {
+          "id": "look_back_left",
+          "label": "向左回眸",
+          "value": "头部从肩上方转回画面左侧"
+        },
+        {
+          "id": "look_back_right",
+          "label": "向右回眸",
+          "value": "头部从肩上方转回画面右侧"
+        },
+        {
+          "id": "slight_tilt_left",
+          "label": "向左轻微侧倾",
+          "value": "头部向画面左侧轻微倾斜"
+        },
+        {
+          "id": "slight_tilt_right",
+          "label": "向右轻微侧倾",
+          "value": "头部向画面右侧轻微倾斜"
+        },
+        {
+          "id": "slight_lower",
+          "label": "头部轻微低下",
+          "value": "头部轻微低下，下颌线条保持清楚"
+        },
+        {
+          "id": "head_tilt_up",
+          "label": "头部上扬",
+          "value": "头部向上扬起"
+        }
+      ]
+    },
+    "pose.gaze": {
+      "category": "姿态动作",
+      "label": "视线",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "camera_direct",
+          "label": "直视镜头",
+          "value": "视线稳定直视镜头"
+        },
+        {
+          "id": "camera_soft",
+          "label": "柔和看向镜头",
+          "value": "视线自然落向镜头，眼神柔和"
+        },
+        {
+          "id": "left_near",
+          "label": "看向画面左侧近处",
+          "value": "视线落向画面左侧近处"
+        },
+        {
+          "id": "right_near",
+          "label": "看向画面右侧近处",
+          "value": "视线落向画面右侧近处"
+        },
+        {
+          "id": "left_distance",
+          "label": "看向左侧远处",
+          "value": "视线越过镜头落向画面左侧远处"
+        },
+        {
+          "id": "right_distance",
+          "label": "看向右侧远处",
+          "value": "视线越过镜头落向画面右侧远处"
+        },
+        {
+          "id": "down_prop",
+          "label": "看向手中物品",
+          "value": "视线自然落在手中物品上"
+        },
+        {
+          "id": "window",
+          "label": "看向窗外",
+          "value": "视线穿过窗户落向室外"
+        },
+        {
+          "id": "slightly_above",
+          "label": "视线略高于镜头",
+          "value": "视线落在镜头上方不远处"
+        },
+        {
+          "id": "side_camera",
+          "label": "侧目看向镜头",
+          "value": "眼睛从侧向位置转回看向镜头"
+        },
+        {
+          "id": "eyes_closed",
+          "label": "闭眼",
+          "value": "闭着眼"
+        },
+        {
+          "id": "look_up",
+          "label": "仰望上方",
+          "value": "仰望向天空"
+        },
+        {
+          "id": "look_down",
+          "label": "低头看地",
+          "value": "低垂目光看向地面"
+        }
+      ]
+    },
+    "pose.expression": {
+      "category": "姿态动作",
+      "label": "表情",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "gentle_smile",
+          "label": "温柔浅笑",
+          "value": "表情温柔，唇角形成自然浅笑"
+        },
+        {
+          "id": "sweet_smile",
+          "label": "清甜微笑",
+          "value": "表情清甜放松，露出轻微笑意"
+        },
+        {
+          "id": "relaxed_smile",
+          "label": "自然放松微笑",
+          "value": "面部肌肉自然放松，唇角轻微上扬"
+        },
+        {
+          "id": "bright_smile",
+          "label": "明朗笑容",
+          "value": "眼神明亮，露出自然开朗的笑容"
+        },
+        {
+          "id": "calm",
+          "label": "平静自然",
+          "value": "表情平静自然，眉眼保持放松"
+        },
+        {
+          "id": "calm_confident",
+          "label": "冷静自信",
+          "value": "表情冷静自信，眉眼稳定清晰"
+        },
+        {
+          "id": "restrained",
+          "label": "克制沉静",
+          "value": "表情克制沉静，唇部自然闭合"
+        },
+        {
+          "id": "focused",
+          "label": "专注",
+          "value": "神情专注，眉眼轻微收拢"
+        },
+        {
+          "id": "thoughtful",
+          "label": "若有所思",
+          "value": "神情安静，视线与轻微收拢的眉眼形成思考状态"
+        },
+        {
+          "id": "cool",
+          "label": "清冷疏离",
+          "value": "表情清冷克制，眉眼和唇部保持稳定"
+        },
+        {
+          "id": "bright_confident",
+          "label": "明艳自信",
+          "value": "表情明艳自信，目光直接，唇线清楚"
+        },
+        {
+          "id": "soft_serious",
+          "label": "柔和严肃",
+          "value": "表情认真而柔和，眉眼保持平稳"
+        },
+        {
+          "id": "surprised",
+          "label": "微微惊讶",
+          "value": "微微惊讶"
+        },
+        {
+          "id": "playful_wink",
+          "label": "俏皮眨眼",
+          "value": "俏皮地眨眼"
+        },
+        {
+          "id": "lazy",
+          "label": "慵懒放松",
+          "value": "慵懒放松"
+        },
+        {
+          "id": "shy",
+          "label": "羞涩抿嘴",
+          "value": "羞涩抿嘴"
+        },
+        {
+          "id": "bright_laugh",
+          "label": "开怀大笑",
+          "value": "开怀大笑"
+        }
+      ]
+    },
+    "pose.event": {
+      "category": "姿态动作",
+      "label": "画面瞬间",
+      "template": "画面捕捉她{value}的瞬间",
+      "options": [
+        {
+          "id": "pause_under_branches",
+          "label": "枝叶下短暂停留",
+          "value": "在枝叶下短暂停留"
+        },
+        {
+          "id": "turn_during_walk",
+          "label": "行走中回头",
+          "value": "行走途中轻微回头"
+        },
+        {
+          "id": "wait_by_wall",
+          "label": "墙边安静等待",
+          "value": "靠在墙边安静等待"
+        },
+        {
+          "id": "pause_at_door",
+          "label": "推门时停下",
+          "value": "推开门后短暂停下"
+        },
+        {
+          "id": "rest_at_cafe",
+          "label": "咖啡馆短暂休息",
+          "value": "在咖啡馆短暂休息"
+        },
+        {
+          "id": "lift_coffee",
+          "label": "端起咖啡杯",
+          "value": "刚刚端起桌上的咖啡杯"
+        },
+        {
+          "id": "review_folder",
+          "label": "查看文件",
+          "value": "坐下查看手中文件"
+        },
+        {
+          "id": "pause_in_thought",
+          "label": "坐下整理思绪",
+          "value": "坐下后短暂停顿并整理思绪"
+        },
+        {
+          "id": "rest_on_sofa",
+          "label": "沙发上短暂休息",
+          "value": "短暂休息"
+        },
+        {
+          "id": "adjust_hat",
+          "label": "整理帽檐",
+          "value": "在微风中轻轻整理帽檐"
+        },
+        {
+          "id": "touch_curtain",
+          "label": "窗边触碰窗帘",
+          "value": "站在窗边轻触窗帘边缘"
+        },
+        {
+          "id": "pause_on_balcony",
+          "label": "阳台短暂停步",
+          "value": "走到阳台栏杆旁短暂停步"
+        },
+        {
+          "id": "wait_for_elevator",
+          "label": "电梯前等待",
+          "value": "站在电梯门前安静等待"
+        },
+        {
+          "id": "studio_pose_reset",
+          "label": "棚拍间隙调整姿态",
+          "value": "在棚拍间隙重新调整姿态"
+        },
+        {
+          "id": "tie_shoelace",
+          "label": "运动前整理鞋带",
+          "value": "在运动开始前俯身整理鞋带"
+        },
+        {
+          "id": "shelter_under_umbrella",
+          "label": "雨中撑伞停步",
+          "value": "在细雨中撑伞"
+        },
+        {
+          "id": "dance_spin",
+          "label": "旋转起舞",
+          "value": "旋转起舞"
+        },
+        {
+          "id": "hair_toss",
+          "label": "甩动长发",
+          "value": "甩动长发"
+        },
+        {
+          "id": "laugh_head_back",
+          "label": "仰头大笑",
+          "value": "仰头大笑"
+        },
+        {
+          "id": "jumping",
+          "label": "轻盈跃起",
+          "value": "轻盈跃起"
+        },
+        {
+          "id": "look_back_smile",
+          "label": "回眸一笑",
+          "value": "回眸一笑"
+        }
+      ]
+    }
+  },
+  "bundles": {
+    "pose_action_chains": [
+      {
+        "id": "forest_hat_bouquet",
+        "label": "森系花束扶帽站姿",
+        "fields": {
+          "pose.event": "pause_under_branches",
+          "pose.base": "standing_three_quarter",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "right_leg",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "bouquet_and_hat",
+          "pose.leg_action": "one_knee_bent",
+          "pose.head_direction": "look_back_right",
+          "pose.gaze": "camera_soft",
+          "pose.expression": "gentle_smile"
+        },
+        "tags": [
+          "森系",
+          "生活写真",
+          "站姿"
+        ]
+      },
+      {
+        "id": "cafe_cup_relaxed",
+        "label": "咖啡馆托杯放松坐姿",
+        "fields": {
+          "pose.event": "lift_coffee",
+          "pose.base": "sitting_booth_relaxed",
+          "pose.body_direction": "right_quarter",
+          "pose.weight": "right_hip",
+          "pose.shoulders": "relaxed_inward",
+          "pose.hand_action": "hold_coffee_cup",
+          "pose.leg_action": "knees_side",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_soft",
+          "pose.expression": "relaxed_smile"
+        },
+        "tags": [
+          "咖啡馆",
+          "生活写真",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "cafe_table_candid",
+        "label": "咖啡馆桌边自然抓拍",
+        "fields": {
+          "pose.event": "rest_at_cafe",
+          "pose.base": "sitting_chair_edge",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "centered_seated",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "cup_and_table",
+          "pose.leg_action": "knees_together",
+          "pose.head_direction": "slight_tilt_left",
+          "pose.gaze": "down_prop",
+          "pose.expression": "calm"
+        },
+        "tags": [
+          "咖啡馆",
+          "抓拍",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "workplace_folder_forward",
+        "label": "职场文件夹前倾坐姿",
+        "fields": {
+          "pose.event": "review_folder",
+          "pose.base": "sitting_sofa_forward",
+          "pose.body_direction": "front",
+          "pose.weight": "forward",
+          "pose.shoulders": "forward_relaxed",
+          "pose.hand_action": "pen_and_folder",
+          "pose.leg_action": "knees_together",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm_confident"
+        },
+        "tags": [
+          "职场",
+          "商业写真",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "doorway_fan_flash",
+        "label": "门框折扇硬闪站姿",
+        "fields": {
+          "pose.event": "pause_at_door",
+          "pose.base": "standing_doorway",
+          "pose.body_direction": "right_quarter",
+          "pose.weight": "left_leg",
+          "pose.shoulders": "one_shoulder_lower",
+          "pose.hand_action": "door_handle_and_fan",
+          "pose.leg_action": "raised_crossed_leg",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "bright_confident"
+        },
+        "tags": [
+          "轻奢",
+          "硬闪",
+          "全身站姿"
+        ]
+      },
+      {
+        "id": "wall_collar_fashion",
+        "label": "墙边扶领时尚站姿",
+        "fields": {
+          "pose.event": "wait_by_wall",
+          "pose.base": "leaning_wall",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "right_leg",
+          "pose.shoulders": "one_shoulder_forward",
+          "pose.hand_action": "adjust_collar",
+          "pose.leg_action": "ankles_crossed",
+          "pose.head_direction": "turn_right",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "cool"
+        },
+        "tags": [
+          "都市时尚",
+          "墙边",
+          "站姿"
+        ]
+      },
+      {
+        "id": "walking_turn_street",
+        "label": "街头行走回头",
+        "fields": {
+          "pose.event": "turn_during_walk",
+          "pose.base": "walking_pause",
+          "pose.body_direction": "diagonal_forward",
+          "pose.weight": "forward",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "arms_relaxed_sides",
+          "pose.leg_action": "walking_step",
+          "pose.head_direction": "look_back_left",
+          "pose.gaze": "side_camera",
+          "pose.expression": "relaxed_smile"
+        },
+        "tags": [
+          "都市街拍",
+          "行走",
+          "抓拍"
+        ]
+      },
+      {
+        "id": "window_curtain_quiet",
+        "label": "窗边轻触窗帘",
+        "fields": {
+          "pose.event": "touch_curtain",
+          "pose.base": "standing_three_quarter",
+          "pose.body_direction": "right_profile",
+          "pose.weight": "left_leg",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "touch_curtain",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "turn_right",
+          "pose.gaze": "window",
+          "pose.expression": "thoughtful"
+        },
+        "tags": [
+          "窗边",
+          "生活写真",
+          "安静"
+        ]
+      },
+      {
+        "id": "studio_stool_direct",
+        "label": "影棚高脚椅正面坐姿",
+        "fields": {
+          "pose.event": "studio_pose_reset",
+          "pose.base": "sitting_stool",
+          "pose.body_direction": "front",
+          "pose.weight": "centered_seated",
+          "pose.shoulders": "open_chest",
+          "pose.hand_action": "hands_on_thighs",
+          "pose.leg_action": "stool_foot_rest",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm_confident"
+        },
+        "tags": [
+          "影棚",
+          "商业写真",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "balcony_railing_distance",
+        "label": "阳台扶栏远眺",
+        "fields": {
+          "pose.event": "pause_on_balcony",
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "left_profile",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "touch_railing",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "turn_left",
+          "pose.gaze": "left_distance",
+          "pose.expression": "calm"
+        },
+        "tags": [
+          "旅行",
+          "阳台",
+          "远眺"
+        ]
+      },
+      {
+        "id": "elevator_handbag_wait",
+        "label": "电梯前手袋等待站姿",
+        "fields": {
+          "pose.event": "wait_for_elevator",
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "right_quarter",
+          "pose.weight": "left_leg",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "hold_handbag",
+          "pose.leg_action": "one_foot_forward",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "restrained"
+        },
+        "tags": [
+          "都市职场",
+          "通勤",
+          "站姿"
+        ]
+      },
+      {
+        "id": "glasses_sofa_confident",
+        "label": "沙发扶镜框自信坐姿",
+        "fields": {
+          "pose.event": "review_folder",
+          "pose.base": "sitting_sofa_forward",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "left_hip",
+          "pose.shoulders": "forward_relaxed",
+          "pose.hand_action": "glasses_and_folder",
+          "pose.leg_action": "knees_together",
+          "pose.head_direction": "slight_tilt_right",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm_confident"
+        },
+        "tags": [
+          "职场",
+          "知性",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "fashion_pocket_standing",
+        "label": "一手插袋时尚站姿",
+        "fields": {
+          "pose.event": "studio_pose_reset",
+          "pose.base": "standing_three_quarter",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "right_leg",
+          "pose.shoulders": "one_shoulder_forward",
+          "pose.hand_action": "one_hand_pocket",
+          "pose.leg_action": "one_foot_forward",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "cool"
+        },
+        "tags": [
+          "时尚",
+          "影棚",
+          "站姿"
+        ]
+      },
+      {
+        "id": "new_chinese_folded_hands",
+        "label": "新中式身前叠手站姿",
+        "fields": {
+          "pose.event": "wait_by_wall",
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "right_quarter",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "hands_folded_front",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "turn_left",
+          "pose.gaze": "left_near",
+          "pose.expression": "restrained"
+        },
+        "tags": [
+          "新中式",
+          "克制",
+          "站姿"
+        ]
+      },
+      {
+        "id": "chair_elbow_thoughtful",
+        "label": "椅边支肘思考坐姿",
+        "fields": {
+          "pose.event": "pause_in_thought",
+          "pose.base": "sitting_chair_edge",
+          "pose.body_direction": "right_quarter",
+          "pose.weight": "forward",
+          "pose.shoulders": "forward_relaxed",
+          "pose.hand_action": "elbow_on_knee",
+          "pose.leg_action": "one_leg_extended",
+          "pose.head_direction": "slight_lower",
+          "pose.gaze": "right_near",
+          "pose.expression": "thoughtful"
+        },
+        "tags": [
+          "电影感",
+          "思考",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "umbrella_rain_pause",
+        "label": "雨中撑伞停步",
+        "fields": {
+          "pose.event": "shelter_under_umbrella",
+          "pose.base": "walking_pause",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "right_leg",
+          "pose.shoulders": "relaxed_inward",
+          "pose.hand_action": "hold_umbrella",
+          "pose.leg_action": "one_foot_forward",
+          "pose.head_direction": "turn_right",
+          "pose.gaze": "right_distance",
+          "pose.expression": "calm"
+        },
+        "tags": [
+          "雨天",
+          "街拍",
+          "站姿"
+        ]
+      },
+      {
+        "id": "sport_shoelace_crouch",
+        "label": "运动前整理鞋带",
+        "fields": {
+          "pose.event": "tie_shoelace",
+          "pose.base": "crouching_sport",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "forward",
+          "pose.shoulders": "forward_relaxed",
+          "pose.hand_action": "adjust_shoelace",
+          "pose.leg_action": "sport_crouch",
+          "pose.head_direction": "slight_lower",
+          "pose.gaze": "down_prop",
+          "pose.expression": "focused"
+        },
+        "tags": [
+          "运动",
+          "低位姿态",
+          "抓拍"
+        ]
+      },
+      {
+        "id": "side_hair_touch_beauty",
+        "label": "侧身整理发丝美妆姿态",
+        "fields": {
+          "pose.event": "studio_pose_reset",
+          "pose.base": "standing_three_quarter",
+          "pose.body_direction": "right_quarter",
+          "pose.weight": "left_leg",
+          "pose.shoulders": "one_shoulder_lower",
+          "pose.hand_action": "touch_hair",
+          "pose.leg_action": "ankles_crossed",
+          "pose.head_direction": "slight_tilt_left",
+          "pose.gaze": "camera_soft",
+          "pose.expression": "gentle_smile"
+        },
+        "tags": [
+          "美妆",
+          "近景",
+          "站姿"
+        ]
+      },
+      {
+        "id": "waist_hand_direct",
+        "label": "扶腰正面商业站姿",
+        "fields": {
+          "pose.event": "studio_pose_reset",
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "left_leg",
+          "pose.shoulders": "open_chest",
+          "pose.hand_action": "one_hand_waist",
+          "pose.leg_action": "one_knee_bent",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "bright_confident"
+        },
+        "tags": [
+          "商业写真",
+          "时尚",
+          "站姿"
+        ]
+      },
+      {
+        "id": "sofa_relaxed_side_gaze",
+        "label": "沙发后靠侧目坐姿",
+        "fields": {
+          "pose.event": "rest_on_sofa",
+          "pose.base": "sitting_sofa_relaxed",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "back",
+          "pose.shoulders": "relaxed_inward",
+          "pose.hand_action": "hands_on_thighs",
+          "pose.leg_action": "knees_side",
+          "pose.head_direction": "turn_right",
+          "pose.gaze": "side_camera",
+          "pose.expression": "restrained"
+        },
+        "tags": [
+          "室内",
+          "轻奢",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "cafe_booth_direct",
+        "label": "咖啡馆卡座平静直视",
+        "fields": {
+          "pose.event": "rest_at_cafe",
+          "pose.base": "sitting_booth_relaxed",
+          "pose.body_direction": "right_quarter",
+          "pose.weight": "back",
+          "pose.shoulders": "relaxed_inward",
+          "pose.hand_action": "hands_on_thighs",
+          "pose.leg_action": "knees_together",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm"
+        },
+        "tags": [
+          "咖啡馆",
+          "生活写真",
+          "坐姿",
+          "直视"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+# Development and internal planning files
+.github/
+.superpowers/
+.codex-skill-review-*/
+docs/superpowers/
+docs/model-evaluation-v0.4.md
+examples/
+prototype/
+tests/
+phrase_library/*_review.md
+phrase_library/README.md
+
+# Local audit notes and screenshots
+/task_plan.md
+/findings.md
+/progress.md
+screenshots/
+
+# Python and editor caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+.idea/
+.vscode/
+*.log

@@ -1,0 +1,2460 @@
+{
+  "schema_version": "1.0.0",
+  "language": "zh-CN",
+  "target_models": [
+    "Z-Image",
+    "Z-Image-Turbo"
+  ],
+  "validation": {
+    "language_rules": "passed",
+    "model_image_tests": "pending"
+  },
+  "fields": {
+    "person.age": {
+      "category": "人物",
+      "label": "年龄阶段",
+      "template": "一位{value}",
+      "options": [
+        {
+          "id": "age_20s",
+          "label": "20–29岁",
+          "value": "25岁左右的成年女性",
+          "fragment": "25岁左右"
+        },
+        {
+          "id": "age_30s",
+          "label": "30–39岁",
+          "value": "35岁左右的成年女性",
+          "fragment": "35岁左右"
+        },
+        {
+          "id": "age_40s",
+          "label": "40–49岁",
+          "value": "45岁左右的成年女性",
+          "fragment": "45岁左右"
+        },
+        {
+          "id": "age_50s",
+          "label": "50–59岁",
+          "value": "55岁左右的成年女性",
+          "fragment": "55岁左右"
+        },
+        {
+          "id": "age_60s",
+          "label": "60–69岁",
+          "value": "65岁左右的成年女性",
+          "fragment": "65岁左右"
+        },
+        {
+          "id": "age_70_plus",
+          "label": "70岁以上",
+          "value": "75岁左右的成年女性",
+          "fragment": "75岁左右"
+        }
+      ]
+    },
+    "person.ethnicity": {
+      "category": "人物",
+      "label": "族裔大类",
+      "template": "一位{value}",
+      "options": [
+        {
+          "id": "east_asian",
+          "label": "东亚",
+          "value": "东亚成年女性",
+          "fragment": "东亚"
+        },
+        {
+          "id": "southeast_asian",
+          "label": "东南亚",
+          "value": "东南亚成年女性",
+          "fragment": "东南亚"
+        },
+        {
+          "id": "south_asian",
+          "label": "南亚",
+          "value": "南亚成年女性",
+          "fragment": "南亚"
+        },
+        {
+          "id": "central_asian",
+          "label": "中亚",
+          "value": "中亚成年女性",
+          "fragment": "中亚"
+        },
+        {
+          "id": "west_asian_middle_eastern",
+          "label": "西亚／中东",
+          "value": "西亚／中东成年女性",
+          "fragment": "西亚／中东"
+        },
+        {
+          "id": "european_descent",
+          "label": "欧洲裔",
+          "value": "欧洲裔成年女性",
+          "fragment": "欧洲裔"
+        },
+        {
+          "id": "african_descent",
+          "label": "非洲裔",
+          "value": "非洲裔成年女性",
+          "fragment": "非洲裔"
+        },
+        {
+          "id": "latin_american_descent",
+          "label": "拉丁美洲裔",
+          "value": "拉丁美洲裔成年女性",
+          "fragment": "拉丁美洲裔"
+        },
+        {
+          "id": "multiethnic",
+          "label": "多族裔混合外观",
+          "value": "具有多族裔混合外观的成年女性",
+          "fragment": "多族裔混合外观"
+        }
+      ]
+    },
+    "person.ethnicity_branch": {
+      "category": "人物",
+      "label": "地域族裔分支",
+      "template": "一位{value}",
+      "options": [
+        {
+          "id": "northeast_asian",
+          "label": "东北亚地域外观",
+          "value": "具有东北亚地域外观的成年女性",
+          "fragment": "东北亚地域外观",
+          "tags": [
+            "east_asian"
+          ]
+        },
+        {
+          "id": "southern_east_asian",
+          "label": "东亚南部地域外观",
+          "value": "具有东亚南部地域外观的成年女性",
+          "fragment": "东亚南部地域外观",
+          "tags": [
+            "east_asian"
+          ]
+        },
+        {
+          "id": "mainland_southeast_asian",
+          "label": "大陆东南亚地域外观",
+          "value": "具有大陆东南亚地域外观的成年女性",
+          "fragment": "大陆东南亚地域外观",
+          "tags": [
+            "southeast_asian"
+          ]
+        },
+        {
+          "id": "maritime_southeast_asian",
+          "label": "海岛东南亚地域外观",
+          "value": "具有海岛东南亚地域外观的成年女性",
+          "fragment": "海岛东南亚地域外观",
+          "tags": [
+            "southeast_asian"
+          ]
+        },
+        {
+          "id": "northern_south_asian",
+          "label": "北部南亚地域外观",
+          "value": "具有北部南亚地域外观的成年女性",
+          "fragment": "北部南亚地域外观",
+          "tags": [
+            "south_asian"
+          ]
+        },
+        {
+          "id": "southern_south_asian",
+          "label": "南部南亚地域外观",
+          "value": "具有南部南亚地域外观的成年女性",
+          "fragment": "南部南亚地域外观",
+          "tags": [
+            "south_asian"
+          ]
+        },
+        {
+          "id": "steppe_central_asian",
+          "label": "草原中亚地域外观",
+          "value": "具有草原中亚地域外观的成年女性",
+          "fragment": "草原中亚地域外观",
+          "tags": [
+            "central_asian"
+          ]
+        },
+        {
+          "id": "western_central_asian",
+          "label": "西部中亚地域外观",
+          "value": "具有西部中亚地域外观的成年女性",
+          "fragment": "西部中亚地域外观",
+          "tags": [
+            "central_asian"
+          ]
+        },
+        {
+          "id": "arab_descent",
+          "label": "阿拉伯裔",
+          "value": "阿拉伯裔成年女性",
+          "fragment": "阿拉伯裔",
+          "tags": [
+            "west_asian_middle_eastern"
+          ]
+        },
+        {
+          "id": "persian_descent",
+          "label": "波斯裔",
+          "value": "波斯裔成年女性",
+          "fragment": "波斯裔",
+          "tags": [
+            "west_asian_middle_eastern"
+          ]
+        },
+        {
+          "id": "levantine",
+          "label": "黎凡特地域外观",
+          "value": "具有黎凡特地域外观的成年女性",
+          "fragment": "黎凡特地域外观",
+          "tags": [
+            "west_asian_middle_eastern"
+          ]
+        },
+        {
+          "id": "anatolian",
+          "label": "安纳托利亚地域外观",
+          "value": "具有安纳托利亚地域外观的成年女性",
+          "fragment": "安纳托利亚地域外观",
+          "tags": [
+            "west_asian_middle_eastern"
+          ]
+        },
+        {
+          "id": "slavic_descent",
+          "label": "斯拉夫裔",
+          "value": "斯拉夫裔成年女性",
+          "fragment": "斯拉夫裔",
+          "tags": [
+            "european_descent"
+          ]
+        },
+        {
+          "id": "nordic_descent",
+          "label": "北欧裔",
+          "value": "北欧裔成年女性",
+          "fragment": "北欧裔",
+          "tags": [
+            "european_descent"
+          ]
+        },
+        {
+          "id": "western_european",
+          "label": "西欧裔",
+          "value": "西欧裔成年女性",
+          "fragment": "西欧裔",
+          "tags": [
+            "european_descent"
+          ]
+        },
+        {
+          "id": "mediterranean_european",
+          "label": "地中海欧洲裔",
+          "value": "地中海欧洲裔成年女性",
+          "fragment": "地中海欧洲裔",
+          "tags": [
+            "european_descent"
+          ]
+        },
+        {
+          "id": "north_african",
+          "label": "北非地域外观",
+          "value": "具有北非地域外观的成年女性",
+          "fragment": "北非地域外观",
+          "tags": [
+            "african_descent"
+          ]
+        },
+        {
+          "id": "west_african",
+          "label": "西非地域外观",
+          "value": "具有西非地域外观的成年女性",
+          "fragment": "西非地域外观",
+          "tags": [
+            "african_descent"
+          ]
+        },
+        {
+          "id": "east_african",
+          "label": "东非地域外观",
+          "value": "具有东非地域外观的成年女性",
+          "fragment": "东非地域外观",
+          "tags": [
+            "african_descent"
+          ]
+        },
+        {
+          "id": "central_african",
+          "label": "中非地域外观",
+          "value": "具有中非地域外观的成年女性",
+          "fragment": "中非地域外观",
+          "tags": [
+            "african_descent"
+          ]
+        },
+        {
+          "id": "southern_african",
+          "label": "南部非洲地域外观",
+          "value": "具有南部非洲地域外观的成年女性",
+          "fragment": "南部非洲地域外观",
+          "tags": [
+            "african_descent"
+          ]
+        },
+        {
+          "id": "andean_latin_american",
+          "label": "安第斯地域外观",
+          "value": "具有安第斯地域外观的成年女性",
+          "fragment": "安第斯地域外观",
+          "tags": [
+            "latin_american_descent"
+          ]
+        },
+        {
+          "id": "caribbean_latin_american",
+          "label": "加勒比地域外观",
+          "value": "具有加勒比地域外观的成年女性",
+          "fragment": "加勒比地域外观",
+          "tags": [
+            "latin_american_descent"
+          ]
+        },
+        {
+          "id": "southern_cone_latin_american",
+          "label": "南锥体地域外观",
+          "value": "具有南锥体地域外观的成年女性",
+          "fragment": "南锥体地域外观",
+          "tags": [
+            "latin_american_descent"
+          ]
+        },
+        {
+          "id": "east_asian_european_mixed",
+          "label": "东亚与欧洲混合族裔",
+          "value": "东亚与欧洲混合族裔成年女性",
+          "fragment": "东亚与欧洲混合族裔",
+          "tags": [
+            "multiethnic"
+          ]
+        },
+        {
+          "id": "african_european_mixed",
+          "label": "非洲与欧洲混合族裔",
+          "value": "非洲与欧洲混合族裔成年女性",
+          "fragment": "非洲与欧洲混合族裔",
+          "tags": [
+            "multiethnic"
+          ]
+        },
+        {
+          "id": "south_asian_european_mixed",
+          "label": "南亚与欧洲混合族裔",
+          "value": "南亚与欧洲混合族裔成年女性",
+          "fragment": "南亚与欧洲混合族裔",
+          "tags": [
+            "multiethnic"
+          ]
+        },
+        {
+          "id": "latin_european_mixed",
+          "label": "拉丁美洲与欧洲混合族裔",
+          "value": "拉丁美洲与欧洲混合族裔成年女性",
+          "fragment": "拉丁美洲与欧洲混合族裔",
+          "tags": [
+            "multiethnic"
+          ]
+        }
+      ]
+    },
+    "person.face_shape": {
+      "category": "人物",
+      "label": "脸型",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "soft_round",
+          "label": "圆润脸型",
+          "value": "圆润脸型，面颊饱满，下颌轮廓圆润"
+        },
+        {
+          "id": "balanced_oval",
+          "label": "标准鹅蛋脸",
+          "value": "标准鹅蛋脸，额头、颧骨与下颌比例均衡，下颌平滑收窄"
+        },
+        {
+          "id": "long_face",
+          "label": "修长脸型",
+          "value": "修长脸型，脸部纵向比例较长，面颊相对较窄"
+        },
+        {
+          "id": "soft_square_round",
+          "label": "柔和方圆脸",
+          "value": "柔和方圆脸，下颌宽度较明显，下颌角转折柔和"
+        },
+        {
+          "id": "heart",
+          "label": "心形脸",
+          "value": "心形脸，额头稍宽，下颌收窄，下巴微尖"
+        },
+        {
+          "id": "diamond",
+          "label": "菱形脸",
+          "value": "菱形脸，颧骨区域较宽，额头与下颌相对较窄"
+        }
+      ]
+    },
+    "person.face_contour_detail": {
+      "category": "人物",
+      "label": "轮廓细节",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "full_cheeks",
+          "label": "面颊饱满",
+          "value": "面颊轮廓饱满柔和",
+          "requires": {
+            "person.face_shape": [
+              "soft_round",
+              "balanced_oval",
+              "soft_square_round",
+              "heart"
+            ]
+          }
+        },
+        {
+          "id": "slim_cheeks",
+          "label": "面颊清瘦",
+          "value": "面颊线条清瘦利落",
+          "requires": {
+            "person.face_shape": [
+              "balanced_oval",
+              "long_face",
+              "heart",
+              "diamond"
+            ]
+          }
+        },
+        {
+          "id": "soft_cheekbones",
+          "label": "颧骨柔和",
+          "value": "颧骨轮廓柔和流畅",
+          "requires": {
+            "person.face_shape": [
+              "soft_round",
+              "balanced_oval",
+              "soft_square_round",
+              "heart"
+            ]
+          }
+        },
+        {
+          "id": "defined_cheekbones",
+          "label": "颧骨清晰",
+          "value": "颧骨轮廓清晰自然",
+          "requires": {
+            "person.face_shape": [
+              "balanced_oval",
+              "long_face",
+              "soft_square_round",
+              "heart",
+              "diamond"
+            ]
+          }
+        },
+        {
+          "id": "soft_jawline",
+          "label": "下颌线柔和",
+          "value": "下颌线条柔和流畅",
+          "requires": {
+            "person.face_shape": [
+              "soft_round",
+              "balanced_oval",
+              "soft_square_round",
+              "heart"
+            ]
+          }
+        },
+        {
+          "id": "defined_jawline",
+          "label": "下颌线清晰",
+          "value": "下颌线条清晰利落",
+          "requires": {
+            "person.face_shape": [
+              "balanced_oval",
+              "long_face",
+              "soft_square_round",
+              "heart",
+              "diamond"
+            ]
+          }
+        },
+        {
+          "id": "rounded_chin",
+          "label": "下巴圆润",
+          "value": "下巴轮廓圆润自然",
+          "requires": {
+            "person.face_shape": [
+              "soft_round",
+              "balanced_oval",
+              "soft_square_round"
+            ]
+          }
+        },
+        {
+          "id": "slightly_pointed_chin",
+          "label": "下巴微尖",
+          "value": "下巴轮廓微微收尖",
+          "requires": {
+            "person.face_shape": [
+              "balanced_oval",
+              "long_face",
+              "heart",
+              "diamond"
+            ]
+          }
+        }
+      ]
+    },
+    "person.eye_shape": {
+      "category": "人物",
+      "label": "眼型",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "almond",
+          "label": "杏仁眼",
+          "value": "一双轮廓均衡、眼角自然收窄的杏仁眼"
+        },
+        {
+          "id": "round_bright",
+          "label": "明亮圆眼",
+          "value": "一双纵向开合较明显、瞳仁清晰的圆眼"
+        },
+        {
+          "id": "slender",
+          "label": "细长眼",
+          "value": "一双横向延伸、眼裂较长的细长眼型"
+        },
+        {
+          "id": "slightly_upturned",
+          "label": "微挑眼",
+          "value": "一双眼尾轻微上扬的微挑眼型"
+        },
+        {
+          "id": "soft_downturned",
+          "label": "柔和垂眼",
+          "value": "一双眼尾轻微下垂、轮廓柔和的眼睛"
+        }
+      ]
+    },
+    "person.iris_color": {
+      "category": "人物",
+      "label": "瞳色",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "dark_brown",
+          "label": "深棕色",
+          "value": "瞳色为自然深棕色"
+        },
+        {
+          "id": "black_brown",
+          "label": "黑褐色",
+          "value": "瞳色为接近黑色的黑褐色"
+        },
+        {
+          "id": "light_brown",
+          "label": "浅棕色",
+          "value": "瞳色为通透浅棕色"
+        },
+        {
+          "id": "amber",
+          "label": "琥珀色",
+          "value": "瞳色为带金棕层次的琥珀色"
+        },
+        {
+          "id": "gray",
+          "label": "灰色",
+          "value": "瞳色为低饱和自然灰色"
+        },
+        {
+          "id": "blue",
+          "label": "蓝色",
+          "value": "瞳色为清晰自然的蓝色"
+        },
+        {
+          "id": "green",
+          "label": "绿色",
+          "value": "瞳色为低饱和自然绿色"
+        }
+      ]
+    },
+    "person.eyelid": {
+      "category": "人物",
+      "label": "眼睑特征",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "single",
+          "label": "单眼皮",
+          "value": "上眼睑为轮廓干净的单眼皮"
+        },
+        {
+          "id": "inner_double",
+          "label": "内双",
+          "value": "上眼睑带自然收窄的内双褶皱"
+        },
+        {
+          "id": "natural_double",
+          "label": "自然双眼皮",
+          "value": "上眼睑带宽度适中的自然双眼皮褶皱"
+        }
+      ]
+    },
+    "person.skin_tone": {
+      "category": "人物",
+      "label": "肤色",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "cool_fair",
+          "label": "冷白肤色",
+          "value": "冷调自然白皙肤色"
+        },
+        {
+          "id": "warm_fair",
+          "label": "暖白肤色",
+          "value": "带柔和暖调的自然白皙肤色"
+        },
+        {
+          "id": "natural_light",
+          "label": "自然浅肤色",
+          "value": "明度适中的自然浅肤色"
+        },
+        {
+          "id": "natural_beige",
+          "label": "自然米色肤色",
+          "value": "中性自然的米色肤色"
+        },
+        {
+          "id": "light_wheat",
+          "label": "浅小麦肤色",
+          "value": "健康自然的浅小麦肤色"
+        },
+        {
+          "id": "honey",
+          "label": "蜂蜜肤色",
+          "value": "均匀温暖的蜂蜜色肤色"
+        },
+        {
+          "id": "wheat_brown",
+          "label": "小麦棕肤色",
+          "value": "带暖调的小麦棕肤色"
+        },
+        {
+          "id": "deep_brown",
+          "label": "深棕肤色",
+          "value": "均匀自然的深棕肤色"
+        }
+      ]
+    },
+    "person.skin_texture": {
+      "category": "人物",
+      "label": "肤质",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "naturally_refined",
+          "label": "自然细腻",
+          "value": "肤质自然细腻，保留轻微真实纹理"
+        },
+        {
+          "id": "real_texture",
+          "label": "真实皮肤纹理",
+          "value": "清楚保留毛孔与细微皮肤纹理"
+        },
+        {
+          "id": "soft_dewy",
+          "label": "柔润水光",
+          "value": "肤质柔润，面部高点带自然水光"
+        },
+        {
+          "id": "soft_matte",
+          "label": "柔雾均匀",
+          "value": "肤质呈柔雾质感，表面均匀细致"
+        }
+      ]
+    },
+    "person.makeup": {
+      "category": "人物",
+      "label": "整体妆容预设",
+      "template": "妆容采用{value}",
+      "options": [
+        {
+          "id": "natural_nude",
+          "label": "自然裸妆",
+          "value": "轻薄自然底妆、柔和眉形与低饱和裸色唇妆"
+        },
+        {
+          "id": "nude_pink",
+          "label": "清透裸粉妆",
+          "value": "清透底妆、淡粉腮红与水润裸粉色唇妆"
+        },
+        {
+          "id": "peach",
+          "label": "蜜桃珊瑚妆",
+          "value": "轻薄底妆、蜜桃色腮红与柔润珊瑚唇色"
+        },
+        {
+          "id": "milk_tea",
+          "label": "奶茶棕妆",
+          "value": "柔雾底妆、奶茶棕眼妆与低饱和奶茶色唇妆"
+        },
+        {
+          "id": "bean_paste_matte",
+          "label": "豆沙柔雾妆",
+          "value": "细腻柔雾底妆、克制眼妆与低饱和豆沙唇色"
+        },
+        {
+          "id": "clear_glossy",
+          "label": "清透水光妆",
+          "value": "清透水光底妆、细闪眼妆与透明感玻璃唇"
+        },
+        {
+          "id": "red_lip",
+          "label": "明艳红唇妆",
+          "value": "干净底妆、清晰眼线与边缘利落的鲜明红唇"
+        },
+        {
+          "id": "berry",
+          "label": "浆果色妆容",
+          "value": "细腻底妆、深棕眼妆与明艳浆果色唇妆"
+        },
+        {
+          "id": "earth_tone",
+          "label": "大地色妆容",
+          "value": "低饱和大地色妆容，温暖而高级"
+        },
+        {
+          "id": "smoked_eye",
+          "label": "小烟熏妆",
+          "value": "柔和晕染的小烟熏妆"
+        },
+        {
+          "id": "no_makeup",
+          "label": "伪素颜妆",
+          "value": "清透的伪素颜妆容"
+        }
+      ]
+    },
+    "person.body_build": {
+      "category": "人物",
+      "label": "基础身形",
+      "template": "身形{value}",
+      "options": [
+        {
+          "id": "slender_balanced",
+          "label": "纤细匀称",
+          "value": "纤细匀称，四肢线条自然协调"
+        },
+        {
+          "id": "balanced",
+          "label": "自然匀称",
+          "value": "自然匀称，肩颈、腰线与四肢比例协调"
+        },
+        {
+          "id": "soft_full",
+          "label": "柔和丰润",
+          "value": "柔和丰润，整体身体轮廓圆润协调"
+        },
+        {
+          "id": "athletic",
+          "label": "健康运动型",
+          "value": "健康紧致，肩背与四肢线条具有自然力量感"
+        }
+      ]
+    },
+    "person.stature": {
+      "category": "人物",
+      "label": "身量观感",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "petite",
+          "label": "小巧身量",
+          "value": "成年女性身量较小，整体比例协调"
+        },
+        {
+          "id": "medium",
+          "label": "中等身量",
+          "value": "中等身量，整体比例自然协调"
+        },
+        {
+          "id": "tall",
+          "label": "高挑身量",
+          "value": "身量高挑，肩颈与四肢比例舒展"
+        }
+      ]
+    },
+    "person.line_emphasis": {
+      "category": "人物",
+      "label": "线条重点",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "shoulder_neck",
+          "label": "肩颈线条舒展",
+          "value": "肩颈线条舒展自然"
+        },
+        {
+          "id": "waistline",
+          "label": "腰线自然清晰",
+          "value": "腰线自然清晰"
+        },
+        {
+          "id": "soft_waist_hip",
+          "label": "腰胯曲线柔和",
+          "value": "腰胯轮廓形成柔和自然的曲线"
+        },
+        {
+          "id": "long_legs",
+          "label": "腿部线条修长",
+          "value": "腿部线条修长协调"
+        },
+        {
+          "id": "strong_shoulder_back",
+          "label": "肩背自然有力",
+          "value": "肩背线条具有自然力量感"
+        }
+      ]
+    },
+    "hair.color": {
+      "category": "发型",
+      "label": "发色",
+      "template": "头发呈{value}",
+      "options": [
+        {
+          "id": "natural_black",
+          "label": "自然黑色",
+          "value": "自然黑色，在光线下保留细腻发丝层次"
+        },
+        {
+          "id": "dark_brown_black",
+          "label": "深棕黑色",
+          "value": "自然深棕黑色，在高光处带柔和棕色层次"
+        },
+        {
+          "id": "dark_chestnut",
+          "label": "深栗棕色",
+          "value": "均匀的深栗棕色，发丝高光温暖克制"
+        },
+        {
+          "id": "chocolate_brown",
+          "label": "巧克力棕",
+          "value": "浓郁巧克力棕色，明暗层次自然"
+        },
+        {
+          "id": "tea_brown",
+          "label": "冷调茶棕色",
+          "value": "低饱和冷调茶棕色，发丝质感轻盈"
+        },
+        {
+          "id": "soft_brown",
+          "label": "柔和浅棕色",
+          "value": "柔和浅棕色，整体明度自然"
+        },
+        {
+          "id": "honey_brown",
+          "label": "蜂蜜棕色",
+          "value": "温暖蜂蜜棕色，在光线下呈现金色细微高光"
+        },
+        {
+          "id": "reddish_brown",
+          "label": "红棕色",
+          "value": "低饱和红棕色，发丝高光带克制暖红色"
+        },
+        {
+          "id": "wine_red",
+          "label": "酒红棕色",
+          "value": "深酒红棕色，暗部接近黑色，高光显出酒红层次"
+        },
+        {
+          "id": "blue_black",
+          "label": "蓝黑色",
+          "value": "冷调蓝黑色，边缘高光呈现细微蓝色层次"
+        },
+        {
+          "id": "ash_brown",
+          "label": "亚麻灰棕色",
+          "value": "低饱和亚麻灰棕色，色调均匀柔和"
+        },
+        {
+          "id": "platinum_blonde",
+          "label": "铂金浅金色",
+          "value": "明亮铂金浅金色，发根与发梢层次清楚"
+        },
+        {
+          "id": "silver_gray",
+          "label": "银灰色",
+          "value": "银灰色，发丝带清冷金属光泽"
+        },
+        {
+          "id": "ink_green",
+          "label": "墨绿色",
+          "value": "深墨绿色，光线下泛幽暗色泽"
+        },
+        {
+          "id": "dusty_pink",
+          "label": "樱花粉",
+          "value": "柔和樱花粉色，明度偏柔"
+        },
+        {
+          "id": "deep_purple",
+          "label": "深紫色",
+          "value": "浓郁深紫色，高光处透紫调"
+        },
+        {
+          "id": "milk_tea_brown",
+          "label": "奶茶棕",
+          "value": "温暖的奶茶棕色，高光柔和"
+        }
+      ]
+    },
+    "hair.length": {
+      "category": "发型",
+      "label": "长度",
+      "template": "发长{value}",
+      "options": [
+        {
+          "id": "pixie",
+          "label": "精灵短发",
+          "value": "贴近耳侧，露出颈部线条"
+        },
+        {
+          "id": "chin",
+          "label": "齐下巴",
+          "value": "到下巴位置，轮廓简洁"
+        },
+        {
+          "id": "shoulder",
+          "label": "齐肩",
+          "value": "到肩部位置，发尾自然落在肩侧"
+        },
+        {
+          "id": "collarbone",
+          "label": "锁骨发",
+          "value": "到锁骨位置，发尾围绕肩颈自然展开"
+        },
+        {
+          "id": "chest",
+          "label": "及胸长发",
+          "value": "到胸部位置，形成完整长发轮廓"
+        },
+        {
+          "id": "waist",
+          "label": "及腰长发",
+          "value": "接近腰部，发丝纵向垂落"
+        },
+        {
+          "id": "waist_length",
+          "label": "及臀长发",
+          "value": "垂至臀部的及臀长发，轮廓完整"
+        }
+      ]
+    },
+    "hair.texture": {
+      "category": "发型",
+      "label": "发质与卷度",
+      "template": "发丝{value}",
+      "options": [
+        {
+          "id": "straight_smooth",
+          "label": "自然顺直",
+          "value": "自然顺直，表面带柔和光泽"
+        },
+        {
+          "id": "soft_wavy",
+          "label": "柔和微卷",
+          "value": "形成松散柔和的微卷弧度"
+        },
+        {
+          "id": "inward_curl",
+          "label": "整齐内扣",
+          "value": "在发尾形成整齐内扣弧度"
+        },
+        {
+          "id": "large_waves",
+          "label": "复古大波浪",
+          "value": "形成连续清晰的复古大波浪"
+        },
+        {
+          "id": "loose_curls",
+          "label": "松散卷发",
+          "value": "形成大小自然的松散卷度"
+        },
+        {
+          "id": "light_fluffy",
+          "label": "轻盈蓬松",
+          "value": "轻盈蓬松，发根保持自然空气感"
+        },
+        {
+          "id": "wet_texture",
+          "label": "轻微湿发质感",
+          "value": "带轻微湿润质感，部分发束自然聚合"
+        },
+        {
+          "id": "sleek_glossy",
+          "label": "顺滑高光质感",
+          "value": "顺滑整齐，发丝表面形成连续柔和高光"
+        },
+        {
+          "id": "wool_curl",
+          "label": "羊毛卷",
+          "value": "形成细小密集的羊毛卷弧度"
+        },
+        {
+          "id": "water_wave",
+          "label": "水波纹",
+          "value": "呈现规律起伏的水波纹卷度"
+        },
+        {
+          "id": "messy_wave",
+          "label": "睡不醒卷",
+          "value": "形成慵懒随意的睡不醒卷"
+        },
+        {
+          "id": "airy_fluffy",
+          "label": "空气蓬松",
+          "value": "呈现充满空气感的蓬松状态"
+        }
+      ]
+    },
+    "hair.style": {
+      "category": "发型",
+      "label": "造型",
+      "template": "头发{value}",
+      "options": [
+        {
+          "id": "loose",
+          "label": "自然披散",
+          "value": "自然披散在肩后与脸侧"
+        },
+        {
+          "id": "low_ponytail",
+          "label": "松弛低马尾",
+          "value": "在脑后束成松弛低马尾，脸侧留少量碎发"
+        },
+        {
+          "id": "high_ponytail",
+          "label": "利落高马尾",
+          "value": "在后脑较高位置束成利落高马尾"
+        },
+        {
+          "id": "low_bun",
+          "label": "整洁低盘发",
+          "value": "在后脑下方梳成整洁低盘发，轮廓干净"
+        },
+        {
+          "id": "high_bun",
+          "label": "整洁高盘发",
+          "value": "在后脑上方梳成整洁高盘发，露出颈部线条"
+        },
+        {
+          "id": "messy_bun",
+          "label": "松弛丸子头",
+          "value": "在头顶后方束成松弛丸子头，保留自然碎发"
+        },
+        {
+          "id": "half_up",
+          "label": "半扎发",
+          "value": "将上半部分头发向后束起，其余发丝自然垂落"
+        },
+        {
+          "id": "side_swept",
+          "label": "单侧披发",
+          "value": "主要拨向一侧肩前，另一侧露出耳朵"
+        },
+        {
+          "id": "french_twist",
+          "label": "法式扭卷盘发",
+          "value": "向后收拢成轮廓流畅的法式扭卷盘发"
+        },
+        {
+          "id": "single_braid",
+          "label": "松散单辫",
+          "value": "编成一条松散长辫并自然落在肩前"
+        },
+        {
+          "id": "double_braids",
+          "label": "低位双辫",
+          "value": "在两侧编成低位双辫，辫子纹理清楚"
+        },
+        {
+          "id": "bob_shape",
+          "label": "利落短发轮廓",
+          "value": "围绕脸侧形成利落短发轮廓，发尾整齐"
+        },
+        {
+          "id": "fishbone_braid",
+          "label": "鱼骨辫",
+          "value": "编成紧致的鱼骨辫垂在肩后"
+        },
+        {
+          "id": "side_braid",
+          "label": "侧编发",
+          "value": "一侧编成松散麻花辫搭在胸前"
+        },
+        {
+          "id": "princess_half_up",
+          "label": "公主头",
+          "value": "上半部分头发向后束成公主头"
+        },
+        {
+          "id": "double_buns",
+          "label": "双丸子头",
+          "value": "两侧各扎一个俏皮的丸子头"
+        },
+        {
+          "id": "high_puff",
+          "label": "高颅顶",
+          "value": "发根垫高形成饱满颅顶轮廓"
+        }
+      ]
+    },
+    "hair.bangs": {
+      "category": "发型",
+      "label": "刘海",
+      "template": "额前为{value}",
+      "options": [
+        {
+          "id": "open_forehead",
+          "label": "自然露额",
+          "value": "自然露额造型，发际线与额头轮廓清楚"
+        },
+        {
+          "id": "middle_part",
+          "label": "自然中分",
+          "value": "自然中分，两侧发丝沿脸部轮廓垂落"
+        },
+        {
+          "id": "air_bangs",
+          "label": "轻薄空气刘海",
+          "value": "轻薄细碎、微微透额的空气刘海"
+        },
+        {
+          "id": "curtain_bangs",
+          "label": "法式八字刘海",
+          "value": "向两侧展开的法式八字刘海，衔接脸侧发丝"
+        },
+        {
+          "id": "side_bangs",
+          "label": "细碎侧分刘海",
+          "value": "自然侧分的细碎刘海，部分发丝贴近眉侧"
+        },
+        {
+          "id": "blunt_bangs",
+          "label": "齐眉刘海",
+          "value": "边缘整齐、长度到眉部附近的齐眉刘海"
+        },
+        {
+          "id": "wispy_bangs",
+          "label": "轻盈碎刘海",
+          "value": "长短自然、分束清楚的轻盈碎刘海"
+        },
+        {
+          "id": "baby_bangs",
+          "label": "眉上刘海",
+          "value": "齐眉上方的短款刘海"
+        },
+        {
+          "id": "curtain_bangs_full",
+          "label": "全幅齐刘海",
+          "value": "覆盖整个额头的齐刘海"
+        }
+      ]
+    },
+    "hair.headwear": {
+      "category": "发型",
+      "label": "头部配饰",
+      "template": "佩戴{value}",
+      "options": [
+        {
+          "id": "straw_hat",
+          "label": "浅草色编织草帽",
+          "value": "浅草色编织草帽，帽檐纹理清楚"
+        },
+        {
+          "id": "wide_brim_hat",
+          "label": "宽檐毡帽",
+          "value": "轮廓挺括的宽檐毡帽"
+        },
+        {
+          "id": "beret",
+          "label": "羊毛贝雷帽",
+          "value": "柔软羊毛贝雷帽，帽身自然偏向一侧"
+        },
+        {
+          "id": "silk_headband",
+          "label": "丝质发带",
+          "value": "低饱和丝质发带，表面带柔和光泽"
+        },
+        {
+          "id": "black_headband",
+          "label": "黑色细发带",
+          "value": "简洁黑色细发带，固定在发际线后方"
+        },
+        {
+          "id": "pearl_clip",
+          "label": "珍珠发夹",
+          "value": "小巧珍珠发夹，固定在一侧耳上发丝处"
+        },
+        {
+          "id": "metal_clip",
+          "label": "几何金属发夹",
+          "value": "简洁几何金属发夹，固定在侧面发丝处"
+        },
+        {
+          "id": "velvet_bow",
+          "label": "丝绒蝴蝶结",
+          "value": "低光泽丝绒蝴蝶结，系在束发位置"
+        },
+        {
+          "id": "flower_hairpin",
+          "label": "小白花发饰",
+          "value": "由数朵小白花组成的细小发饰"
+        },
+        {
+          "id": "jade_hairpin",
+          "label": "玉质发簪",
+          "value": "细长玉质发簪，表面温润通透"
+        },
+        {
+          "id": "gold_hairpin",
+          "label": "金色发簪",
+          "value": "结构纤细的金色发簪，带少量垂坠装饰"
+        },
+        {
+          "id": "baseball_cap",
+          "label": "纯色棒球帽",
+          "value": "结构简洁的纯色棒球帽，帽檐自然向前"
+        },
+        {
+          "id": "headband",
+          "label": "发箍",
+          "value": "宽幅发箍，固定住额前发丝"
+        },
+        {
+          "id": "knit_beanie",
+          "label": "针织帽",
+          "value": "柔软针织帽，帽型贴合头型"
+        },
+        {
+          "id": "flower_crown",
+          "label": "花环",
+          "value": "鲜花编成的花环，戴在发间"
+        },
+        {
+          "id": "fluffy_beret",
+          "label": "毛绒软帽",
+          "value": "毛绒绒的软帽，帽身蓬松"
+        },
+        {
+          "id": "veil",
+          "label": "头纱",
+          "value": "轻薄头纱，半遮住发丝"
+        }
+      ]
+    },
+    "clothing.mode": {
+      "category": "服装",
+      "label": "穿搭结构",
+      "template": "整体采用{value}",
+      "options": [
+        {
+          "id": "dress",
+          "label": "连衣裙",
+          "value": "单件连衣裙结构"
+        },
+        {
+          "id": "separates",
+          "label": "上装＋下装",
+          "value": "上装与下装组合结构"
+        },
+        {
+          "id": "suit",
+          "label": "西装套装",
+          "value": "上下呼应的西装套装结构"
+        },
+        {
+          "id": "jumpsuit",
+          "label": "连体服",
+          "value": "腰线上下连贯的连体服结构"
+        },
+        {
+          "id": "layered",
+          "label": "叠穿造型",
+          "value": "层次清楚的叠穿结构"
+        }
+      ]
+    },
+    "clothing.color": {
+      "category": "服装",
+      "label": "服装颜色素材",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "cream_white",
+          "label": "奶油白",
+          "value": "柔和奶油白色"
+        },
+        {
+          "id": "ivory",
+          "label": "象牙白",
+          "value": "温润象牙白色"
+        },
+        {
+          "id": "mint_green",
+          "label": "薄荷绿",
+          "value": "清浅薄荷绿色"
+        },
+        {
+          "id": "sage_green",
+          "label": "鼠尾草绿",
+          "value": "低饱和鼠尾草绿色"
+        },
+        {
+          "id": "beige",
+          "label": "米杏色",
+          "value": "柔和米杏色"
+        },
+        {
+          "id": "camel",
+          "label": "驼色",
+          "value": "温暖中明度驼色"
+        },
+        {
+          "id": "coffee",
+          "label": "咖色",
+          "value": "浓郁咖色"
+        },
+        {
+          "id": "chocolate",
+          "label": "巧克力棕",
+          "value": "深巧克力棕色"
+        },
+        {
+          "id": "charcoal",
+          "label": "炭灰色",
+          "value": "低饱和炭灰色"
+        },
+        {
+          "id": "black",
+          "label": "玄黑色",
+          "value": "纯净玄黑色"
+        },
+        {
+          "id": "navy",
+          "label": "藏青色",
+          "value": "深沉藏青色"
+        },
+        {
+          "id": "dusty_blue",
+          "label": "雾霾蓝",
+          "value": "低饱和雾霾蓝色"
+        },
+        {
+          "id": "light_pink",
+          "label": "浅粉色",
+          "value": "低饱和浅粉色"
+        },
+        {
+          "id": "dusty_rose",
+          "label": "干枯玫瑰色",
+          "value": "低饱和干枯玫瑰色"
+        },
+        {
+          "id": "wine_red",
+          "label": "酒红色",
+          "value": "深酒红色"
+        },
+        {
+          "id": "bright_red",
+          "label": "正红色",
+          "value": "饱和度清晰的正红色"
+        },
+        {
+          "id": "taro_purple",
+          "label": "香芋紫",
+          "value": "温柔香芋紫色"
+        },
+        {
+          "id": "matcha_green",
+          "label": "抹茶绿",
+          "value": "清淡抹茶绿色"
+        },
+        {
+          "id": "ginger_yellow",
+          "label": "姜黄色",
+          "value": "温暖姜黄色"
+        },
+        {
+          "id": "oatmeal",
+          "label": "燕麦色",
+          "value": "柔和燕麦色"
+        },
+        {
+          "id": "brick_red",
+          "label": "砖红色",
+          "value": "沉稳砖红色"
+        },
+        {
+          "id": "sky_blue",
+          "label": "天蓝色",
+          "value": "清透天蓝色"
+        }
+      ]
+    },
+    "clothing.material": {
+      "category": "服装",
+      "label": "服装材质素材",
+      "template": "{value}",
+      "options": [
+        {
+          "id": "fine_rib_knit",
+          "label": "细罗纹针织",
+          "value": "纹理细密、贴合自然的细罗纹针织面料"
+        },
+        {
+          "id": "soft_knit",
+          "label": "柔软针织",
+          "value": "表面柔软、织纹细腻的针织面料"
+        },
+        {
+          "id": "wool_knit",
+          "label": "羊毛针织",
+          "value": "带细小绒感的羊毛针织面料"
+        },
+        {
+          "id": "cotton",
+          "label": "棉质",
+          "value": "表面自然、褶皱柔和的棉质面料"
+        },
+        {
+          "id": "linen",
+          "label": "棉麻",
+          "value": "织纹可见、垂坠克制的棉麻面料"
+        },
+        {
+          "id": "chiffon",
+          "label": "雪纺",
+          "value": "轻盈垂坠、边缘柔和的雪纺面料"
+        },
+        {
+          "id": "silk",
+          "label": "真丝",
+          "value": "表面顺滑、带柔和反光的真丝面料"
+        },
+        {
+          "id": "satin",
+          "label": "缎面",
+          "value": "垂坠流畅、表面高光连续的缎面"
+        },
+        {
+          "id": "suiting",
+          "label": "西装面料",
+          "value": "挺括平整、廓形清晰的西装面料"
+        },
+        {
+          "id": "denim",
+          "label": "牛仔",
+          "value": "织纹清楚、结构结实的牛仔面料"
+        },
+        {
+          "id": "leather",
+          "label": "哑光皮革",
+          "value": "表面细腻、反光克制的哑光皮革"
+        },
+        {
+          "id": "patent_leather",
+          "label": "漆皮",
+          "value": "表面光滑、镜面高光清晰的漆皮材质"
+        },
+        {
+          "id": "lace",
+          "label": "蕾丝",
+          "value": "花纹边缘清楚、层次细密的蕾丝面料"
+        },
+        {
+          "id": "tulle",
+          "label": "薄纱",
+          "value": "轻薄透光并与内层服装完整叠合的薄纱面料"
+        },
+        {
+          "id": "cashmere",
+          "label": "羊绒",
+          "value": "柔软细腻的羊绒面料"
+        },
+        {
+          "id": "corduroy",
+          "label": "灯芯绒",
+          "value": "带竖向棱纹的灯芯绒面料"
+        },
+        {
+          "id": "suede",
+          "label": "麂皮",
+          "value": "绒感细腻的麂皮面料"
+        },
+        {
+          "id": "organza",
+          "label": "欧根纱",
+          "value": "挺括通透的欧根纱面料"
+        },
+        {
+          "id": "velvet",
+          "label": "天鹅绒",
+          "value": "泛着柔光的天鹅绒面料"
+        },
+        {
+          "id": "chenille",
+          "label": "雪尼尔",
+          "value": "柔软丰盈的雪尼尔面料"
+        }
+      ]
+    },
+    "clothing.pattern": {
+      "category": "服装",
+      "label": "图案纹理",
+      "template": "面料带有{value}",
+      "options": [
+        {
+          "id": "tiny_floral",
+          "label": "细小碎花",
+          "value": "分布均匀的细小碎花图案"
+        },
+        {
+          "id": "horizontal_stripes",
+          "label": "横向条纹",
+          "value": "宽度均匀、边缘清晰的横向条纹"
+        },
+        {
+          "id": "vertical_stripes",
+          "label": "纵向细条纹",
+          "value": "间距稳定的纵向细条纹"
+        },
+        {
+          "id": "plaid",
+          "label": "细格纹",
+          "value": "比例细密、颜色克制的格纹"
+        },
+        {
+          "id": "polka_dot",
+          "label": "小波点",
+          "value": "间距均匀的小型圆点图案"
+        },
+        {
+          "id": "jacquard",
+          "label": "暗纹提花",
+          "value": "随光线显现的低对比提花暗纹"
+        },
+        {
+          "id": "botanical",
+          "label": "植物印花",
+          "value": "轮廓清楚、色彩低饱和的植物印花"
+        },
+        {
+          "id": "geometric",
+          "label": "几何纹样",
+          "value": "排列有序的简洁几何纹样"
+        },
+        {
+          "id": "embroidered_flower",
+          "label": "花卉刺绣",
+          "value": "针脚清晰、分布克制的花卉刺绣"
+        },
+        {
+          "id": "ribbed",
+          "label": "纵向罗纹",
+          "value": "细密连续的纵向罗纹"
+        },
+        {
+          "id": "pleated",
+          "label": "压褶纹理",
+          "value": "间距整齐、纵向延伸的压褶纹理"
+        },
+        {
+          "id": "color_block",
+          "label": "拼色结构",
+          "value": "边界清楚、比例克制的拼色结构"
+        },
+        {
+          "id": "paisley",
+          "label": "佩斯利纹",
+          "value": "繁复经典的佩斯利纹样"
+        },
+        {
+          "id": "houndstooth",
+          "label": "千鸟格",
+          "value": "黑白交错的千鸟格纹"
+        },
+        {
+          "id": "big_plaid",
+          "label": "大格纹",
+          "value": "间距较大的方格纹"
+        },
+        {
+          "id": "leopard_print",
+          "label": "豹纹",
+          "value": "野性十足的豹纹图案"
+        },
+        {
+          "id": "boho_print",
+          "label": "波西米亚印花",
+          "value": "色彩浓郁的民族风印花"
+        }
+      ]
+    },
+    "clothing.top_type": {
+      "category": "服装",
+      "label": "上装类型",
+      "template": "上装为{value}",
+      "options": [
+        {
+          "id": "halter_knit",
+          "label": "挂脖针织上衣",
+          "value": "贴身挂脖针织上衣，肩颈线条清楚"
+        },
+        {
+          "id": "ribbed_tank",
+          "label": "细罗纹吊带上衣",
+          "value": "细罗纹吊带上衣，领口和肩带结构清楚"
+        },
+        {
+          "id": "knit_cardigan",
+          "label": "薄针织开衫",
+          "value": "轻薄针织开衫，门襟与袖口自然垂落"
+        },
+        {
+          "id": "draped_blouse",
+          "label": "垂坠衬衫",
+          "value": "垂坠衬衫，领口与袖口结构利落"
+        },
+        {
+          "id": "white_shirt",
+          "label": "挺括白衬衫",
+          "value": "挺括白衬衫，肩线和门襟平整清楚"
+        },
+        {
+          "id": "suit_vest",
+          "label": "修身西装马甲",
+          "value": "修身西装马甲，翻领与收腰线条明确"
+        },
+        {
+          "id": "cropped_jacket",
+          "label": "短款西装外套",
+          "value": "短款西装外套，肩线挺括，衣摆到腰部"
+        },
+        {
+          "id": "turtleneck",
+          "label": "修身高领上衣",
+          "value": "修身高领上衣，领口贴合颈部，轮廓简洁"
+        },
+        {
+          "id": "boatneck_knit",
+          "label": "船领针织上衣",
+          "value": "船领针织上衣，横向领口展现肩颈轮廓"
+        },
+        {
+          "id": "one_shoulder_top",
+          "label": "单肩上衣",
+          "value": "单肩上衣，斜向领口结构清晰"
+        },
+        {
+          "id": "new_chinese_top",
+          "label": "新中式盘扣上衣",
+          "value": "新中式盘扣上衣，立领与盘扣结构清楚"
+        },
+        {
+          "id": "denim_jacket",
+          "label": "短款牛仔外套",
+          "value": "短款牛仔外套，翻领、口袋和车线细节清楚"
+        },
+        {
+          "id": "hoodie",
+          "label": "简洁连帽卫衣",
+          "value": "简洁连帽卫衣，帽身和抽绳自然垂落"
+        },
+        {
+          "id": "sports_bra_top",
+          "label": "运动背心",
+          "value": "完整包覆的运动背心，肩带稳定，轮廓利落"
+        },
+        {
+          "id": "knit_pullover",
+          "label": "针织套头毛衣",
+          "value": "柔软针织套头毛衣，领口微宽松"
+        },
+        {
+          "id": "puff_sleeve_blouse",
+          "label": "泡泡袖衬衫",
+          "value": "泡泡袖衬衫，袖形蓬松挺括"
+        },
+        {
+          "id": "off_shoulder_top",
+          "label": "一字肩上衣",
+          "value": "一字肩露肩上衣，肩颈线条舒展"
+        },
+        {
+          "id": "lace_top",
+          "label": "蕾丝上衣",
+          "value": "蕾丝拼接上衣，花纹隐约透肤"
+        },
+        {
+          "id": "leather_jacket",
+          "label": "皮夹克",
+          "value": "做旧皮夹克，翻领与拉链利落"
+        },
+        {
+          "id": "plaid_shirt",
+          "label": "格纹衬衫",
+          "value": "格纹衬衫，翻领与纽扣门襟完整"
+        },
+        {
+          "id": "oversized_tee",
+          "label": "宽松T恤",
+          "value": "宽松的纯色T恤，落肩版型"
+        },
+        {
+          "id": "knit_vest",
+          "label": "针织背心",
+          "value": "叠穿的针织背心，领口与袖笼整齐"
+        },
+        {
+          "id": "polo_shirt",
+          "label": "Polo衫",
+          "value": "翻领短袖Polo衫，领口纽扣完整"
+        },
+        {
+          "id": "bomber_jacket",
+          "label": "棒球服",
+          "value": "宽松棒球服，罗纹领口与袖口"
+        },
+        {
+          "id": "down_jacket",
+          "label": "羽绒服",
+          "value": "蓬松保暖的羽绒服"
+        },
+        {
+          "id": "wool_coat",
+          "label": "呢大衣",
+          "value": "挺括的呢子大衣"
+        },
+        {
+          "id": "flight_jacket",
+          "label": "飞行夹克",
+          "value": "利落的飞行夹克"
+        },
+        {
+          "id": "trench_coat",
+          "label": "风衣",
+          "value": "长款风衣，腰带与翻领完整"
+        },
+        {
+          "id": "crop_top",
+          "label": "露脐短上衣",
+          "value": "露出腰线的短款上衣"
+        },
+        {
+          "id": "lantern_sleeve_top",
+          "label": "灯笼袖上衣",
+          "value": "灯笼袖上衣，袖口收拢"
+        }
+      ]
+    },
+    "clothing.bottom_type": {
+      "category": "服装",
+      "label": "下装类型",
+      "template": "下装为{value}",
+      "options": [
+        {
+          "id": "a_line_skirt",
+          "label": "A字半裙",
+          "value": "高腰A字半裙，裙摆自然向下展开"
+        },
+        {
+          "id": "pencil_skirt",
+          "label": "修身包臀半裙",
+          "value": "高腰修身包臀半裙，腰臀剪裁利落"
+        },
+        {
+          "id": "pleated_skirt",
+          "label": "百褶半裙",
+          "value": "高腰百褶半裙，褶线整齐垂落"
+        },
+        {
+          "id": "suit_mini_skirt",
+          "label": "西装短裙",
+          "value": "高腰西装短裙，裙身结构挺括"
+        },
+        {
+          "id": "midi_skirt",
+          "label": "垂坠中长裙",
+          "value": "高腰垂坠中长裙，裙摆到小腿位置"
+        },
+        {
+          "id": "wide_leg_trousers",
+          "label": "高腰阔腿裤",
+          "value": "高腰阔腿长裤，裤线笔直，裤腿垂坠"
+        },
+        {
+          "id": "straight_trousers",
+          "label": "直筒西裤",
+          "value": "高腰直筒西裤，中缝线条清楚"
+        },
+        {
+          "id": "cigarette_pants",
+          "label": "九分烟管裤",
+          "value": "高腰九分烟管裤，裤腿轮廓利落"
+        },
+        {
+          "id": "straight_jeans",
+          "label": "直筒牛仔裤",
+          "value": "高腰直筒牛仔裤，车线与口袋结构清楚"
+        },
+        {
+          "id": "denim_shorts",
+          "label": "高腰牛仔短裤",
+          "value": "高腰牛仔短裤，裤脚和腰头结构清楚"
+        },
+        {
+          "id": "sports_leggings",
+          "label": "运动紧身裤",
+          "value": "高腰运动紧身长裤，面料平整，腿部线条完整"
+        },
+        {
+          "id": "linen_trousers",
+          "label": "棉麻长裤",
+          "value": "高腰棉麻长裤，裤腿宽松并自然垂落"
+        },
+        {
+          "id": "flare_jeans",
+          "label": "微喇牛仔裤",
+          "value": "微喇牛仔裤，裤脚向外微张"
+        },
+        {
+          "id": "cargo_pants",
+          "label": "工装裤",
+          "value": "多口袋工装裤，裤型宽松挺括"
+        },
+        {
+          "id": "tulle_skirt",
+          "label": "半身纱裙",
+          "value": "半透明薄纱半裙，裙摆轻盈"
+        },
+        {
+          "id": "mermaid_skirt",
+          "label": "鱼尾半裙",
+          "value": "贴身鱼尾半裙，裙摆向下展开"
+        },
+        {
+          "id": "cycling_shorts",
+          "label": "骑行短裤",
+          "value": "贴合腿型的骑行短裤"
+        },
+        {
+          "id": "leather_skirt",
+          "label": "皮质半裙",
+          "value": "哑光皮质半裙，线条利落"
+        },
+        {
+          "id": "overalls",
+          "label": "背带裤",
+          "value": "背带牛仔裤，胸前有护片"
+        },
+        {
+          "id": "yoga_pants",
+          "label": "瑜伽裤",
+          "value": "高腰贴合的瑜伽裤"
+        }
+      ]
+    },
+    "clothing.dress_type": {
+      "category": "服装",
+      "label": "连衣裙类型",
+      "template": "穿着{value}",
+      "options": [
+        {
+          "id": "floral_strap_dress",
+          "label": "碎花吊带连衣裙",
+          "value": "碎花吊带连衣裙，细肩带和裙身轮廓清楚"
+        },
+        {
+          "id": "halter_dress",
+          "label": "挂脖连衣裙",
+          "value": "挂脖连衣裙，肩颈与领口结构清楚"
+        },
+        {
+          "id": "shirt_dress",
+          "label": "衬衫式连衣裙",
+          "value": "衬衫式连衣裙，翻领、门襟和腰带完整"
+        },
+        {
+          "id": "wrap_dress",
+          "label": "裹身连衣裙",
+          "value": "裹身连衣裙，交叠领口与腰部系带清楚"
+        },
+        {
+          "id": "knit_dress",
+          "label": "针织连衣裙",
+          "value": "修身针织连衣裙，织纹连续，裙身自然贴合"
+        },
+        {
+          "id": "suit_dress",
+          "label": "西装式连衣裙",
+          "value": "西装式连衣裙，翻领、收腰和裙摆剪裁利落"
+        },
+        {
+          "id": "slip_dress",
+          "label": "缎面吊带长裙",
+          "value": "缎面吊带长裙，细肩带与垂坠裙摆完整可见"
+        },
+        {
+          "id": "high_neck_dress",
+          "label": "高领修身连衣裙",
+          "value": "高领修身连衣裙，领口、长袖与腰线结构清楚"
+        },
+        {
+          "id": "off_shoulder_dress",
+          "label": "露肩连衣裙",
+          "value": "露肩连衣裙，横向领口与袖部结构稳定"
+        },
+        {
+          "id": "a_line_dress",
+          "label": "收腰A字连衣裙",
+          "value": "收腰A字连衣裙，上身合体，裙摆自然展开"
+        },
+        {
+          "id": "new_chinese_dress",
+          "label": "新中式盘扣长裙",
+          "value": "新中式盘扣长裙，立领、盘扣与长裙结构清楚"
+        },
+        {
+          "id": "qipao",
+          "label": "改良旗袍",
+          "value": "改良旗袍，立领、斜襟与侧开衩结构完整"
+        },
+        {
+          "id": "evening_dress",
+          "label": "修身晚礼服",
+          "value": "修身晚礼服，领口、腰线与长裙摆完整呈现"
+        },
+        {
+          "id": "denim_dress",
+          "label": "牛仔连衣裙",
+          "value": "牛仔连衣裙，翻领、腰线与车线结构清楚"
+        },
+        {
+          "id": "little_black_dress",
+          "label": "吊带小黑裙",
+          "value": "细吊带收腰小黑裙，裙长至膝上"
+        },
+        {
+          "id": "puff_sleeve_dress",
+          "label": "泡泡袖连衣裙",
+          "value": "泡泡袖收腰连衣裙，袖口蓬松有型"
+        },
+        {
+          "id": "mermaid_dress",
+          "label": "鱼尾连衣裙",
+          "value": "贴身鱼尾连衣裙，裙摆向下如鱼尾展开"
+        },
+        {
+          "id": "lace_dress",
+          "label": "蕾丝连衣裙",
+          "value": "半透明蕾丝连衣裙，花纹镂空细腻"
+        },
+        {
+          "id": "tulle_layered_dress",
+          "label": "多层纱裙",
+          "value": "层层薄纱堆叠的纱裙，裙摆蓬松轻盈"
+        },
+        {
+          "id": "vest_dress",
+          "label": "背心式连衣裙",
+          "value": "简洁背心式连衣裙，领口利落"
+        },
+        {
+          "id": "one_shoulder_dress",
+          "label": "单肩连衣裙",
+          "value": "不对称单肩连衣裙，露出单侧肩线"
+        },
+        {
+          "id": "tea_dress",
+          "label": "茶歇裙",
+          "value": "收腰A字茶歇裙，腰带系结"
+        },
+        {
+          "id": "strapless_dress",
+          "label": "抹胸连衣裙",
+          "value": "抹胸连衣裙，肩颈与胸口线条完整"
+        },
+        {
+          "id": "hanfu",
+          "label": "汉服",
+          "value": "交领广袖的汉服襦裙，衣袂宽大"
+        },
+        {
+          "id": "kimono",
+          "label": "和服",
+          "value": "宽袖系带的日式和服，腰封规整"
+        }
+      ]
+    },
+    "clothing.jumpsuit_type": {
+      "category": "服装",
+      "label": "连体服类型",
+      "template": "穿着{value}",
+      "options": [
+        {
+          "id": "tailored_jumpsuit",
+          "label": "收腰西装连体裤",
+          "value": "收腰西装连体裤，翻领、腰线与裤线结构利落"
+        },
+        {
+          "id": "wide_leg_jumpsuit",
+          "label": "无袖阔腿连体裤",
+          "value": "无袖阔腿连体裤，上身合体，腰线清楚，裤腿自然垂坠"
+        },
+        {
+          "id": "halter_jumpsuit",
+          "label": "挂脖连体裤",
+          "value": "挂脖连体裤，肩颈、收腰与阔腿结构清楚"
+        },
+        {
+          "id": "shirt_jumpsuit",
+          "label": "衬衫式连体裤",
+          "value": "衬衫式连体裤，翻领、门襟、腰带与长裤结构完整"
+        },
+        {
+          "id": "utility_jumpsuit",
+          "label": "工装连体裤",
+          "value": "工装连体裤，翻领、口袋、腰带与裤脚结构清楚"
+        },
+        {
+          "id": "denim_jumpsuit",
+          "label": "牛仔连体裤",
+          "value": "牛仔连体裤，车线、口袋、腰线与裤装结构清楚"
+        },
+        {
+          "id": "wrap_jumpsuit",
+          "label": "交叠领连体裤",
+          "value": "交叠领连体裤，V形领口、收腰与宽松裤腿结构稳定"
+        },
+        {
+          "id": "short_jumpsuit",
+          "label": "收腰连体短裤",
+          "value": "收腰连体短裤，领口、腰带与短裤裤脚结构清楚"
+        },
+        {
+          "id": "knit_jumpsuit",
+          "label": "针织连体裤",
+          "value": "柔软针织连体裤，贴合身形"
+        },
+        {
+          "id": "backless_jumpsuit",
+          "label": "露背连体裤",
+          "value": "露背收腰连体裤，背部线条流畅"
+        },
+        {
+          "id": "puff_sleeve_romper",
+          "label": "泡泡袖连体短裤",
+          "value": "泡泡袖连体短裤，活泼利落"
+        },
+        {
+          "id": "satin_jumpsuit",
+          "label": "缎面连体裤",
+          "value": "缎面垂坠连体裤，光泽柔和"
+        }
+      ]
+    },
+    "clothing.fit_detail": {
+      "category": "服装",
+      "label": "版型细节",
+      "template": "服装{value}",
+      "options": [
+        {
+          "id": "fitted",
+          "label": "修身贴合",
+          "value": "修身贴合身体轮廓，面料形成自然褶皱"
+        },
+        {
+          "id": "relaxed",
+          "label": "宽松垂坠",
+          "value": "保持宽松垂坠轮廓，肩线与衣摆自然放松"
+        },
+        {
+          "id": "defined_waist",
+          "label": "明确收腰",
+          "value": "在腰部形成明确收腰结构，腰线位置清楚"
+        },
+        {
+          "id": "high_waist",
+          "label": "高腰结构",
+          "value": "采用高腰结构，腰头位置清晰稳定"
+        },
+        {
+          "id": "deep_v",
+          "label": "深V领口",
+          "value": "采用边缘清楚的深V领口，并由完整内层稳定承托"
+        },
+        {
+          "id": "square_neck",
+          "label": "方形领口",
+          "value": "采用轮廓清楚的方形领口"
+        },
+        {
+          "id": "boat_neck",
+          "label": "船形领口",
+          "value": "采用横向展开的船形领口"
+        },
+        {
+          "id": "high_neck",
+          "label": "高领结构",
+          "value": "采用贴合颈部的完整高领结构"
+        },
+        {
+          "id": "slit",
+          "label": "侧开衩",
+          "value": "裙摆一侧带线条利落的开衩结构"
+        },
+        {
+          "id": "pleated",
+          "label": "立体褶裥",
+          "value": "带有排列整齐的立体褶裥"
+        },
+        {
+          "id": "draped",
+          "label": "自然垂褶",
+          "value": "在腰侧与衣摆形成自然垂褶"
+        },
+        {
+          "id": "layered",
+          "label": "层叠衣摆",
+          "value": "衣摆形成边缘清楚的轻盈层叠结构"
+        },
+        {
+          "id": "backless",
+          "label": "露背设计",
+          "value": "采用露背设计，背部线条舒展"
+        },
+        {
+          "id": "puff_sleeve",
+          "label": "泡泡袖",
+          "value": "带有蓬松的泡泡袖"
+        },
+        {
+          "id": "ruffle",
+          "label": "荷叶边",
+          "value": "在领口或袖口点缀荷叶边"
+        },
+        {
+          "id": "tie_waist",
+          "label": "系带收腰",
+          "value": "以系带在腰部收拢，形成自然褶皱"
+        },
+        {
+          "id": "lantern_sleeve",
+          "label": "灯笼袖",
+          "value": "带有收口蓬起的灯笼袖"
+        },
+        {
+          "id": "crop",
+          "label": "露脐设计",
+          "value": "露出腰线的短款设计"
+        },
+        {
+          "id": "strapless",
+          "label": "抹胸设计",
+          "value": "抹胸式的无肩带设计"
+        }
+      ]
+    },
+    "clothing.legwear": {
+      "category": "服装",
+      "label": "袜装",
+      "template": "搭配{value}",
+      "options": [
+        {
+          "id": "black_sheer_tights",
+          "label": "黑色半透明连裤袜",
+          "value": "黑色半透明连裤袜，织物密度均匀"
+        },
+        {
+          "id": "dark_gray_sheer_tights",
+          "label": "深灰半透明连裤袜",
+          "value": "深灰色半透明连裤袜，腿部明暗层次自然"
+        },
+        {
+          "id": "black_thigh_high",
+          "label": "黑色大腿袜",
+          "value": "黑色半透明大腿袜，袜口平整贴合"
+        },
+        {
+          "id": "lace_top_thigh_high",
+          "label": "蕾丝袜口大腿袜",
+          "value": "半透明大腿袜，袜口带细密蕾丝花边"
+        },
+        {
+          "id": "cream_ankle_socks",
+          "label": "奶油白短袜",
+          "value": "奶油白色短袜，袜口自然堆叠"
+        },
+        {
+          "id": "ribbed_knee_socks",
+          "label": "罗纹及膝袜",
+          "value": "细罗纹及膝袜，纵向织纹清楚"
+        },
+        {
+          "id": "sports_socks",
+          "label": "白色运动袜",
+          "value": "白色中筒运动袜，袜口与罗纹结构清楚"
+        },
+        {
+          "id": "lace_ankle_socks",
+          "label": "蕾丝短袜",
+          "value": "浅色短袜，袜口带细小蕾丝边"
+        },
+        {
+          "id": "fishnet",
+          "label": "渔网袜",
+          "value": "细密渔网袜，网眼均匀"
+        },
+        {
+          "id": "thigh_high_socks",
+          "label": "过膝长袜",
+          "value": "过膝长袜，袜口位置清楚"
+        },
+        {
+          "id": "ankle_socks",
+          "label": "及踝袜",
+          "value": "长度到脚踝的短袜"
+        },
+        {
+          "id": "black_sheer",
+          "label": "黑色丝袜",
+          "value": "黑色丝袜，光泽细腻均匀"
+        }
+      ]
+    },
+    "clothing.shoes": {
+      "category": "服装",
+      "label": "鞋履",
+      "template": "脚穿{value}",
+      "options": [
+        {
+          "id": "pointed_stiletto",
+          "label": "尖头细跟高跟鞋",
+          "value": "尖头细跟高跟鞋，鞋面轮廓利落"
+        },
+        {
+          "id": "patent_pumps",
+          "label": "漆皮高跟鞋",
+          "value": "漆皮尖头高跟鞋，鞋面高光清楚"
+        },
+        {
+          "id": "slingback_heels",
+          "label": "后空高跟鞋",
+          "value": "尖头后空高跟鞋，后跟细带结构清楚"
+        },
+        {
+          "id": "block_heels",
+          "label": "方头粗跟鞋",
+          "value": "方头粗跟鞋，鞋跟稳定，鞋面结构简洁"
+        },
+        {
+          "id": "loafers",
+          "label": "皮质乐福鞋",
+          "value": "皮质乐福鞋，鞋面与鞋底轮廓清楚"
+        },
+        {
+          "id": "mary_jane",
+          "label": "玛丽珍鞋",
+          "value": "圆头玛丽珍鞋，脚背搭扣清楚"
+        },
+        {
+          "id": "ankle_boots",
+          "label": "尖头短靴",
+          "value": "尖头及踝短靴，靴筒贴合，鞋跟利落"
+        },
+        {
+          "id": "knee_boots",
+          "label": "及膝长靴",
+          "value": "及膝长靴，靴筒平整贴合腿部"
+        },
+        {
+          "id": "white_sneakers",
+          "label": "白色运动鞋",
+          "value": "简洁白色运动鞋，鞋带与鞋底结构清楚"
+        },
+        {
+          "id": "retro_sneakers",
+          "label": "复古运动鞋",
+          "value": "低帮复古运动鞋，鞋面带克制拼色"
+        },
+        {
+          "id": "flat_sandals",
+          "label": "细带平底凉鞋",
+          "value": "细带平底凉鞋，脚背带与鞋底完整可见"
+        },
+        {
+          "id": "mules",
+          "label": "尖头穆勒鞋",
+          "value": "尖头穆勒鞋，鞋面简洁并露出后跟"
+        },
+        {
+          "id": "over_knee_boots",
+          "label": "过膝长靴",
+          "value": "过膝长靴，靴筒贴合腿型"
+        },
+        {
+          "id": "canvas_sneakers",
+          "label": "帆布鞋",
+          "value": "浅色帆布鞋，鞋型简洁"
+        },
+        {
+          "id": "ballet_flats",
+          "label": "芭蕾平底鞋",
+          "value": "圆头芭蕾平底鞋，鞋口浅"
+        },
+        {
+          "id": "martin_boots",
+          "label": "马丁靴",
+          "value": "厚底马丁靴，鞋带整齐"
+        },
+        {
+          "id": "heeled_sandals",
+          "label": "高跟凉鞋",
+          "value": "细带高跟凉鞋，线条纤细"
+        }
+      ]
+    },
+    "clothing.accessory": {
+      "category": "服装",
+      "label": "服装配件",
+      "template": "搭配{value}",
+      "options": [
+        {
+          "id": "pearl_studs",
+          "label": "珍珠耳钉",
+          "value": "小巧珍珠耳钉"
+        },
+        {
+          "id": "pearl_drop",
+          "label": "珍珠耳坠",
+          "value": "细长珍珠耳坠，垂坠位置清楚"
+        },
+        {
+          "id": "metal_tassel",
+          "label": "金属流苏耳饰",
+          "value": "细长金属流苏耳饰，随头部方向自然垂落"
+        },
+        {
+          "id": "gold_hoops",
+          "label": "金色耳圈",
+          "value": "小号金色耳圈，表面高光克制"
+        },
+        {
+          "id": "geometric_earrings",
+          "label": "几何耳饰",
+          "value": "结构简洁的几何金属耳饰"
+        },
+        {
+          "id": "fine_necklace",
+          "label": "纤细项链",
+          "value": "贴近锁骨的纤细金属项链"
+        },
+        {
+          "id": "pearl_necklace",
+          "label": "短珍珠项链",
+          "value": "长度贴近颈部的短珍珠项链"
+        },
+        {
+          "id": "rectangle_glasses",
+          "label": "细框矩形眼镜",
+          "value": "纤细金属矩形眼镜，镜片保持通透"
+        },
+        {
+          "id": "round_glasses",
+          "label": "细框圆形眼镜",
+          "value": "纤细金属圆形眼镜，镜片反光克制"
+        },
+        {
+          "id": "leather_belt",
+          "label": "细皮腰带",
+          "value": "细窄皮质腰带，金属搭扣位于腰部中央"
+        },
+        {
+          "id": "structured_handbag",
+          "label": "结构感手袋",
+          "value": "轮廓挺括的中小型手袋"
+        },
+        {
+          "id": "shoulder_bag",
+          "label": "小型肩背包",
+          "value": "小型皮质肩背包，细肩带自然垂落"
+        },
+        {
+          "id": "silk_scarf",
+          "label": "窄幅丝巾",
+          "value": "窄幅丝质领巾，表面带柔和光泽"
+        },
+        {
+          "id": "wristwatch",
+          "label": "金属腕表",
+          "value": "表盘简洁的纤细金属腕表"
+        },
+        {
+          "id": "sunglasses",
+          "label": "墨镜",
+          "value": "一副墨镜，镜片泛着反光"
+        },
+        {
+          "id": "hair_clip",
+          "label": "发夹",
+          "value": "点缀在发间的发夹"
+        },
+        {
+          "id": "choker",
+          "label": "皮质choker",
+          "value": "贴颈的皮质choker"
+        },
+        {
+          "id": "brooch",
+          "label": "胸针",
+          "value": "别在领口的胸针"
+        },
+        {
+          "id": "bracelet",
+          "label": "手链",
+          "value": "腕间一条细手链"
+        },
+        {
+          "id": "hair_band",
+          "label": "发带",
+          "value": "束发用的发带"
+        },
+        {
+          "id": "shawl",
+          "label": "披肩",
+          "value": "搭在肩上的柔软披肩"
+        }
+      ]
+    }
+  }
+}

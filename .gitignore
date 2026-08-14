@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+.idea/
+.vscode/
+.worktrees/
+*.log
+.superpowers/
+.codex-skill-review-*/
+/task_plan.md
+/findings.md
+/progress.md

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Z-Image Chinese Phrase Library",
+  "type": "object",
+  "required": ["schema_version", "language", "target_models", "validation", "fields"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "language": {"const": "zh-CN"},
+    "target_models": {
+      "type": "array",
+      "items": {"enum": ["Z-Image", "Z-Image-Turbo"]},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "validation": {
+      "type": "object",
+      "required": ["language_rules", "model_image_tests"],
+      "properties": {
+        "language_rules": {"enum": ["pending", "passed"]},
+        "model_image_tests": {"enum": ["pending", "partial", "passed"]}
+      },
+      "additionalProperties": false
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["category", "label", "template", "options"],
+        "properties": {
+          "category": {"type": "string", "minLength": 1},
+          "label": {"type": "string", "minLength": 1},
+          "template": {"type": "string", "pattern": "\\{value\\}"},
+          "options": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "label", "value"],
+              "properties": {
+                "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+                "label": {"type": "string", "minLength": 1},
+                "value": {"type": "string", "minLength": 1},
+                "fragment": {"type": "string", "minLength": 1},
+                "tags": {"type": "array", "items": {"type": "string"}},
+                "requires": {"type": "object"},
+                "excludes": {"type": "object"}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "bundles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "label", "fields", "tags"],
+          "properties": {
+            "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+            "label": {"type": "string", "minLength": 1},
+            "fields": {
+              "type": "object",
+              "minProperties": 2,
+              "additionalProperties": {
+                "oneOf": [
+                  {"type": "string", "pattern": "^[a-z0-9_]+$"},
+                  {
+                    "type": "array",
+                    "items": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+                    "minItems": 1,
+                    "uniqueItems": true
+                  }
+                ]
+              }
+            },
+            "tags": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

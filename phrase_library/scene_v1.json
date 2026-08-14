@@ -1,0 +1,1432 @@
+{
+  "schema_version": "1.0.0",
+  "language": "zh-CN",
+  "target_models": [
+    "Z-Image",
+    "Z-Image-Turbo"
+  ],
+  "validation": {
+    "language_rules": "passed",
+    "model_image_tests": "pending"
+  },
+  "fields": {
+    "scene.location": {
+      "category": "场景空间",
+      "label": "场景地点",
+      "template": "场景位于{value}",
+      "options": [
+        {
+          "id": "summer_garden",
+          "label": "夏日庭院",
+          "value": "枝叶浓密的夏日庭院"
+        },
+        {
+          "id": "forest_path",
+          "label": "林间小径",
+          "value": "被高大树木包围的林间小径"
+        },
+        {
+          "id": "cafe_booth",
+          "label": "咖啡馆卡座",
+          "value": "带深色皮质卡座的暖木咖啡馆"
+        },
+        {
+          "id": "cafe_window",
+          "label": "咖啡馆窗边",
+          "value": "临街咖啡馆的靠窗座位"
+        },
+        {
+          "id": "cream_apartment",
+          "label": "奶油色公寓",
+          "value": "采光通透的奶油色公寓客厅"
+        },
+        {
+          "id": "office_lounge",
+          "label": "办公休息区",
+          "value": "现代办公楼内的简洁休息区"
+        },
+        {
+          "id": "hotel_corridor",
+          "label": "酒店走廊",
+          "value": "铺设地毯的现代酒店走廊"
+        },
+        {
+          "id": "apartment_doorway",
+          "label": "室内门廊",
+          "value": "连接房间与走廊的室内门廊"
+        },
+        {
+          "id": "gray_studio",
+          "label": "高级灰影棚",
+          "value": "背景简洁的高级灰摄影棚"
+        },
+        {
+          "id": "new_chinese_tearoom",
+          "label": "新中式茶室",
+          "value": "木质结构清晰的新中式茶室"
+        },
+        {
+          "id": "hongkong_diner",
+          "label": "复古茶餐厅",
+          "value": "带卡座与旧式装饰的复古茶餐厅"
+        },
+        {
+          "id": "urban_sidewalk",
+          "label": "都市街道",
+          "value": "现代商业区的人行道"
+        },
+        {
+          "id": "glass_lobby",
+          "label": "玻璃大堂",
+          "value": "带大面积玻璃幕墙的建筑大堂"
+        },
+        {
+          "id": "hotel_balcony",
+          "label": "酒店阳台",
+          "value": "面向开阔景观的酒店阳台"
+        },
+        {
+          "id": "city_rooftop",
+          "label": "城市天台",
+          "value": "能够看见城市天际线的建筑天台"
+        },
+        {
+          "id": "seaside",
+          "label": "海边",
+          "value": "沙面平缓、视野开阔的海边"
+        },
+        {
+          "id": "bookstore",
+          "label": "独立书店",
+          "value": "书架排列整齐的独立书店"
+        },
+        {
+          "id": "art_gallery",
+          "label": "当代美术馆",
+          "value": "白墙与高挑空间构成的当代美术馆"
+        },
+        {
+          "id": "flower_shop",
+          "label": "花店",
+          "value": "陈列鲜花与绿植的临街花店"
+        },
+        {
+          "id": "tennis_court",
+          "label": "室外网球场",
+          "value": "地面线条清楚的室外网球场"
+        },
+        {
+          "id": "fitness_studio",
+          "label": "健身训练室",
+          "value": "器械排列简洁的明亮健身训练室"
+        },
+        {
+          "id": "campus_classroom",
+          "label": "校园教室",
+          "value": "采光明亮的校园教室，整齐的课桌椅成排摆放"
+        },
+        {
+          "id": "campus_playground",
+          "label": "校园操场",
+          "value": "铺着红色塑胶跑道的校园操场"
+        },
+        {
+          "id": "outdoor_basketball_court",
+          "label": "室外篮球场",
+          "value": "画着白色边线的室外篮球场"
+        },
+        {
+          "id": "stone_arch_bridge",
+          "label": "石拱桥",
+          "value": "横跨河面的古老石拱桥"
+        },
+        {
+          "id": "wharf",
+          "label": "码头",
+          "value": "停靠着几艘小船的木质码头"
+        },
+        {
+          "id": "coastal_lighthouse",
+          "label": "海边灯塔",
+          "value": "矗立在海岬上的白色灯塔"
+        },
+        {
+          "id": "hot_spring_pool",
+          "label": "温泉汤池",
+          "value": "热气氤氲的露天温泉汤池"
+        },
+        {
+          "id": "sandy_beach",
+          "label": "沙滩",
+          "value": "铺着细软白沙的沙滩"
+        },
+        {
+          "id": "bamboo_grove",
+          "label": "竹林",
+          "value": "青翠挺拔的竹林"
+        },
+        {
+          "id": "lakeside",
+          "label": "湖边",
+          "value": "波光粼粼的湖泊岸边"
+        }
+      ]
+    },
+    "scene.time": {
+      "category": "场景空间",
+      "label": "时间切片",
+      "template": "时间为{value}",
+      "options": [
+        {
+          "id": "clear_morning",
+          "label": "晴朗清晨",
+          "value": "太阳升起后的晴朗清晨"
+        },
+        {
+          "id": "late_morning",
+          "label": "上午晚些时候",
+          "value": "日光明亮的上午晚些时候"
+        },
+        {
+          "id": "midday",
+          "label": "正午",
+          "value": "太阳位置较高的正午时分"
+        },
+        {
+          "id": "summer_afternoon",
+          "label": "夏日午后",
+          "value": "阳光穿过枝叶的夏日午后"
+        },
+        {
+          "id": "overcast_afternoon",
+          "label": "阴天下午",
+          "value": "天空被云层覆盖的下午"
+        },
+        {
+          "id": "golden_hour",
+          "label": "日落前金色时刻",
+          "value": "日落前一小时的金色时刻"
+        },
+        {
+          "id": "dusk",
+          "label": "傍晚",
+          "value": "天空亮度逐渐降低的傍晚"
+        },
+        {
+          "id": "blue_hour",
+          "label": "蓝调时刻",
+          "value": "日落后的蓝调时刻"
+        },
+        {
+          "id": "early_evening",
+          "label": "入夜不久",
+          "value": "室内灯光刚刚亮起的入夜时分"
+        },
+        {
+          "id": "night",
+          "label": "夜间",
+          "value": "室外环境完全进入夜间"
+        },
+        {
+          "id": "late_night",
+          "label": "深夜",
+          "value": "街道人流稀少的深夜"
+        },
+        {
+          "id": "early_autumn_afternoon",
+          "label": "初秋午后",
+          "value": "日光柔和的初秋午后"
+        },
+        {
+          "id": "dawn",
+          "label": "黎明破晓",
+          "value": "太阳即将升起的黎明时分，天际泛起淡金曙光"
+        },
+        {
+          "id": "winter_afternoon",
+          "label": "冬日午后",
+          "value": "阳光低垂而温暖的冬日下午"
+        },
+        {
+          "id": "post_rain_morning",
+          "label": "雨后清晨",
+          "value": "空气清冽通透的雨后清晨"
+        },
+        {
+          "id": "moonlit_night",
+          "label": "月光之夜",
+          "value": "月光明亮、万物镀上银辉的夜晚"
+        },
+        {
+          "id": "twilight",
+          "label": "暮色黄昏",
+          "value": "天色由暖转冷的暮色黄昏"
+        }
+      ]
+    },
+    "scene.weather": {
+      "category": "场景空间",
+      "label": "天气状态",
+      "template": "室外环境呈现{value}",
+      "options": [
+        {
+          "id": "clear_sun",
+          "label": "晴朗日照",
+          "value": "晴朗天空与稳定日照"
+        },
+        {
+          "id": "thin_clouds",
+          "label": "薄云天气",
+          "value": "薄云覆盖下的柔和日照"
+        },
+        {
+          "id": "overcast",
+          "label": "阴天",
+          "value": "云层均匀覆盖形成的低反差天光"
+        },
+        {
+          "id": "light_rain",
+          "label": "细雨",
+          "value": "连续细雨与湿润地面"
+        },
+        {
+          "id": "after_rain",
+          "label": "雨后",
+          "value": "雨后湿润空气与地面积水反光"
+        },
+        {
+          "id": "light_fog",
+          "label": "薄雾",
+          "value": "远处景物边缘柔化的轻薄雾气"
+        },
+        {
+          "id": "sea_breeze",
+          "label": "海风",
+          "value": "能够轻微吹动发丝与衣摆的稳定海风"
+        },
+        {
+          "id": "light_snow",
+          "label": "小雪",
+          "value": "缓慢飘落的小片雪花"
+        },
+        {
+          "id": "humid_summer",
+          "label": "湿润夏日",
+          "value": "空气湿度较高、植物颜色浓郁的夏日天气"
+        },
+        {
+          "id": "autumn_breeze",
+          "label": "初秋微风",
+          "value": "轻微吹动树叶与衣料的初秋微风"
+        },
+        {
+          "id": "heavy_rain",
+          "label": "大雨",
+          "value": "倾泻而下的大雨与连成一片的雨幕"
+        },
+        {
+          "id": "thunderstorm",
+          "label": "雷雨将至",
+          "value": "乌云翻滚、雷雨将至的压抑天色"
+        },
+        {
+          "id": "rainbow",
+          "label": "雨后彩虹",
+          "value": "雨过天晴后挂在天边的一道彩虹"
+        },
+        {
+          "id": "partly_cloudy",
+          "label": "多云",
+          "value": "云层厚重、明暗交替的多云天气"
+        }
+      ]
+    },
+    "scene.foreground": {
+      "category": "场景空间",
+      "label": "前景框景",
+      "template": "前景由{value}",
+      "options": [
+        {
+          "id": "blurred_green_leaves",
+          "label": "失焦绿叶",
+          "value": "靠近镜头的失焦绿色叶片形成自然遮挡"
+        },
+        {
+          "id": "blurred_maple_leaves",
+          "label": "嫩绿枫叶",
+          "value": "大片失焦嫩绿色枫叶形成柔和框景"
+        },
+        {
+          "id": "small_white_flowers",
+          "label": "小白花",
+          "value": "靠近镜头的小白花与细枝形成局部遮挡"
+        },
+        {
+          "id": "wood_table_edge",
+          "label": "浅木桌沿",
+          "value": "画面下方的浅木色桌沿形成稳定边界"
+        },
+        {
+          "id": "coffee_cup_blur",
+          "label": "虚化咖啡杯",
+          "value": "靠近镜头的咖啡杯与碟子形成轻度虚化层"
+        },
+        {
+          "id": "doorframe_vertical",
+          "label": "纵向门框",
+          "value": "一侧门板与门框形成清晰纵向框景"
+        },
+        {
+          "id": "curtain_edge",
+          "label": "窗帘边缘",
+          "value": "一侧柔软窗帘边缘形成纵向遮挡"
+        },
+        {
+          "id": "glass_reflection",
+          "label": "玻璃反射",
+          "value": "靠近镜头的玻璃表面形成浅淡环境反射"
+        },
+        {
+          "id": "railing",
+          "label": "栏杆",
+          "value": "画面下方的栏杆形成横向空间边界"
+        },
+        {
+          "id": "screen_edge",
+          "label": "屏风边缘",
+          "value": "木质屏风边缘形成克制的侧面框景"
+        },
+        {
+          "id": "chair_back",
+          "label": "椅背边缘",
+          "value": "靠近镜头的椅背边缘形成柔和遮挡"
+        },
+        {
+          "id": "desk_folder",
+          "label": "桌面文件",
+          "value": "画面下方的桌面与文件夹形成职场前景"
+        },
+        {
+          "id": "flower_buckets",
+          "label": "花桶与枝叶",
+          "value": "靠近镜头的花桶和枝叶形成丰富前景层次"
+        },
+        {
+          "id": "soft_light_spots",
+          "label": "失焦光点",
+          "value": "靠近镜头边缘的失焦光点形成局部亮部"
+        },
+        {
+          "id": "gallery_wall_edge",
+          "label": "展墙边缘",
+          "value": "一侧展墙边缘形成几何框景"
+        },
+        {
+          "id": "bench_edge",
+          "label": "长椅边缘",
+          "value": "画面下方的长椅边缘形成横向前景"
+        },
+        {
+          "id": "equipment_edge",
+          "label": "虚化训练器械",
+          "value": "一侧轻度虚化的训练器械形成边缘遮挡"
+        },
+        {
+          "id": "hair_strand",
+          "label": "发丝前景",
+          "value": "垂在镜头前的几缕发丝形成轻柔遮挡"
+        },
+        {
+          "id": "branch",
+          "label": "树枝前景",
+          "value": "横过画面的一枝带叶枝条形成自然框景"
+        },
+        {
+          "id": "rain_glass",
+          "label": "雨滴玻璃",
+          "value": "凝着细密雨珠的玻璃形成朦胧遮挡"
+        },
+        {
+          "id": "water_glint",
+          "label": "水面光斑",
+          "value": "水面反射的细碎光斑形成闪烁前景"
+        },
+        {
+          "id": "sheer_curtain",
+          "label": "纱帘前景",
+          "value": "半透纱帘的边缘形成柔和遮挡"
+        }
+      ]
+    },
+    "scene.background": {
+      "category": "场景空间",
+      "label": "背景环境",
+      "template": "背景为{value}",
+      "options": [
+        {
+          "id": "bright_green_garden",
+          "label": "高亮庭院绿景",
+          "value": "高亮夏日庭院绿景，树木与灌木形成自然层次"
+        },
+        {
+          "id": "forest_depth",
+          "label": "林间纵深",
+          "value": "向远处延伸的林间小径与高大树干"
+        },
+        {
+          "id": "warm_wood_cafe",
+          "label": "暖木咖啡馆",
+          "value": "暖木墙面、皮质卡座与轻度虚化的餐桌"
+        },
+        {
+          "id": "street_through_window",
+          "label": "窗外街景",
+          "value": "透过玻璃窗可见的轻度虚化城市街景"
+        },
+        {
+          "id": "cream_living_room",
+          "label": "奶油色客厅",
+          "value": "奶油色墙面、浅色沙发与柔软窗帘"
+        },
+        {
+          "id": "office_sofa_wall",
+          "label": "办公沙发与墙面",
+          "value": "米杏色沙发、浅灰墙面与一株绿色植物"
+        },
+        {
+          "id": "warm_hotel_corridor",
+          "label": "暖色酒店走廊",
+          "value": "向远处延伸的暖色走廊、墙灯与地毯"
+        },
+        {
+          "id": "gray_door_wall",
+          "label": "灰色门板与走廊",
+          "value": "灰色门板、浅色墙面与暖色走廊"
+        },
+        {
+          "id": "gray_studio_gradient",
+          "label": "高级灰渐变背景",
+          "value": "明暗过渡平滑的高级灰影棚背景"
+        },
+        {
+          "id": "new_chinese_wood",
+          "label": "木质新中式空间",
+          "value": "木质墙面、留白屏风与低矮桌案"
+        },
+        {
+          "id": "retro_diner_interior",
+          "label": "复古茶餐厅内景",
+          "value": "旧式卡座、花纹墙砖与暖色吊灯"
+        },
+        {
+          "id": "urban_glass_buildings",
+          "label": "都市玻璃建筑",
+          "value": "现代玻璃建筑立面与轻度虚化的行人"
+        },
+        {
+          "id": "lobby_reflections",
+          "label": "大堂玻璃反射",
+          "value": "玻璃幕墙、石材地面与连续环境反射"
+        },
+        {
+          "id": "balcony_landscape",
+          "label": "阳台开阔景观",
+          "value": "阳台外开阔的城市或海岸景观"
+        },
+        {
+          "id": "city_skyline",
+          "label": "城市天际线",
+          "value": "层次清楚的楼顶轮廓与远处城市天际线"
+        },
+        {
+          "id": "sea_horizon",
+          "label": "海面与地平线",
+          "value": "向远处延伸的海面与清晰地平线"
+        },
+        {
+          "id": "book_shelves",
+          "label": "整齐书架",
+          "value": "排列整齐的木质书架与书籍脊背"
+        },
+        {
+          "id": "white_gallery",
+          "label": "白墙展厅",
+          "value": "留白充足的白色展墙与少量大型画作"
+        },
+        {
+          "id": "flower_display",
+          "label": "鲜花陈列",
+          "value": "分层陈列的鲜花、绿叶与包装纸"
+        },
+        {
+          "id": "tennis_fence",
+          "label": "网球场围网",
+          "value": "绿色球场、白色边线与远处金属围网"
+        },
+        {
+          "id": "gym_mirrors",
+          "label": "健身房镜面",
+          "value": "大面积镜面、训练器械与浅色地面"
+        },
+        {
+          "id": "campus_building",
+          "label": "校园教学楼",
+          "value": "绿树掩映的校园教学楼与操场"
+        },
+        {
+          "id": "dense_forest_shadow",
+          "label": "密林暗影",
+          "value": "光线幽暗、层次分明的密林深处"
+        },
+        {
+          "id": "desert_dune",
+          "label": "沙漠沙丘",
+          "value": "连绵起伏、明暗分明的沙丘"
+        },
+        {
+          "id": "snow_mountain",
+          "label": "雪山",
+          "value": "覆盖积雪、轮廓清晰的连绵山峦"
+        },
+        {
+          "id": "lake_reflection",
+          "label": "湖面倒影",
+          "value": "平静湖面与天光云影的倒影"
+        },
+        {
+          "id": "night_market_glow",
+          "label": "夜市灯火",
+          "value": "挂着彩灯、人头攒动的夜市摊位"
+        }
+      ]
+    },
+    "scene.detail": {
+      "category": "场景空间",
+      "label": "环境细节",
+      "template": "场景中保留{value}",
+      "options": [
+        {
+          "id": "dense_leaves",
+          "label": "浓密枝叶",
+          "value": "浓密绿色枝叶"
+        },
+        {
+          "id": "white_daisies",
+          "label": "白色小雏菊",
+          "value": "零散开放的白色小雏菊"
+        },
+        {
+          "id": "stone_path",
+          "label": "浅色石板路",
+          "value": "向远处延伸的浅色石板路"
+        },
+        {
+          "id": "wood_table",
+          "label": "浅木餐桌",
+          "value": "纹理清楚的浅木色餐桌"
+        },
+        {
+          "id": "menu_board",
+          "label": "菜单牌",
+          "value": "位于背景墙面的简洁菜单牌"
+        },
+        {
+          "id": "coffee_set",
+          "label": "咖啡杯碟",
+          "value": "桌面上的咖啡杯与小碟"
+        },
+        {
+          "id": "linen_curtain",
+          "label": "亚麻窗帘",
+          "value": "自然垂落的浅色亚麻窗帘"
+        },
+        {
+          "id": "floor_lamp",
+          "label": "落地灯",
+          "value": "造型简洁的暖色落地灯"
+        },
+        {
+          "id": "green_plant",
+          "label": "绿色植物",
+          "value": "一株叶片清楚的室内绿色植物"
+        },
+        {
+          "id": "wall_lamps",
+          "label": "走廊壁灯",
+          "value": "沿走廊等距排列的暖色壁灯"
+        },
+        {
+          "id": "carpet_lines",
+          "label": "地毯纹理",
+          "value": "纵向延伸的低对比地毯纹理"
+        },
+        {
+          "id": "door_handle",
+          "label": "金属门把手",
+          "value": "反光克制的金属门把手"
+        },
+        {
+          "id": "studio_stool",
+          "label": "高脚椅",
+          "value": "结构简洁的影棚高脚椅"
+        },
+        {
+          "id": "studio_seamless",
+          "label": "无缝背景纸",
+          "value": "从墙面延伸到地面的影棚背景纸"
+        },
+        {
+          "id": "wood_screen",
+          "label": "木质屏风",
+          "value": "格栅结构清楚的木质屏风"
+        },
+        {
+          "id": "tea_set",
+          "label": "茶具",
+          "value": "低矮桌案上的陶瓷茶壶与茶杯"
+        },
+        {
+          "id": "bamboo_shadow",
+          "label": "竹影",
+          "value": "落在墙面与地面的细碎竹影"
+        },
+        {
+          "id": "retro_tiles",
+          "label": "复古花纹墙砖",
+          "value": "颜色温暖的复古花纹墙砖"
+        },
+        {
+          "id": "ceiling_fan",
+          "label": "旧式吊扇",
+          "value": "安装在天花板上的旧式吊扇"
+        },
+        {
+          "id": "neon_sign",
+          "label": "霓虹招牌",
+          "value": "位于街道背景的彩色霓虹招牌"
+        },
+        {
+          "id": "wet_pavement",
+          "label": "湿润路面",
+          "value": "带灯光反射的湿润路面"
+        },
+        {
+          "id": "passing_cars",
+          "label": "远处车辆",
+          "value": "位于远处道路上的轻度虚化车辆"
+        },
+        {
+          "id": "glass_columns",
+          "label": "玻璃立柱",
+          "value": "垂直排列的玻璃与金属立柱"
+        },
+        {
+          "id": "stone_floor",
+          "label": "浅色石材地面",
+          "value": "接缝整齐的浅色石材地面"
+        },
+        {
+          "id": "balcony_chair",
+          "label": "户外单椅",
+          "value": "靠近栏杆的简洁户外单椅"
+        },
+        {
+          "id": "sea_waves",
+          "label": "细小海浪",
+          "value": "靠近岸边的细小海浪"
+        },
+        {
+          "id": "book_stack",
+          "label": "叠放书籍",
+          "value": "桌面上整齐叠放的几本书"
+        },
+        {
+          "id": "large_painting",
+          "label": "大型画作",
+          "value": "悬挂在展墙中央的大型画作"
+        },
+        {
+          "id": "flower_wrapping",
+          "label": "花束包装纸",
+          "value": "边缘自然展开的花束包装纸"
+        },
+        {
+          "id": "tennis_racket",
+          "label": "网球拍",
+          "value": "靠在长椅旁的网球拍"
+        },
+        {
+          "id": "gym_bench",
+          "label": "训练长椅",
+          "value": "结构简洁的黑色训练长椅"
+        },
+        {
+          "id": "towel_bottle",
+          "label": "毛巾与水瓶",
+          "value": "并排放置的运动毛巾与透明水瓶"
+        },
+        {
+          "id": "city_lights",
+          "label": "城市灯光",
+          "value": "远处建筑窗口形成的细小城市灯光"
+        },
+        {
+          "id": "white_gauze_curtain",
+          "label": "白色纱帘",
+          "value": "随风微动的白色纱帘"
+        },
+        {
+          "id": "potted_plants",
+          "label": "绿植盆栽",
+          "value": "窗边错落的几盆绿植"
+        },
+        {
+          "id": "warm_table_lamp",
+          "label": "暖黄台灯",
+          "value": "一盏发出暖黄光的台灯"
+        },
+        {
+          "id": "wooden_floor_reflection",
+          "label": "木地板反光",
+          "value": "反射着柔和光泽的木地板"
+        },
+        {
+          "id": "floor_mirror",
+          "label": "落地镜",
+          "value": "倚墙而立的一面落地镜"
+        },
+        {
+          "id": "wall_art",
+          "label": "墙面挂画",
+          "value": "墙上挂着的一两幅画作"
+        },
+        {
+          "id": "bookshelf",
+          "label": "书架",
+          "value": "靠墙而立的深色书架"
+        },
+        {
+          "id": "rain_window",
+          "label": "窗外雨滴",
+          "value": "玻璃窗上滑落的雨滴"
+        }
+      ]
+    },
+    "scene.surface": {
+      "category": "场景空间",
+      "label": "空间材质",
+      "template": "空间材质以{value}为主",
+      "options": [
+        {
+          "id": "warm_wood",
+          "label": "暖木材质",
+          "value": "纹理自然的暖色木材"
+        },
+        {
+          "id": "light_wood",
+          "label": "浅木材质",
+          "value": "明度较高的浅色木材"
+        },
+        {
+          "id": "gray_wood",
+          "label": "灰色木饰面",
+          "value": "纹理细密的灰色木饰面"
+        },
+        {
+          "id": "cream_fabric",
+          "label": "米杏织物",
+          "value": "表面柔软的米杏色织物"
+        },
+        {
+          "id": "brown_leather",
+          "label": "深棕皮革",
+          "value": "带自然褶皱与低光泽的深棕色皮革"
+        },
+        {
+          "id": "gray_stone",
+          "label": "浅灰石材",
+          "value": "接缝整齐、表面细腻的浅灰石材"
+        },
+        {
+          "id": "clear_glass",
+          "label": "通透玻璃",
+          "value": "反射清楚但保持通透的玻璃"
+        },
+        {
+          "id": "brushed_metal",
+          "label": "拉丝金属",
+          "value": "表面反光克制的拉丝金属"
+        },
+        {
+          "id": "white_plaster",
+          "label": "白色涂料墙面",
+          "value": "表面平整的白色涂料墙面"
+        },
+        {
+          "id": "retro_tile",
+          "label": "复古瓷砖",
+          "value": "釉面反光柔和的复古瓷砖"
+        },
+        {
+          "id": "linen_textile",
+          "label": "亚麻织物",
+          "value": "织纹可见、垂坠自然的亚麻织物"
+        },
+        {
+          "id": "rubber_floor",
+          "label": "运动橡胶地面",
+          "value": "颗粒细密、反光较低的运动橡胶地面"
+        },
+        {
+          "id": "red_brick",
+          "label": "红砖墙面",
+          "value": "裸露的红砖墙面"
+        },
+        {
+          "id": "raw_concrete",
+          "label": "清水混凝土",
+          "value": "素净的清水混凝土"
+        },
+        {
+          "id": "rattan",
+          "label": "藤编材质",
+          "value": "天然藤编材质"
+        },
+        {
+          "id": "terrazzo",
+          "label": "水磨石地面",
+          "value": "带细小石粒的水磨石地面"
+        }
+      ]
+    },
+    "scene.spatial": {
+      "category": "场景空间",
+      "label": "空间层次",
+      "template": "画面空间呈现{value}",
+      "options": [
+        {
+          "id": "foreground_subject_background",
+          "label": "前中后三层",
+          "value": "前景遮挡、人物主体与背景环境组成的三层纵深"
+        },
+        {
+          "id": "vertical_frame",
+          "label": "纵向框景",
+          "value": "门框或立柱包围人物的纵向框景关系"
+        },
+        {
+          "id": "window_depth",
+          "label": "窗内外层次",
+          "value": "室内人物、玻璃反射与窗外景物构成的内外层次"
+        },
+        {
+          "id": "corridor_depth",
+          "label": "走廊纵深",
+          "value": "墙面与地面线条向远处收拢的走廊纵深"
+        },
+        {
+          "id": "open_negative_space",
+          "label": "单侧环境留白",
+          "value": "人物一侧保留开阔环境留白的空间关系"
+        },
+        {
+          "id": "shallow_interior",
+          "label": "紧凑室内层次",
+          "value": "前景家具、人物与近距离背景组成的紧凑室内层次"
+        },
+        {
+          "id": "deep_outdoor",
+          "label": "开阔户外纵深",
+          "value": "人物、近处地面与远处地平线组成的开阔纵深"
+        },
+        {
+          "id": "geometric_gallery",
+          "label": "几何展厅层次",
+          "value": "展墙边缘、人物与远处画作组成的几何空间层次"
+        },
+        {
+          "id": "layered_plants",
+          "label": "植物层叠空间",
+          "value": "前景叶片、人物与背景植被构成的植物层叠空间"
+        },
+        {
+          "id": "reflection_depth",
+          "label": "反射空间层次",
+          "value": "真实人物、玻璃反射与远处环境共同形成的反射层次"
+        },
+        {
+          "id": "mirror_symmetry",
+          "label": "镜面对称层次",
+          "value": "镜面反射形成的对称层次"
+        },
+        {
+          "id": "top_down_depth",
+          "label": "俯视纵深",
+          "value": "自上而下的纵深感"
+        },
+        {
+          "id": "foreground_occlusion",
+          "label": "前景遮挡层次",
+          "value": "前景遮挡与背景呼应的层次"
+        }
+      ]
+    }
+  },
+  "bundles": {
+    "scene_compositions": [
+      {
+        "id": "summer_forest_garden",
+        "label": "森系夏日庭院",
+        "fields": {
+          "scene.location": "summer_garden",
+          "scene.time": "summer_afternoon",
+          "scene.weather": "humid_summer",
+          "scene.foreground": "blurred_maple_leaves",
+          "scene.background": "bright_green_garden",
+          "scene.detail": [
+            "dense_leaves",
+            "white_daisies",
+            "stone_path"
+          ],
+          "scene.spatial": "layered_plants"
+        },
+        "tags": [
+          "森系",
+          "夏日",
+          "户外"
+        ]
+      },
+      {
+        "id": "forest_path_morning",
+        "label": "清晨林间小径",
+        "fields": {
+          "scene.location": "forest_path",
+          "scene.time": "clear_morning",
+          "scene.weather": "thin_clouds",
+          "scene.foreground": "blurred_green_leaves",
+          "scene.background": "forest_depth",
+          "scene.detail": [
+            "dense_leaves",
+            "stone_path"
+          ],
+          "scene.spatial": "foreground_subject_background"
+        },
+        "tags": [
+          "自然",
+          "清晨",
+          "户外"
+        ]
+      },
+      {
+        "id": "warm_cafe_booth",
+        "label": "暖木咖啡馆卡座",
+        "fields": {
+          "scene.location": "cafe_booth",
+          "scene.time": "early_evening",
+          "scene.foreground": "wood_table_edge",
+          "scene.background": "warm_wood_cafe",
+          "scene.detail": [
+            "wood_table",
+            "menu_board",
+            "coffee_set"
+          ],
+          "scene.surface": "brown_leather",
+          "scene.spatial": "shallow_interior"
+        },
+        "tags": [
+          "咖啡馆",
+          "暖调",
+          "室内"
+        ]
+      },
+      {
+        "id": "cafe_window_day",
+        "label": "日间咖啡馆窗边",
+        "fields": {
+          "scene.location": "cafe_window",
+          "scene.time": "late_morning",
+          "scene.foreground": "coffee_cup_blur",
+          "scene.background": "street_through_window",
+          "scene.detail": [
+            "wood_table",
+            "coffee_set"
+          ],
+          "scene.surface": "warm_wood",
+          "scene.spatial": "window_depth"
+        },
+        "tags": [
+          "咖啡馆",
+          "窗边",
+          "生活写真"
+        ]
+      },
+      {
+        "id": "cream_apartment_window",
+        "label": "奶油色公寓窗边",
+        "fields": {
+          "scene.location": "cream_apartment",
+          "scene.time": "overcast_afternoon",
+          "scene.foreground": "curtain_edge",
+          "scene.background": "cream_living_room",
+          "scene.detail": [
+            "linen_curtain",
+            "floor_lamp",
+            "green_plant"
+          ],
+          "scene.surface": "cream_fabric",
+          "scene.spatial": "shallow_interior"
+        },
+        "tags": [
+          "居家",
+          "奶油色",
+          "室内"
+        ]
+      },
+      {
+        "id": "workplace_lounge",
+        "label": "现代办公休息区",
+        "fields": {
+          "scene.location": "office_lounge",
+          "scene.time": "late_morning",
+          "scene.foreground": "desk_folder",
+          "scene.background": "office_sofa_wall",
+          "scene.detail": [
+            "green_plant",
+            "glass_columns",
+            "stone_floor"
+          ],
+          "scene.surface": "cream_fabric",
+          "scene.spatial": "shallow_interior"
+        },
+        "tags": [
+          "职场",
+          "现代",
+          "室内"
+        ]
+      },
+      {
+        "id": "hotel_corridor_night",
+        "label": "夜间酒店走廊",
+        "fields": {
+          "scene.location": "hotel_corridor",
+          "scene.time": "night",
+          "scene.foreground": "doorframe_vertical",
+          "scene.background": "warm_hotel_corridor",
+          "scene.detail": [
+            "wall_lamps",
+            "carpet_lines"
+          ],
+          "scene.surface": "gray_wood",
+          "scene.spatial": "corridor_depth"
+        },
+        "tags": [
+          "酒店",
+          "夜间",
+          "走廊"
+        ]
+      },
+      {
+        "id": "doorway_hard_flash",
+        "label": "灰门板室内门廊",
+        "fields": {
+          "scene.location": "apartment_doorway",
+          "scene.time": "early_evening",
+          "scene.foreground": "doorframe_vertical",
+          "scene.background": "gray_door_wall",
+          "scene.detail": [
+            "door_handle",
+            "stone_floor"
+          ],
+          "scene.surface": "gray_wood",
+          "scene.spatial": "vertical_frame"
+        },
+        "tags": [
+          "轻奢",
+          "门框",
+          "室内"
+        ]
+      },
+      {
+        "id": "gray_photo_studio",
+        "label": "高级灰摄影棚",
+        "fields": {
+          "scene.location": "gray_studio",
+          "scene.time": "midday",
+          "scene.foreground": "chair_back",
+          "scene.background": "gray_studio_gradient",
+          "scene.detail": [
+            "studio_stool",
+            "studio_seamless"
+          ],
+          "scene.surface": "white_plaster",
+          "scene.spatial": "open_negative_space"
+        },
+        "tags": [
+          "影棚",
+          "商业写真",
+          "简洁"
+        ]
+      },
+      {
+        "id": "new_chinese_tearoom",
+        "label": "竹影新中式茶室",
+        "fields": {
+          "scene.location": "new_chinese_tearoom",
+          "scene.time": "early_autumn_afternoon",
+          "scene.foreground": "screen_edge",
+          "scene.background": "new_chinese_wood",
+          "scene.detail": [
+            "wood_screen",
+            "tea_set",
+            "bamboo_shadow"
+          ],
+          "scene.surface": "warm_wood",
+          "scene.spatial": "foreground_subject_background"
+        },
+        "tags": [
+          "新中式",
+          "竹影",
+          "室内"
+        ]
+      },
+      {
+        "id": "retro_hongkong_diner",
+        "label": "复古港风茶餐厅",
+        "fields": {
+          "scene.location": "hongkong_diner",
+          "scene.time": "early_evening",
+          "scene.foreground": "wood_table_edge",
+          "scene.background": "retro_diner_interior",
+          "scene.detail": [
+            "retro_tiles",
+            "ceiling_fan",
+            "coffee_set"
+          ],
+          "scene.surface": "retro_tile",
+          "scene.spatial": "shallow_interior"
+        },
+        "tags": [
+          "港风",
+          "复古",
+          "室内"
+        ]
+      },
+      {
+        "id": "rainy_city_street",
+        "label": "雨夜都市街道",
+        "fields": {
+          "scene.location": "urban_sidewalk",
+          "scene.time": "night",
+          "scene.weather": "light_rain",
+          "scene.foreground": "glass_reflection",
+          "scene.background": "urban_glass_buildings",
+          "scene.detail": [
+            "neon_sign",
+            "wet_pavement",
+            "passing_cars"
+          ],
+          "scene.surface": "gray_stone",
+          "scene.spatial": "reflection_depth"
+        },
+        "tags": [
+          "都市",
+          "雨夜",
+          "街拍"
+        ]
+      },
+      {
+        "id": "glass_lobby_day",
+        "label": "现代玻璃大堂",
+        "fields": {
+          "scene.location": "glass_lobby",
+          "scene.time": "late_morning",
+          "scene.foreground": "glass_reflection",
+          "scene.background": "lobby_reflections",
+          "scene.detail": [
+            "glass_columns",
+            "stone_floor"
+          ],
+          "scene.surface": "clear_glass",
+          "scene.spatial": "reflection_depth"
+        },
+        "tags": [
+          "都市",
+          "现代建筑",
+          "室内"
+        ]
+      },
+      {
+        "id": "hotel_balcony_golden_hour",
+        "label": "金色时刻酒店阳台",
+        "fields": {
+          "scene.location": "hotel_balcony",
+          "scene.time": "golden_hour",
+          "scene.weather": "sea_breeze",
+          "scene.foreground": "railing",
+          "scene.background": "balcony_landscape",
+          "scene.detail": [
+            "balcony_chair",
+            "linen_curtain"
+          ],
+          "scene.surface": "gray_stone",
+          "scene.spatial": "open_negative_space"
+        },
+        "tags": [
+          "旅行",
+          "度假",
+          "阳台"
+        ]
+      },
+      {
+        "id": "city_rooftop_blue_hour",
+        "label": "蓝调城市天台",
+        "fields": {
+          "scene.location": "city_rooftop",
+          "scene.time": "blue_hour",
+          "scene.weather": "thin_clouds",
+          "scene.foreground": "railing",
+          "scene.background": "city_skyline",
+          "scene.detail": [
+            "city_lights",
+            "passing_cars"
+          ],
+          "scene.surface": "gray_stone",
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "都市",
+          "蓝调时刻",
+          "天台"
+        ]
+      },
+      {
+        "id": "seaside_dusk",
+        "label": "傍晚海边",
+        "fields": {
+          "scene.location": "seaside",
+          "scene.time": "dusk",
+          "scene.weather": "sea_breeze",
+          "scene.foreground": "soft_light_spots",
+          "scene.background": "sea_horizon",
+          "scene.detail": [
+            "sea_waves",
+            "stone_path"
+          ],
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "海边",
+          "傍晚",
+          "旅行"
+        ]
+      },
+      {
+        "id": "quiet_bookstore",
+        "label": "安静独立书店",
+        "fields": {
+          "scene.location": "bookstore",
+          "scene.time": "overcast_afternoon",
+          "scene.foreground": "chair_back",
+          "scene.background": "book_shelves",
+          "scene.detail": [
+            "book_stack",
+            "floor_lamp"
+          ],
+          "scene.surface": "warm_wood",
+          "scene.spatial": "shallow_interior"
+        },
+        "tags": [
+          "书店",
+          "生活写真",
+          "室内"
+        ]
+      },
+      {
+        "id": "minimal_gallery",
+        "label": "极简当代美术馆",
+        "fields": {
+          "scene.location": "art_gallery",
+          "scene.time": "late_morning",
+          "scene.foreground": "gallery_wall_edge",
+          "scene.background": "white_gallery",
+          "scene.detail": [
+            "large_painting",
+            "stone_floor"
+          ],
+          "scene.surface": "white_plaster",
+          "scene.spatial": "geometric_gallery"
+        },
+        "tags": [
+          "美术馆",
+          "极简",
+          "室内"
+        ]
+      },
+      {
+        "id": "flower_shop_morning",
+        "label": "清晨临街花店",
+        "fields": {
+          "scene.location": "flower_shop",
+          "scene.time": "clear_morning",
+          "scene.weather": "clear_sun",
+          "scene.foreground": "flower_buckets",
+          "scene.background": "flower_display",
+          "scene.detail": [
+            "flower_wrapping",
+            "green_plant"
+          ],
+          "scene.surface": "light_wood",
+          "scene.spatial": "layered_plants"
+        },
+        "tags": [
+          "花店",
+          "清晨",
+          "生活写真"
+        ]
+      },
+      {
+        "id": "tennis_court_sun",
+        "label": "晴日室外网球场",
+        "fields": {
+          "scene.location": "tennis_court",
+          "scene.time": "late_morning",
+          "scene.weather": "clear_sun",
+          "scene.foreground": "bench_edge",
+          "scene.background": "tennis_fence",
+          "scene.detail": [
+            "tennis_racket",
+            "towel_bottle"
+          ],
+          "scene.surface": "rubber_floor",
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "运动",
+          "网球",
+          "户外"
+        ]
+      },
+      {
+        "id": "fitness_studio_day",
+        "label": "明亮健身训练室",
+        "fields": {
+          "scene.location": "fitness_studio",
+          "scene.time": "late_morning",
+          "scene.foreground": "equipment_edge",
+          "scene.background": "gym_mirrors",
+          "scene.detail": [
+            "gym_bench",
+            "towel_bottle"
+          ],
+          "scene.surface": "rubber_floor",
+          "scene.spatial": "reflection_depth"
+        },
+        "tags": [
+          "运动",
+          "健身",
+          "室内"
+        ]
+      }
+    ]
+  }
+}

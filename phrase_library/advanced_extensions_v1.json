@@ -1,0 +1,3079 @@
+{
+  "schema_version": "1.0.0",
+  "language": "zh-CN",
+  "target_models": [
+    "Z-Image",
+    "Z-Image-Turbo"
+  ],
+  "validation": {
+    "language_rules": "passed",
+    "model_image_tests": "pending"
+  },
+  "fields": {
+    "hair.undertone": {
+      "category": "发型扩展",
+      "label": "发色色调",
+      "template": "发色在光线下显出{value}",
+      "options": [
+        {
+          "id": "neutral_natural",
+          "label": "自然中性色调",
+          "value": "接近中性的自然色调"
+        },
+        {
+          "id": "warm_brown",
+          "label": "温暖棕调",
+          "value": "柔和温暖的棕色底调"
+        },
+        {
+          "id": "red_brown",
+          "label": "红棕底调",
+          "value": "清楚但克制的红棕底调"
+        },
+        {
+          "id": "golden",
+          "label": "金色底调",
+          "value": "明亮细腻的金色底调"
+        },
+        {
+          "id": "honey",
+          "label": "蜂蜜暖调",
+          "value": "介于金色与浅棕之间的蜂蜜暖调"
+        },
+        {
+          "id": "copper",
+          "label": "铜色底调",
+          "value": "带金属感反光的铜红底调"
+        },
+        {
+          "id": "ash_gray",
+          "label": "灰调",
+          "value": "低饱和的冷灰底调"
+        },
+        {
+          "id": "blue_black",
+          "label": "蓝黑反光",
+          "value": "只在高光处可见的深蓝黑反光"
+        },
+        {
+          "id": "burgundy",
+          "label": "酒红底调",
+          "value": "深沉的酒红底调"
+        },
+        {
+          "id": "beige",
+          "label": "米金底调",
+          "value": "柔和低饱和的米金底调"
+        },
+        {
+          "id": "pearl",
+          "label": "珍珠冷光",
+          "value": "银白与淡灰交替的珍珠冷光"
+        },
+        {
+          "id": "rose",
+          "label": "玫瑰粉调",
+          "value": "轻柔低饱和的玫瑰粉底调"
+        },
+        {
+          "id": "smoky",
+          "label": "烟熏色调",
+          "value": "明度偏低的烟熏灰色调"
+        },
+        {
+          "id": "iridescent",
+          "label": "轻微虹彩",
+          "value": "随角度变化的细微冷暖虹彩"
+        },
+        {
+          "id": "ash_blue",
+          "label": "灰蓝底调",
+          "value": "清冷的灰蓝底调"
+        },
+        {
+          "id": "lavender",
+          "label": "紫灰底调",
+          "value": "柔和的紫灰底调"
+        },
+        {
+          "id": "mint",
+          "label": "薄荷底调",
+          "value": "清透的薄荷绿底调"
+        },
+        {
+          "id": "silver_sheen",
+          "label": "银灰光泽",
+          "value": "金属质感的银灰光泽"
+        }
+      ]
+    },
+    "hair.dye_pattern": {
+      "category": "发型扩展",
+      "label": "染色方式",
+      "template": "头发采用{value}",
+      "options": [
+        {
+          "id": "uniform",
+          "label": "均匀单色染",
+          "value": "从发根到发尾颜色均匀的单色染发"
+        },
+        {
+          "id": "dark_root_gradient",
+          "label": "深发根渐变",
+          "value": "深色发根向较浅发尾平滑过渡的渐变染发"
+        },
+        {
+          "id": "light_tip_gradient",
+          "label": "浅色发尾渐变",
+          "value": "中段开始逐渐变浅、发尾最明亮的渐变染发"
+        },
+        {
+          "id": "dip_dyed_tips",
+          "label": "对比发尾染",
+          "value": "发尾具有边界清楚的对比色染发"
+        },
+        {
+          "id": "split_center",
+          "label": "中分双色染",
+          "value": "以中分线为界、左右颜色不同的双色染发"
+        },
+        {
+          "id": "face_framing_highlights",
+          "label": "脸侧挑染",
+          "value": "脸侧两束头发颜色更浅的框脸挑染"
+        },
+        {
+          "id": "fine_highlights",
+          "label": "细密挑染",
+          "value": "细窄浅色发束均匀分布的挑染"
+        },
+        {
+          "id": "chunky_highlights",
+          "label": "宽束挑染",
+          "value": "数束宽度明显、颜色对比清楚的挑染"
+        },
+        {
+          "id": "hidden_underlayer",
+          "label": "内层染",
+          "value": "外层保持主发色、内层露出对比颜色的染发"
+        },
+        {
+          "id": "ear_side_blocks",
+          "label": "耳侧色块染",
+          "value": "两侧耳旁各有一块边界清楚的对比色染发"
+        },
+        {
+          "id": "crown_highlight",
+          "label": "头顶光带染",
+          "value": "头顶与分缝附近分布较浅色发束的染发"
+        },
+        {
+          "id": "two_tone_ends",
+          "label": "双色发尾染",
+          "value": "发尾由两种相邻颜色交替组成的染发"
+        },
+        {
+          "id": "soft_balayage",
+          "label": "柔和手扫染",
+          "value": "浅色发束从中段自然出现、边界柔和的手扫染发"
+        },
+        {
+          "id": "streak_accent",
+          "label": "单束强调色",
+          "value": "一束高饱和颜色作为局部强调的染发"
+        },
+        {
+          "id": "ear_loop_dye",
+          "label": "挂耳染",
+          "value": "仅在耳侧一缕的挂耳染"
+        },
+        {
+          "id": "bang_dye",
+          "label": "刘海挑染",
+          "value": "集中在刘海的挑染"
+        },
+        {
+          "id": "two_tone_split",
+          "label": "半半染",
+          "value": "左右对半的双色染"
+        },
+        {
+          "id": "underlayer_dye",
+          "label": "底层染",
+          "value": "藏在发下的底层染色"
+        }
+      ]
+    },
+    "camera.framing_effect": {
+      "category": "高级摄影",
+      "label": "框景方式",
+      "template": "画面通过{value}",
+      "options": [
+        {
+          "id": "leaf_shoot_through",
+          "label": "叶片穿透框景",
+          "value": "靠近镜头的失焦叶片形成局部遮挡"
+        },
+        {
+          "id": "door_frame",
+          "label": "门框纵向框景",
+          "value": "门框从左右两侧围合人物"
+        },
+        {
+          "id": "window_frame",
+          "label": "窗框几何框景",
+          "value": "窗框线条在人物周围构成几何边界"
+        },
+        {
+          "id": "curtain_gap",
+          "label": "窗帘缝隙框景",
+          "value": "两侧窗帘之间的开口集中视线"
+        },
+        {
+          "id": "mirror_edge",
+          "label": "镜缘框景",
+          "value": "镜面边缘与真实空间共同围合人物"
+        },
+        {
+          "id": "railing_lines",
+          "label": "栏杆引导线",
+          "value": "栏杆线条从前景延伸并引导视线"
+        },
+        {
+          "id": "foreground_silhouette",
+          "label": "暗色前景剪影",
+          "value": "靠近镜头的暗色轮廓形成不规则边框"
+        },
+        {
+          "id": "foreground_hands",
+          "label": "手部贴近镜头",
+          "value": "靠近镜头的手部形成明显近大远小关系"
+        },
+        {
+          "id": "narrow_opening",
+          "label": "狭窄开口取景",
+          "value": "前景结构之间的狭窄开口露出人物"
+        },
+        {
+          "id": "frame_within_frame",
+          "label": "多层框中框",
+          "value": "前后两层建筑边界形成框中框结构"
+        },
+        {
+          "id": "reflection_split",
+          "label": "反射分割画面",
+          "value": "真实人物与反射影像分处画面两侧"
+        },
+        {
+          "id": "corner_negative_space",
+          "label": "角落留白",
+          "value": "人物贴近画面角落并保留大面积简洁空间"
+        },
+        {
+          "id": "diagonal_obstruction",
+          "label": "对角线遮挡",
+          "value": "前景遮挡沿对角线切入画面"
+        },
+        {
+          "id": "circular_opening",
+          "label": "圆形开口框景",
+          "value": "圆形或拱形开口围绕人物主体"
+        },
+        {
+          "id": "wall_edge",
+          "label": "墙缘局部遮挡",
+          "value": "靠近镜头的墙面边缘遮住少量画面"
+        },
+        {
+          "id": "crowd_gap",
+          "label": "人群间隙框景",
+          "value": "失焦人群之间的间隙露出清晰人物"
+        }
+      ]
+    },
+    "camera.optical_effect": {
+      "category": "高级摄影",
+      "label": "光学效果",
+      "template": "镜头呈现{value}",
+      "options": [
+        {
+          "id": "fisheye",
+          "label": "鱼眼畸变",
+          "value": "鱼眼镜头形成的弧形边缘与夸张透视"
+        },
+        {
+          "id": "ultrawide_stretch",
+          "label": "超广角拉伸",
+          "value": "超广角近距离拍摄形成的边缘拉伸与近大远小"
+        },
+        {
+          "id": "telephoto_compression",
+          "label": "长焦压缩",
+          "value": "长焦镜头压缩人物与背景距离的效果"
+        },
+        {
+          "id": "macro_texture",
+          "label": "微距纹理",
+          "value": "微距拍摄呈现的细小材质纹理与极浅景深"
+        },
+        {
+          "id": "window_reflection",
+          "label": "窗户反射",
+          "value": "玻璃表面叠加人物与室外景物的反射"
+        },
+        {
+          "id": "mirror_reflection",
+          "label": "镜面反射",
+          "value": "清晰镜像与真实人物同时入画的效果"
+        },
+        {
+          "id": "textured_glass",
+          "label": "纹理玻璃折射",
+          "value": "纹理玻璃使人物局部轮廓产生规律变形"
+        },
+        {
+          "id": "rain_glass",
+          "label": "雨滴玻璃折射",
+          "value": "玻璃雨滴将背景灯光折射成细小亮斑"
+        },
+        {
+          "id": "prism_refraction",
+          "label": "棱镜彩色折射",
+          "value": "棱镜在画面边缘形成局部彩色折射"
+        },
+        {
+          "id": "lens_flare",
+          "label": "镜头眩光",
+          "value": "逆光进入镜头形成透明光斑与亮度渐变"
+        },
+        {
+          "id": "soft_focus",
+          "label": "柔焦镜片",
+          "value": "亮部边缘轻微扩散而主体轮廓仍可辨认的柔焦效果"
+        },
+        {
+          "id": "panning_blur",
+          "label": "追随摇摄模糊",
+          "value": "人物相对清楚、背景沿运动方向拉开的动态模糊"
+        },
+        {
+          "id": "long_exposure_trails",
+          "label": "长曝光光轨",
+          "value": "静止人物周围出现连续灯光轨迹的长曝光效果"
+        },
+        {
+          "id": "zoom_burst",
+          "label": "径向变焦轨迹",
+          "value": "光线从画面中心向外放射的径向变焦轨迹"
+        },
+        {
+          "id": "double_exposure",
+          "label": "双重曝光",
+          "value": "人物轮廓与另一层场景以透明方式叠加的双重曝光"
+        },
+        {
+          "id": "chromatic_edge",
+          "label": "轻微色散",
+          "value": "高反差边缘出现细窄红蓝色散的光学效果"
+        },
+        {
+          "id": "tilt_shift",
+          "label": "移轴焦平面",
+          "value": "清晰区域呈窄带分布、前后迅速虚化的移轴效果"
+        },
+        {
+          "id": "starburst",
+          "label": "点光源星芒",
+          "value": "小型点光源周围出现细长放射状星芒"
+        },
+        {
+          "id": "halation",
+          "label": "胶片光晕",
+          "value": "高亮边缘向周围扩散出轻微暖色光晕"
+        },
+        {
+          "id": "underwater_refraction",
+          "label": "水面折射",
+          "value": "水面波动在人物与背景上形成轻微折射变形"
+        }
+      ]
+    },
+    "lighting.subject_effect": {
+      "category": "高级光效",
+      "label": "人物局部光效",
+      "template": "人物身上可见{value}",
+      "options": [
+        {
+          "id": "round_catchlights",
+          "label": "圆形眼神光",
+          "value": "双眼中位置一致的圆形眼神光"
+        },
+        {
+          "id": "window_catchlights",
+          "label": "窗格眼神光",
+          "value": "双眼中清楚可见的矩形窗格反光"
+        },
+        {
+          "id": "butterfly_shadow",
+          "label": "蝶形鼻影",
+          "value": "鼻尖下方短小对称的蝶形阴影"
+        },
+        {
+          "id": "loop_shadow",
+          "label": "环形鼻影",
+          "value": "鼻侧向下延伸但未连接面颊暗部的短阴影"
+        },
+        {
+          "id": "rembrandt_triangle",
+          "label": "伦勃朗三角光",
+          "value": "背光侧脸颊上的小块三角形亮区"
+        },
+        {
+          "id": "split_face",
+          "label": "面部明暗分割",
+          "value": "面部一侧明亮、另一侧明显压暗的垂直分区"
+        },
+        {
+          "id": "narrow_face_strip",
+          "label": "面部窄光带",
+          "value": "横跨眼睛或面中的狭窄亮光带"
+        },
+        {
+          "id": "eye_mask_shadow",
+          "label": "眼周图形阴影",
+          "value": "眼周区域边界清楚的几何阴影"
+        },
+        {
+          "id": "hair_rim",
+          "label": "发丝轮廓光",
+          "value": "发丝外缘连续而纤细的亮色轮廓"
+        },
+        {
+          "id": "shoulder_rim",
+          "label": "肩部轮廓光",
+          "value": "肩膀与手臂外缘清楚的轮廓亮线"
+        },
+        {
+          "id": "translucent_fingers",
+          "label": "手指透光",
+          "value": "逆光穿过手指边缘形成的暖红透光"
+        },
+        {
+          "id": "fingertip_glow",
+          "label": "指尖亮点",
+          "value": "指尖与光源接触位置出现的集中亮点"
+        },
+        {
+          "id": "leaf_dapple_skin",
+          "label": "枝叶斑驳光",
+          "value": "面部、肩颈和手臂上的枝叶形状光斑"
+        },
+        {
+          "id": "window_grid_skin",
+          "label": "窗格投影",
+          "value": "落在人物皮肤和服装上的规则窗格投影"
+        },
+        {
+          "id": "water_caustic_skin",
+          "label": "水纹焦散",
+          "value": "皮肤和衣料表面波动形状的水纹亮斑"
+        },
+        {
+          "id": "neon_edge",
+          "label": "彩色霓虹轮廓",
+          "value": "人物轮廓两侧不同颜色的霓虹亮边"
+        },
+        {
+          "id": "warm_face_cool_rim",
+          "label": "暖面冷轮廓",
+          "value": "面部暖色照明与头发冷色轮廓光"
+        },
+        {
+          "id": "face_spotlight",
+          "label": "面部聚光",
+          "value": "集中照亮完整面部、向颈部快速衰减的圆形光区"
+        },
+        {
+          "id": "eye_highlight_band",
+          "label": "双眼横向亮带",
+          "value": "同时穿过双眼的柔和横向亮带"
+        },
+        {
+          "id": "lip_specular",
+          "label": "唇部集中高光",
+          "value": "唇部中央清楚而面积较小的湿润高光"
+        },
+        {
+          "id": "jewelry_sparkle",
+          "label": "首饰闪光点",
+          "value": "耳饰或项链边缘少量清晰闪光点"
+        },
+        {
+          "id": "fabric_specular",
+          "label": "面料高光纹理",
+          "value": "丝绸、皮革或金属面料上连续的高光纹理"
+        },
+        {
+          "id": "silhouette_edge",
+          "label": "剪影边缘分离",
+          "value": "暗色人物轮廓被细窄背光从背景中分离"
+        },
+        {
+          "id": "top_light_pool",
+          "label": "顶部局部光池",
+          "value": "头顶、面部和肩部处于集中光池，其余身体逐渐进入暗部"
+        }
+      ]
+    },
+    "lighting.environment_effect": {
+      "category": "高级光效",
+      "label": "环境光效",
+      "template": "环境中可见{value}",
+      "options": [
+        {
+          "id": "volumetric_beam",
+          "label": "体积光束",
+          "value": "空气介质中边界可见的体积光束"
+        },
+        {
+          "id": "blind_shadows",
+          "label": "百叶窗影",
+          "value": "墙面与地面上方向一致的百叶窗条纹投影"
+        },
+        {
+          "id": "triangle_projection",
+          "label": "三角形投影",
+          "value": "人物后方墙面上边缘清楚的三角形亮区"
+        },
+        {
+          "id": "geometric_projection",
+          "label": "几何投影",
+          "value": "由矩形与斜线组成的几何光影投射"
+        },
+        {
+          "id": "leaf_shadow_background",
+          "label": "背景枝叶影",
+          "value": "背景墙面上疏密自然的枝叶投影"
+        },
+        {
+          "id": "circular_backdrop_spot",
+          "label": "圆形背景光斑",
+          "value": "人物背后居中的柔边圆形光斑"
+        },
+        {
+          "id": "radial_backlight",
+          "label": "放射状背光",
+          "value": "被人物遮挡的光源向四周形成放射状亮线"
+        },
+        {
+          "id": "floor_reflection",
+          "label": "地面完整倒影",
+          "value": "光洁地面上清楚但亮度较低的人物倒影"
+        },
+        {
+          "id": "wet_ground_reflection",
+          "label": "湿地灯光反射",
+          "value": "湿润地面上被拉长的彩色灯光反射"
+        },
+        {
+          "id": "mirror_repetition",
+          "label": "多重镜像",
+          "value": "相对镜面形成的重复人物倒影"
+        },
+        {
+          "id": "dust_in_light",
+          "label": "光束浮尘",
+          "value": "光束中少量可见的细小浮尘颗粒"
+        },
+        {
+          "id": "haze_bloom",
+          "label": "薄雾辉光",
+          "value": "薄雾使明亮区域向周围柔和扩散"
+        },
+        {
+          "id": "colored_fog",
+          "label": "彩色薄雾",
+          "value": "被不同色光染亮的低密度薄雾"
+        },
+        {
+          "id": "water_caustic_room",
+          "label": "空间水纹焦散",
+          "value": "墙面与地面上连续波动形状的水纹亮斑"
+        },
+        {
+          "id": "neon_surface_reflection",
+          "label": "霓虹表面反射",
+          "value": "玻璃与金属表面细长的彩色霓虹反射"
+        },
+        {
+          "id": "projected_color_bands",
+          "label": "彩色投影带",
+          "value": "横跨墙面和人物周围的多条半透明彩色光带"
+        },
+        {
+          "id": "prism_rainbow",
+          "label": "局部彩虹折射",
+          "value": "墙面或地面上一小片光谱排列的彩虹折射"
+        },
+        {
+          "id": "doorway_light_strip",
+          "label": "门缝光带",
+          "value": "从半开门后延伸到地面的狭长亮光带"
+        },
+        {
+          "id": "ceiling_light_pool",
+          "label": "顶灯光池",
+          "value": "顶部灯具在地面形成边缘柔和的集中光池"
+        },
+        {
+          "id": "lattice_shadow",
+          "label": "格栅投影",
+          "value": "木格栅在墙面和地面形成的重复方格阴影"
+        },
+        {
+          "id": "city_bokeh",
+          "label": "城市灯光散景",
+          "value": "远处城市点光源形成的大小不一圆形散景"
+        },
+        {
+          "id": "backlight_air_glow",
+          "label": "逆光空气辉光",
+          "value": "人物周围空气被逆光照亮形成的柔和明雾"
+        },
+        {
+          "id": "high_key_wash",
+          "label": "高调白色漫射",
+          "value": "白色墙面与地面共同反射形成的高调漫射光"
+        },
+        {
+          "id": "low_key_vignette",
+          "label": "暗角式局部照明",
+          "value": "画面中央保持可见、四周逐渐进入深色暗部的照明"
+        }
+      ]
+    },
+    "scene.indoor_family": {
+      "category": "室内场景扩展",
+      "label": "室内空间大类",
+      "template": "空间属于{value}",
+      "options": [
+        {
+          "id": "residential",
+          "label": "居住空间",
+          "value": "日常居住空间"
+        },
+        {
+          "id": "hospitality",
+          "label": "餐饮与酒店",
+          "value": "餐饮或酒店空间"
+        },
+        {
+          "id": "retail",
+          "label": "商业零售",
+          "value": "商业零售空间"
+        },
+        {
+          "id": "culture",
+          "label": "文化艺术",
+          "value": "文化艺术空间"
+        },
+        {
+          "id": "workplace",
+          "label": "办公工作",
+          "value": "办公与专业工作空间"
+        },
+        {
+          "id": "transport",
+          "label": "交通空间",
+          "value": "室内交通空间"
+        },
+        {
+          "id": "wellness",
+          "label": "运动康体",
+          "value": "运动与康体空间"
+        },
+        {
+          "id": "heritage",
+          "label": "东方传统",
+          "value": "东方传统室内空间"
+        },
+        {
+          "id": "industrial",
+          "label": "工业功能",
+          "value": "工业与后勤功能空间"
+        },
+        {
+          "id": "specialized",
+          "label": "专业特色",
+          "value": "具有明确用途的专业空间"
+        }
+      ]
+    },
+    "scene.indoor_location": {
+      "category": "室内场景扩展",
+      "label": "具体室内地点",
+      "template": "人物位于{value}",
+      "options": [
+        {
+          "id": "sunlit_living_room",
+          "label": "采光客厅",
+          "value": "窗户宽大、布置简洁的明亮客厅",
+          "tags": [
+            "residential"
+          ]
+        },
+        {
+          "id": "cream_bedroom",
+          "label": "奶油色卧室",
+          "value": "床品柔软、色调统一的奶油色卧室",
+          "tags": [
+            "residential"
+          ]
+        },
+        {
+          "id": "compact_kitchen",
+          "label": "开放式厨房",
+          "value": "浅色台面与整齐橱柜组成的开放式厨房",
+          "tags": [
+            "residential"
+          ]
+        },
+        {
+          "id": "window_home_office",
+          "label": "窗边书房",
+          "value": "书桌靠近窗户、书架排列整齐的家庭书房",
+          "tags": [
+            "residential"
+          ]
+        },
+        {
+          "id": "marble_bathroom",
+          "label": "石材浴室",
+          "value": "浅色石材墙面与大镜面组成的现代浴室",
+          "tags": [
+            "residential"
+          ]
+        },
+        {
+          "id": "enclosed_balcony",
+          "label": "封闭阳台",
+          "value": "落地窗、绿植和休闲椅组成的封闭阳台",
+          "tags": [
+            "residential"
+          ]
+        },
+        {
+          "id": "wood_cafe",
+          "label": "暖木咖啡馆",
+          "value": "暖木墙面与皮质卡座组成的咖啡馆",
+          "tags": [
+            "hospitality"
+          ]
+        },
+        {
+          "id": "hotel_guest_room",
+          "label": "酒店客房",
+          "value": "床头灯与软包墙面构成的现代酒店客房",
+          "tags": [
+            "hospitality"
+          ]
+        },
+        {
+          "id": "hotel_lounge",
+          "label": "酒店休息厅",
+          "value": "沙发、边几与低位灯具组成的酒店休息厅",
+          "tags": [
+            "hospitality"
+          ]
+        },
+        {
+          "id": "restaurant_booth",
+          "label": "餐厅卡座",
+          "value": "深色卡座与小型餐桌组成的餐厅座位区",
+          "tags": [
+            "hospitality"
+          ]
+        },
+        {
+          "id": "cocktail_bar",
+          "label": "鸡尾酒吧",
+          "value": "长吧台、玻璃杯架与暖色灯带组成的酒吧",
+          "tags": [
+            "hospitality"
+          ]
+        },
+        {
+          "id": "hotel_corridor",
+          "label": "酒店走廊",
+          "value": "地毯、墙灯和连续房门组成的酒店走廊",
+          "tags": [
+            "hospitality"
+          ]
+        },
+        {
+          "id": "independent_bookstore",
+          "label": "独立书店",
+          "value": "木质书架与阅读桌组成的独立书店",
+          "tags": [
+            "retail"
+          ]
+        },
+        {
+          "id": "flower_shop",
+          "label": "花店",
+          "value": "鲜花、绿植和包装台组成的临街花店",
+          "tags": [
+            "retail"
+          ]
+        },
+        {
+          "id": "record_store",
+          "label": "唱片店",
+          "value": "黑胶唱片架与试听区域组成的复古唱片店",
+          "tags": [
+            "retail"
+          ]
+        },
+        {
+          "id": "fashion_boutique",
+          "label": "服装精品店",
+          "value": "服装挂架、试衣镜和展示台组成的精品店",
+          "tags": [
+            "retail"
+          ]
+        },
+        {
+          "id": "jewelry_showroom",
+          "label": "珠宝陈列室",
+          "value": "玻璃展柜与定向灯光组成的珠宝陈列室",
+          "tags": [
+            "retail"
+          ]
+        },
+        {
+          "id": "modern_pharmacy",
+          "label": "现代药店",
+          "value": "白色货架与清晰导视组成的现代药店",
+          "tags": [
+            "retail"
+          ]
+        },
+        {
+          "id": "library_reading_room",
+          "label": "图书馆阅览室",
+          "value": "长桌、阅读灯和高书架组成的图书馆阅览室",
+          "tags": [
+            "culture"
+          ]
+        },
+        {
+          "id": "white_art_gallery",
+          "label": "白墙美术馆",
+          "value": "白墙、高挑顶面与大幅作品组成的当代美术馆",
+          "tags": [
+            "culture"
+          ]
+        },
+        {
+          "id": "museum_hall",
+          "label": "博物馆展厅",
+          "value": "展柜、石材地面和高顶组成的博物馆展厅",
+          "tags": [
+            "culture"
+          ]
+        },
+        {
+          "id": "theater_foyer",
+          "label": "剧院前厅",
+          "value": "楼梯、立柱和暖色吊灯组成的剧院前厅",
+          "tags": [
+            "culture"
+          ]
+        },
+        {
+          "id": "dance_rehearsal_room",
+          "label": "舞蹈排练室",
+          "value": "整面镜墙、木地板和扶杆组成的舞蹈排练室",
+          "tags": [
+            "culture"
+          ]
+        },
+        {
+          "id": "pottery_studio",
+          "label": "陶艺工作室",
+          "value": "陶轮、木架和半成品陶器组成的陶艺工作室",
+          "tags": [
+            "culture"
+          ]
+        },
+        {
+          "id": "executive_office",
+          "label": "行政办公室",
+          "value": "深色办公桌、文件柜和城市窗景组成的行政办公室",
+          "tags": [
+            "workplace"
+          ]
+        },
+        {
+          "id": "glass_meeting_room",
+          "label": "玻璃会议室",
+          "value": "玻璃隔墙、长桌和显示屏组成的会议室",
+          "tags": [
+            "workplace"
+          ]
+        },
+        {
+          "id": "creative_studio",
+          "label": "创意工作室",
+          "value": "样稿墙、工作台和开放式置物架组成的创意工作室",
+          "tags": [
+            "workplace"
+          ]
+        },
+        {
+          "id": "fashion_atelier",
+          "label": "服装工作室",
+          "value": "人台、面料卷和裁剪桌组成的服装工作室",
+          "tags": [
+            "workplace"
+          ]
+        },
+        {
+          "id": "newsroom",
+          "label": "新闻编辑室",
+          "value": "多排工作台与显示屏组成的新闻编辑室",
+          "tags": [
+            "workplace"
+          ]
+        },
+        {
+          "id": "clean_laboratory",
+          "label": "洁净实验室",
+          "value": "浅色操作台、玻璃器皿与顶部灯板组成的实验室",
+          "tags": [
+            "workplace"
+          ]
+        },
+        {
+          "id": "station_waiting_hall",
+          "label": "车站候车厅",
+          "value": "成排座椅、电子时刻屏和高顶组成的候车厅",
+          "tags": [
+            "transport"
+          ]
+        },
+        {
+          "id": "subway_platform",
+          "label": "地铁站台",
+          "value": "站台屏蔽门、导视牌和连续顶灯组成的地铁站台",
+          "tags": [
+            "transport"
+          ]
+        },
+        {
+          "id": "airport_lounge",
+          "label": "机场休息室",
+          "value": "大窗、休闲座椅与航班信息屏组成的机场休息室",
+          "tags": [
+            "transport"
+          ]
+        },
+        {
+          "id": "train_carriage",
+          "label": "列车车厢",
+          "value": "两排列车座椅与连续车窗组成的客运车厢",
+          "tags": [
+            "transport"
+          ]
+        },
+        {
+          "id": "parking_garage",
+          "label": "地下停车场",
+          "value": "混凝土立柱、车位线与顶部灯管组成的停车场",
+          "tags": [
+            "transport"
+          ]
+        },
+        {
+          "id": "elevator_lobby",
+          "label": "电梯厅",
+          "value": "金属电梯门、石材墙面和楼层指示灯组成的电梯厅",
+          "tags": [
+            "transport"
+          ]
+        },
+        {
+          "id": "fitness_studio",
+          "label": "健身训练室",
+          "value": "训练器械、镜墙和橡胶地面组成的健身训练室",
+          "tags": [
+            "wellness"
+          ]
+        },
+        {
+          "id": "yoga_studio",
+          "label": "瑜伽教室",
+          "value": "木地板、瑜伽垫和柔和窗光组成的瑜伽教室",
+          "tags": [
+            "wellness"
+          ]
+        },
+        {
+          "id": "indoor_pool",
+          "label": "室内泳池",
+          "value": "浅色池壁、水面反光与高窗组成的室内泳池",
+          "tags": [
+            "wellness"
+          ]
+        },
+        {
+          "id": "spa_lounge",
+          "label": "水疗休息区",
+          "value": "躺椅、毛巾和低位暖光组成的水疗休息区",
+          "tags": [
+            "wellness"
+          ]
+        },
+        {
+          "id": "sports_locker_room",
+          "label": "运动更衣室",
+          "value": "储物柜、长凳和顶灯组成的运动更衣室",
+          "tags": [
+            "wellness"
+          ]
+        },
+        {
+          "id": "pilates_room",
+          "label": "普拉提教室",
+          "value": "普拉提器械、落地窗与浅色地面组成的训练教室",
+          "tags": [
+            "wellness"
+          ]
+        },
+        {
+          "id": "new_chinese_tearoom",
+          "label": "新中式茶室",
+          "value": "木格栅、茶桌与留白墙面组成的新中式茶室",
+          "tags": [
+            "heritage"
+          ]
+        },
+        {
+          "id": "temple_side_hall",
+          "label": "寺院偏殿",
+          "value": "木柱、供桌与深色地砖组成的安静寺院偏殿",
+          "tags": [
+            "heritage"
+          ]
+        },
+        {
+          "id": "traditional_study",
+          "label": "传统书斋",
+          "value": "书案、卷轴与木质博古架组成的传统书斋",
+          "tags": [
+            "heritage"
+          ]
+        },
+        {
+          "id": "old_mansion_parlor",
+          "label": "老宅厅堂",
+          "value": "木门、圈椅和旧式灯具组成的老宅厅堂",
+          "tags": [
+            "heritage"
+          ]
+        },
+        {
+          "id": "silk_workshop",
+          "label": "传统织造坊",
+          "value": "木质织机、丝线和布匹组成的传统织造工坊",
+          "tags": [
+            "heritage"
+          ]
+        },
+        {
+          "id": "tea_house_corridor",
+          "label": "茶馆内廊",
+          "value": "连续木门、灯笼和窄长通道组成的茶馆内廊",
+          "tags": [
+            "heritage"
+          ]
+        },
+        {
+          "id": "warehouse_aisle",
+          "label": "仓库通道",
+          "value": "高货架、纸箱和顶部工业灯组成的仓库通道",
+          "tags": [
+            "industrial"
+          ]
+        },
+        {
+          "id": "factory_walkway",
+          "label": "工厂走道",
+          "value": "金属设备、黄色标线与高窗组成的工厂走道",
+          "tags": [
+            "industrial"
+          ]
+        },
+        {
+          "id": "machine_room",
+          "label": "机械设备间",
+          "value": "管线、阀门和大型设备组成的机械设备间",
+          "tags": [
+            "industrial"
+          ]
+        },
+        {
+          "id": "basement_laundry",
+          "label": "地下洗衣房",
+          "value": "成排洗衣机、折衣台和裸露管线组成的洗衣房",
+          "tags": [
+            "industrial"
+          ]
+        },
+        {
+          "id": "service_corridor",
+          "label": "后勤走廊",
+          "value": "浅色墙面、推车和功能门组成的后勤走廊",
+          "tags": [
+            "industrial"
+          ]
+        },
+        {
+          "id": "glass_greenhouse",
+          "label": "玻璃温室",
+          "value": "玻璃顶面、金属骨架与密集植物组成的室内温室",
+          "tags": [
+            "industrial"
+          ]
+        },
+        {
+          "id": "photo_studio",
+          "label": "摄影棚",
+          "value": "无缝背景纸、灯架和监视器组成的摄影棚",
+          "tags": [
+            "specialized"
+          ]
+        },
+        {
+          "id": "backstage_dressing_room",
+          "label": "后台化妆间",
+          "value": "带灯镜台、服装架和化妆用品组成的后台化妆间",
+          "tags": [
+            "specialized"
+          ]
+        },
+        {
+          "id": "music_rehearsal_room",
+          "label": "音乐排练室",
+          "value": "乐器、谱架与吸音墙面组成的音乐排练室",
+          "tags": [
+            "specialized"
+          ]
+        },
+        {
+          "id": "clockmaker_workshop",
+          "label": "钟表工坊",
+          "value": "小型工具、零件抽屉和多座钟表组成的钟表工坊",
+          "tags": [
+            "specialized"
+          ]
+        },
+        {
+          "id": "observatory_room",
+          "label": "天文观测室",
+          "value": "大型望远镜、圆顶结构与控制台组成的观测室",
+          "tags": [
+            "specialized"
+          ]
+        },
+        {
+          "id": "archive_room",
+          "label": "档案室",
+          "value": "移动密集架、文件盒与窄通道组成的档案室",
+          "tags": [
+            "specialized"
+          ]
+        },
+        {
+          "id": "spiral_staircase",
+          "label": "旋转楼梯",
+          "value": "造型别致的旋转楼梯",
+          "tags": [
+            "residential"
+          ]
+        },
+        {
+          "id": "sunroom",
+          "label": "阳光房",
+          "value": "三面采光、通透明亮的阳光房",
+          "tags": [
+            "residential"
+          ]
+        },
+        {
+          "id": "fireplace_living",
+          "label": "壁炉客厅",
+          "value": "带壁炉的温暖客厅",
+          "tags": [
+            "residential"
+          ]
+        },
+        {
+          "id": "attic_loft",
+          "label": "木屋阁楼",
+          "value": "木质横梁外露的阁楼",
+          "tags": [
+            "residential"
+          ]
+        },
+        {
+          "id": "glass_corridor",
+          "label": "玻璃连廊",
+          "value": "连接两栋楼的玻璃连廊",
+          "tags": [
+            "workplace"
+          ]
+        },
+        {
+          "id": "garden_veranda",
+          "label": "花园门廊",
+          "value": "正对花园的开放式门廊",
+          "tags": [
+            "residential"
+          ]
+        }
+      ]
+    }
+  },
+  "bundles": {
+    "hair_style_bundles": [
+      {
+        "id": "chin_bob_air_bangs",
+        "label": "齐下巴内扣空气刘海",
+        "fields": {
+          "hair.length": "chin",
+          "hair.texture": "inward_curl",
+          "hair.style": "bob_shape",
+          "hair.bangs": "air_bangs"
+        },
+        "tags": [
+          "短发",
+          "日系"
+        ]
+      },
+      {
+        "id": "chin_bob_wispy",
+        "label": "齐下巴细碎短发",
+        "fields": {
+          "hair.length": "chin",
+          "hair.texture": "straight_smooth",
+          "hair.style": "bob_shape",
+          "hair.bangs": "wispy_bangs"
+        },
+        "tags": [
+          "短发",
+          "自然"
+        ]
+      },
+      {
+        "id": "shoulder_waves_center",
+        "label": "齐肩中分微卷",
+        "fields": {
+          "hair.length": "shoulder",
+          "hair.texture": "soft_wavy",
+          "hair.style": "loose",
+          "hair.bangs": "middle_part"
+        },
+        "tags": [
+          "齐肩",
+          "温柔"
+        ]
+      },
+      {
+        "id": "shoulder_inward_air",
+        "label": "齐肩内扣空气刘海",
+        "fields": {
+          "hair.length": "shoulder",
+          "hair.texture": "inward_curl",
+          "hair.style": "loose",
+          "hair.bangs": "air_bangs"
+        },
+        "tags": [
+          "齐肩",
+          "清甜"
+        ]
+      },
+      {
+        "id": "collarbone_loose_curtain",
+        "label": "锁骨发与八字刘海",
+        "fields": {
+          "hair.length": "collarbone",
+          "hair.texture": "soft_wavy",
+          "hair.style": "loose",
+          "hair.bangs": "curtain_bangs"
+        },
+        "tags": [
+          "锁骨发",
+          "生活"
+        ]
+      },
+      {
+        "id": "collarbone_sleek_side",
+        "label": "锁骨直发侧分",
+        "fields": {
+          "hair.length": "collarbone",
+          "hair.texture": "sleek_glossy",
+          "hair.style": "side_swept",
+          "hair.bangs": "side_bangs"
+        },
+        "tags": [
+          "锁骨发",
+          "利落"
+        ]
+      },
+      {
+        "id": "chest_large_waves_middle",
+        "label": "胸长大波浪中分",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "large_waves",
+          "hair.style": "loose",
+          "hair.bangs": "middle_part"
+        },
+        "tags": [
+          "长发",
+          "成熟"
+        ]
+      },
+      {
+        "id": "chest_soft_waves_air",
+        "label": "胸长柔卷空气刘海",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "soft_wavy",
+          "hair.style": "loose",
+          "hair.bangs": "air_bangs"
+        },
+        "tags": [
+          "长发",
+          "日系"
+        ]
+      },
+      {
+        "id": "waist_loose_curls_center",
+        "label": "及腰长卷发",
+        "fields": {
+          "hair.length": "waist",
+          "hair.texture": "loose_curls",
+          "hair.style": "loose",
+          "hair.bangs": "middle_part"
+        },
+        "tags": [
+          "及腰",
+          "卷发"
+        ]
+      },
+      {
+        "id": "waist_straight_wispy",
+        "label": "及腰直发细碎刘海",
+        "fields": {
+          "hair.length": "waist",
+          "hair.texture": "straight_smooth",
+          "hair.style": "loose",
+          "hair.bangs": "wispy_bangs"
+        },
+        "tags": [
+          "及腰",
+          "直发"
+        ]
+      },
+      {
+        "id": "low_ponytail_center",
+        "label": "中分低马尾",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "straight_smooth",
+          "hair.style": "low_ponytail",
+          "hair.bangs": "middle_part"
+        },
+        "tags": [
+          "低马尾",
+          "职场"
+        ]
+      },
+      {
+        "id": "low_ponytail_side_bangs",
+        "label": "侧刘海低马尾",
+        "fields": {
+          "hair.length": "collarbone",
+          "hair.texture": "soft_wavy",
+          "hair.style": "low_ponytail",
+          "hair.bangs": "side_bangs"
+        },
+        "tags": [
+          "低马尾",
+          "柔和"
+        ]
+      },
+      {
+        "id": "high_ponytail_open",
+        "label": "露额高马尾",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "straight_smooth",
+          "hair.style": "high_ponytail",
+          "hair.bangs": "open_forehead"
+        },
+        "tags": [
+          "高马尾",
+          "运动"
+        ]
+      },
+      {
+        "id": "high_ponytail_wavy",
+        "label": "微卷高马尾",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "soft_wavy",
+          "hair.style": "high_ponytail",
+          "hair.bangs": "wispy_bangs"
+        },
+        "tags": [
+          "高马尾",
+          "活力"
+        ]
+      },
+      {
+        "id": "low_bun_middle",
+        "label": "中分整洁低盘发",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "sleek_glossy",
+          "hair.style": "low_bun",
+          "hair.bangs": "middle_part"
+        },
+        "tags": [
+          "盘发",
+          "职场"
+        ]
+      },
+      {
+        "id": "low_bun_wispy",
+        "label": "碎发低盘发",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "soft_wavy",
+          "hair.style": "low_bun",
+          "hair.bangs": "wispy_bangs"
+        },
+        "tags": [
+          "盘发",
+          "松弛"
+        ]
+      },
+      {
+        "id": "high_bun_open",
+        "label": "露额高盘发",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "sleek_glossy",
+          "hair.style": "high_bun",
+          "hair.bangs": "open_forehead"
+        },
+        "tags": [
+          "高盘发",
+          "利落"
+        ]
+      },
+      {
+        "id": "high_bun_face_strands",
+        "label": "高盘发与脸侧碎发",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "soft_wavy",
+          "hair.style": "high_bun",
+          "hair.bangs": "wispy_bangs"
+        },
+        "tags": [
+          "高盘发",
+          "时尚"
+        ]
+      },
+      {
+        "id": "messy_bun_air",
+        "label": "空气刘海松散丸子头",
+        "fields": {
+          "hair.length": "collarbone",
+          "hair.texture": "light_fluffy",
+          "hair.style": "messy_bun",
+          "hair.bangs": "air_bangs"
+        },
+        "tags": [
+          "丸子头",
+          "日常"
+        ]
+      },
+      {
+        "id": "messy_bun_scrunchie",
+        "label": "布艺发圈松散发髻",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "soft_wavy",
+          "hair.style": "messy_bun",
+          "hair.bangs": "wispy_bangs",
+          "jewelry.wrist": "fabric_scrunchie"
+        },
+        "tags": [
+          "发髻",
+          "松弛"
+        ]
+      },
+      {
+        "id": "half_up_curtain",
+        "label": "八字刘海半扎发",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "large_waves",
+          "hair.style": "half_up",
+          "hair.bangs": "curtain_bangs"
+        },
+        "tags": [
+          "半扎发",
+          "浪漫"
+        ]
+      },
+      {
+        "id": "half_up_pearl_clip",
+        "label": "珍珠发夹半扎发",
+        "fields": {
+          "hair.length": "collarbone",
+          "hair.texture": "soft_wavy",
+          "hair.style": "half_up",
+          "hair.bangs": "side_bangs",
+          "hair.headwear": "pearl_clip"
+        },
+        "tags": [
+          "半扎发",
+          "珍珠"
+        ]
+      },
+      {
+        "id": "side_swept_large_waves",
+        "label": "侧分大波浪",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "large_waves",
+          "hair.style": "side_swept",
+          "hair.bangs": "side_bangs"
+        },
+        "tags": [
+          "侧分",
+          "时尚"
+        ]
+      },
+      {
+        "id": "side_swept_wet",
+        "label": "湿发侧梳",
+        "fields": {
+          "hair.length": "shoulder",
+          "hair.texture": "wet_texture",
+          "hair.style": "side_swept",
+          "hair.bangs": "open_forehead"
+        },
+        "tags": [
+          "湿发",
+          "画报"
+        ]
+      },
+      {
+        "id": "french_twist_open",
+        "label": "露额法式扭转盘发",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "sleek_glossy",
+          "hair.style": "french_twist",
+          "hair.bangs": "open_forehead"
+        },
+        "tags": [
+          "法式盘发",
+          "晚宴"
+        ]
+      },
+      {
+        "id": "french_twist_side",
+        "label": "侧刘海法式盘发",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "soft_wavy",
+          "hair.style": "french_twist",
+          "hair.bangs": "side_bangs"
+        },
+        "tags": [
+          "法式盘发",
+          "柔和"
+        ]
+      },
+      {
+        "id": "single_braid_wispy",
+        "label": "细碎刘海单辫",
+        "fields": {
+          "hair.length": "waist",
+          "hair.texture": "straight_smooth",
+          "hair.style": "single_braid",
+          "hair.bangs": "wispy_bangs"
+        },
+        "tags": [
+          "长辫",
+          "自然"
+        ]
+      },
+      {
+        "id": "single_braid_jade_pin",
+        "label": "东方单辫与玉簪",
+        "fields": {
+          "hair.length": "waist",
+          "hair.texture": "straight_smooth",
+          "hair.style": "single_braid",
+          "hair.bangs": "middle_part",
+          "hair.headwear": "jade_hairpin"
+        },
+        "tags": [
+          "东方",
+          "长辫"
+        ]
+      },
+      {
+        "id": "double_braids_air",
+        "label": "空气刘海双辫",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "straight_smooth",
+          "hair.style": "double_braids",
+          "hair.bangs": "air_bangs"
+        },
+        "tags": [
+          "双辫",
+          "清新"
+        ]
+      },
+      {
+        "id": "double_braids_cap",
+        "label": "棒球帽双辫",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "straight_smooth",
+          "hair.style": "double_braids",
+          "hair.bangs": "wispy_bangs",
+          "hair.headwear": "baseball_cap"
+        },
+        "tags": [
+          "双辫",
+          "运动"
+        ]
+      },
+      {
+        "id": "beret_soft_waves",
+        "label": "贝雷帽柔卷发",
+        "fields": {
+          "hair.length": "collarbone",
+          "hair.texture": "soft_wavy",
+          "hair.style": "loose",
+          "hair.bangs": "side_bangs",
+          "hair.headwear": "beret"
+        },
+        "tags": [
+          "贝雷帽",
+          "法式"
+        ]
+      },
+      {
+        "id": "straw_hat_long_waves",
+        "label": "草帽长卷发",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "soft_wavy",
+          "hair.style": "loose",
+          "hair.bangs": "air_bangs",
+          "hair.headwear": "straw_hat"
+        },
+        "tags": [
+          "草帽",
+          "夏日"
+        ]
+      },
+      {
+        "id": "wide_hat_large_waves",
+        "label": "宽檐帽大波浪",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "large_waves",
+          "hair.style": "loose",
+          "hair.bangs": "side_bangs",
+          "hair.headwear": "wide_brim_hat"
+        },
+        "tags": [
+          "宽檐帽",
+          "度假"
+        ]
+      },
+      {
+        "id": "silk_headband_straight",
+        "label": "丝质发带直发",
+        "fields": {
+          "hair.length": "collarbone",
+          "hair.texture": "straight_smooth",
+          "hair.style": "loose",
+          "hair.bangs": "middle_part",
+          "hair.headwear": "silk_headband"
+        },
+        "tags": [
+          "发带",
+          "精致"
+        ]
+      },
+      {
+        "id": "velvet_bow_ponytail",
+        "label": "丝绒蝴蝶结低马尾",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "soft_wavy",
+          "hair.style": "low_ponytail",
+          "hair.bangs": "curtain_bangs",
+          "hair.headwear": "velvet_bow"
+        },
+        "tags": [
+          "蝴蝶结",
+          "复古"
+        ]
+      },
+      {
+        "id": "flower_pin_low_bun",
+        "label": "花朵发簪低盘发",
+        "fields": {
+          "hair.length": "chest",
+          "hair.texture": "soft_wavy",
+          "hair.style": "low_bun",
+          "hair.bangs": "middle_part",
+          "hair.headwear": "flower_hairpin"
+        },
+        "tags": [
+          "东方",
+          "花簪"
+        ]
+      },
+      {
+        "id": "gold_pin_high_bun",
+        "label": "金色发簪高盘发",
+        "fields": {
+          "hair.length": "waist",
+          "hair.texture": "sleek_glossy",
+          "hair.style": "high_bun",
+          "hair.bangs": "open_forehead",
+          "hair.headwear": "gold_hairpin"
+        },
+        "tags": [
+          "东方",
+          "华贵"
+        ]
+      }
+    ],
+    "advanced_camera_effects": [
+      {
+        "id": "leaf_prism_portrait",
+        "label": "叶片框景棱镜近景",
+        "fields": {
+          "camera.shot_size": "chest_up",
+          "camera.composition": "center_right",
+          "camera.lens": "lens_85mm",
+          "camera.angle": "eye_level",
+          "camera.depth": "foreground_blur",
+          "camera.focus": "both_eyes",
+          "camera.framing_effect": "leaf_shoot_through",
+          "camera.optical_effect": "prism_refraction"
+        },
+        "tags": [
+          "近景",
+          "创意"
+        ]
+      },
+      {
+        "id": "window_reflection_portrait",
+        "label": "窗户反射半身",
+        "fields": {
+          "camera.shot_size": "waist_up",
+          "camera.composition": "left_third",
+          "camera.lens": "lens_50mm",
+          "camera.angle": "eye_level",
+          "camera.depth": "layered_depth",
+          "camera.focus": "face_environment",
+          "camera.framing_effect": "window_frame",
+          "camera.optical_effect": "window_reflection"
+        },
+        "tags": [
+          "窗户",
+          "反射"
+        ]
+      },
+      {
+        "id": "mirror_split_portrait",
+        "label": "镜面分割人像",
+        "fields": {
+          "camera.shot_size": "three_quarter",
+          "camera.composition": "negative_space",
+          "camera.lens": "lens_50mm",
+          "camera.angle": "three_quarter_view",
+          "camera.depth": "medium",
+          "camera.focus": "full_figure",
+          "camera.framing_effect": "reflection_split",
+          "camera.optical_effect": "mirror_reflection"
+        },
+        "tags": [
+          "镜面",
+          "构图"
+        ]
+      },
+      {
+        "id": "rain_glass_closeup",
+        "label": "雨滴玻璃近景",
+        "fields": {
+          "camera.shot_size": "head_shoulders",
+          "camera.composition": "centered",
+          "camera.lens": "lens_85mm",
+          "camera.angle": "eye_level",
+          "camera.depth": "shallow",
+          "camera.focus": "near_eye",
+          "camera.framing_effect": "window_frame",
+          "camera.optical_effect": "rain_glass"
+        },
+        "tags": [
+          "雨天",
+          "玻璃"
+        ]
+      },
+      {
+        "id": "textured_glass_beauty",
+        "label": "纹理玻璃美容特写",
+        "fields": {
+          "camera.shot_size": "face_closeup",
+          "camera.composition": "edge_cropped",
+          "camera.lens": "lens_105mm",
+          "camera.angle": "eye_level",
+          "camera.depth": "very_shallow",
+          "camera.focus": "near_eye",
+          "camera.framing_effect": "narrow_opening",
+          "camera.optical_effect": "textured_glass"
+        },
+        "tags": [
+          "美容",
+          "折射"
+        ]
+      },
+      {
+        "id": "fisheye_street_full",
+        "label": "鱼眼街头全身",
+        "fields": {
+          "camera.shot_size": "full_body",
+          "camera.composition": "centered",
+          "camera.lens": "lens_28mm",
+          "camera.angle": "slightly_low",
+          "camera.depth": "deep",
+          "camera.focus": "full_figure",
+          "camera.framing_effect": "circular_opening",
+          "camera.optical_effect": "fisheye"
+        },
+        "tags": [
+          "街头",
+          "鱼眼"
+        ]
+      },
+      {
+        "id": "ultrawide_reach",
+        "label": "超广角伸手动态",
+        "fields": {
+          "camera.shot_size": "dynamic_full_body",
+          "camera.composition": "diagonal",
+          "camera.lens": "lens_28mm",
+          "camera.angle": "ground_level",
+          "camera.depth": "deep",
+          "camera.focus": "moving_subject",
+          "camera.framing_effect": "foreground_hands",
+          "camera.optical_effect": "ultrawide_stretch"
+        },
+        "tags": [
+          "动态",
+          "超广角"
+        ]
+      },
+      {
+        "id": "telephoto_crowd_gap",
+        "label": "人群间隙长焦人像",
+        "fields": {
+          "camera.shot_size": "wide_full_body",
+          "camera.composition": "right_third",
+          "camera.lens": "lens_135mm",
+          "camera.angle": "eye_level",
+          "camera.depth": "background_compressed",
+          "camera.focus": "full_figure",
+          "camera.framing_effect": "crowd_gap",
+          "camera.optical_effect": "telephoto_compression"
+        },
+        "tags": [
+          "长焦",
+          "街拍"
+        ]
+      },
+      {
+        "id": "macro_jewelry_texture",
+        "label": "首饰材质微距",
+        "fields": {
+          "camera.shot_size": "detail_closeup",
+          "camera.composition": "edge_cropped",
+          "camera.lens": "lens_105mm",
+          "camera.angle": "three_quarter_view",
+          "camera.depth": "very_shallow",
+          "camera.focus": "garment_detail",
+          "camera.framing_effect": "mirror_edge",
+          "camera.optical_effect": "macro_texture"
+        },
+        "tags": [
+          "首饰",
+          "微距"
+        ]
+      },
+      {
+        "id": "curtain_soft_focus",
+        "label": "窗帘缝隙柔焦人像",
+        "fields": {
+          "camera.shot_size": "chest_up",
+          "camera.composition": "center_left",
+          "camera.lens": "lens_85mm",
+          "camera.angle": "eye_level",
+          "camera.depth": "shallow",
+          "camera.focus": "both_eyes",
+          "camera.framing_effect": "curtain_gap",
+          "camera.optical_effect": "soft_focus"
+        },
+        "tags": [
+          "柔焦",
+          "窗边"
+        ]
+      },
+      {
+        "id": "doorway_flare_full",
+        "label": "门框逆光眩光全身",
+        "fields": {
+          "camera.shot_size": "full_body",
+          "camera.composition": "doorway_frame",
+          "camera.lens": "lens_50mm",
+          "camera.angle": "slightly_low",
+          "camera.depth": "medium",
+          "camera.focus": "full_figure",
+          "camera.framing_effect": "door_frame",
+          "camera.optical_effect": "lens_flare"
+        },
+        "tags": [
+          "逆光",
+          "全身"
+        ]
+      },
+      {
+        "id": "panning_street_motion",
+        "label": "街头追随摇摄",
+        "fields": {
+          "camera.shot_size": "dynamic_full_body",
+          "camera.composition": "diagonal",
+          "camera.lens": "lens_50mm",
+          "camera.angle": "waist_level",
+          "camera.depth": "medium",
+          "camera.focus": "moving_subject",
+          "camera.framing_effect": "railing_lines",
+          "camera.optical_effect": "panning_blur"
+        },
+        "tags": [
+          "运动",
+          "摇摄"
+        ]
+      },
+      {
+        "id": "long_exposure_city",
+        "label": "城市长曝光人像",
+        "fields": {
+          "camera.shot_size": "full_body",
+          "camera.composition": "centered",
+          "camera.lens": "lens_35mm",
+          "camera.angle": "eye_level",
+          "camera.depth": "deep",
+          "camera.focus": "full_figure",
+          "camera.framing_effect": "frame_within_frame",
+          "camera.optical_effect": "long_exposure_trails"
+        },
+        "tags": [
+          "夜景",
+          "长曝光"
+        ]
+      },
+      {
+        "id": "zoom_burst_center",
+        "label": "中心径向变焦人像",
+        "fields": {
+          "camera.shot_size": "three_quarter",
+          "camera.composition": "centered",
+          "camera.lens": "lens_50mm",
+          "camera.angle": "eye_level",
+          "camera.depth": "moderate_shallow",
+          "camera.focus": "both_eyes",
+          "camera.framing_effect": "circular_opening",
+          "camera.optical_effect": "zoom_burst"
+        },
+        "tags": [
+          "创意",
+          "放射"
+        ]
+      },
+      {
+        "id": "double_exposure_profile",
+        "label": "侧面双重曝光",
+        "fields": {
+          "camera.shot_size": "head_shoulders",
+          "camera.composition": "negative_space",
+          "camera.lens": "lens_85mm",
+          "camera.angle": "profile_view",
+          "camera.depth": "shallow",
+          "camera.focus": "face",
+          "camera.framing_effect": "reflection_split",
+          "camera.optical_effect": "double_exposure"
+        },
+        "tags": [
+          "侧面",
+          "双重曝光"
+        ]
+      },
+      {
+        "id": "corner_chromatic_fashion",
+        "label": "角落色散时尚人像",
+        "fields": {
+          "camera.shot_size": "waist_up",
+          "camera.composition": "negative_space",
+          "camera.lens": "lens_65mm",
+          "camera.angle": "slightly_high",
+          "camera.depth": "shallow",
+          "camera.focus": "both_eyes",
+          "camera.framing_effect": "corner_negative_space",
+          "camera.optical_effect": "chromatic_edge"
+        },
+        "tags": [
+          "时尚",
+          "色散"
+        ]
+      },
+      {
+        "id": "wall_tilt_shift",
+        "label": "墙缘移轴空间人像",
+        "fields": {
+          "camera.shot_size": "environmental_portrait",
+          "camera.composition": "left_third",
+          "camera.lens": "lens_50mm",
+          "camera.angle": "slightly_high",
+          "camera.depth": "layered_depth",
+          "camera.focus": "face_environment",
+          "camera.framing_effect": "wall_edge",
+          "camera.optical_effect": "tilt_shift"
+        },
+        "tags": [
+          "空间",
+          "移轴"
+        ]
+      },
+      {
+        "id": "arch_starburst_evening",
+        "label": "拱形框景星芒夜景",
+        "fields": {
+          "camera.shot_size": "wide_full_body",
+          "camera.composition": "symmetrical",
+          "camera.lens": "lens_35mm",
+          "camera.angle": "waist_level",
+          "camera.depth": "deep",
+          "camera.focus": "face_environment",
+          "camera.framing_effect": "circular_opening",
+          "camera.optical_effect": "starburst"
+        },
+        "tags": [
+          "夜景",
+          "星芒"
+        ]
+      },
+      {
+        "id": "leaf_halation_film",
+        "label": "叶片框景胶片光晕",
+        "fields": {
+          "camera.shot_size": "chest_up",
+          "camera.composition": "center_right",
+          "camera.lens": "lens_85mm",
+          "camera.angle": "eye_level",
+          "camera.depth": "foreground_blur",
+          "camera.focus": "both_eyes",
+          "camera.framing_effect": "leaf_shoot_through",
+          "camera.optical_effect": "halation"
+        },
+        "tags": [
+          "胶片",
+          "森系"
+        ]
+      },
+      {
+        "id": "water_refraction_portrait",
+        "label": "水面折射人像",
+        "fields": {
+          "camera.shot_size": "waist_up",
+          "camera.composition": "centered",
+          "camera.lens": "lens_50mm",
+          "camera.angle": "slightly_high",
+          "camera.depth": "moderate_shallow",
+          "camera.focus": "upper_body",
+          "camera.framing_effect": "reflection_split",
+          "camera.optical_effect": "underwater_refraction"
+        },
+        "tags": [
+          "水面",
+          "折射"
+        ]
+      }
+    ],
+    "lighting_effect_pairs": [
+      {
+        "id": "beauty_round_catchlight",
+        "label": "美容圆形眼神光",
+        "fields": {
+          "lighting.source": "ring_fill",
+          "lighting.direction": "front",
+          "lighting.quality": "even_flat",
+          "lighting.subject_effect": "round_catchlights",
+          "lighting.environment_effect": "high_key_wash"
+        },
+        "tags": [
+          "美容",
+          "明亮"
+        ]
+      },
+      {
+        "id": "window_catchlight_soft",
+        "label": "窗格眼神光与柔窗光",
+        "fields": {
+          "lighting.source": "window_daylight",
+          "lighting.direction": "front_left",
+          "lighting.quality": "soft_directional",
+          "lighting.subject_effect": "window_catchlights",
+          "lighting.environment_effect": "high_key_wash"
+        },
+        "tags": [
+          "窗边",
+          "自然光"
+        ]
+      },
+      {
+        "id": "butterfly_backdrop_spot",
+        "label": "蝶形光与圆形背景光斑",
+        "fields": {
+          "lighting.source": "beauty_dish",
+          "lighting.direction": "top_front",
+          "lighting.quality": "soft_directional",
+          "lighting.subject_effect": "butterfly_shadow",
+          "lighting.environment_effect": "circular_backdrop_spot"
+        },
+        "tags": [
+          "影棚",
+          "美容"
+        ]
+      },
+      {
+        "id": "rembrandt_low_key",
+        "label": "伦勃朗三角光与暗角",
+        "fields": {
+          "lighting.source": "continuous_panel",
+          "lighting.direction": "side_left",
+          "lighting.quality": "low_key",
+          "lighting.subject_effect": "rembrandt_triangle",
+          "lighting.environment_effect": "low_key_vignette"
+        },
+        "tags": [
+          "低调",
+          "肖像"
+        ]
+      },
+      {
+        "id": "split_face_door_strip",
+        "label": "面部分割与门缝光带",
+        "fields": {
+          "lighting.source": "continuous_panel",
+          "lighting.direction": "side_right",
+          "lighting.quality": "low_key",
+          "lighting.subject_effect": "split_face",
+          "lighting.environment_effect": "doorway_light_strip"
+        },
+        "tags": [
+          "电影感",
+          "室内"
+        ]
+      },
+      {
+        "id": "narrow_face_geometric",
+        "label": "面部窄光与几何投影",
+        "fields": {
+          "lighting.source": "continuous_panel",
+          "lighting.direction": "front_right",
+          "lighting.quality": "crisp_hard",
+          "lighting.subject_effect": "narrow_face_strip",
+          "lighting.environment_effect": "geometric_projection"
+        },
+        "tags": [
+          "画报",
+          "几何"
+        ]
+      },
+      {
+        "id": "hair_rim_air_glow",
+        "label": "发丝轮廓与空气辉光",
+        "fields": {
+          "lighting.source": "sunset_sun",
+          "lighting.direction": "back",
+          "lighting.quality": "glowing_backlight",
+          "lighting.subject_effect": "hair_rim",
+          "lighting.environment_effect": "backlight_air_glow"
+        },
+        "tags": [
+          "逆光",
+          "日落"
+        ]
+      },
+      {
+        "id": "shoulder_rim_radial",
+        "label": "肩部轮廓与放射背光",
+        "fields": {
+          "lighting.source": "continuous_panel",
+          "lighting.direction": "back",
+          "lighting.quality": "low_key",
+          "lighting.subject_effect": "shoulder_rim",
+          "lighting.environment_effect": "radial_backlight"
+        },
+        "tags": [
+          "轮廓光",
+          "影棚"
+        ]
+      },
+      {
+        "id": "finger_translucent_dust",
+        "label": "手指透光与光束浮尘",
+        "fields": {
+          "lighting.source": "window_daylight",
+          "lighting.direction": "back_left",
+          "lighting.quality": "soft_directional",
+          "lighting.subject_effect": "translucent_fingers",
+          "lighting.environment_effect": "dust_in_light"
+        },
+        "tags": [
+          "手部",
+          "窗光"
+        ]
+      },
+      {
+        "id": "leaf_dapple_background",
+        "label": "人物与背景枝叶光影",
+        "fields": {
+          "lighting.source": "leaf_filtered_sun",
+          "lighting.direction": "back_left",
+          "lighting.quality": "dappled",
+          "lighting.subject_effect": "leaf_dapple_skin",
+          "lighting.environment_effect": "leaf_shadow_background"
+        },
+        "tags": [
+          "森系",
+          "斑驳光"
+        ]
+      },
+      {
+        "id": "window_grid_blinds",
+        "label": "人物窗格与背景百叶影",
+        "fields": {
+          "lighting.source": "window_daylight",
+          "lighting.direction": "side_right",
+          "lighting.quality": "crisp_hard",
+          "lighting.subject_effect": "window_grid_skin",
+          "lighting.environment_effect": "blind_shadows"
+        },
+        "tags": [
+          "窗影",
+          "几何"
+        ]
+      },
+      {
+        "id": "water_caustic_room",
+        "label": "人物与空间水纹焦散",
+        "fields": {
+          "lighting.source": "reflected_bounce",
+          "lighting.direction": "below_front",
+          "lighting.quality": "mixed_color",
+          "lighting.subject_effect": "water_caustic_skin",
+          "lighting.environment_effect": "water_caustic_room"
+        },
+        "tags": [
+          "水纹",
+          "创意"
+        ]
+      },
+      {
+        "id": "neon_edges_reflection",
+        "label": "霓虹轮廓与表面反射",
+        "fields": {
+          "lighting.source": "neon_signs",
+          "lighting.direction": "side_left",
+          "lighting.quality": "mixed_color",
+          "lighting.subject_effect": "neon_edge",
+          "lighting.environment_effect": "neon_surface_reflection"
+        },
+        "tags": [
+          "霓虹",
+          "夜景"
+        ]
+      },
+      {
+        "id": "warm_face_colored_fog",
+        "label": "暖面冷轮廓与彩雾",
+        "fields": {
+          "lighting.source": "storefront_light",
+          "lighting.direction": "front_right",
+          "lighting.quality": "mixed_color",
+          "lighting.subject_effect": "warm_face_cool_rim",
+          "lighting.environment_effect": "colored_fog"
+        },
+        "tags": [
+          "冷暖",
+          "电影感"
+        ]
+      },
+      {
+        "id": "face_spot_ceiling_pool",
+        "label": "面部聚光与顶灯光池",
+        "fields": {
+          "lighting.source": "ceiling_ambient",
+          "lighting.direction": "top",
+          "lighting.quality": "low_key",
+          "lighting.subject_effect": "face_spotlight",
+          "lighting.environment_effect": "ceiling_light_pool"
+        },
+        "tags": [
+          "顶光",
+          "室内"
+        ]
+      },
+      {
+        "id": "eye_band_triangle",
+        "label": "双眼亮带与三角投影",
+        "fields": {
+          "lighting.source": "continuous_panel",
+          "lighting.direction": "side_left",
+          "lighting.quality": "crisp_hard",
+          "lighting.subject_effect": "eye_highlight_band",
+          "lighting.environment_effect": "triangle_projection"
+        },
+        "tags": [
+          "画报",
+          "硬光"
+        ]
+      },
+      {
+        "id": "jewelry_prism",
+        "label": "首饰闪光与彩虹折射",
+        "fields": {
+          "lighting.source": "large_softbox",
+          "lighting.direction": "front_right",
+          "lighting.quality": "specular",
+          "lighting.subject_effect": "jewelry_sparkle",
+          "lighting.environment_effect": "prism_rainbow"
+        },
+        "tags": [
+          "首饰",
+          "商业"
+        ]
+      },
+      {
+        "id": "fabric_floor_reflection",
+        "label": "面料高光与地面倒影",
+        "fields": {
+          "lighting.source": "large_softbox",
+          "lighting.direction": "front_left",
+          "lighting.quality": "specular",
+          "lighting.subject_effect": "fabric_specular",
+          "lighting.environment_effect": "floor_reflection"
+        },
+        "tags": [
+          "时尚",
+          "材质"
+        ]
+      },
+      {
+        "id": "silhouette_volumetric",
+        "label": "剪影轮廓与体积光束",
+        "fields": {
+          "lighting.source": "continuous_panel",
+          "lighting.direction": "back",
+          "lighting.quality": "low_key",
+          "lighting.subject_effect": "silhouette_edge",
+          "lighting.environment_effect": "volumetric_beam"
+        },
+        "tags": [
+          "剪影",
+          "体积光"
+        ]
+      },
+      {
+        "id": "top_pool_lattice",
+        "label": "顶部光池与格栅投影",
+        "fields": {
+          "lighting.source": "ceiling_ambient",
+          "lighting.direction": "top",
+          "lighting.quality": "low_key",
+          "lighting.subject_effect": "top_light_pool",
+          "lighting.environment_effect": "lattice_shadow"
+        },
+        "tags": [
+          "东方",
+          "低调"
+        ]
+      },
+      {
+        "id": "flash_wet_reflection",
+        "label": "硬闪与湿地反射",
+        "fields": {
+          "lighting.source": "hard_flash",
+          "lighting.direction": "front",
+          "lighting.quality": "crisp_hard",
+          "lighting.subject_effect": "jewelry_sparkle",
+          "lighting.environment_effect": "wet_ground_reflection"
+        },
+        "tags": [
+          "硬闪",
+          "雨夜"
+        ]
+      },
+      {
+        "id": "soft_flash_haze",
+        "label": "柔闪与薄雾辉光",
+        "fields": {
+          "lighting.source": "soft_flash",
+          "lighting.direction": "front",
+          "lighting.quality": "soft_directional",
+          "lighting.subject_effect": "round_catchlights",
+          "lighting.environment_effect": "haze_bloom"
+        },
+        "tags": [
+          "CCD",
+          "柔闪"
+        ]
+      },
+      {
+        "id": "neon_city_bokeh",
+        "label": "霓虹轮廓与城市散景",
+        "fields": {
+          "lighting.source": "neon_signs",
+          "lighting.direction": "back_right",
+          "lighting.quality": "mixed_color",
+          "lighting.subject_effect": "neon_edge",
+          "lighting.environment_effect": "city_bokeh"
+        },
+        "tags": [
+          "都市",
+          "散景"
+        ]
+      },
+      {
+        "id": "mirror_repetition_specular",
+        "label": "材质高光与多重镜像",
+        "fields": {
+          "lighting.source": "large_softbox",
+          "lighting.direction": "side_right",
+          "lighting.quality": "specular",
+          "lighting.subject_effect": "fabric_specular",
+          "lighting.environment_effect": "mirror_repetition"
+        },
+        "tags": [
+          "镜面",
+          "时尚"
+        ]
+      }
+    ],
+    "indoor_scene_compositions": [
+      {
+        "id": "sunlit_living_room_scene",
+        "label": "明亮客厅窗边",
+        "fields": {
+          "scene.indoor_family": "residential",
+          "scene.indoor_location": "sunlit_living_room",
+          "scene.time": "late_morning",
+          "scene.detail": [
+            "linen_curtain",
+            "green_plant"
+          ],
+          "scene.surface": "cream_fabric",
+          "scene.spatial": "window_depth"
+        },
+        "tags": [
+          "居家",
+          "窗边"
+        ]
+      },
+      {
+        "id": "cream_bedroom_scene",
+        "label": "奶油色卧室清晨",
+        "fields": {
+          "scene.indoor_family": "residential",
+          "scene.indoor_location": "cream_bedroom",
+          "scene.time": "clear_morning",
+          "scene.detail": [
+            "linen_curtain",
+            "floor_lamp"
+          ],
+          "scene.surface": "linen_textile",
+          "scene.spatial": "shallow_interior"
+        },
+        "tags": [
+          "卧室",
+          "清晨"
+        ]
+      },
+      {
+        "id": "home_office_scene",
+        "label": "家庭书房午后",
+        "fields": {
+          "scene.indoor_family": "residential",
+          "scene.indoor_location": "window_home_office",
+          "scene.time": "overcast_afternoon",
+          "scene.detail": [
+            "book_stack",
+            "green_plant"
+          ],
+          "scene.surface": "warm_wood",
+          "scene.spatial": "window_depth"
+        },
+        "tags": [
+          "书房",
+          "安静"
+        ]
+      },
+      {
+        "id": "enclosed_balcony_scene",
+        "label": "封闭阳台金色时刻",
+        "fields": {
+          "scene.indoor_family": "residential",
+          "scene.indoor_location": "enclosed_balcony",
+          "scene.time": "golden_hour",
+          "scene.detail": [
+            "balcony_chair",
+            "green_plant"
+          ],
+          "scene.surface": "light_wood",
+          "scene.spatial": "window_depth"
+        },
+        "tags": [
+          "阳台",
+          "日落"
+        ]
+      },
+      {
+        "id": "wood_cafe_scene",
+        "label": "暖木咖啡馆",
+        "fields": {
+          "scene.indoor_family": "hospitality",
+          "scene.indoor_location": "wood_cafe",
+          "scene.time": "early_evening",
+          "scene.detail": [
+            "wood_table",
+            "coffee_set",
+            "menu_board"
+          ],
+          "scene.surface": "brown_leather",
+          "scene.spatial": "shallow_interior"
+        },
+        "tags": [
+          "咖啡馆",
+          "暖调"
+        ]
+      },
+      {
+        "id": "hotel_room_scene",
+        "label": "酒店客房夜间",
+        "fields": {
+          "scene.indoor_family": "hospitality",
+          "scene.indoor_location": "hotel_guest_room",
+          "scene.time": "night",
+          "scene.detail": [
+            "floor_lamp",
+            "linen_curtain"
+          ],
+          "scene.surface": "cream_fabric",
+          "scene.spatial": "shallow_interior"
+        },
+        "tags": [
+          "酒店",
+          "夜间"
+        ]
+      },
+      {
+        "id": "hotel_lounge_scene",
+        "label": "酒店休息厅傍晚",
+        "fields": {
+          "scene.indoor_family": "hospitality",
+          "scene.indoor_location": "hotel_lounge",
+          "scene.time": "dusk",
+          "scene.detail": [
+            "floor_lamp",
+            "green_plant"
+          ],
+          "scene.surface": "gray_stone",
+          "scene.spatial": "open_negative_space"
+        },
+        "tags": [
+          "酒店",
+          "轻奢"
+        ]
+      },
+      {
+        "id": "cocktail_bar_scene",
+        "label": "鸡尾酒吧深夜",
+        "fields": {
+          "scene.indoor_family": "hospitality",
+          "scene.indoor_location": "cocktail_bar",
+          "scene.time": "late_night",
+          "scene.detail": [
+            "neon_sign",
+            "city_lights"
+          ],
+          "scene.surface": "brushed_metal",
+          "scene.spatial": "reflection_depth"
+        },
+        "tags": [
+          "酒吧",
+          "夜景"
+        ]
+      },
+      {
+        "id": "bookstore_scene",
+        "label": "独立书店午后",
+        "fields": {
+          "scene.indoor_family": "retail",
+          "scene.indoor_location": "independent_bookstore",
+          "scene.time": "overcast_afternoon",
+          "scene.detail": [
+            "book_stack",
+            "wood_table"
+          ],
+          "scene.surface": "warm_wood",
+          "scene.spatial": "corridor_depth"
+        },
+        "tags": [
+          "书店",
+          "知性"
+        ]
+      },
+      {
+        "id": "flower_shop_scene",
+        "label": "花店清晨",
+        "fields": {
+          "scene.indoor_family": "retail",
+          "scene.indoor_location": "flower_shop",
+          "scene.time": "clear_morning",
+          "scene.detail": [
+            "flower_wrapping",
+            "green_plant"
+          ],
+          "scene.surface": "light_wood",
+          "scene.spatial": "layered_plants"
+        },
+        "tags": [
+          "花店",
+          "清晨"
+        ]
+      },
+      {
+        "id": "record_store_scene",
+        "label": "复古唱片店",
+        "fields": {
+          "scene.indoor_family": "retail",
+          "scene.indoor_location": "record_store",
+          "scene.time": "early_evening",
+          "scene.detail": [
+            "neon_sign",
+            "retro_tiles"
+          ],
+          "scene.surface": "retro_tile",
+          "scene.spatial": "corridor_depth"
+        },
+        "tags": [
+          "唱片店",
+          "复古"
+        ]
+      },
+      {
+        "id": "fashion_boutique_scene",
+        "label": "服装精品店",
+        "fields": {
+          "scene.indoor_family": "retail",
+          "scene.indoor_location": "fashion_boutique",
+          "scene.time": "late_morning",
+          "scene.detail": [
+            "glass_columns",
+            "large_painting"
+          ],
+          "scene.surface": "clear_glass",
+          "scene.spatial": "reflection_depth"
+        },
+        "tags": [
+          "精品店",
+          "时尚"
+        ]
+      },
+      {
+        "id": "library_scene",
+        "label": "图书馆阅览室",
+        "fields": {
+          "scene.indoor_family": "culture",
+          "scene.indoor_location": "library_reading_room",
+          "scene.time": "late_morning",
+          "scene.detail": [
+            "book_stack",
+            "wood_table"
+          ],
+          "scene.surface": "warm_wood",
+          "scene.spatial": "corridor_depth"
+        },
+        "tags": [
+          "图书馆",
+          "安静"
+        ]
+      },
+      {
+        "id": "gallery_scene",
+        "label": "白墙美术馆",
+        "fields": {
+          "scene.indoor_family": "culture",
+          "scene.indoor_location": "white_art_gallery",
+          "scene.time": "midday",
+          "scene.detail": [
+            "large_painting",
+            "stone_floor"
+          ],
+          "scene.surface": "white_plaster",
+          "scene.spatial": "geometric_gallery"
+        },
+        "tags": [
+          "美术馆",
+          "极简"
+        ]
+      },
+      {
+        "id": "theater_foyer_scene",
+        "label": "剧院前厅夜间",
+        "fields": {
+          "scene.indoor_family": "culture",
+          "scene.indoor_location": "theater_foyer",
+          "scene.time": "night",
+          "scene.detail": [
+            "wall_lamps",
+            "carpet_lines"
+          ],
+          "scene.surface": "gray_stone",
+          "scene.spatial": "vertical_frame"
+        },
+        "tags": [
+          "剧院",
+          "华丽"
+        ]
+      },
+      {
+        "id": "dance_room_scene",
+        "label": "舞蹈排练室",
+        "fields": {
+          "scene.indoor_family": "culture",
+          "scene.indoor_location": "dance_rehearsal_room",
+          "scene.time": "late_morning",
+          "scene.detail": [
+            "towel_bottle",
+            "linen_curtain"
+          ],
+          "scene.surface": "light_wood",
+          "scene.spatial": "reflection_depth"
+        },
+        "tags": [
+          "舞蹈",
+          "训练"
+        ]
+      },
+      {
+        "id": "executive_office_scene",
+        "label": "行政办公室",
+        "fields": {
+          "scene.indoor_family": "workplace",
+          "scene.indoor_location": "executive_office",
+          "scene.time": "late_morning",
+          "scene.detail": [
+            "book_stack",
+            "city_lights"
+          ],
+          "scene.surface": "warm_wood",
+          "scene.spatial": "window_depth"
+        },
+        "tags": [
+          "职场",
+          "办公室"
+        ]
+      },
+      {
+        "id": "meeting_room_scene",
+        "label": "玻璃会议室",
+        "fields": {
+          "scene.indoor_family": "workplace",
+          "scene.indoor_location": "glass_meeting_room",
+          "scene.time": "midday",
+          "scene.detail": [
+            "glass_columns",
+            "stone_floor"
+          ],
+          "scene.surface": "clear_glass",
+          "scene.spatial": "reflection_depth"
+        },
+        "tags": [
+          "职场",
+          "现代"
+        ]
+      },
+      {
+        "id": "fashion_atelier_scene",
+        "label": "服装工作室",
+        "fields": {
+          "scene.indoor_family": "workplace",
+          "scene.indoor_location": "fashion_atelier",
+          "scene.time": "overcast_afternoon",
+          "scene.detail": [
+            "linen_curtain",
+            "studio_stool"
+          ],
+          "scene.surface": "linen_textile",
+          "scene.spatial": "foreground_subject_background"
+        },
+        "tags": [
+          "时尚",
+          "工作室"
+        ]
+      },
+      {
+        "id": "station_hall_scene",
+        "label": "车站候车厅",
+        "fields": {
+          "scene.indoor_family": "transport",
+          "scene.indoor_location": "station_waiting_hall",
+          "scene.time": "early_evening",
+          "scene.detail": [
+            "glass_columns",
+            "stone_floor"
+          ],
+          "scene.surface": "gray_stone",
+          "scene.spatial": "corridor_depth"
+        },
+        "tags": [
+          "车站",
+          "旅行"
+        ]
+      },
+      {
+        "id": "subway_platform_scene",
+        "label": "地铁站台夜间",
+        "fields": {
+          "scene.indoor_family": "transport",
+          "scene.indoor_location": "subway_platform",
+          "scene.time": "night",
+          "scene.detail": [
+            "neon_sign",
+            "glass_columns"
+          ],
+          "scene.surface": "brushed_metal",
+          "scene.spatial": "corridor_depth"
+        },
+        "tags": [
+          "地铁",
+          "都市"
+        ]
+      },
+      {
+        "id": "airport_lounge_scene",
+        "label": "机场休息室",
+        "fields": {
+          "scene.indoor_family": "transport",
+          "scene.indoor_location": "airport_lounge",
+          "scene.time": "golden_hour",
+          "scene.detail": [
+            "glass_columns",
+            "stone_floor"
+          ],
+          "scene.surface": "cream_fabric",
+          "scene.spatial": "window_depth"
+        },
+        "tags": [
+          "机场",
+          "旅行"
+        ]
+      },
+      {
+        "id": "fitness_scene",
+        "label": "健身训练室",
+        "fields": {
+          "scene.indoor_family": "wellness",
+          "scene.indoor_location": "fitness_studio",
+          "scene.time": "late_morning",
+          "scene.detail": [
+            "gym_bench",
+            "towel_bottle"
+          ],
+          "scene.surface": "rubber_floor",
+          "scene.spatial": "reflection_depth"
+        },
+        "tags": [
+          "健身",
+          "运动"
+        ]
+      },
+      {
+        "id": "yoga_scene",
+        "label": "瑜伽教室",
+        "fields": {
+          "scene.indoor_family": "wellness",
+          "scene.indoor_location": "yoga_studio",
+          "scene.time": "clear_morning",
+          "scene.detail": [
+            "linen_curtain",
+            "green_plant"
+          ],
+          "scene.surface": "light_wood",
+          "scene.spatial": "open_negative_space"
+        },
+        "tags": [
+          "瑜伽",
+          "清晨"
+        ]
+      },
+      {
+        "id": "indoor_pool_scene",
+        "label": "室内泳池",
+        "fields": {
+          "scene.indoor_family": "wellness",
+          "scene.indoor_location": "indoor_pool",
+          "scene.time": "midday",
+          "scene.detail": [
+            "towel_bottle",
+            "glass_columns"
+          ],
+          "scene.surface": "retro_tile",
+          "scene.spatial": "reflection_depth"
+        },
+        "tags": [
+          "泳池",
+          "水光"
+        ]
+      },
+      {
+        "id": "tearoom_scene",
+        "label": "新中式茶室",
+        "fields": {
+          "scene.indoor_family": "heritage",
+          "scene.indoor_location": "new_chinese_tearoom",
+          "scene.time": "summer_afternoon",
+          "scene.detail": [
+            "tea_set",
+            "wood_screen",
+            "bamboo_shadow"
+          ],
+          "scene.surface": "warm_wood",
+          "scene.spatial": "vertical_frame"
+        },
+        "tags": [
+          "新中式",
+          "茶室"
+        ]
+      },
+      {
+        "id": "traditional_study_scene",
+        "label": "传统书斋",
+        "fields": {
+          "scene.indoor_family": "heritage",
+          "scene.indoor_location": "traditional_study",
+          "scene.time": "overcast_afternoon",
+          "scene.detail": [
+            "book_stack",
+            "wood_screen"
+          ],
+          "scene.surface": "warm_wood",
+          "scene.spatial": "shallow_interior"
+        },
+        "tags": [
+          "东方",
+          "书斋"
+        ]
+      },
+      {
+        "id": "warehouse_scene",
+        "label": "仓库通道",
+        "fields": {
+          "scene.indoor_family": "industrial",
+          "scene.indoor_location": "warehouse_aisle",
+          "scene.time": "early_evening",
+          "scene.detail": [
+            "door_handle",
+            "stone_floor"
+          ],
+          "scene.surface": "brushed_metal",
+          "scene.spatial": "corridor_depth"
+        },
+        "tags": [
+          "工业",
+          "通道"
+        ]
+      },
+      {
+        "id": "photo_studio_scene",
+        "label": "专业摄影棚",
+        "fields": {
+          "scene.indoor_family": "specialized",
+          "scene.indoor_location": "photo_studio",
+          "scene.time": "midday",
+          "scene.detail": [
+            "studio_stool",
+            "studio_seamless"
+          ],
+          "scene.surface": "white_plaster",
+          "scene.spatial": "open_negative_space"
+        },
+        "tags": [
+          "摄影棚",
+          "商业"
+        ]
+      },
+      {
+        "id": "backstage_scene",
+        "label": "后台化妆间",
+        "fields": {
+          "scene.indoor_family": "specialized",
+          "scene.indoor_location": "backstage_dressing_room",
+          "scene.time": "early_evening",
+          "scene.detail": [
+            "wall_lamps",
+            "studio_stool"
+          ],
+          "scene.surface": "clear_glass",
+          "scene.spatial": "reflection_depth"
+        },
+        "tags": [
+          "后台",
+          "镜面"
+        ]
+      }
+    ]
+  }
+}

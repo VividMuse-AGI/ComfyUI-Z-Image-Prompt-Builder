@@ -1,0 +1,2520 @@
+{
+  "schema_version": "1.0.0",
+  "language": "zh-CN",
+  "target_models": [
+    "Z-Image",
+    "Z-Image-Turbo"
+  ],
+  "validation": {
+    "language_rules": "passed",
+    "model_image_tests": "pending"
+  },
+  "fields": {
+    "face.eyebrows": {
+      "category": "面部细节",
+      "label": "自然眉形",
+      "template": "眉毛为{value}",
+      "options": [
+        {
+          "id": "soft_straight",
+          "label": "柔和平眉",
+          "value": "线条柔和、粗细自然的平眉"
+        },
+        {
+          "id": "slim_straight",
+          "label": "纤细直眉",
+          "value": "眉峰不明显的纤细直眉"
+        },
+        {
+          "id": "natural_arch",
+          "label": "自然弧眉",
+          "value": "眉峰轻微抬起的自然弧眉"
+        },
+        {
+          "id": "defined_arch",
+          "label": "清晰挑眉",
+          "value": "眉峰清楚、眉尾利落的挑眉"
+        },
+        {
+          "id": "willow",
+          "label": "柳叶眉",
+          "value": "细长并向眉尾缓慢收拢的柳叶眉"
+        },
+        {
+          "id": "feathered",
+          "label": "野生羽毛眉",
+          "value": "眉毛根根分明、走向自然的羽毛眉"
+        },
+        {
+          "id": "thick_natural",
+          "label": "浓密自然眉",
+          "value": "毛流浓密、边缘自然的眉形"
+        },
+        {
+          "id": "short_gentle",
+          "label": "短而柔和",
+          "value": "长度略短、眉尾圆润的柔和眉形"
+        },
+        {
+          "id": "long_refined",
+          "label": "修长精致眉",
+          "value": "眉尾延伸、轮廓整齐的修长眉形"
+        },
+        {
+          "id": "slightly_drooped",
+          "label": "轻微下垂眉",
+          "value": "眉尾轻微下垂的温和眉形"
+        }
+      ]
+    },
+    "face.nose": {
+      "category": "面部细节",
+      "label": "鼻部轮廓",
+      "template": "鼻部呈现{value}",
+      "options": [
+        {
+          "id": "slim_straight",
+          "label": "细直鼻梁",
+          "value": "细直鼻梁与小巧鼻尖"
+        },
+        {
+          "id": "soft_straight",
+          "label": "柔和直鼻",
+          "value": "高度适中、线条柔和的直鼻"
+        },
+        {
+          "id": "small_round_tip",
+          "label": "小巧圆鼻尖",
+          "value": "小巧鼻梁与圆润鼻尖"
+        },
+        {
+          "id": "defined_bridge",
+          "label": "立体鼻梁",
+          "value": "鼻梁起伏清楚、鼻尖轮廓明确的立体结构"
+        },
+        {
+          "id": "low_soft_bridge",
+          "label": "低而柔和鼻梁",
+          "value": "鼻梁较低、侧面转折平缓的自然结构"
+        },
+        {
+          "id": "slightly_upturned",
+          "label": "轻微翘鼻",
+          "value": "鼻尖轻微上翘、鼻翼小巧的轮廓"
+        },
+        {
+          "id": "narrow_tip",
+          "label": "窄鼻尖",
+          "value": "鼻梁纤细并向窄小鼻尖收拢"
+        },
+        {
+          "id": "rounded_natural",
+          "label": "圆润自然鼻型",
+          "value": "鼻梁与鼻翼比例自然、边缘圆润的鼻型"
+        },
+        {
+          "id": "long_elegant",
+          "label": "修长鼻型",
+          "value": "鼻梁长度略长、线条连贯的鼻型"
+        },
+        {
+          "id": "compact_defined",
+          "label": "小巧立体鼻型",
+          "value": "整体小巧但鼻梁和鼻尖转折清楚的鼻型"
+        }
+      ]
+    },
+    "face.lip_shape": {
+      "category": "面部细节",
+      "label": "唇形",
+      "template": "唇形为{value}",
+      "options": [
+        {
+          "id": "small_soft",
+          "label": "小巧柔润唇",
+          "value": "轮廓小巧、边缘柔和的自然唇形"
+        },
+        {
+          "id": "full_balanced",
+          "label": "饱满均衡唇",
+          "value": "上下唇厚度均衡、轮廓饱满的唇形"
+        },
+        {
+          "id": "defined_cupid",
+          "label": "清晰唇峰",
+          "value": "唇峰清楚、嘴角轮廓利落的唇形"
+        },
+        {
+          "id": "soft_cupid",
+          "label": "柔和唇峰",
+          "value": "唇峰轻柔、边缘圆润的唇形"
+        },
+        {
+          "id": "thin_refined",
+          "label": "纤薄精致唇",
+          "value": "厚度偏薄、线条整齐的唇形"
+        },
+        {
+          "id": "lower_full",
+          "label": "下唇较饱满",
+          "value": "上唇轻薄、下唇自然饱满的唇形"
+        },
+        {
+          "id": "wide_gentle",
+          "label": "舒展宽唇",
+          "value": "横向舒展、嘴角柔和的唇形"
+        },
+        {
+          "id": "rounded",
+          "label": "圆润唇形",
+          "value": "唇峰不尖锐、整体圆润的唇形"
+        },
+        {
+          "id": "slightly_upturned",
+          "label": "嘴角微扬",
+          "value": "静止时嘴角轻微上扬的唇形"
+        },
+        {
+          "id": "compact_defined",
+          "label": "小巧清晰唇",
+          "value": "宽度较窄、唇线清楚的小巧唇形"
+        }
+      ]
+    },
+    "face.visible_detail": {
+      "category": "面部细节",
+      "label": "可见面部特征",
+      "template": "面部可见{value}",
+      "options": [
+        {
+          "id": "light_freckles",
+          "label": "浅淡雀斑",
+          "value": "横跨鼻梁与双颊的浅淡雀斑"
+        },
+        {
+          "id": "dense_freckles",
+          "label": "细密雀斑",
+          "value": "分布在鼻梁和面中区域的细密雀斑"
+        },
+        {
+          "id": "under_eye_mole",
+          "label": "眼下小痣",
+          "value": "一侧眼睛下方的小痣"
+        },
+        {
+          "id": "cheek_mole",
+          "label": "脸颊小痣",
+          "value": "一侧脸颊上的小痣"
+        },
+        {
+          "id": "lip_mole",
+          "label": "唇边小痣",
+          "value": "靠近嘴角的一颗小痣"
+        },
+        {
+          "id": "natural_under_eye",
+          "label": "自然眼下纹理",
+          "value": "眼下细微纹理与自然卧蚕轮廓"
+        },
+        {
+          "id": "visible_pores",
+          "label": "真实毛孔",
+          "value": "鼻翼与面颊区域真实可见的细小毛孔"
+        },
+        {
+          "id": "soft_smile_lines",
+          "label": "浅笑纹",
+          "value": "微笑时嘴角两侧出现的浅淡笑纹"
+        },
+        {
+          "id": "sun_kissed_cheeks",
+          "label": "日晒红润",
+          "value": "鼻尖与双颊被日光晒出的自然红润"
+        },
+        {
+          "id": "dewy_high_points",
+          "label": "自然水润高点",
+          "value": "颧骨、鼻梁与唇峰处自然形成的水润反光"
+        },
+        {
+          "id": "face_sticker_daisy",
+          "label": "雏菊脸贴",
+          "value": "贴在一侧脸颊上的小雏菊装饰"
+        },
+        {
+          "id": "gold_leaf_detail",
+          "label": "金箔面饰",
+          "value": "点缀在眼尾或颧骨附近的细小金箔"
+        }
+      ]
+    },
+    "makeup.base": {
+      "category": "精细妆容",
+      "label": "底妆",
+      "template": "底妆呈现{value}",
+      "options": [
+        {
+          "id": "barely_there",
+          "label": "轻薄自然",
+          "value": "覆盖轻薄、保留皮肤原生纹理的自然效果"
+        },
+        {
+          "id": "dewy",
+          "label": "水润光泽",
+          "value": "颧骨与面中带自然反光的水润效果"
+        },
+        {
+          "id": "semi_matte",
+          "label": "柔雾半哑光",
+          "value": "油光受控、仍保留少量光泽的半哑光效果"
+        },
+        {
+          "id": "matte",
+          "label": "干净哑光",
+          "value": "表面细腻、反光较少的哑光效果"
+        },
+        {
+          "id": "satin",
+          "label": "缎光底妆",
+          "value": "光泽均匀、明暗过渡柔和的缎光效果"
+        },
+        {
+          "id": "clear_bright",
+          "label": "清透提亮",
+          "value": "面中轻微提亮、肤色均匀的清透效果"
+        },
+        {
+          "id": "warm_natural",
+          "label": "暖调自然",
+          "value": "肤色略带暖意、遮盖适中的自然效果"
+        },
+        {
+          "id": "cool_clear",
+          "label": "冷调清透",
+          "value": "肤色偏中性冷白、表面通透的效果"
+        },
+        {
+          "id": "commercial_polished",
+          "label": "商业精修底妆",
+          "value": "肤色均匀、边缘干净并保留细小皮肤纹理的效果"
+        },
+        {
+          "id": "film_natural",
+          "label": "胶片自然底妆",
+          "value": "遮盖轻柔、在胶片颗粒下仍显自然的效果"
+        },
+        {
+          "id": "dewy_glass",
+          "label": "玻璃光泽",
+          "value": "清透的玻璃光泽"
+        },
+        {
+          "id": "powder_matte",
+          "label": "粉雾哑光",
+          "value": "细腻的粉雾哑光"
+        }
+      ]
+    },
+    "makeup.eyebrow": {
+      "category": "精细妆容",
+      "label": "眉妆",
+      "template": "眉妆使用{value}",
+      "options": [
+        {
+          "id": "soft_brown",
+          "label": "柔和棕色",
+          "value": "柔和棕色填充，保留自然毛流"
+        },
+        {
+          "id": "gray_brown",
+          "label": "灰棕色",
+          "value": "低饱和灰棕色填充，边缘轻柔"
+        },
+        {
+          "id": "dark_brown_defined",
+          "label": "深棕清晰",
+          "value": "深棕色勾勒，眉尾轮廓清楚"
+        },
+        {
+          "id": "black_natural",
+          "label": "自然黑色",
+          "value": "接近发色的自然黑色，毛流分明"
+        },
+        {
+          "id": "feathered_gel",
+          "label": "透明眉胶毛流",
+          "value": "透明眉胶向上梳理形成根根分明的毛流"
+        },
+        {
+          "id": "straight_korean",
+          "label": "韩式柔平眉",
+          "value": "浅棕色平直填充，眉峰弱化"
+        },
+        {
+          "id": "arched_refined",
+          "label": "精致弧形眉",
+          "value": "顺着弧形眉峰细致填充，眉尾收窄"
+        },
+        {
+          "id": "light_sparse",
+          "label": "浅淡稀疏感",
+          "value": "颜色浅淡、间隙可见的轻盈填充"
+        },
+        {
+          "id": "warm_caramel",
+          "label": "暖焦糖眉色",
+          "value": "与暖棕发色协调的焦糖棕填充"
+        },
+        {
+          "id": "cool_taupe",
+          "label": "冷调灰褐眉色",
+          "value": "与冷调发色协调的灰褐色填充"
+        },
+        {
+          "id": "red_brown_brow",
+          "label": "红棕眉",
+          "value": "温暖的红棕眉色"
+        },
+        {
+          "id": "wild_feather_brow",
+          "label": "野生羽毛眉",
+          "value": "根根分明的野生羽毛眉"
+        },
+        {
+          "id": "soft_grey_brow",
+          "label": "柔灰眉",
+          "value": "柔和的灰调眉色"
+        }
+      ]
+    },
+    "makeup.eyeshadow": {
+      "category": "精细妆容",
+      "label": "眼影",
+      "template": "眼影为{value}",
+      "options": [
+        {
+          "id": "nude_beige",
+          "label": "裸米色",
+          "value": "贴近肤色的裸米色轻扫眼窝"
+        },
+        {
+          "id": "peach",
+          "label": "柔桃色",
+          "value": "柔和桃色晕染上眼皮与下眼尾"
+        },
+        {
+          "id": "rose_brown",
+          "label": "玫瑰棕",
+          "value": "低饱和玫瑰棕形成柔和层次"
+        },
+        {
+          "id": "milk_tea",
+          "label": "奶茶棕",
+          "value": "浅奶茶棕从睫毛根部向外晕开"
+        },
+        {
+          "id": "warm_brown",
+          "label": "暖棕色",
+          "value": "暖棕色加深眼尾与眼窝轮廓"
+        },
+        {
+          "id": "cool_taupe",
+          "label": "冷灰褐",
+          "value": "冷灰褐色塑造克制的眼窝阴影"
+        },
+        {
+          "id": "coral",
+          "label": "珊瑚色",
+          "value": "清透珊瑚色轻柔覆盖眼皮"
+        },
+        {
+          "id": "dusty_pink",
+          "label": "灰粉色",
+          "value": "低饱和灰粉色围绕眼周柔和晕染"
+        },
+        {
+          "id": "champagne_shimmer",
+          "label": "香槟细闪",
+          "value": "香槟色细闪集中点亮上眼皮中央"
+        },
+        {
+          "id": "gold_brown",
+          "label": "金棕色",
+          "value": "金棕色光泽与深棕眼尾形成层次"
+        },
+        {
+          "id": "brick_red",
+          "label": "砖红色",
+          "value": "砖红色重点晕染眼尾与下眼睑"
+        },
+        {
+          "id": "plum",
+          "label": "梅子色",
+          "value": "深梅子色在眼尾形成收敛层次"
+        },
+        {
+          "id": "smoky_gray",
+          "label": "烟灰色",
+          "value": "烟灰色沿睫毛根部向眼窝渐淡"
+        },
+        {
+          "id": "olive_gold",
+          "label": "橄榄金",
+          "value": "低饱和橄榄绿与细金色反光叠加"
+        },
+        {
+          "id": "lavender_purple",
+          "label": "薰衣草紫",
+          "value": "柔和的薰衣草紫"
+        },
+        {
+          "id": "mint",
+          "label": "薄荷绿",
+          "value": "清透的薄荷绿"
+        },
+        {
+          "id": "cool_silver",
+          "label": "冷调银灰",
+          "value": "带珠光的冷调银灰"
+        },
+        {
+          "id": "pearl_white",
+          "label": "珠光白",
+          "value": "提亮的珠光白"
+        }
+      ]
+    },
+    "makeup.eyeliner": {
+      "category": "精细妆容",
+      "label": "眼线",
+      "template": "眼线采用{value}",
+      "options": [
+        {
+          "id": "brown_inner",
+          "label": "棕色内眼线",
+          "value": "贴近睫毛根部的纤细棕色内眼线"
+        },
+        {
+          "id": "black_inner",
+          "label": "黑色内眼线",
+          "value": "填满睫毛根部间隙的黑色内眼线"
+        },
+        {
+          "id": "short_downturned",
+          "label": "短下垂眼线",
+          "value": "眼尾短而轻微向下延伸的棕色眼线"
+        },
+        {
+          "id": "slight_wing",
+          "label": "轻微上扬眼线",
+          "value": "眼尾纤细并轻微上扬的眼线"
+        },
+        {
+          "id": "defined_wing",
+          "label": "清晰猫眼线",
+          "value": "眼尾延长并形成清楚尖角的黑色眼线"
+        },
+        {
+          "id": "soft_smudged",
+          "label": "柔和晕染眼线",
+          "value": "沿睫毛根部轻微晕开的深棕眼线"
+        },
+        {
+          "id": "puppy",
+          "label": "无辜下垂眼线",
+          "value": "顺着眼尾自然下行方向延伸的柔和眼线"
+        },
+        {
+          "id": "half_liner",
+          "label": "后半段眼线",
+          "value": "从眼睛中段开始并向外收尖的眼线"
+        },
+        {
+          "id": "lower_outer",
+          "label": "下眼尾线",
+          "value": "仅在下眼睑外侧三分之一处轻柔勾勒"
+        },
+        {
+          "id": "graphic_double",
+          "label": "双层图形眼线",
+          "value": "主眼线上方增加一条间隔清楚的细线"
+        },
+        {
+          "id": "colored_eyeliner",
+          "label": "彩色眼线",
+          "value": "带色彩的彩色眼线"
+        },
+        {
+          "id": "long_wing",
+          "label": "上挑长眼线",
+          "value": "向眼尾拉长的上挑眼线"
+        }
+      ]
+    },
+    "makeup.eyelash": {
+      "category": "精细妆容",
+      "label": "睫毛",
+      "template": "睫毛呈现{value}",
+      "options": [
+        {
+          "id": "natural_curled",
+          "label": "自然卷翘",
+          "value": "根根分明、弧度自然的卷翘效果"
+        },
+        {
+          "id": "slender_defined",
+          "label": "纤长分明",
+          "value": "长度突出、彼此分开的纤长效果"
+        },
+        {
+          "id": "soft_dense",
+          "label": "柔软浓密",
+          "value": "密度较高但边缘柔软的效果"
+        },
+        {
+          "id": "clustered",
+          "label": "簇状睫毛",
+          "value": "数根一簇、间隔清楚的簇状效果"
+        },
+        {
+          "id": "outer_emphasis",
+          "label": "眼尾加长",
+          "value": "外眼角长度逐渐增加的效果"
+        },
+        {
+          "id": "brown_soft",
+          "label": "棕色柔睫",
+          "value": "颜色为深棕色、存在感柔和的效果"
+        },
+        {
+          "id": "lower_defined",
+          "label": "下睫毛清晰",
+          "value": "上下睫毛均根根可见，下睫毛保持纤细"
+        },
+        {
+          "id": "wet_lash",
+          "label": "湿润束感",
+          "value": "带轻微光泽、聚拢成细束的效果"
+        },
+        {
+          "id": "doll_lash",
+          "label": "洋娃娃睫毛",
+          "value": "浓密卷翘的洋娃娃睫毛"
+        },
+        {
+          "id": "fan_lash",
+          "label": "扇形睫毛",
+          "value": "向眼尾张开的扇形睫毛"
+        }
+      ]
+    },
+    "makeup.blush": {
+      "category": "精细妆容",
+      "label": "腮红",
+      "template": "腮红呈现{value}",
+      "options": [
+        {
+          "id": "peach_cheeks",
+          "label": "蜜桃脸颊",
+          "value": "蜜桃色集中在双颊中央并向外柔和晕开"
+        },
+        {
+          "id": "pink_under_eye",
+          "label": "眼下粉色",
+          "value": "浅粉色从眼下延伸到颧骨上方"
+        },
+        {
+          "id": "coral_sun_kissed",
+          "label": "珊瑚日晒感",
+          "value": "珊瑚色横跨双颊与鼻梁形成日晒感"
+        },
+        {
+          "id": "rose_lifted",
+          "label": "玫瑰提拉感",
+          "value": "低饱和玫瑰色沿颧骨斜向上晕染"
+        },
+        {
+          "id": "nude_beige",
+          "label": "裸杏色",
+          "value": "裸杏色轻扫颧骨，存在感克制"
+        },
+        {
+          "id": "cool_pink",
+          "label": "冷粉色",
+          "value": "冷粉色集中在面中区域，边缘透明"
+        },
+        {
+          "id": "warm_apricot",
+          "label": "暖杏色",
+          "value": "暖杏色覆盖双颊并与肤色自然融合"
+        },
+        {
+          "id": "plum_contour",
+          "label": "梅子色轮廓腮红",
+          "value": "浅梅子色沿颧骨外侧形成柔和轮廓"
+        },
+        {
+          "id": "barely_visible",
+          "label": "浅淡自然红润",
+          "value": "只在双颊留下很浅的自然红润"
+        },
+        {
+          "id": "glossy_cheek",
+          "label": "水润光泽腮红",
+          "value": "透明粉色与细腻湿润反光叠加在颧骨处"
+        },
+        {
+          "id": "hangover_blush",
+          "label": "宿醉腮红",
+          "value": "大面积晕染的宿醉感腮红"
+        },
+        {
+          "id": "sunburn_blush",
+          "label": "晒伤感腮红",
+          "value": "横跨鼻梁的晒伤感腮红"
+        }
+      ]
+    },
+    "makeup.lip_color": {
+      "category": "精细妆容",
+      "label": "唇色",
+      "template": "唇色为{value}",
+      "options": [
+        {
+          "id": "nude_pink",
+          "label": "裸粉色",
+          "value": "贴近自然唇色的柔和裸粉色"
+        },
+        {
+          "id": "milk_tea",
+          "label": "奶茶色",
+          "value": "低饱和奶茶棕粉色"
+        },
+        {
+          "id": "peach",
+          "label": "蜜桃色",
+          "value": "清透柔和的蜜桃粉色"
+        },
+        {
+          "id": "coral",
+          "label": "珊瑚色",
+          "value": "明亮、饱和度适中的珊瑚色"
+        },
+        {
+          "id": "rose",
+          "label": "玫瑰色",
+          "value": "中等明度的自然玫瑰色"
+        },
+        {
+          "id": "dusty_rose",
+          "label": "干枯玫瑰色",
+          "value": "低饱和干枯玫瑰色"
+        },
+        {
+          "id": "bean_paste",
+          "label": "豆沙色",
+          "value": "温和稳重的豆沙红色"
+        },
+        {
+          "id": "apricot",
+          "label": "杏色",
+          "value": "带暖橙调的浅杏色"
+        },
+        {
+          "id": "brick_red",
+          "label": "砖红色",
+          "value": "棕调明显的砖红色"
+        },
+        {
+          "id": "classic_red",
+          "label": "经典红色",
+          "value": "明度适中、边界鲜明的经典红色"
+        },
+        {
+          "id": "cherry_red",
+          "label": "樱桃红",
+          "value": "清透鲜明的樱桃红色"
+        },
+        {
+          "id": "wine_red",
+          "label": "酒红色",
+          "value": "深沉浓郁的酒红色"
+        },
+        {
+          "id": "plum",
+          "label": "梅子色",
+          "value": "带紫调的深梅子色"
+        },
+        {
+          "id": "brown_red",
+          "label": "棕红色",
+          "value": "棕色比例明显的复古红色"
+        },
+        {
+          "id": "cool_mauve",
+          "label": "冷调灰紫粉",
+          "value": "低饱和冷调灰紫粉色"
+        },
+        {
+          "id": "natural_red",
+          "label": "自然红润",
+          "value": "接近原生唇色的自然红润色"
+        },
+        {
+          "id": "coral_orange",
+          "label": "珊瑚橘",
+          "value": "明快的珊瑚橘"
+        },
+        {
+          "id": "rose_red",
+          "label": "玫红",
+          "value": "娇艳的玫红"
+        },
+        {
+          "id": "nude_brown",
+          "label": "裸棕",
+          "value": "低调的裸棕"
+        }
+      ]
+    },
+    "makeup.lip_finish": {
+      "category": "精细妆容",
+      "label": "唇面质地",
+      "template": "唇妆质地为{value}",
+      "options": [
+        {
+          "id": "natural_moist",
+          "label": "自然润泽",
+          "value": "保留细小唇纹的自然润泽质地"
+        },
+        {
+          "id": "glossy",
+          "label": "水光玻璃唇",
+          "value": "中央反光清楚的水光玻璃质地"
+        },
+        {
+          "id": "satin",
+          "label": "缎光",
+          "value": "光泽细腻、颜色覆盖均匀的缎光质地"
+        },
+        {
+          "id": "velvet_matte",
+          "label": "丝绒哑光",
+          "value": "边缘柔和、表面细腻的丝绒哑光质地"
+        },
+        {
+          "id": "soft_matte",
+          "label": "柔雾哑光",
+          "value": "唇纹轻微柔化的柔雾哑光质地"
+        },
+        {
+          "id": "blurred_edge",
+          "label": "晕染唇边",
+          "value": "中心颜色较深、唇线边缘轻柔晕开的质地"
+        },
+        {
+          "id": "clear_balmy",
+          "label": "透明润唇感",
+          "value": "颜色透明、表面带薄层润泽的质地"
+        },
+        {
+          "id": "metallic_sheen",
+          "label": "细微金属光",
+          "value": "随光线出现细小金属反光的质地"
+        },
+        {
+          "id": "glossy_mirror",
+          "label": "镜面水光",
+          "value": "反光的镜面水光"
+        },
+        {
+          "id": "gradient_bitten",
+          "label": "渐变咬唇",
+          "value": "由内向外渐变的咬唇妆"
+        }
+      ]
+    },
+    "nail.shape": {
+      "category": "手部细节",
+      "label": "甲形长度",
+      "template": "指甲为{value}",
+      "options": [
+        {
+          "id": "short_round",
+          "label": "短圆甲",
+          "value": "长度较短、边缘圆润的甲形"
+        },
+        {
+          "id": "short_square",
+          "label": "短方甲",
+          "value": "长度较短、前缘平直的方形甲"
+        },
+        {
+          "id": "soft_square",
+          "label": "方圆甲",
+          "value": "前缘平直、四角圆滑的方圆甲"
+        },
+        {
+          "id": "medium_oval",
+          "label": "中长椭圆甲",
+          "value": "长度适中、末端圆润的椭圆甲"
+        },
+        {
+          "id": "medium_almond",
+          "label": "中长杏仁甲",
+          "value": "两侧逐渐收窄的中长杏仁甲"
+        },
+        {
+          "id": "long_almond",
+          "label": "长杏仁甲",
+          "value": "长度明显、末端柔和收尖的杏仁甲"
+        },
+        {
+          "id": "long_coffin",
+          "label": "长梯形甲",
+          "value": "两侧收窄、前端平直的长梯形甲"
+        },
+        {
+          "id": "long_stiletto",
+          "label": "长尖甲",
+          "value": "长度明显、末端尖锐的细长甲形"
+        },
+        {
+          "id": "natural_trimmed",
+          "label": "自然修剪甲",
+          "value": "沿指尖整齐修剪的自然甲形"
+        },
+        {
+          "id": "medium_squoval",
+          "label": "中长方圆甲",
+          "value": "长度适中、轮廓介于方形与椭圆之间的甲形"
+        }
+      ]
+    },
+    "nail.color": {
+      "category": "手部细节",
+      "label": "指甲颜色",
+      "template": "甲色为{value}",
+      "options": [
+        {
+          "id": "transparent",
+          "label": "透明色",
+          "value": "接近自然甲面的透明色"
+        },
+        {
+          "id": "milky_white",
+          "label": "乳白色",
+          "value": "半透明乳白色"
+        },
+        {
+          "id": "nude_pink",
+          "label": "裸粉色",
+          "value": "柔和裸粉色"
+        },
+        {
+          "id": "peach",
+          "label": "蜜桃色",
+          "value": "清透蜜桃粉色"
+        },
+        {
+          "id": "beige",
+          "label": "米杏色",
+          "value": "低饱和米杏色"
+        },
+        {
+          "id": "classic_red",
+          "label": "正红色",
+          "value": "饱和鲜明的正红色"
+        },
+        {
+          "id": "wine_red",
+          "label": "酒红色",
+          "value": "深沉酒红色"
+        },
+        {
+          "id": "cherry_red",
+          "label": "樱桃红",
+          "value": "明亮樱桃红色"
+        },
+        {
+          "id": "dark_brown",
+          "label": "深棕色",
+          "value": "接近黑色的深棕色"
+        },
+        {
+          "id": "black",
+          "label": "黑色",
+          "value": "均匀纯黑色"
+        },
+        {
+          "id": "sage_green",
+          "label": "鼠尾草绿",
+          "value": "低饱和鼠尾草绿色"
+        },
+        {
+          "id": "navy_blue",
+          "label": "藏蓝色",
+          "value": "深藏蓝色"
+        },
+        {
+          "id": "silver",
+          "label": "银色",
+          "value": "带金属反光的银色"
+        },
+        {
+          "id": "multicolor_pastel",
+          "label": "柔和彩色跳色",
+          "value": "由浅粉、淡蓝与奶油黄交替组成的柔和彩色"
+        },
+        {
+          "id": "matcha_nail",
+          "label": "抹茶绿",
+          "value": "清浅的抹茶绿"
+        },
+        {
+          "id": "taro_nail",
+          "label": "香芋紫",
+          "value": "温柔的香芋紫"
+        },
+        {
+          "id": "holographic_nail",
+          "label": "全息偏光",
+          "value": "随角度变色的全息偏光"
+        }
+      ]
+    },
+    "nail.finish": {
+      "category": "手部细节",
+      "label": "美甲质地",
+      "template": "甲面呈现{value}",
+      "options": [
+        {
+          "id": "natural_gloss",
+          "label": "自然亮泽",
+          "value": "接近健康甲面的自然亮泽"
+        },
+        {
+          "id": "high_gloss",
+          "label": "高亮镜面",
+          "value": "反光清楚的高亮镜面质地"
+        },
+        {
+          "id": "matte",
+          "label": "柔雾哑光",
+          "value": "表面平整、反光很弱的柔雾哑光质地"
+        },
+        {
+          "id": "jelly",
+          "label": "透明果冻",
+          "value": "具有透明层次的果冻质地"
+        },
+        {
+          "id": "fine_glitter",
+          "label": "细闪",
+          "value": "均匀分布细小闪片的质地"
+        },
+        {
+          "id": "pearl",
+          "label": "珍珠光",
+          "value": "随角度变化出现柔和珍珠光的质地"
+        },
+        {
+          "id": "chrome",
+          "label": "金属镜面",
+          "value": "反射周围光线的金属镜面质地"
+        },
+        {
+          "id": "french_tip",
+          "label": "法式白边",
+          "value": "自然底色搭配边缘整齐的白色法式线条"
+        }
+      ]
+    },
+    "jewelry.earrings": {
+      "category": "首饰配件",
+      "label": "耳饰",
+      "template": "佩戴{value}",
+      "options": [
+        {
+          "id": "pearl_studs",
+          "label": "珍珠耳钉",
+          "value": "小颗圆形珍珠耳钉"
+        },
+        {
+          "id": "diamond_studs",
+          "label": "透明晶石耳钉",
+          "value": "小颗透明晶石耳钉"
+        },
+        {
+          "id": "gold_hoops_small",
+          "label": "小金属圆环",
+          "value": "细窄的小号金色圆环耳饰"
+        },
+        {
+          "id": "silver_hoops",
+          "label": "银色圆环",
+          "value": "表面光洁的银色圆环耳饰"
+        },
+        {
+          "id": "pearl_drop",
+          "label": "珍珠垂坠耳饰",
+          "value": "由细金属链连接单颗珍珠的垂坠耳饰"
+        },
+        {
+          "id": "metal_tassel",
+          "label": "金属流苏耳饰",
+          "value": "多条细金属链组成的流苏耳饰"
+        },
+        {
+          "id": "geometric_gold",
+          "label": "金色几何耳饰",
+          "value": "线条利落的金色几何耳饰"
+        },
+        {
+          "id": "rectangle_drop",
+          "label": "矩形垂坠耳饰",
+          "value": "细长矩形金属垂坠耳饰"
+        },
+        {
+          "id": "crystal_chandelier",
+          "label": "晶石吊灯耳饰",
+          "value": "多层透明晶石组成的吊灯式耳饰"
+        },
+        {
+          "id": "flower_studs",
+          "label": "小花耳钉",
+          "value": "小巧花朵造型耳钉"
+        },
+        {
+          "id": "jade_drop",
+          "label": "玉石坠耳饰",
+          "value": "浅色玉石与细金属连接的垂坠耳饰"
+        },
+        {
+          "id": "vintage_clip",
+          "label": "复古耳夹",
+          "value": "带雕刻纹样的圆形复古耳夹"
+        },
+        {
+          "id": "asymmetric",
+          "label": "不对称耳饰",
+          "value": "一侧耳钉与一侧长链组成的不对称耳饰"
+        },
+        {
+          "id": "black_enamel",
+          "label": "黑色珐琅耳饰",
+          "value": "黑色珐琅与金色边框组合的耳饰"
+        },
+        {
+          "id": "ear_cuff",
+          "label": "金属耳骨夹",
+          "value": "贴合耳廓的细金属耳骨夹"
+        },
+        {
+          "id": "fabric_flower",
+          "label": "布艺花朵耳饰",
+          "value": "小型布艺花瓣组成的柔软耳饰"
+        }
+      ]
+    },
+    "jewelry.necklace": {
+      "category": "首饰配件",
+      "label": "颈部首饰",
+      "template": "颈部搭配{value}",
+      "options": [
+        {
+          "id": "fine_gold_chain",
+          "label": "金色细链",
+          "value": "贴近锁骨的金色细链项链"
+        },
+        {
+          "id": "fine_silver_chain",
+          "label": "银色细链",
+          "value": "贴近锁骨的银色细链项链"
+        },
+        {
+          "id": "single_pearl",
+          "label": "单颗珍珠项链",
+          "value": "细链与单颗小珍珠组成的项链"
+        },
+        {
+          "id": "pearl_strand",
+          "label": "短珍珠项链",
+          "value": "长度贴近颈根的单排珍珠项链"
+        },
+        {
+          "id": "small_pendant",
+          "label": "小吊坠项链",
+          "value": "细链与小型几何吊坠组成的项链"
+        },
+        {
+          "id": "layered_chains",
+          "label": "叠戴细链",
+          "value": "两条不同长度的纤细金属链"
+        },
+        {
+          "id": "black_choker",
+          "label": "黑色细颈带",
+          "value": "贴合颈部的黑色细颈带"
+        },
+        {
+          "id": "velvet_choker",
+          "label": "丝绒颈带",
+          "value": "带小吊坠的窄幅丝绒颈带"
+        },
+        {
+          "id": "gold_collar",
+          "label": "金色硬质项圈",
+          "value": "沿颈部弧线展开的金色硬质项圈"
+        },
+        {
+          "id": "jade_pendant",
+          "label": "玉石吊坠",
+          "value": "细绳与温润玉石吊坠组成的项链"
+        },
+        {
+          "id": "long_pendant",
+          "label": "长吊坠项链",
+          "value": "垂落到胸前的细长吊坠项链"
+        },
+        {
+          "id": "crystal_necklace",
+          "label": "晶石项链",
+          "value": "多颗透明晶石排列成的短项链"
+        },
+        {
+          "id": "ribbon_bow",
+          "label": "丝带蝴蝶结颈饰",
+          "value": "窄丝带系成的小型蝴蝶结颈饰"
+        },
+        {
+          "id": "chain_lariat",
+          "label": "Y形链条项链",
+          "value": "沿胸前垂落的Y形细链项链"
+        }
+      ]
+    },
+    "jewelry.wrist": {
+      "category": "首饰配件",
+      "label": "腕部配件",
+      "template": "腕部佩戴{value}",
+      "options": [
+        {
+          "id": "fine_gold_bracelet",
+          "label": "金色细手链",
+          "value": "带小吊坠的金色细手链"
+        },
+        {
+          "id": "fine_silver_bracelet",
+          "label": "银色细手链",
+          "value": "线条简洁的银色细手链"
+        },
+        {
+          "id": "pearl_bracelet",
+          "label": "珍珠手链",
+          "value": "小颗珍珠串联的手链"
+        },
+        {
+          "id": "gold_bangle",
+          "label": "金色手镯",
+          "value": "表面光洁的窄幅金色手镯"
+        },
+        {
+          "id": "jade_bangle",
+          "label": "玉石手镯",
+          "value": "通透浅色的圆形玉石手镯"
+        },
+        {
+          "id": "chain_bracelet",
+          "label": "链条手链",
+          "value": "链节清楚的金属手链"
+        },
+        {
+          "id": "leather_watch",
+          "label": "皮带腕表",
+          "value": "细皮革表带与小表盘组成的腕表"
+        },
+        {
+          "id": "metal_watch",
+          "label": "金属腕表",
+          "value": "金属链式表带与简洁表盘组成的腕表"
+        },
+        {
+          "id": "sport_watch",
+          "label": "运动腕表",
+          "value": "深色软质表带的运动腕表"
+        },
+        {
+          "id": "fabric_scrunchie",
+          "label": "布艺发圈",
+          "value": "套在手腕上的柔软布艺发圈"
+        },
+        {
+          "id": "beaded_bracelet",
+          "label": "彩色珠串",
+          "value": "小颗彩色珠子串联的手链"
+        },
+        {
+          "id": "wide_cuff",
+          "label": "宽金属腕饰",
+          "value": "覆盖部分手腕的宽幅金属腕饰"
+        }
+      ]
+    },
+    "jewelry.rings": {
+      "category": "首饰配件",
+      "label": "戒指",
+      "template": "手指佩戴{value}",
+      "options": [
+        {
+          "id": "single_band",
+          "label": "单枚素圈",
+          "value": "一枚表面光洁的细金属素圈"
+        },
+        {
+          "id": "tiny_stone",
+          "label": "小晶石戒指",
+          "value": "一枚镶嵌小颗透明晶石的细戒指"
+        },
+        {
+          "id": "stacked_thin",
+          "label": "叠戴细戒",
+          "value": "两到三枚粗细不同的纤细戒指"
+        },
+        {
+          "id": "signet",
+          "label": "小型印章戒",
+          "value": "顶部平整的小型金属印章戒指"
+        },
+        {
+          "id": "pearl_ring",
+          "label": "珍珠戒指",
+          "value": "一枚镶嵌小颗珍珠的戒指"
+        },
+        {
+          "id": "open_ring",
+          "label": "开口戒指",
+          "value": "两端留有间隔的细金属开口戒指"
+        },
+        {
+          "id": "geometric",
+          "label": "几何戒指",
+          "value": "由直线与圆弧构成的几何金属戒指"
+        },
+        {
+          "id": "black_stone",
+          "label": "黑色宝石戒指",
+          "value": "镶嵌小颗黑色宝石的戒指"
+        },
+        {
+          "id": "jade_ring",
+          "label": "玉石戒指",
+          "value": "温润浅色玉石制成的戒指"
+        },
+        {
+          "id": "multiple_mixed",
+          "label": "多枚混搭戒指",
+          "value": "分布在不同手指上的多枚细金属戒指"
+        }
+      ]
+    },
+    "accessory.eyewear": {
+      "category": "随身配件",
+      "label": "眼镜",
+      "template": "佩戴{value}",
+      "options": [
+        {
+          "id": "fine_rectangle_gold",
+          "label": "金色细矩形眼镜",
+          "value": "金色细框矩形眼镜"
+        },
+        {
+          "id": "fine_rectangle_silver",
+          "label": "银色细矩形眼镜",
+          "value": "银色细框矩形眼镜"
+        },
+        {
+          "id": "round_gold",
+          "label": "金色圆框眼镜",
+          "value": "金色细框圆形眼镜"
+        },
+        {
+          "id": "round_black",
+          "label": "黑色圆框眼镜",
+          "value": "黑色细框圆形眼镜"
+        },
+        {
+          "id": "clear_frame",
+          "label": "透明框眼镜",
+          "value": "透明浅色镜框眼镜"
+        },
+        {
+          "id": "tortoiseshell",
+          "label": "玳瑁框眼镜",
+          "value": "棕色玳瑁纹镜框眼镜"
+        },
+        {
+          "id": "black_cat_eye",
+          "label": "黑色猫眼镜",
+          "value": "外眼角上扬的黑色猫眼框眼镜"
+        },
+        {
+          "id": "oversized_square",
+          "label": "大方框眼镜",
+          "value": "轮廓宽大的方形镜框眼镜"
+        },
+        {
+          "id": "rimless",
+          "label": "无框眼镜",
+          "value": "镜片边缘裸露的无框眼镜"
+        },
+        {
+          "id": "aviator_clear",
+          "label": "飞行员光学镜",
+          "value": "双梁飞行员造型的透明镜片眼镜"
+        },
+        {
+          "id": "black_sunglasses",
+          "label": "黑色墨镜",
+          "value": "深色镜片与黑色镜框组成的墨镜"
+        },
+        {
+          "id": "brown_sunglasses",
+          "label": "茶色墨镜",
+          "value": "茶色渐变镜片的墨镜"
+        },
+        {
+          "id": "narrow_sunglasses",
+          "label": "窄框墨镜",
+          "value": "横向狭窄、线条利落的深色墨镜"
+        },
+        {
+          "id": "sport_sunglasses",
+          "label": "运动墨镜",
+          "value": "贴合面部弧度的一体式运动墨镜"
+        }
+      ]
+    },
+    "accessory.bag": {
+      "category": "随身配件",
+      "label": "手袋",
+      "template": "搭配{value}",
+      "options": [
+        {
+          "id": "structured_handbag",
+          "label": "结构感手提包",
+          "value": "轮廓挺括的小型结构感手提包"
+        },
+        {
+          "id": "mini_top_handle",
+          "label": "迷你手提包",
+          "value": "带短提手的迷你方形手提包"
+        },
+        {
+          "id": "shoulder_bag",
+          "label": "腋下肩背包",
+          "value": "背带较短、贴近腋下的肩背包"
+        },
+        {
+          "id": "crossbody_bag",
+          "label": "小型斜挎包",
+          "value": "细长背带的小型斜挎包"
+        },
+        {
+          "id": "chain_bag",
+          "label": "链条包",
+          "value": "金属链条肩带与翻盖结构组成的小包"
+        },
+        {
+          "id": "clutch",
+          "label": "手拿包",
+          "value": "轮廓扁平、握在手中的长方形手拿包"
+        },
+        {
+          "id": "tote_canvas",
+          "label": "帆布托特包",
+          "value": "浅色厚帆布制成的宽口托特包"
+        },
+        {
+          "id": "tote_leather",
+          "label": "皮质托特包",
+          "value": "表面细腻、容量较大的皮质托特包"
+        },
+        {
+          "id": "woven_straw",
+          "label": "草编包",
+          "value": "天然草色纤维编织的小型手袋"
+        },
+        {
+          "id": "bucket_bag",
+          "label": "水桶包",
+          "value": "顶部抽绳收口的圆筒形水桶包"
+        },
+        {
+          "id": "backpack_small",
+          "label": "小型双肩包",
+          "value": "轮廓简洁的小型双肩包"
+        },
+        {
+          "id": "sport_duffel",
+          "label": "运动手提袋",
+          "value": "软质面料与宽肩带组成的运动手提袋"
+        },
+        {
+          "id": "beaded_bag",
+          "label": "珠饰手袋",
+          "value": "表面由小颗珠子排列覆盖的迷你手袋"
+        },
+        {
+          "id": "velvet_evening",
+          "label": "丝绒晚宴包",
+          "value": "深色丝绒与金属搭扣组成的小型晚宴包"
+        },
+        {
+          "id": "belt_bag",
+          "label": "腰包",
+          "value": "系在腰间的腰包"
+        }
+      ]
+    },
+    "prop.object": {
+      "category": "交互道具",
+      "label": "交互物件",
+      "template": "画面中可见{value}",
+      "options": [
+        {
+          "id": "flower_bouquet",
+          "label": "花束",
+          "value": "人物手臂抱住的一束鲜花"
+        },
+        {
+          "id": "daisy_bouquet",
+          "label": "小雏菊花束",
+          "value": "人物手中一束白色小雏菊"
+        },
+        {
+          "id": "rose_bouquet",
+          "label": "玫瑰花束",
+          "value": "由多枝玫瑰与叶材组成的花束"
+        },
+        {
+          "id": "coffee_cup",
+          "label": "咖啡杯",
+          "value": "人物手中带杯碟的陶瓷咖啡杯"
+        },
+        {
+          "id": "takeaway_cup",
+          "label": "外带饮料杯",
+          "value": "人物手中带透明杯盖的外带饮料杯"
+        },
+        {
+          "id": "folder",
+          "label": "文件夹",
+          "value": "人物手中竖立的深色文件夹"
+        },
+        {
+          "id": "pen",
+          "label": "签字笔",
+          "value": "人物手指间夹住的金属签字笔"
+        },
+        {
+          "id": "folding_fan",
+          "label": "折扇",
+          "value": "人物手中展开的折扇"
+        },
+        {
+          "id": "round_fan",
+          "label": "团扇",
+          "value": "人物手中带细柄的圆形团扇"
+        },
+        {
+          "id": "umbrella_clear",
+          "label": "透明雨伞",
+          "value": "人物手中撑开的透明长柄雨伞"
+        },
+        {
+          "id": "umbrella_black",
+          "label": "黑色雨伞",
+          "value": "人物手中撑开的黑色长柄雨伞"
+        },
+        {
+          "id": "paper_parasol",
+          "label": "纸伞",
+          "value": "人物手中带木质伞骨的浅色纸伞"
+        },
+        {
+          "id": "smartphone",
+          "label": "智能手机",
+          "value": "人物单手握住的智能手机"
+        },
+        {
+          "id": "compact_camera",
+          "label": "便携相机",
+          "value": "人物手中带腕带的便携数码相机"
+        },
+        {
+          "id": "film_camera",
+          "label": "胶片相机",
+          "value": "人物胸前由背带悬挂的胶片相机"
+        },
+        {
+          "id": "book",
+          "label": "精装书",
+          "value": "人物手中翻开的精装书"
+        },
+        {
+          "id": "magazine",
+          "label": "杂志",
+          "value": "人物手中翻开的时尚杂志"
+        },
+        {
+          "id": "newspaper",
+          "label": "报纸",
+          "value": "人物双手展开的折叠报纸"
+        },
+        {
+          "id": "wine_glass",
+          "label": "高脚杯",
+          "value": "人物手中盛有少量饮品的透明高脚杯"
+        },
+        {
+          "id": "dessert_plate",
+          "label": "甜点盘",
+          "value": "桌面上带小份甜点的浅色餐盘"
+        },
+        {
+          "id": "tennis_racket",
+          "label": "网球拍",
+          "value": "人物手中握住拍柄的网球拍"
+        },
+        {
+          "id": "yoga_mat",
+          "label": "瑜伽垫",
+          "value": "人物手臂夹住的卷起瑜伽垫"
+        },
+        {
+          "id": "headphones",
+          "label": "头戴耳机",
+          "value": "人物一只手拿住的头戴式耳机"
+        },
+        {
+          "id": "shopping_bag",
+          "label": "购物袋",
+          "value": "人物手中提着的纸质购物袋"
+        },
+        {
+          "id": "gift_box",
+          "label": "礼物盒",
+          "value": "人物双手托住的系带礼物盒"
+        },
+        {
+          "id": "ballet_shoes",
+          "label": "芭蕾舞鞋",
+          "value": "人物手中提着鞋带的软底芭蕾舞鞋"
+        },
+        {
+          "id": "door_handle",
+          "label": "门把手",
+          "value": "人物一只手握住的金属门把手"
+        },
+        {
+          "id": "railing",
+          "label": "栏杆",
+          "value": "人物手掌轻扶的栏杆"
+        },
+        {
+          "id": "curtain",
+          "label": "窗帘",
+          "value": "人物手指轻触的窗帘边缘"
+        },
+        {
+          "id": "shoelace",
+          "label": "鞋带",
+          "value": "人物双手正在整理的一侧鞋带"
+        },
+        {
+          "id": "microphone",
+          "label": "麦克风",
+          "value": "手持的一支麦克风"
+        },
+        {
+          "id": "soap_bubbles",
+          "label": "泡泡",
+          "value": "飘在空中的一串肥皂泡"
+        },
+        {
+          "id": "pet_cat",
+          "label": "宠物猫",
+          "value": "一只温顺的宠物猫"
+        },
+        {
+          "id": "pet_dog",
+          "label": "宠物犬",
+          "value": "一只活泼的宠物犬"
+        },
+        {
+          "id": "lantern",
+          "label": "灯笼",
+          "value": "一盏发出暖光的灯笼"
+        },
+        {
+          "id": "balloon",
+          "label": "气球",
+          "value": "一束飘起的彩色气球"
+        },
+        {
+          "id": "suitcase",
+          "label": "行李箱",
+          "value": "一只立在地上的行李箱"
+        },
+        {
+          "id": "cake",
+          "label": "蛋糕",
+          "value": "一块点缀精致的蛋糕"
+        },
+        {
+          "id": "candle",
+          "label": "蜡烛",
+          "value": "一支点燃的蜡烛"
+        },
+        {
+          "id": "crown",
+          "label": "皇冠",
+          "value": "一顶小巧的皇冠"
+        },
+        {
+          "id": "mask",
+          "label": "口罩",
+          "value": "挂在下巴上的口罩"
+        },
+        {
+          "id": "kite",
+          "label": "风筝",
+          "value": "一只随风扬起的风筝"
+        }
+      ]
+    }
+  },
+  "bundles": {
+    "beauty_looks": [
+      {
+        "id": "bare_natural",
+        "label": "清透裸妆",
+        "fields": {
+          "makeup.base": "barely_there",
+          "makeup.eyebrow": "soft_brown",
+          "makeup.eyeshadow": "nude_beige",
+          "makeup.eyeliner": "brown_inner",
+          "makeup.eyelash": "natural_curled",
+          "makeup.blush": "barely_visible",
+          "makeup.lip_color": "natural_red",
+          "makeup.lip_finish": "natural_moist"
+        },
+        "tags": [
+          "自然",
+          "生活"
+        ]
+      },
+      {
+        "id": "japanese_peach",
+        "label": "日系蜜桃妆",
+        "fields": {
+          "makeup.base": "clear_bright",
+          "makeup.eyebrow": "soft_brown",
+          "makeup.eyeshadow": "peach",
+          "makeup.eyeliner": "short_downturned",
+          "makeup.eyelash": "brown_soft",
+          "makeup.blush": "peach_cheeks",
+          "makeup.lip_color": "peach",
+          "makeup.lip_finish": "clear_balmy"
+        },
+        "tags": [
+          "日系",
+          "清甜"
+        ]
+      },
+      {
+        "id": "cafe_milk_tea",
+        "label": "咖啡馆奶茶妆",
+        "fields": {
+          "makeup.base": "warm_natural",
+          "makeup.eyebrow": "warm_caramel",
+          "makeup.eyeshadow": "milk_tea",
+          "makeup.eyeliner": "brown_inner",
+          "makeup.eyelash": "natural_curled",
+          "makeup.blush": "nude_beige",
+          "makeup.lip_color": "milk_tea",
+          "makeup.lip_finish": "satin"
+        },
+        "tags": [
+          "咖啡馆",
+          "暖调"
+        ]
+      },
+      {
+        "id": "office_refined",
+        "label": "职场精致妆",
+        "fields": {
+          "makeup.base": "semi_matte",
+          "makeup.eyebrow": "dark_brown_defined",
+          "makeup.eyeshadow": "rose_brown",
+          "makeup.eyeliner": "slight_wing",
+          "makeup.eyelash": "slender_defined",
+          "makeup.blush": "rose_lifted",
+          "makeup.lip_color": "dusty_rose",
+          "makeup.lip_finish": "satin"
+        },
+        "tags": [
+          "职场",
+          "精致"
+        ]
+      },
+      {
+        "id": "classic_red_lip",
+        "label": "经典红唇妆",
+        "fields": {
+          "makeup.base": "commercial_polished",
+          "makeup.eyebrow": "black_natural",
+          "makeup.eyeshadow": "warm_brown",
+          "makeup.eyeliner": "defined_wing",
+          "makeup.eyelash": "outer_emphasis",
+          "makeup.blush": "nude_beige",
+          "makeup.lip_color": "classic_red",
+          "makeup.lip_finish": "satin"
+        },
+        "tags": [
+          "红唇",
+          "时尚"
+        ]
+      },
+      {
+        "id": "night_wine_gloss",
+        "label": "夜间酒红光泽妆",
+        "fields": {
+          "makeup.base": "satin",
+          "makeup.eyebrow": "dark_brown_defined",
+          "makeup.eyeshadow": "gold_brown",
+          "makeup.eyeliner": "defined_wing",
+          "makeup.eyelash": "soft_dense",
+          "makeup.blush": "rose_lifted",
+          "makeup.lip_color": "wine_red",
+          "makeup.lip_finish": "glossy"
+        },
+        "tags": [
+          "夜间",
+          "轻奢"
+        ]
+      },
+      {
+        "id": "rose_dewy",
+        "label": "玫瑰水光妆",
+        "fields": {
+          "makeup.base": "dewy",
+          "makeup.eyebrow": "arched_refined",
+          "makeup.eyeshadow": "rose_brown",
+          "makeup.eyeliner": "half_liner",
+          "makeup.eyelash": "clustered",
+          "makeup.blush": "glossy_cheek",
+          "makeup.lip_color": "rose",
+          "makeup.lip_finish": "glossy"
+        },
+        "tags": [
+          "水光",
+          "美妆"
+        ]
+      },
+      {
+        "id": "cool_clear",
+        "label": "冷白清透妆",
+        "fields": {
+          "makeup.base": "cool_clear",
+          "makeup.eyebrow": "cool_taupe",
+          "makeup.eyeshadow": "cool_taupe",
+          "makeup.eyeliner": "black_inner",
+          "makeup.eyelash": "slender_defined",
+          "makeup.blush": "cool_pink",
+          "makeup.lip_color": "cool_mauve",
+          "makeup.lip_finish": "natural_moist"
+        },
+        "tags": [
+          "清透",
+          "冷调"
+        ]
+      },
+      {
+        "id": "coral_summer",
+        "label": "夏日珊瑚妆",
+        "fields": {
+          "makeup.base": "clear_bright",
+          "makeup.eyebrow": "soft_brown",
+          "makeup.eyeshadow": "coral",
+          "makeup.eyeliner": "brown_inner",
+          "makeup.eyelash": "natural_curled",
+          "makeup.blush": "coral_sun_kissed",
+          "makeup.lip_color": "coral",
+          "makeup.lip_finish": "clear_balmy"
+        },
+        "tags": [
+          "夏日",
+          "元气"
+        ]
+      },
+      {
+        "id": "soft_pink",
+        "label": "柔粉甜美妆",
+        "fields": {
+          "makeup.base": "dewy",
+          "makeup.eyebrow": "straight_korean",
+          "makeup.eyeshadow": "dusty_pink",
+          "makeup.eyeliner": "puppy",
+          "makeup.eyelash": "clustered",
+          "makeup.blush": "pink_under_eye",
+          "makeup.lip_color": "nude_pink",
+          "makeup.lip_finish": "glossy"
+        },
+        "tags": [
+          "柔粉",
+          "甜美"
+        ]
+      },
+      {
+        "id": "retro_brick",
+        "label": "复古砖红妆",
+        "fields": {
+          "makeup.base": "warm_natural",
+          "makeup.eyebrow": "dark_brown_defined",
+          "makeup.eyeshadow": "brick_red",
+          "makeup.eyeliner": "soft_smudged",
+          "makeup.eyelash": "outer_emphasis",
+          "makeup.blush": "warm_apricot",
+          "makeup.lip_color": "brick_red",
+          "makeup.lip_finish": "velvet_matte"
+        },
+        "tags": [
+          "复古",
+          "暖调"
+        ]
+      },
+      {
+        "id": "hongkong_brown_red",
+        "label": "港风棕红妆",
+        "fields": {
+          "makeup.base": "satin",
+          "makeup.eyebrow": "black_natural",
+          "makeup.eyeshadow": "gold_brown",
+          "makeup.eyeliner": "defined_wing",
+          "makeup.eyelash": "soft_dense",
+          "makeup.blush": "rose_lifted",
+          "makeup.lip_color": "brown_red",
+          "makeup.lip_finish": "satin"
+        },
+        "tags": [
+          "港风",
+          "胶片"
+        ]
+      },
+      {
+        "id": "plum_evening",
+        "label": "梅子晚宴妆",
+        "fields": {
+          "makeup.base": "semi_matte",
+          "makeup.eyebrow": "arched_refined",
+          "makeup.eyeshadow": "plum",
+          "makeup.eyeliner": "defined_wing",
+          "makeup.eyelash": "soft_dense",
+          "makeup.blush": "plum_contour",
+          "makeup.lip_color": "plum",
+          "makeup.lip_finish": "velvet_matte"
+        },
+        "tags": [
+          "晚宴",
+          "浓郁"
+        ]
+      },
+      {
+        "id": "smoky_fashion",
+        "label": "烟熏时尚妆",
+        "fields": {
+          "makeup.base": "matte",
+          "makeup.eyebrow": "dark_brown_defined",
+          "makeup.eyeshadow": "smoky_gray",
+          "makeup.eyeliner": "soft_smudged",
+          "makeup.eyelash": "outer_emphasis",
+          "makeup.blush": "nude_beige",
+          "makeup.lip_color": "nude_pink",
+          "makeup.lip_finish": "soft_matte"
+        },
+        "tags": [
+          "烟熏",
+          "时尚"
+        ]
+      },
+      {
+        "id": "champagne_editorial",
+        "label": "香槟画报妆",
+        "fields": {
+          "makeup.base": "commercial_polished",
+          "makeup.eyebrow": "feathered_gel",
+          "makeup.eyeshadow": "champagne_shimmer",
+          "makeup.eyeliner": "slight_wing",
+          "makeup.eyelash": "slender_defined",
+          "makeup.blush": "glossy_cheek",
+          "makeup.lip_color": "bean_paste",
+          "makeup.lip_finish": "satin"
+        },
+        "tags": [
+          "画报",
+          "光泽"
+        ]
+      },
+      {
+        "id": "olive_gold_editorial",
+        "label": "橄榄金画报妆",
+        "fields": {
+          "makeup.base": "satin",
+          "makeup.eyebrow": "cool_taupe",
+          "makeup.eyeshadow": "olive_gold",
+          "makeup.eyeliner": "graphic_double",
+          "makeup.eyelash": "outer_emphasis",
+          "makeup.blush": "nude_beige",
+          "makeup.lip_color": "brown_red",
+          "makeup.lip_finish": "metallic_sheen"
+        },
+        "tags": [
+          "画报",
+          "色彩"
+        ]
+      },
+      {
+        "id": "apricot_french",
+        "label": "法式暖杏妆",
+        "fields": {
+          "makeup.base": "film_natural",
+          "makeup.eyebrow": "light_sparse",
+          "makeup.eyeshadow": "milk_tea",
+          "makeup.eyeliner": "brown_inner",
+          "makeup.eyelash": "brown_soft",
+          "makeup.blush": "warm_apricot",
+          "makeup.lip_color": "apricot",
+          "makeup.lip_finish": "blurred_edge"
+        },
+        "tags": [
+          "法式",
+          "松弛"
+        ]
+      },
+      {
+        "id": "cherry_ccd",
+        "label": "CCD樱桃唇妆",
+        "fields": {
+          "makeup.base": "film_natural",
+          "makeup.eyebrow": "straight_korean",
+          "makeup.eyeshadow": "nude_beige",
+          "makeup.eyeliner": "black_inner",
+          "makeup.eyelash": "lower_defined",
+          "makeup.blush": "pink_under_eye",
+          "makeup.lip_color": "cherry_red",
+          "makeup.lip_finish": "glossy"
+        },
+        "tags": [
+          "CCD",
+          "明亮"
+        ]
+      },
+      {
+        "id": "new_chinese_refined",
+        "label": "新中式克制妆",
+        "fields": {
+          "makeup.base": "semi_matte",
+          "makeup.eyebrow": "arched_refined",
+          "makeup.eyeshadow": "rose_brown",
+          "makeup.eyeliner": "half_liner",
+          "makeup.eyelash": "natural_curled",
+          "makeup.blush": "rose_lifted",
+          "makeup.lip_color": "bean_paste",
+          "makeup.lip_finish": "soft_matte"
+        },
+        "tags": [
+          "新中式",
+          "克制"
+        ]
+      },
+      {
+        "id": "sport_fresh",
+        "label": "运动清爽妆",
+        "fields": {
+          "makeup.base": "matte",
+          "makeup.eyebrow": "feathered_gel",
+          "makeup.eyeshadow": "nude_beige",
+          "makeup.eyeliner": "brown_inner",
+          "makeup.eyelash": "natural_curled",
+          "makeup.blush": "coral_sun_kissed",
+          "makeup.lip_color": "natural_red",
+          "makeup.lip_finish": "clear_balmy"
+        },
+        "tags": [
+          "运动",
+          "清爽"
+        ]
+      },
+      {
+        "id": "black_white_graphic",
+        "label": "黑白图形妆",
+        "fields": {
+          "makeup.base": "matte",
+          "makeup.eyebrow": "black_natural",
+          "makeup.eyeshadow": "smoky_gray",
+          "makeup.eyeliner": "graphic_double",
+          "makeup.eyelash": "clustered",
+          "makeup.blush": "plum_contour",
+          "makeup.lip_color": "classic_red",
+          "makeup.lip_finish": "velvet_matte"
+        },
+        "tags": [
+          "黑白",
+          "图形"
+        ]
+      }
+    ],
+    "accessory_sets": [
+      {
+        "id": "minimal_pearl",
+        "label": "极简珍珠套组",
+        "fields": {
+          "jewelry.earrings": "pearl_studs",
+          "jewelry.necklace": "single_pearl",
+          "jewelry.wrist": "fine_gold_bracelet",
+          "jewelry.rings": "single_band"
+        },
+        "tags": [
+          "极简",
+          "珍珠"
+        ]
+      },
+      {
+        "id": "office_gold",
+        "label": "职场金色套组",
+        "fields": {
+          "jewelry.earrings": "geometric_gold",
+          "jewelry.necklace": "fine_gold_chain",
+          "jewelry.wrist": "leather_watch",
+          "jewelry.rings": "tiny_stone",
+          "accessory.eyewear": "fine_rectangle_gold",
+          "accessory.bag": "structured_handbag"
+        },
+        "tags": [
+          "职场",
+          "金色"
+        ]
+      },
+      {
+        "id": "office_silver",
+        "label": "职场银色套组",
+        "fields": {
+          "jewelry.earrings": "rectangle_drop",
+          "jewelry.necklace": "fine_silver_chain",
+          "jewelry.wrist": "metal_watch",
+          "jewelry.rings": "single_band",
+          "accessory.eyewear": "fine_rectangle_silver",
+          "accessory.bag": "tote_leather"
+        },
+        "tags": [
+          "职场",
+          "银色"
+        ]
+      },
+      {
+        "id": "cafe_soft",
+        "label": "咖啡馆柔和套组",
+        "fields": {
+          "jewelry.earrings": "flower_studs",
+          "jewelry.necklace": "small_pendant",
+          "jewelry.wrist": "fine_gold_bracelet",
+          "jewelry.rings": "open_ring",
+          "accessory.bag": "shoulder_bag"
+        },
+        "tags": [
+          "咖啡馆",
+          "日常"
+        ]
+      },
+      {
+        "id": "summer_straw",
+        "label": "夏日草编套组",
+        "fields": {
+          "jewelry.earrings": "fabric_flower",
+          "jewelry.necklace": "single_pearl",
+          "jewelry.wrist": "beaded_bracelet",
+          "jewelry.rings": "open_ring",
+          "accessory.bag": "woven_straw"
+        },
+        "tags": [
+          "夏日",
+          "自然"
+        ]
+      },
+      {
+        "id": "french_gold",
+        "label": "法式金色套组",
+        "fields": {
+          "jewelry.earrings": "gold_hoops_small",
+          "jewelry.necklace": "layered_chains",
+          "jewelry.wrist": "fine_gold_bracelet",
+          "jewelry.rings": "stacked_thin",
+          "accessory.bag": "chain_bag"
+        },
+        "tags": [
+          "法式",
+          "金色"
+        ]
+      },
+      {
+        "id": "evening_crystal",
+        "label": "晚宴晶石套组",
+        "fields": {
+          "jewelry.earrings": "crystal_chandelier",
+          "jewelry.necklace": "crystal_necklace",
+          "jewelry.wrist": "wide_cuff",
+          "jewelry.rings": "tiny_stone",
+          "accessory.bag": "velvet_evening"
+        },
+        "tags": [
+          "晚宴",
+          "晶石"
+        ]
+      },
+      {
+        "id": "black_gold",
+        "label": "黑金时尚套组",
+        "fields": {
+          "jewelry.earrings": "black_enamel",
+          "jewelry.necklace": "gold_collar",
+          "jewelry.wrist": "gold_bangle",
+          "jewelry.rings": "black_stone",
+          "accessory.bag": "clutch"
+        },
+        "tags": [
+          "黑金",
+          "时尚"
+        ]
+      },
+      {
+        "id": "new_chinese_jade",
+        "label": "新中式玉石套组",
+        "fields": {
+          "jewelry.earrings": "jade_drop",
+          "jewelry.necklace": "jade_pendant",
+          "jewelry.wrist": "jade_bangle",
+          "jewelry.rings": "jade_ring"
+        },
+        "tags": [
+          "新中式",
+          "玉石"
+        ]
+      },
+      {
+        "id": "retro_clip",
+        "label": "复古耳夹套组",
+        "fields": {
+          "jewelry.earrings": "vintage_clip",
+          "jewelry.necklace": "pearl_strand",
+          "jewelry.wrist": "leather_watch",
+          "jewelry.rings": "signet",
+          "accessory.bag": "mini_top_handle"
+        },
+        "tags": [
+          "复古",
+          "端庄"
+        ]
+      },
+      {
+        "id": "urban_silver",
+        "label": "都市银色套组",
+        "fields": {
+          "jewelry.earrings": "ear_cuff",
+          "jewelry.necklace": "fine_silver_chain",
+          "jewelry.wrist": "chain_bracelet",
+          "jewelry.rings": "multiple_mixed",
+          "accessory.eyewear": "narrow_sunglasses",
+          "accessory.bag": "shoulder_bag"
+        },
+        "tags": [
+          "都市",
+          "银色"
+        ]
+      },
+      {
+        "id": "street_black",
+        "label": "街头黑色套组",
+        "fields": {
+          "jewelry.earrings": "silver_hoops",
+          "jewelry.necklace": "black_choker",
+          "jewelry.wrist": "wide_cuff",
+          "jewelry.rings": "geometric",
+          "accessory.eyewear": "black_sunglasses",
+          "accessory.bag": "crossbody_bag"
+        },
+        "tags": [
+          "街头",
+          "黑色"
+        ]
+      },
+      {
+        "id": "sweet_ribbon",
+        "label": "甜美丝带套组",
+        "fields": {
+          "jewelry.earrings": "pearl_drop",
+          "jewelry.necklace": "ribbon_bow",
+          "jewelry.wrist": "pearl_bracelet",
+          "jewelry.rings": "pearl_ring",
+          "accessory.bag": "beaded_bag"
+        },
+        "tags": [
+          "甜美",
+          "丝带"
+        ]
+      },
+      {
+        "id": "gallery_geometric",
+        "label": "美术馆几何套组",
+        "fields": {
+          "jewelry.earrings": "geometric_gold",
+          "jewelry.necklace": "small_pendant",
+          "jewelry.wrist": "gold_bangle",
+          "jewelry.rings": "geometric",
+          "accessory.eyewear": "rimless",
+          "accessory.bag": "clutch"
+        },
+        "tags": [
+          "几何",
+          "画廊"
+        ]
+      },
+      {
+        "id": "travel_practical",
+        "label": "旅行实用套组",
+        "fields": {
+          "jewelry.earrings": "gold_hoops_small",
+          "jewelry.wrist": "leather_watch",
+          "jewelry.rings": "single_band",
+          "accessory.eyewear": "brown_sunglasses",
+          "accessory.bag": "crossbody_bag"
+        },
+        "tags": [
+          "旅行",
+          "轻便"
+        ]
+      },
+      {
+        "id": "sport_active",
+        "label": "运动活力套组",
+        "fields": {
+          "jewelry.earrings": "diamond_studs",
+          "jewelry.wrist": "sport_watch",
+          "accessory.eyewear": "sport_sunglasses",
+          "accessory.bag": "sport_duffel"
+        },
+        "tags": [
+          "运动",
+          "功能"
+        ]
+      },
+      {
+        "id": "bookstore_intellectual",
+        "label": "书店知性套组",
+        "fields": {
+          "jewelry.earrings": "pearl_studs",
+          "jewelry.necklace": "fine_silver_chain",
+          "jewelry.wrist": "leather_watch",
+          "jewelry.rings": "open_ring",
+          "accessory.eyewear": "tortoiseshell",
+          "accessory.bag": "tote_leather"
+        },
+        "tags": [
+          "书店",
+          "知性"
+        ]
+      },
+      {
+        "id": "transparent_modern",
+        "label": "透明现代套组",
+        "fields": {
+          "jewelry.earrings": "asymmetric",
+          "jewelry.necklace": "chain_lariat",
+          "jewelry.wrist": "chain_bracelet",
+          "jewelry.rings": "stacked_thin",
+          "accessory.eyewear": "clear_frame",
+          "accessory.bag": "mini_top_handle"
+        },
+        "tags": [
+          "现代",
+          "轻盈"
+        ]
+      }
+    ],
+    "prop_action_links": [
+      {
+        "id": "bouquet_hat",
+        "label": "抱花束并扶帽檐",
+        "fields": {
+          "prop.object": "flower_bouquet",
+          "pose.hand_action": "bouquet_and_hat",
+          "pose.gaze": "camera_soft"
+        },
+        "tags": [
+          "花束",
+          "站姿"
+        ]
+      },
+      {
+        "id": "daisy_hat",
+        "label": "小雏菊与草帽",
+        "fields": {
+          "prop.object": "daisy_bouquet",
+          "pose.hand_action": "bouquet_and_hat",
+          "pose.gaze": "camera_soft"
+        },
+        "tags": [
+          "雏菊",
+          "森系"
+        ]
+      },
+      {
+        "id": "coffee_both_hands",
+        "label": "双手托咖啡杯",
+        "fields": {
+          "prop.object": "coffee_cup",
+          "pose.hand_action": "hold_coffee_cup",
+          "pose.gaze": "camera_soft"
+        },
+        "tags": [
+          "咖啡",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "coffee_table",
+        "label": "咖啡杯与桌沿",
+        "fields": {
+          "prop.object": "coffee_cup",
+          "pose.hand_action": "cup_and_table",
+          "pose.gaze": "down_prop"
+        },
+        "tags": [
+          "咖啡馆",
+          "桌面"
+        ]
+      },
+      {
+        "id": "folder_both_hands",
+        "label": "双手持文件夹",
+        "fields": {
+          "prop.object": "folder",
+          "pose.hand_action": "hold_folder",
+          "pose.gaze": "camera_direct"
+        },
+        "tags": [
+          "职场",
+          "文件"
+        ]
+      },
+      {
+        "id": "folder_pen",
+        "label": "文件夹与签字笔",
+        "fields": {
+          "prop.object": [
+            "folder",
+            "pen"
+          ],
+          "pose.hand_action": "pen_and_folder",
+          "pose.gaze": "camera_direct"
+        },
+        "tags": [
+          "职场",
+          "签字笔"
+        ]
+      },
+      {
+        "id": "fan_door",
+        "label": "折扇与门把手",
+        "fields": {
+          "prop.object": [
+            "door_handle",
+            "folding_fan"
+          ],
+          "pose.hand_action": "door_handle_and_fan",
+          "pose.gaze": "camera_direct"
+        },
+        "tags": [
+          "门框",
+          "折扇"
+        ]
+      },
+      {
+        "id": "clear_umbrella",
+        "label": "透明雨伞",
+        "fields": {
+          "prop.object": "umbrella_clear",
+          "pose.hand_action": "hold_umbrella",
+          "pose.gaze": "right_distance"
+        },
+        "tags": [
+          "雨天",
+          "透明伞"
+        ]
+      },
+      {
+        "id": "black_umbrella",
+        "label": "黑色雨伞",
+        "fields": {
+          "prop.object": "umbrella_black",
+          "pose.hand_action": "hold_umbrella",
+          "pose.gaze": "camera_direct"
+        },
+        "tags": [
+          "雨夜",
+          "黑伞"
+        ]
+      },
+      {
+        "id": "balcony_railing",
+        "label": "轻扶栏杆",
+        "fields": {
+          "prop.object": "railing",
+          "pose.hand_action": "touch_railing",
+          "pose.gaze": "left_distance"
+        },
+        "tags": [
+          "阳台",
+          "远眺"
+        ]
+      },
+      {
+        "id": "window_curtain",
+        "label": "轻触窗帘",
+        "fields": {
+          "prop.object": "curtain",
+          "pose.hand_action": "touch_curtain",
+          "pose.gaze": "window"
+        },
+        "tags": [
+          "窗边",
+          "室内"
+        ]
+      },
+      {
+        "id": "sport_shoelace",
+        "label": "整理鞋带",
+        "fields": {
+          "prop.object": "shoelace",
+          "pose.hand_action": "adjust_shoelace",
+          "pose.gaze": "down_prop"
+        },
+        "tags": [
+          "运动",
+          "准备"
+        ]
+      }
+    ]
+  }
+}
