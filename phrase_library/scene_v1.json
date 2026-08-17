@@ -1426,6 +1426,205 @@
           "健身",
           "室内"
         ]
+      },
+      {
+        "id": "campus_classroom_morning",
+        "label": "明亮校园教室",
+        "fields": {
+          "scene.location": "campus_classroom",
+          "scene.time": "clear_morning",
+          "scene.weather": "clear_sun",
+          "scene.foreground": "chair_back",
+          "scene.detail": [
+            "book_stack",
+            "green_plant"
+          ],
+          "scene.spatial": "shallow_interior"
+        },
+        "tags": [
+          "校园",
+          "教室",
+          "室内"
+        ]
+      },
+      {
+        "id": "campus_playground_afternoon",
+        "label": "午后校园操场",
+        "fields": {
+          "scene.location": "campus_playground",
+          "scene.time": "late_morning",
+          "scene.weather": "clear_sun",
+          "scene.foreground": "bench_edge",
+          "scene.background": "campus_building",
+          "scene.detail": [
+            "towel_bottle"
+          ],
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "校园",
+          "操场",
+          "户外"
+        ]
+      },
+      {
+        "id": "basketball_court_sun",
+        "label": "晴日室外篮球场",
+        "fields": {
+          "scene.location": "outdoor_basketball_court",
+          "scene.time": "late_morning",
+          "scene.weather": "clear_sun",
+          "scene.foreground": "bench_edge",
+          "scene.background": "campus_building",
+          "scene.detail": [
+            "towel_bottle"
+          ],
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "运动",
+          "篮球",
+          "户外"
+        ]
+      },
+      {
+        "id": "stone_bridge_fog",
+        "label": "晨雾石拱桥",
+        "fields": {
+          "scene.location": "stone_arch_bridge",
+          "scene.time": "clear_morning",
+          "scene.weather": "light_fog",
+          "scene.foreground": "water_glint",
+          "scene.background": "lake_reflection",
+          "scene.detail": [
+            "stone_floor"
+          ],
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "古桥",
+          "晨雾",
+          "户外"
+        ]
+      },
+      {
+        "id": "wharf_dusk",
+        "label": "黄昏码头",
+        "fields": {
+          "scene.location": "wharf",
+          "scene.time": "golden_hour",
+          "scene.weather": "sea_breeze",
+          "scene.foreground": "water_glint",
+          "scene.background": "sea_horizon",
+          "scene.detail": [
+            "sea_waves"
+          ],
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "码头",
+          "黄昏",
+          "海边"
+        ]
+      },
+      {
+        "id": "lighthouse_dawn",
+        "label": "清晨海边灯塔",
+        "fields": {
+          "scene.location": "coastal_lighthouse",
+          "scene.time": "dawn",
+          "scene.weather": "sea_breeze",
+          "scene.foreground": "soft_light_spots",
+          "scene.background": "sea_horizon",
+          "scene.detail": [
+            "sea_waves"
+          ],
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "灯塔",
+          "清晨",
+          "海边"
+        ]
+      },
+      {
+        "id": "hot_spring_twilight",
+        "label": "温泉汤池",
+        "fields": {
+          "scene.location": "hot_spring_pool",
+          "scene.time": "twilight",
+          "scene.weather": "light_fog",
+          "scene.foreground": "soft_light_spots",
+          "scene.detail": [
+            "stone_floor"
+          ],
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "温泉",
+          "暮色",
+          "东方传统"
+        ]
+      },
+      {
+        "id": "sandy_beach_afternoon",
+        "label": "午后沙滩",
+        "fields": {
+          "scene.location": "sandy_beach",
+          "scene.time": "summer_afternoon",
+          "scene.weather": "sea_breeze",
+          "scene.foreground": "soft_light_spots",
+          "scene.background": "sea_horizon",
+          "scene.detail": [
+            "sea_waves"
+          ],
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "沙滩",
+          "午后",
+          "海边"
+        ]
+      },
+      {
+        "id": "bamboo_grove_fog",
+        "label": "晨雾竹林",
+        "fields": {
+          "scene.location": "bamboo_grove",
+          "scene.time": "clear_morning",
+          "scene.weather": "light_fog",
+          "scene.foreground": "blurred_green_leaves",
+          "scene.detail": [
+            "bamboo_shadow",
+            "dense_leaves"
+          ],
+          "scene.spatial": "layered_plants"
+        },
+        "tags": [
+          "竹林",
+          "晨雾",
+          "户外"
+        ]
+      },
+      {
+        "id": "lakeside_dusk",
+        "label": "湖边黄昏",
+        "fields": {
+          "scene.location": "lakeside",
+          "scene.time": "golden_hour",
+          "scene.weather": "thin_clouds",
+          "scene.foreground": "water_glint",
+          "scene.background": "lake_reflection",
+          "scene.detail": [
+            "stone_path"
+          ],
+          "scene.spatial": "deep_outdoor"
+        },
+        "tags": [
+          "湖边",
+          "黄昏",
+          "户外"
+        ]
       }
     ]
   }
