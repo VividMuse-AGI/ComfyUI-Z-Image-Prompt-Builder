@@ -1687,6 +1687,148 @@
           "建筑",
           "对称"
         ]
+      },
+      {
+        "id": "high_angle_full_35",
+        "label": "高位俯拍全身",
+        "fields": {
+          "camera.shot_size": "full_body",
+          "camera.composition": "centered",
+          "camera.lens": "lens_35mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "high_angle",
+          "camera.depth": "deep",
+          "camera.focus": "full_figure"
+        },
+        "tags": [
+          "俯拍",
+          "全身"
+        ]
+      },
+      {
+        "id": "low_angle_full_28",
+        "label": "低位仰拍全身",
+        "fields": {
+          "camera.shot_size": "full_body",
+          "camera.composition": "centered",
+          "camera.lens": "lens_28mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "low_angle",
+          "camera.depth": "deep",
+          "camera.focus": "full_figure"
+        },
+        "tags": [
+          "仰拍",
+          "全身"
+        ]
+      },
+      {
+        "id": "overhead_full_35",
+        "label": "正上方俯拍全身",
+        "fields": {
+          "camera.shot_size": "full_body",
+          "camera.composition": "symmetrical",
+          "camera.lens": "lens_35mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "overhead",
+          "camera.depth": "deep",
+          "camera.focus": "full_figure"
+        },
+        "tags": [
+          "俯拍",
+          "全身",
+          "创意"
+        ]
+      },
+      {
+        "id": "dutch_angle_dynamic_50",
+        "label": "荷兰角动态全身",
+        "fields": {
+          "camera.shot_size": "dynamic_full_body",
+          "camera.composition": "diagonal",
+          "camera.lens": "lens_50mm",
+          "camera.distance": "distance_35m",
+          "camera.angle": "dutch_angle",
+          "camera.depth": "moderate_shallow",
+          "camera.focus": "moving_subject"
+        },
+        "tags": [
+          "荷兰角",
+          "动态",
+          "时尚"
+        ]
+      },
+      {
+        "id": "leading_lines_env_35",
+        "label": "引导线环境人像",
+        "fields": {
+          "camera.shot_size": "environmental_portrait",
+          "camera.composition": "leading_lines",
+          "camera.lens": "lens_35mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "eye_level",
+          "camera.depth": "layered_depth",
+          "camera.focus": "face_environment"
+        },
+        "tags": [
+          "引导线",
+          "环境",
+          "纵深"
+        ]
+      },
+      {
+        "id": "frame_within_frame_50",
+        "label": "框中框半身",
+        "fields": {
+          "camera.shot_size": "three_quarter",
+          "camera.composition": "frame_within_frame",
+          "camera.lens": "lens_50mm",
+          "camera.distance": "distance_35m",
+          "camera.angle": "eye_level",
+          "camera.depth": "medium",
+          "camera.focus": "upper_body"
+        },
+        "tags": [
+          "框中框",
+          "框架",
+          "半身"
+        ]
+      },
+      {
+        "id": "golden_ratio_waist_85",
+        "label": "黄金分割半身",
+        "fields": {
+          "camera.shot_size": "waist_up",
+          "camera.composition": "golden_ratio",
+          "camera.lens": "lens_85mm",
+          "camera.distance": "distance_2m",
+          "camera.angle": "eye_level",
+          "camera.depth": "shallow",
+          "camera.focus": "both_eyes"
+        },
+        "tags": [
+          "黄金分割",
+          "半身",
+          "人像"
+        ]
+      },
+      {
+        "id": "triangle_full_50",
+        "label": "三角构图全身",
+        "fields": {
+          "camera.shot_size": "full_body",
+          "camera.composition": "triangle",
+          "camera.lens": "lens_50mm",
+          "camera.distance": "distance_5m",
+          "camera.angle": "eye_level",
+          "camera.depth": "deep",
+          "camera.focus": "full_figure"
+        },
+        "tags": [
+          "三角构图",
+          "全身",
+          "人像"
+        ]
       }
     ],
     "lighting_plans": [
