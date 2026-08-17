@@ -2632,6 +2632,168 @@
           "一次性相机",
           "胶片"
         ]
+      },
+      {
+        "id": "morandi_muted",
+        "label": "莫兰迪低饱和柔和",
+        "fields": {
+          "color.palette": "morandi",
+          "color.temperature": "slightly_cool",
+          "color.contrast": "very_low",
+          "finish.capture": "mirrorless",
+          "finish.texture": "matte",
+          "finish.highlight": "subdued",
+          "finish.grain": "fine_grain"
+        },
+        "tags": [
+          "莫兰迪",
+          "低饱和",
+          "柔和"
+        ]
+      },
+      {
+        "id": "macaron_sweet",
+        "label": "马卡龙甜系清新",
+        "fields": {
+          "color.palette": "macaron",
+          "color.temperature": "neutral",
+          "color.contrast": "low",
+          "finish.capture": "phone_camera",
+          "finish.texture": "clean_crisp",
+          "finish.highlight": "bright_clean",
+          "finish.grain": "clean_surface"
+        },
+        "tags": [
+          "马卡龙",
+          "甜系",
+          "清新"
+        ]
+      },
+      {
+        "id": "sunset_orange_purple_dusk",
+        "label": "日落橙紫晚霞",
+        "fields": {
+          "color.palette": "sunset_orange_purple",
+          "color.temperature": "warm",
+          "color.contrast": "medium_high",
+          "finish.capture": "mirrorless",
+          "finish.texture": "atmospheric_haze",
+          "finish.highlight": "warm_glow",
+          "finish.grain": "fine_grain"
+        },
+        "tags": [
+          "日落",
+          "橙紫",
+          "晚霞"
+        ]
+      },
+      {
+        "id": "forest_green_documentary",
+        "label": "森林绿棕纪实",
+        "fields": {
+          "color.palette": "forest_green_brown",
+          "color.temperature": "slightly_cool",
+          "color.contrast": "natural",
+          "finish.capture": "dslr",
+          "finish.texture": "documentary_real",
+          "finish.highlight": "controlled",
+          "finish.grain": "subtle_digital_noise"
+        },
+        "tags": [
+          "森林",
+          "自然",
+          "纪实"
+        ]
+      },
+      {
+        "id": "black_white_red_cool",
+        "label": "黑白红冷调强烈",
+        "fields": {
+          "color.palette": "black_white_red",
+          "color.temperature": "cool",
+          "color.contrast": "high",
+          "finish.capture": "mirrorless",
+          "finish.texture": "clean_crisp",
+          "finish.highlight": "specular_crisp",
+          "finish.grain": "clean_surface"
+        },
+        "tags": [
+          "黑白红",
+          "冷调",
+          "强烈"
+        ]
+      },
+      {
+        "id": "oil_painting_classic",
+        "label": "油画古典艺术",
+        "fields": {
+          "color.palette": "warm_brown_cream",
+          "color.temperature": "warm",
+          "color.contrast": "soft_highlights_deep_blacks",
+          "finish.capture": "full_frame_camera",
+          "finish.texture": "oil_painting",
+          "finish.highlight": "warm_glow",
+          "finish.grain": "coarse_grain"
+        },
+        "tags": [
+          "油画",
+          "古典",
+          "艺术"
+        ]
+      },
+      {
+        "id": "watercolor_soft",
+        "label": "水彩淡雅",
+        "fields": {
+          "color.palette": "cream_beige",
+          "color.temperature": "neutral",
+          "color.contrast": "very_low",
+          "finish.capture": "mirrorless",
+          "finish.texture": "watercolor",
+          "finish.highlight": "slight_bloom",
+          "finish.grain": "fine_grain"
+        },
+        "tags": [
+          "水彩",
+          "淡雅",
+          "柔美"
+        ]
+      },
+      {
+        "id": "dreamy_soft_girl",
+        "label": "梦幻柔焦少女",
+        "fields": {
+          "color.palette": "pink_cream",
+          "color.temperature": "slightly_warm",
+          "color.contrast": "low",
+          "finish.capture": "mirrorless",
+          "finish.texture": "dreamy_soft",
+          "finish.highlight": "slight_bloom",
+          "finish.grain": "fine_grain"
+        },
+        "tags": [
+          "梦幻",
+          "柔焦",
+          "少女"
+        ]
+      },
+      {
+        "id": "matte_grain_texture",
+        "label": "磨砂颗粒质感",
+        "fields": {
+          "color.palette": "cool_gray_blue",
+          "color.temperature": "slightly_cool",
+          "color.contrast": "medium_high",
+          "finish.capture": "mirrorless",
+          "finish.texture": "matte_grain",
+          "finish.highlight": "subdued",
+          "finish.grain": "visible_grain"
+        },
+        "tags": [
+          "磨砂",
+          "颗粒",
+          "质感"
+        ]
       }
     ]
   }
