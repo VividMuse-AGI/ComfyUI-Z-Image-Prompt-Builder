@@ -89,6 +89,21 @@
           "id": "hand_on_hip",
           "label": "叉腰站立",
           "value": "叉腰站立"
+        },
+        {
+          "id": "standing_with_sword",
+          "label": "持剑站立",
+          "value": "持剑自然站立"
+        },
+        {
+          "id": "horseback_sitting",
+          "label": "马背坐姿",
+          "value": "骑在马背上的坐姿"
+        },
+        {
+          "id": "cycling_posture",
+          "label": "骑行姿态",
+          "value": "骑行时身体前倾的姿态"
         }
       ]
     },
@@ -461,6 +476,46 @@
           "id": "tuck_hair",
           "label": "别发到耳后",
           "value": "把碎发别到耳后"
+        },
+        {
+          "id": "holding_book",
+          "label": "双手捧书",
+          "value": "双手捧着书本"
+        },
+        {
+          "id": "holding_paintbrush",
+          "label": "握画笔",
+          "value": "一手握着画笔"
+        },
+        {
+          "id": "cradling_pet",
+          "label": "环抱宠物",
+          "value": "双臂环抱宠物"
+        },
+        {
+          "id": "holding_bubble_wand",
+          "label": "举泡泡棒",
+          "value": "举起泡泡棒"
+        },
+        {
+          "id": "gripping_sword",
+          "label": "握剑柄",
+          "value": "单手握住剑柄"
+        },
+        {
+          "id": "holding_reins",
+          "label": "牵缰绳",
+          "value": "双手牵握缰绳"
+        },
+        {
+          "id": "gripping_handlebar",
+          "label": "扶车把",
+          "value": "双手扶住车把"
+        },
+        {
+          "id": "phone_to_ear",
+          "label": "举手机至耳畔",
+          "value": "将手机举至耳畔"
         }
       ]
     },
@@ -543,6 +598,16 @@
           "id": "knee_up",
           "label": "屈膝抱腿",
           "value": "屈膝将腿抱在身前"
+        },
+        {
+          "id": "feet_in_stirrups",
+          "label": "踩马镫",
+          "value": "双脚踩在马镫上"
+        },
+        {
+          "id": "pedaling",
+          "label": "踩踏脚蹬",
+          "value": "双腿交替踩踏脚蹬"
         }
       ]
     },
@@ -871,6 +936,46 @@
           "id": "look_back_smile",
           "label": "回眸一笑",
           "value": "回眸一笑"
+        },
+        {
+          "id": "reading_book",
+          "label": "低头专注阅读",
+          "value": "低头专注阅读"
+        },
+        {
+          "id": "painting_canvas",
+          "label": "提笔作画",
+          "value": "提笔在画布上作画"
+        },
+        {
+          "id": "cuddling_pet",
+          "label": "逗弄宠物",
+          "value": "怀里抱着宠物逗弄"
+        },
+        {
+          "id": "blowing_bubbles",
+          "label": "吹出泡泡",
+          "value": "吹出一串透明泡泡"
+        },
+        {
+          "id": "holding_sword",
+          "label": "持剑侧立",
+          "value": "持剑侧身而立"
+        },
+        {
+          "id": "horseback_riding",
+          "label": "骑马缓行",
+          "value": "骑在马背上缓行"
+        },
+        {
+          "id": "cycling_bike",
+          "label": "骑车前行",
+          "value": "骑着自行车前行"
+        },
+        {
+          "id": "answering_phone",
+          "label": "接听电话",
+          "value": "举起手机接听电话"
         }
       ]
     }
@@ -1317,6 +1422,174 @@
           "生活写真",
           "坐姿",
           "直视"
+        ]
+      },
+      {
+        "id": "reading_book_seated",
+        "label": "阅读翻书坐姿",
+        "fields": {
+          "pose.event": "reading_book",
+          "pose.base": "sitting_chair_edge",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "centered_seated",
+          "pose.shoulders": "forward_relaxed",
+          "pose.hand_action": "holding_book",
+          "pose.leg_action": "knees_together",
+          "pose.head_direction": "slight_lower",
+          "pose.gaze": "down_prop",
+          "pose.expression": "focused"
+        },
+        "tags": [
+          "文艺",
+          "阅读",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "painting_canvas",
+        "label": "画架前提笔作画",
+        "fields": {
+          "pose.event": "painting_canvas",
+          "pose.base": "sitting_stool",
+          "pose.body_direction": "diagonal_forward",
+          "pose.weight": "forward",
+          "pose.shoulders": "one_shoulder_forward",
+          "pose.hand_action": "holding_paintbrush",
+          "pose.leg_action": "stool_foot_rest",
+          "pose.head_direction": "slight_lower",
+          "pose.gaze": "down_prop",
+          "pose.expression": "focused"
+        },
+        "tags": [
+          "文艺",
+          "作画",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "cuddling_pet",
+        "label": "怀抱宠物站姿",
+        "fields": {
+          "pose.event": "cuddling_pet",
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "cradling_pet",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "slight_lower",
+          "pose.gaze": "down_prop",
+          "pose.expression": "gentle_smile"
+        },
+        "tags": [
+          "生活",
+          "宠物",
+          "站姿"
+        ]
+      },
+      {
+        "id": "blowing_bubbles",
+        "label": "吹泡泡俏皮站姿",
+        "fields": {
+          "pose.event": "blowing_bubbles",
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "right_quarter",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "holding_bubble_wand",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "head_tilt_up",
+          "pose.gaze": "right_near",
+          "pose.expression": "bright_smile"
+        },
+        "tags": [
+          "童趣",
+          "泡泡",
+          "站姿"
+        ]
+      },
+      {
+        "id": "sword_standing",
+        "label": "持剑回眸站姿",
+        "fields": {
+          "pose.event": "holding_sword",
+          "pose.base": "standing_with_sword",
+          "pose.body_direction": "right_profile",
+          "pose.weight": "right_leg",
+          "pose.shoulders": "shoulders_back",
+          "pose.hand_action": "gripping_sword",
+          "pose.leg_action": "one_knee_bent",
+          "pose.head_direction": "look_back_left",
+          "pose.gaze": "left_distance",
+          "pose.expression": "cool"
+        },
+        "tags": [
+          "古风",
+          "武侠",
+          "站姿"
+        ]
+      },
+      {
+        "id": "horseback_riding",
+        "label": "马背骑行姿态",
+        "fields": {
+          "pose.event": "horseback_riding",
+          "pose.base": "horseback_sitting",
+          "pose.body_direction": "right_quarter",
+          "pose.weight": "centered_seated",
+          "pose.shoulders": "open_chest",
+          "pose.hand_action": "holding_reins",
+          "pose.leg_action": "feet_in_stirrups",
+          "pose.head_direction": "front",
+          "pose.gaze": "right_distance",
+          "pose.expression": "bright_smile"
+        },
+        "tags": [
+          "旅行",
+          "骑马",
+          "坐姿"
+        ]
+      },
+      {
+        "id": "cycling_bike",
+        "label": "骑行自行车姿态",
+        "fields": {
+          "pose.event": "cycling_bike",
+          "pose.base": "cycling_posture",
+          "pose.body_direction": "diagonal_forward",
+          "pose.weight": "forward",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "gripping_handlebar",
+          "pose.leg_action": "pedaling",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "relaxed_smile"
+        },
+        "tags": [
+          "运动",
+          "骑行",
+          "动态"
+        ]
+      },
+      {
+        "id": "answering_phone",
+        "label": "街头接听电话停步",
+        "fields": {
+          "pose.event": "answering_phone",
+          "pose.base": "walking_pause",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "left_leg",
+          "pose.shoulders": "one_shoulder_forward",
+          "pose.hand_action": "phone_to_ear",
+          "pose.leg_action": "one_foot_forward",
+          "pose.head_direction": "slight_tilt_right",
+          "pose.gaze": "right_near",
+          "pose.expression": "relaxed_smile"
+        },
+        "tags": [
+          "生活",
+          "电话",
+          "站姿"
         ]
       }
     ]
