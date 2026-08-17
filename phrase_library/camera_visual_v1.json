@@ -2146,6 +2146,133 @@
           "窗影",
           "几何"
         ]
+      },
+      {
+        "id": "candlelight_warm",
+        "label": "烛光暖调",
+        "fields": {
+          "lighting.source": "candlelight",
+          "lighting.direction": "front_left",
+          "lighting.quality": "soft_directional",
+          "lighting.target": "face_hands",
+          "lighting.shadow": "natural_contour"
+        },
+        "tags": [
+          "烛光",
+          "暖调"
+        ]
+      },
+      {
+        "id": "campfire_night",
+        "label": "篝火夜话暖光",
+        "fields": {
+          "lighting.source": "campfire",
+          "lighting.direction": "front",
+          "lighting.quality": "soft_diffused",
+          "lighting.target": "prop_hands",
+          "lighting.shadow": "mixed_soft"
+        },
+        "tags": [
+          "篝火",
+          "暖调",
+          "夜景"
+        ]
+      },
+      {
+        "id": "car_headlight_silhouette",
+        "label": "车灯逆光剪影",
+        "fields": {
+          "lighting.source": "car_headlight",
+          "lighting.direction": "back",
+          "lighting.quality": "silhouette_backlight",
+          "lighting.target": "hair_edge",
+          "lighting.shadow": "rim_separation"
+        },
+        "tags": [
+          "车灯",
+          "逆光",
+          "都市"
+        ]
+      },
+      {
+        "id": "phone_screen_night",
+        "label": "手机屏幕冷光",
+        "fields": {
+          "lighting.source": "phone_screen",
+          "lighting.direction": "front",
+          "lighting.quality": "soft_directional",
+          "lighting.target": "face_eyes",
+          "lighting.shadow": "barely_visible"
+        },
+        "tags": [
+          "冷调",
+          "夜景",
+          "屏幕光"
+        ]
+      },
+      {
+        "id": "projector_color",
+        "label": "投影彩色光斑",
+        "fields": {
+          "lighting.source": "projector",
+          "lighting.direction": "front",
+          "lighting.quality": "mixed_color",
+          "lighting.target": "subject_background",
+          "lighting.shadow": "mixed_soft"
+        },
+        "tags": [
+          "投影",
+          "彩色",
+          "艺术"
+        ]
+      },
+      {
+        "id": "rembrandt_classic",
+        "label": "伦勃朗经典侧光",
+        "fields": {
+          "lighting.source": "window_daylight",
+          "lighting.direction": "side_left",
+          "lighting.quality": "rembrandt",
+          "lighting.target": "face_shoulders",
+          "lighting.shadow": "natural_contour"
+        },
+        "tags": [
+          "伦勃朗",
+          "肖像",
+          "经典"
+        ]
+      },
+      {
+        "id": "below_neon_glow",
+        "label": "下方霓虹补光",
+        "fields": {
+          "lighting.source": "neon_signs",
+          "lighting.direction": "below_front",
+          "lighting.quality": "mixed_color",
+          "lighting.target": "face_eyes",
+          "lighting.shadow": "barely_visible"
+        },
+        "tags": [
+          "霓虹",
+          "下方补光",
+          "赛博"
+        ]
+      },
+      {
+        "id": "top_dramatic",
+        "label": "顶部戏剧光",
+        "fields": {
+          "lighting.source": "ceiling_ambient",
+          "lighting.direction": "top",
+          "lighting.quality": "crisp_hard",
+          "lighting.target": "face_shoulders",
+          "lighting.shadow": "deep_side"
+        },
+        "tags": [
+          "顶光",
+          "戏剧",
+          "低调"
+        ]
       }
     ],
     "visual_profiles": [
