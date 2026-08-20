@@ -1,0 +1,27 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile Python and parse phrase libraries
+        run: |
+          python -m py_compile nodes.py __init__.py
+          python -c "import glob,json; [json.load(open(path, encoding='utf-8')) for path in glob.glob('phrase_library/*.json')]"
+      - name: Run Python regressions
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+      - name: Run frontend regressions
+        run: |
+          node --check web/js/preset_sync.js
+          node tests/frontend_preset_values.mjs

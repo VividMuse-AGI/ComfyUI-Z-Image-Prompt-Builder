@@ -709,6 +709,16 @@
       "id":"flower_shop_ccd","label":"花店明亮CCD生活照","tags":["花店","CCD","生活"],
       "bundles":{"pose_action_chains":"forest_hat_bouquet","scene_compositions":"flower_shop_morning","camera_setups":"phone_waist","lighting_plans":"ccd_soft_flash","visual_profiles":"ccd_lifestyle","beauty_looks":"cherry_ccd","accessory_sets":"sweet_ribbon","prop_action_links":"bouquet_hat"},
       "field_pool":{"clothing.mode":["dress","separates"],"clothing.color":["cream_white","light_pink","mint_green"],"clothing.material":["cotton","fine_rib_knit","chiffon"],"clothing.pattern":["tiny_floral"],"clothing.dress_type":["floral_strap_dress","a_line_dress"],"clothing.top_type":["ribbed_tank","knit_cardigan"],"clothing.bottom_type":["a_line_skirt"]}
+    },
+    {
+      "id":"hanfu_garden_portrait","label":"汉服庭院人像","tags":["汉服","中式","庭院"],
+      "bundles":{"pose_action_chains":"hanfu_garden_lookback","scene_compositions":"new_chinese_tearoom","camera_setups":"classic_waist_85","lighting_plans":"window_soft_side","visual_profiles":"new_chinese_matte","beauty_looks":"new_chinese_refined","accessory_sets":"new_chinese_jade"},
+      "field_pool":{"clothing.mode":["dress"],"clothing.color":["wine_red","ivory","sage_green"],"clothing.material":["silk","linen"],"clothing.pattern":["jacquard"],"clothing.dress_type":["hanfu"],"hair.headwear":["gold_hairpin","jade_hairpin","flower_hairpin"]}
+    },
+    {
+      "id":"cyber_neon_night","label":"赛博霓虹夜景人像","tags":["赛博","霓虹","夜景"],
+      "bundles":{"pose_action_chains":"cyber_walk_confident","scene_compositions":"rainy_city_street","camera_setups":"street_full_50","lighting_plans":"neon_mixed_side","visual_profiles":"purple_neon_digital","beauty_looks":"smoky_fashion","accessory_sets":"urban_silver"},
+      "field_pool":{"clothing.mode":["dress","separates","layered"],"clothing.color":["black","charcoal","navy","wine_red"],"clothing.material":["patent_leather","leather","suiting"],"clothing.pattern":["color_block"],"clothing.dress_type":["strapless_dress","evening_dress"],"clothing.top_type":["cropped_jacket","turtleneck"],"clothing.bottom_type":["straight_trousers","suit_mini_skirt"],"clothing.shoes":["ankle_boots","knee_boots","pointed_stiletto"]}
     }
   ]
 }

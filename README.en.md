@@ -12,13 +12,13 @@ A Chinese portrait prompt builder node for ComfyUI by VividMuse. Generate natura
 - **92 structured fields** across 8 modules — Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, and Visual. Each field can be set to "Follow preset", "Random", "Disabled", or a specific value; dependent fields collapse according to the current mode.
 - Person is split into atomic fields (age, ethnicity, face shape, contour, eye shape, iris color, eyelid, skin tone, skin texture, makeup, and body shape); makeup supports two mutually exclusive branches: overall preset vs. per-item customization.
 - Capture medium is independent of subject and ships 12 digital, phone, film, and instant-photography media.
-- Photo themes use a two-level structure: **12 theme categories × 120 specific themes**.
+- Photo themes use a two-level structure: **12 theme categories × 144 specific themes**.
 - Hair is split into color, length, texture, style, bangs, and headwear, plus optional hair-tone and dye-pattern fields; random generation prefers 37 compatible hair structures.
 - Clothing is split into a structure field plus 20 sub-fields covering dresses, jumpsuits, tops, bottoms, colors, materials, patterns, fit, legwear, shoes, and accessories; mutually exclusive structure branches, with colors and materials scoped to specific garments.
-- Pose & action covers 10 dimensions (moment, base pose, body direction, weight, shoulders, hands, legs, head, gaze, expression); random picks from 21 complete action chains.
-- Scene covers category, location, time, weather, foreground, background, environment detail, surface material, and spatial depth; 12 space categories filter 86 unique locations; random picks from 61 complete scene compositions; indoor scenes automatically omit weather.
-- Photography covers 7 fields (shot size, composition, focal length, distance, angle, depth of field, focus); random picks from 22 complete camera setups.
-- Visual covers 12 fields (key light, direction, quality, target, shadow, palette, temperature, contrast, capture style, texture, highlight, grain); random draws from 21 lighting plans and 21 visual profiles.
+- Pose & action covers 10 dimensions (moment, base pose, body direction, weight, shoulders, hands, legs, head, gaze, expression); random picks from 32 complete action chains.
+- Scene covers category, location, time, weather, foreground, background, environment detail, surface material, and spatial depth; 12 space categories filter 102 unique locations; random picks from 71 complete scene compositions; indoor scenes automatically omit weather.
+- Photography covers 7 fields (shot size, composition, focal length, distance, angle, depth of field, focus); random picks from 30 complete camera setups.
+- Visual covers 12 fields (key light, direction, quality, target, shadow, palette, temperature, contrast, capture style, texture, highlight, grain); random draws from 29 lighting plans and 30 visual profiles.
 - Random results are **seed-controlled and reproducible**; manually locked values always take priority.
 - Camera setups are filtered by aspect ratio, theme category, and seated/standing pose to avoid conflicting lens, distance, shot-size, and focus combinations.
 - Outputs recommended **width and height** for setting the latent size.
@@ -32,9 +32,12 @@ A Chinese portrait prompt builder node for ComfyUI by VividMuse. Generate natura
 - Japanese café warm-tone close-up portrait (日系咖啡馆暖调近景人像)
 - Nighttime indoor luxury hard-flash fashion portrait (夜间室内轻奢硬闪时尚写真)
 - Urban workplace light-luxury seated portrait (都市职场轻奢坐姿写真)
+- Historical Hanfu portrait (古风汉服写真)
+- Seaside vacation portrait (海边假日度假写真)
+- Cyberpunk city night portrait (赛博都市夜景写真)
 - Custom combination (自定义组合)
 
-The four presets come from real-world portrait prompts, decomposed into editable person, styling, action, environment, lighting, composition, and imaging fields.
+Seven portrait presets are decomposed into editable person, styling, action, environment, lighting, composition, and imaging fields. Custom combination provides a minimal neutral starting point.
 
 ## Installation
 

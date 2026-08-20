@@ -1591,6 +1591,69 @@
           "电话",
           "站姿"
         ]
+      },
+      {
+        "id": "hanfu_garden_lookback",
+        "label": "汉服庭院回眸站姿",
+        "fields": {
+          "pose.event": "look_back_smile",
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "right_leg",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "hands_folded_front",
+          "pose.leg_action": "one_knee_bent",
+          "pose.head_direction": "look_back_right",
+          "pose.gaze": "camera_soft",
+          "pose.expression": "gentle_smile"
+        },
+        "tags": [
+          "汉服",
+          "庭院",
+          "回眸"
+        ]
+      },
+      {
+        "id": "seaside_turn_smile",
+        "label": "海边指向远方回眸",
+        "fields": {
+          "pose.event": "look_back_smile",
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "right_leg",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "point_distance",
+          "pose.leg_action": "one_knee_bent",
+          "pose.head_direction": "look_back_right",
+          "pose.gaze": "camera_soft",
+          "pose.expression": "bright_smile"
+        },
+        "tags": [
+          "海边",
+          "度假",
+          "回眸"
+        ]
+      },
+      {
+        "id": "cyber_walk_confident",
+        "label": "赛博街头自信回眸",
+        "fields": {
+          "pose.event": "turn_during_walk",
+          "pose.base": "walking_pause",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "forward",
+          "pose.shoulders": "relaxed_level",
+          "pose.hand_action": "arms_relaxed_sides",
+          "pose.leg_action": "walking_step",
+          "pose.head_direction": "look_back_right",
+          "pose.gaze": "camera_soft",
+          "pose.expression": "bright_confident"
+        },
+        "tags": [
+          "赛博",
+          "都市夜景",
+          "行走"
+        ]
       }
     ]
   }

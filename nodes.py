@@ -237,6 +237,15 @@ PROFILE_CAMERA_BUNDLES = {
     "都市职场轻奢坐姿写真": _camera_bundles(
         "office_seated_70", "sofa_seated_85", "classic_waist_85"
     ),
+    "古风汉服写真": _camera_bundles(
+        "classic_waist_85", "frame_within_frame_50", "garment_detail_105"
+    ),
+    "海边假日度假写真": _camera_bundles(
+        "travel_environment_35", "landscape_gaze_space_50", "telephoto_environment_135"
+    ),
+    "赛博都市夜景写真": _camera_bundles(
+        "leading_lines_env_35", "street_full_50", "fashion_three_quarter_70"
+    ),
 }
 
 POSE_LIBRARY_FIELDS = {
@@ -608,6 +617,18 @@ HAIR_PROFILE_BUNDLE_IDS = {
     "都市职场轻奢坐姿写真": (
         "low_ponytail_center", "low_bun_middle", "collarbone_sleek_side", "french_twist_side"
     ),
+    "古风汉服写真": (
+        "low_bun_middle", "low_bun_wispy", "flower_pin_low_bun",
+        "gold_pin_high_bun", "single_braid_jade_pin",
+    ),
+    "海边假日度假写真": (
+        "chest_soft_waves_air", "straw_hat_long_waves", "waist_loose_curls_center",
+        "low_ponytail_center", "single_braid_wispy",
+    ),
+    "赛博都市夜景写真": (
+        "side_swept_wet", "side_swept_large_waves", "high_ponytail_open",
+        "half_up_pearl_clip", "collarbone_sleek_side",
+    ),
 }
 PROFILE_HAIR_BUNDLES = {
     preset: [HAIR_STRUCTURE_BUNDLE_BY_ID[bundle_id] for bundle_id in bundle_ids]
@@ -729,6 +750,9 @@ CLOTHING_PROFILE_RECIPE_IDS = {
     "日系咖啡馆暖调近景人像": ("warm_cafe_portrait", "bookstore_intellectual", "french_apartment_window", "retro_hongkong_diner"),
     "夜间室内轻奢硬闪时尚写真": ("doorway_flash_fashion", "low_key_hotel_cinema", "urban_neon_walk"),
     "都市职场轻奢坐姿写真": ("office_luxury_seated", "minimal_gallery_editorial", "neutral_ecommerce_full"),
+    "古风汉服写真": ("hanfu_garden_portrait",),
+    "海边假日度假写真": ("seaside_golden_vacation",),
+    "赛博都市夜景写真": ("cyber_neon_night",),
 }
 
 LEGACY_CLOTHING_COMBINATIONS = {
@@ -1224,7 +1248,7 @@ FIELD_OPTIONS = {name: list(FIELD_TEXT[name]) for name in FIELD_ORDER}
 PRESETS: Dict[str, Dict[str, str]] = {
     "日系森系夏日柔光写真": {
         "画面比例": "2:3竖构图",
-        "成像媒介": "全画幅微单摄影",
+        "成像媒介": "35毫米胶片摄影",
         "写真大类": "自然户外",
         "写真主题": "日系森系夏日写真",
         "年龄阶段": "20–29岁",
@@ -1554,7 +1578,7 @@ PRESETS: Dict[str, Dict[str, str]] = {
         "腿部动作": "一腿轻微屈膝",
         "头部方向": "向右回眸",
         "视线": "柔和看向镜头",
-        "表情": "清冷疏离",
+        "表情": "温柔浅笑",
         "场景大类": "东方传统",
         "场景地点": "江南园林",
         "时间切片": "阴天下午",
@@ -1586,7 +1610,7 @@ PRESETS: Dict[str, Dict[str, str]] = {
     },
     "海边假日度假写真": {
         "画面比例": "2:3竖构图",
-        "成像媒介": "全画幅微单摄影",
+        "成像媒介": "便携数码相机摄影",
         "写真大类": "旅行度假",
         "写真主题": "海边夏日度假写真",
         "年龄阶段": "20–29岁",
@@ -1734,12 +1758,12 @@ PRESETS: Dict[str, Dict[str, str]] = {
         "鞋履": EMPTY_CHOICE,
         "服装配件": "珍珠耳坠",
         "画面瞬间": "行走中回头",
-        "基础姿态": "自然站立",
+        "基础姿态": "行走中停步",
         "身体方向": "左侧三分之二身",
-        "身体重心": "右腿承重",
+        "身体重心": "重心轻微前移",
         "肩颈状态": "双肩放松平稳",
         "手部动作": "双臂自然垂落",
-        "腿部动作": "一腿轻微屈膝",
+        "腿部动作": "自然迈步",
         "头部方向": "向右回眸",
         "视线": "柔和看向镜头",
         "表情": "明艳自信",
@@ -2085,7 +2109,7 @@ PROFILE_POOLS: Dict[str, Dict[str, Sequence[str]]] = {
         "发色": ["深棕黑色", "深栗棕色", "冷调茶棕色", "柔和浅棕色"],
         "发色色调": ["自然中性色调", "温暖棕调", "蜂蜜暖调"],
         "染色方式": ["均匀单色染", "深发根渐变", "柔和手扫染"],
-        "头部配饰": ["浅草色编织草帽", "小白花发饰", "丝质发带", "珍珠发夹"],
+        "头部配饰": ["金色发簪", "玉质发簪", "小白花发饰"],
         "基础身形": ["自然匀称", "纤细匀称", "柔和丰润"],
         "身量观感": ["中等身量", "小巧身量"],
         "线条重点": ["肩颈线条舒展", "腰线自然清晰"],
@@ -2113,7 +2137,7 @@ PROFILE_POOLS: Dict[str, Dict[str, Sequence[str]]] = {
         "发色": ["深棕黑色", "深栗棕色", "冷调茶棕色", "柔和浅棕色"],
         "发色色调": ["自然中性色调", "温暖棕调", "蜂蜜暖调"],
         "染色方式": ["均匀单色染", "深发根渐变", "柔和手扫染"],
-        "头部配饰": ["浅草色编织草帽", "小白花发饰", "丝质发带", "珍珠发夹"],
+        "头部配饰": ["浅草色编织草帽", "丝质发带", "珍珠发夹"],
         "基础身形": ["自然匀称", "纤细匀称", "柔和丰润"],
         "身量观感": ["中等身量", "小巧身量"],
         "线条重点": ["肩颈线条舒展", "腰线自然清晰"],
@@ -2128,23 +2152,23 @@ PROFILE_POOLS: Dict[str, Dict[str, Sequence[str]]] = {
         "年龄阶段": ["20–29岁", "30–39岁"],
         "族裔大类": ["东亚"],
         "地域族裔分支": ["大类通用外观", "东北亚地域外观", "东亚南部地域外观"],
-        "脸型": ["标准鹅蛋脸", "圆润脸型"],
-        "轮廓细节": ["下颌线柔和", "颧骨柔和", "面颊饱满"],
-        "眼型": ["杏仁眼", "明亮圆眼", "柔和垂眼"],
+        "脸型": ["标准鹅蛋脸", "修长脸型", "菱形脸"],
+        "轮廓细节": ["下颌线清晰", "颧骨清晰", "面颊清瘦"],
+        "眼型": ["杏仁眼", "微挑眼", "细长眼"],
         "瞳色": ["深棕色", "黑褐色", "浅棕色"],
         "眼睑特征": ["自然双眼皮", "内双"],
-        "肤色": ["暖白肤色", "自然浅肤色"],
-        "肤质": ["自然细腻", "真实皮肤纹理", "柔润水光"],
+        "肤色": ["冷白肤色", "暖白肤色", "自然浅肤色"],
+        "肤质": ["柔雾均匀", "真实皮肤纹理", "自然细腻"],
         "妆容模式": ["整体预设"],
-        "整体妆容预设": ["清透裸粉妆", "自然裸妆", "蜜桃珊瑚妆"],
+        "整体妆容预设": ["明艳红唇妆", "浆果色妆容", "豆沙柔雾妆"],
         "发色模式": ["基础发色", "进阶染发"],
-        "发色": ["深棕黑色", "深栗棕色", "冷调茶棕色", "柔和浅棕色"],
-        "发色色调": ["自然中性色调", "温暖棕调", "蜂蜜暖调"],
-        "染色方式": ["均匀单色染", "深发根渐变", "柔和手扫染"],
-        "头部配饰": ["浅草色编织草帽", "小白花发饰", "丝质发带", "珍珠发夹"],
+        "发色": ["自然黑色", "深棕黑色", "蓝黑色", "酒红棕色", "铂金浅金色"],
+        "发色色调": ["蓝黑反光", "红棕底调", "珍珠冷光", "自然中性色调"],
+        "染色方式": ["均匀单色染", "宽束挑染", "耳侧色块染", "内层染"],
+        "头部配饰": ["几何金属发夹", "黑色细发带", "珍珠发夹"],
         "基础身形": ["自然匀称", "纤细匀称", "柔和丰润"],
-        "身量观感": ["中等身量", "小巧身量"],
-        "线条重点": ["肩颈线条舒展", "腰线自然清晰"],
+        "身量观感": ["高挑身量", "中等身量"],
+        "线条重点": ["腿部线条修长", "腰线自然清晰", "腰胯曲线柔和"],
         "前景框景": ["失焦光点", "玻璃反射", "无明显前景"],
         "背景环境": ["未来赛博街区", "玻璃幕墙都市夜景"],
     },
@@ -2194,6 +2218,15 @@ PROFILE_POSE_BUNDLES = {
     ),
     "都市职场轻奢坐姿写真": _pose_bundles(
         "workplace_folder_forward", "glasses_sofa_confident", "studio_stool_direct", "elevator_handbag_wait"
+    ),
+    "古风汉服写真": _pose_bundles(
+        "hanfu_garden_lookback", "new_chinese_folded_hands", "sword_standing"
+    ),
+    "海边假日度假写真": _pose_bundles(
+        "seaside_turn_smile", "walking_turn_street", "balcony_railing_distance"
+    ),
+    "赛博都市夜景写真": _pose_bundles(
+        "cyber_walk_confident", "walking_turn_street"
     ),
 }
 
@@ -2252,6 +2285,18 @@ PROFILE_SCENE_BUNDLES = {
     "都市职场轻奢坐姿写真": _scene_bundles(
         "workplace_lounge", "glass_lobby_day", "executive_office_scene",
         "meeting_room_scene", "fashion_atelier_scene"
+    ),
+    "古风汉服写真": _scene_bundles(
+        "new_chinese_tearoom", "tearoom_scene", "traditional_study_scene",
+        "bamboo_grove_fog"
+    ),
+    "海边假日度假写真": _scene_bundles(
+        "seaside_dusk", "sandy_beach_afternoon", "lighthouse_dawn",
+        "hotel_balcony_golden_hour", "wharf_dusk"
+    ),
+    "赛博都市夜景写真": _scene_bundles(
+        "cyber_street_concept", "rainy_city_street", "city_rooftop_blue_hour",
+        "subway_platform_scene", "warehouse_scene", "steampunk_room_concept"
     ),
 }
 
@@ -3749,14 +3794,16 @@ def resolve_fields(
         orientation_bundles = PORTRAIT_CAMERA_BUNDLES
     if orientation_bundles and active_oriented_camera:
         if random_scope == RANDOM_SCOPES[2]:
-            category_camera = THEME_CATEGORY_CAMERA_BUNDLES.get(
+            camera_pool = THEME_CATEGORY_CAMERA_BUNDLES.get(
                 resolved.get("写真大类", ""), CAMERA_BUNDLES
             )
-            compatible_orientation = [
-                bundle for bundle in orientation_bundles if bundle in category_camera
-            ]
-            if compatible_orientation:
-                orientation_bundles = compatible_orientation
+        else:
+            camera_pool = PROFILE_CAMERA_BUNDLES.get(preset, CAMERA_BUNDLES)
+        compatible_orientation = [
+            bundle for bundle in orientation_bundles if bundle in camera_pool
+        ]
+        if compatible_orientation:
+            orientation_bundles = compatible_orientation
         orientation_bundles = _pose_compatible_camera_bundles(
             resolved.get("基础姿态", ""), orientation_bundles
         )
@@ -4083,6 +4130,9 @@ def _scene_prompt_text(fields: Mapping[str, str], density: str) -> str:
     surface = selected.get("空间材质", "")
     spatial = selected.get("空间层次", "")
 
+    def with_suffix(value: str, suffix: str) -> str:
+        return value if value.endswith(suffix) else f"{value}{suffix}"
+
     if density == "精简":
         parts = []
         if location:
@@ -4090,9 +4140,9 @@ def _scene_prompt_text(fields: Mapping[str, str], density: str) -> str:
         if time_slice:
             parts.append(time_slice)
         if foreground:
-            parts.append(f"{foreground}前景")
+            parts.append(with_suffix(foreground, "前景"))
         if background:
-            parts.append(f"{background}背景")
+            parts.append(with_suffix(background, "背景"))
         return "，".join(parts)
 
     if density == "标准":
@@ -4107,9 +4157,9 @@ def _scene_prompt_text(fields: Mapping[str, str], density: str) -> str:
         if opening:
             parts.append("，".join(opening))
         if foreground:
-            parts.append(f"{foreground}前景")
+            parts.append(with_suffix(foreground, "前景"))
         if background:
-            parts.append(f"{background}背景")
+            parts.append(with_suffix(background, "背景"))
         if details:
             parts.append(f"保留{details}")
         return "，".join(parts)
