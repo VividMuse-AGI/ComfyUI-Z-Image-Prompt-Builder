@@ -17,6 +17,14 @@ for (const relativePath of visibilityFiles) {
     `${relativePath} must use the Node 2.0 zero-height widget type`,
   );
 }
+
+const presetSource = fs.readFileSync(
+  new URL("../web/js/preset_sync.js", import.meta.url),
+  "utf8",
+);
+assert.match(presetSource, /spacer\.options\.hidden = true;/);
+assert.match(presetSource, /spacer\.type = "hidden";/);
+
 function extractFunction(source, functionName) {
   const start = source.indexOf(`function ${functionName}(`);
   assert.notEqual(start, -1, `missing ${functionName}`);

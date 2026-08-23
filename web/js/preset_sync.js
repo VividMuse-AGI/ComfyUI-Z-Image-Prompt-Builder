@@ -943,7 +943,11 @@ app.registerExtension({
       const spacer = addNonSerializedWidget(
         node, "button", "__vividMuseFreePromptSpacer", null, () => {},
       );
-      spacer.computeSize = () => [0, 8];
+      spacer.type = "hidden";
+      spacer.hidden = true;
+      spacer.options ??= {};
+      spacer.options.hidden = true;
+      spacer.computeSize = () => [0, -4];
       spacer.draw = () => {};
       node.__vividMuseFreePromptSpacer = spacer;
       moveWidgetBefore(node, spacer, widgetByName(node, "自由提示词"));
