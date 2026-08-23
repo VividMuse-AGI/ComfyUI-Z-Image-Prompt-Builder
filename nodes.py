@@ -40,6 +40,16 @@ LEGACY_RANDOM_SCOPES = {
 
 PROMPT_DENSITIES = ["精简", "标准", "详细"]
 PROMPT_JOIN_POSITIONS = ["自由提示词在前", "结构化模块在前"]
+USER_MODULE_INPUTS = {
+    "画面基础": "用户画面基础片段",
+    "人物": "用户人物片段",
+    "发型": "用户发型片段",
+    "服装": "用户服装片段",
+    "姿态动作": "用户姿态动作片段",
+    "场景": "用户场景片段",
+    "摄影": "用户摄影片段",
+    "视觉表现": "用户视觉表现片段",
+}
 
 LIBRARY_ROOT = Path(__file__).resolve().parent / "phrase_library"
 
@@ -4352,6 +4362,7 @@ def compose_prompt_text(
     density: str = "标准",
     user_person_fragment: str = "",
     user_pose_fragment: str = "",
+    user_module_fragments: Mapping[str, str] | None = None,
 ) -> str:
     """Compose a positive prompt at the requested information density."""
 
@@ -4364,8 +4375,23 @@ def compose_prompt_text(
     identity = _person_identity_text(fields)
     person_detail_text = _person_detail_prompt_text(fields, density)
     body_text = _body_prompt_text(fields, density)
-    user_person_text = _normalize_user_module_fragment(user_person_fragment)
-    user_pose_text = _normalize_user_module_fragment(user_pose_fragment)
+    supplied_modules = user_module_fragments or {}
+    user_modules = {
+        module_name: _normalize_user_module_fragment(supplied_modules.get(module_name, ""))
+        for module_name in USER_MODULE_INPUTS
+    }
+    if not user_modules["人物"]:
+        user_modules["人物"] = _normalize_user_module_fragment(user_person_fragment)
+    if not user_modules["姿态动作"]:
+        user_modules["姿态动作"] = _normalize_user_module_fragment(user_pose_fragment)
+    user_base_text = user_modules["画面基础"]
+    user_person_text = user_modules["人物"]
+    user_hair_text = user_modules["发型"]
+    user_clothing_text = user_modules["服装"]
+    user_pose_text = user_modules["姿态动作"]
+    user_scene_text = user_modules["场景"]
+    user_camera_text = user_modules["摄影"]
+    user_visual_text = user_modules["视觉表现"]
     person_core_text = user_person_text or f"{identity}，{person_detail_text}，{body_text}"
     pose_core_text = user_pose_text or _pose_prompt_text(fields, density)
     standard_pose_core_text = user_pose_text or f"人物{pose_core_text}"
@@ -4373,6 +4399,7 @@ def compose_prompt_text(
     # When any module is disabled, compose only the modules the user kept.
     # This makes the clear button a blank canvas for partial prompts.
     output_fields = [field for field in FIELD_ORDER if field not in CONTROL_ONLY_FIELDS]
+    base_output_fields = ("画面比例", "成像媒介", "写真主题")
     active_clothing_fields = set(CLOTHING_MODE_FIELDS.get(
         fields.get("穿搭结构", EMPTY_CHOICE), ()
     ))
@@ -4410,12 +4437,7 @@ def compose_prompt_text(
             and fields.get(field)
             not in DEPENDENCY_PLACEHOLDER_VALUES.get(field, ())
         ]
-        if (
-            not selected_fields
-            and not identity
-            and not user_person_text
-            and not user_pose_text
-        ):
+        if not selected_fields and not identity and not any(user_modules.values()):
             return ""
         formatter = full
         if density == "精简":
@@ -4442,6 +4464,7 @@ def compose_prompt_text(
                     atomic_parts.append(rendered)
             return "，".join(atomic_parts)
 
+        base_added = False
         identity_added = False
         person_detail_added = False
         body_added = False
@@ -4452,6 +4475,11 @@ def compose_prompt_text(
         camera_added = False
         visual_added = False
         for field in output_fields:
+            if field in base_output_fields and user_base_text:
+                if not base_added:
+                    parts.append(user_base_text)
+                    base_added = True
+                continue
             if field in IDENTITY_FIELDS:
                 if not identity_added:
                     if user_person_text:
@@ -4504,7 +4532,7 @@ def compose_prompt_text(
                 continue
             if field in SCENE_OUTPUT_FIELDS:
                 if not scene_added:
-                    scene_text = _scene_prompt_text(fields, density)
+                    scene_text = user_scene_text or _scene_prompt_text(fields, density)
                     rendered = group_text_or_atomic_fallback(
                         scene_text, SCENE_OUTPUT_FIELDS
                     )
@@ -4514,7 +4542,7 @@ def compose_prompt_text(
                 continue
             if field in CAMERA_OUTPUT_FIELDS:
                 if not camera_added:
-                    camera_text = _camera_prompt_text(fields, density)
+                    camera_text = user_camera_text or _camera_prompt_text(fields, density)
                     rendered = group_text_or_atomic_fallback(
                         camera_text, CAMERA_OUTPUT_FIELDS
                     )
@@ -4524,7 +4552,7 @@ def compose_prompt_text(
                 continue
             if field in VISUAL_OUTPUT_FIELDS:
                 if not visual_added:
-                    visual_text = _visual_prompt_text(fields, density)
+                    visual_text = user_visual_text or _visual_prompt_text(fields, density)
                     rendered = group_text_or_atomic_fallback(
                         visual_text, VISUAL_OUTPUT_FIELDS
                     )
@@ -4534,7 +4562,7 @@ def compose_prompt_text(
                 continue
             if field in CLOTHING_OUTPUT_FIELDS:
                 if not clothing_added:
-                    clothing_text = _clothing_prompt_text(fields, density)
+                    clothing_text = user_clothing_text or _clothing_prompt_text(fields, density)
                     rendered = group_text_or_atomic_fallback(
                         clothing_text, CLOTHING_OUTPUT_FIELDS
                     )
@@ -4544,7 +4572,7 @@ def compose_prompt_text(
                 continue
             if field in HAIR_OUTPUT_FIELDS:
                 if not hair_added:
-                    hair_text = _hair_prompt_text(fields, density)
+                    hair_text = user_hair_text or _hair_prompt_text(fields, density)
                     rendered = group_text_or_atomic_fallback(
                         hair_text, HAIR_OUTPUT_FIELDS
                     )
@@ -4558,13 +4586,14 @@ def compose_prompt_text(
         return f"{prompt_body}。" if prompt_body else ""
 
     if density == "精简":
-        hair_text = _hair_prompt_text(fields, density)
-        clothing_text = _clothing_prompt_text(fields, density)
-        scene_text = _scene_prompt_text(fields, density)
-        camera_text = _camera_prompt_text(fields, density)
-        visual_text = _visual_prompt_text(fields, density)
+        base_text = user_base_text or f"{brief('画面比例')}，{brief('成像媒介')}，{brief('写真主题')}"
+        hair_text = user_hair_text or _hair_prompt_text(fields, density)
+        clothing_text = user_clothing_text or _clothing_prompt_text(fields, density)
+        scene_text = user_scene_text or _scene_prompt_text(fields, density)
+        camera_text = user_camera_text or _camera_prompt_text(fields, density)
+        visual_text = user_visual_text or _visual_prompt_text(fields, density)
         segments = [
-            f"{brief('画面比例')}，{brief('成像媒介')}，{brief('写真主题')}；",
+            f"{base_text}；",
             f"{person_core_text}，{hair_text}，{clothing_text}；",
             f"{pose_core_text}；",
             f"{scene_text}；",
@@ -4574,13 +4603,14 @@ def compose_prompt_text(
         return "".join(segments)
 
     if density == "标准":
-        hair_text = _hair_prompt_text(fields, density)
-        clothing_text = _clothing_prompt_text(fields, density)
-        scene_text = _scene_prompt_text(fields, density)
-        camera_text = _camera_prompt_text(fields, density)
-        visual_text = _visual_prompt_text(fields, density)
+        base_text = user_base_text or f"{brief('画面比例')}，{brief('成像媒介')}，{brief('写真主题')}"
+        hair_text = user_hair_text or _hair_prompt_text(fields, density)
+        clothing_text = user_clothing_text or _clothing_prompt_text(fields, density)
+        scene_text = user_scene_text or _scene_prompt_text(fields, density)
+        camera_text = user_camera_text or _camera_prompt_text(fields, density)
+        visual_text = user_visual_text or _visual_prompt_text(fields, density)
         segments = [
-            f"{brief('画面比例')}，{brief('成像媒介')}，{brief('写真主题')}。{person_core_text}；",
+            f"{base_text}。{person_core_text}；",
             f"{hair_text}；{clothing_text}。",
             f"{standard_pose_core_text}。",
             f"{scene_text}。",
@@ -4589,13 +4619,14 @@ def compose_prompt_text(
         ]
         return "".join(segments)
 
-    hair_text = _hair_prompt_text(fields, density)
-    clothing_text = _clothing_prompt_text(fields, density)
-    scene_text = _scene_prompt_text(fields, density)
-    camera_text = _camera_prompt_text(fields, density)
-    visual_text = _visual_prompt_text(fields, density)
+    base_text = user_base_text or f"{full('画面比例')}，{full('成像媒介')}，{full('写真主题')}"
+    hair_text = user_hair_text or _hair_prompt_text(fields, density)
+    clothing_text = user_clothing_text or _clothing_prompt_text(fields, density)
+    scene_text = user_scene_text or _scene_prompt_text(fields, density)
+    camera_text = user_camera_text or _camera_prompt_text(fields, density)
+    visual_text = user_visual_text or _visual_prompt_text(fields, density)
     segments = [
-        f"{full('画面比例')}，{full('成像媒介')}，{full('写真主题')}，{person_core_text}；",
+        f"{base_text}，{person_core_text}；",
         f"{hair_text}；{clothing_text}；",
         f"{standard_pose_core_text}；",
         f"{scene_text}；",
@@ -4639,12 +4670,17 @@ def build_prompt_text(
     join_position: str = "自由提示词在前",
     user_person_fragment: str = "",
     user_pose_fragment: str = "",
+    user_module_fragments: Mapping[str, str] | None = None,
 ) -> str:
     """Resolve fields and compose one Chinese natural-language positive prompt."""
 
     fields = resolve_fields(preset, random_scope, seed, requested)
     structured_prompt = compose_prompt_text(
-        fields, density, user_person_fragment, user_pose_fragment
+        fields,
+        density,
+        user_person_fragment,
+        user_pose_fragment,
+        user_module_fragments,
     )
     return join_prompt_text(free_prompt, structured_prompt, join_position)
 
@@ -4728,6 +4764,36 @@ class ZImageChinesePromptBuilder:
                     "tooltip": "由TXT模块词库写入的用户姿态动作描述。",
                 },
             ),
+            "用户画面基础片段": (
+                "STRING",
+                {"default": "", "multiline": True, "dynamicPrompts": False,
+                 "tooltip": "由TXT模块词库写入的用户画面基础描述。"},
+            ),
+            "用户发型片段": (
+                "STRING",
+                {"default": "", "multiline": True, "dynamicPrompts": False,
+                 "tooltip": "由TXT模块词库写入的用户发型描述。"},
+            ),
+            "用户服装片段": (
+                "STRING",
+                {"default": "", "multiline": True, "dynamicPrompts": False,
+                 "tooltip": "由TXT模块词库写入的用户服装描述。"},
+            ),
+            "用户场景片段": (
+                "STRING",
+                {"default": "", "multiline": True, "dynamicPrompts": False,
+                 "tooltip": "由TXT模块词库写入的用户场景描述。"},
+            ),
+            "用户摄影片段": (
+                "STRING",
+                {"default": "", "multiline": True, "dynamicPrompts": False,
+                 "tooltip": "由TXT模块词库写入的用户摄影描述。"},
+            ),
+            "用户视觉表现片段": (
+                "STRING",
+                {"default": "", "multiline": True, "dynamicPrompts": False,
+                 "tooltip": "由TXT模块词库写入的用户视觉表现描述。"},
+            ),
         }
         return {"required": inputs, "optional": optional}
 
@@ -4736,16 +4802,15 @@ class ZImageChinesePromptBuilder:
         density = kwargs.pop("提示词密度", "标准")
         free_prompt = kwargs.pop("自由提示词", "")
         join_position = kwargs.pop("拼接位置", PROMPT_JOIN_POSITIONS[0])
-        user_person_fragment = kwargs.pop("用户人物片段", "")
-        user_pose_fragment = kwargs.pop("用户姿态动作片段", "")
+        user_module_fragments = {
+            module_name: kwargs.pop(input_name, "")
+            for module_name, input_name in USER_MODULE_INPUTS.items()
+        }
         random_scope = kwargs.pop("随机范围", RANDOM_SCOPES[0])
         seed = kwargs.pop("随机种子", 0)
         fields = resolve_fields(preset, random_scope, seed, kwargs)
         structured_prompt = compose_prompt_text(
-            fields,
-            density,
-            user_person_fragment,
-            user_pose_fragment,
+            fields, density, user_module_fragments=user_module_fragments
         )
         prompt = join_prompt_text(free_prompt, structured_prompt, join_position)
         aspect = fields["画面比例"]

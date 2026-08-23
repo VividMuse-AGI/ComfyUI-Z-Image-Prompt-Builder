@@ -4,18 +4,39 @@ const NODE_CLASS = "VividMuse_ZImageChinesePromptBuilder";
 const LIBRARY_PROPERTY = "vividMuseTxtModuleLibrary";
 const EXPANDED_PROPERTY = "vividMuseTxtModuleLibraryExpanded";
 const APPLIED_TITLE_PROPERTY = "vividMuseTxtModuleAppliedTitles";
-const MODULES = ["人物", "姿态动作"];
+const MODULES = [
+  "画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现",
+];
 const TARGET_WIDGETS = {
+  "画面基础": "用户画面基础片段",
   "人物": "用户人物片段",
+  "发型": "用户发型片段",
+  "服装": "用户服装片段",
   "姿态动作": "用户姿态动作片段",
+  "场景": "用户场景片段",
+  "摄影": "用户摄影片段",
+  "视觉表现": "用户视觉表现片段",
 };
 const MODULE_ALIASES = new Map([
+  ["画面基础", "画面基础"],
+  ["基础画面", "画面基础"],
   ["人物", "人物"],
   ["人物设定", "人物"],
   ["角色", "人物"],
+  ["发型", "发型"],
+  ["头发", "发型"],
+  ["服装", "服装"],
+  ["穿搭", "服装"],
   ["姿态动作", "姿态动作"],
   ["姿态", "姿态动作"],
   ["动作", "姿态动作"],
+  ["场景", "场景"],
+  ["环境", "场景"],
+  ["摄影", "摄影"],
+  ["镜头", "摄影"],
+  ["视觉表现", "视觉表现"],
+  ["视觉", "视觉表现"],
+  ["光影色彩", "视觉表现"],
 ]);
 const EMPTY_VALUE = "当前模块没有词库条目";
 const MAX_FILE_BYTES = 1024 * 1024;
@@ -106,7 +127,7 @@ function parseTxtModuleLibrary(text) {
     while (current.body.at(-1)?.trim() === "") current.body.pop();
     const prompt = current.body.join("\n");
     if (!current.module) {
-      throw new Error(`条目“${current.title}”缺少有效的“模块：人物”或“模块：姿态动作”。`);
+      throw new Error(`条目“${current.title}”缺少有效的“模块：模块名称”。`);
     }
     if (!prompt) throw new Error(`条目“${current.title}”没有提示词正文。`);
     if (prompt.length > MAX_PROMPT_CHARACTERS) {
@@ -189,7 +210,7 @@ function syncModuleLibraryControls(node, resize = true) {
   const fileName = node.properties?.[LIBRARY_PROPERTY]?.fileName;
   node.__vividMuseTxtModuleToggle.name = allEntries.length
     ? `🧩 TXT模块词库（${fileName || "未命名"} · ${allEntries.length}条）`
-    : "🧩 TXT模块词库（人物/动作）";
+    : "🧩 TXT模块词库（全模块）";
 
   const appliedTitle = node.properties?.[APPLIED_TITLE_PROPERTY]?.[moduleName];
   const targetValue = widgetByName(node, TARGET_WIDGETS[moduleName])?.value;
@@ -373,7 +394,7 @@ function installModuleLibraryWidgets(node) {
   const toggle = addHelperWidget(
     node,
     "button",
-    "🧩 TXT模块词库（人物/动作）",
+    "🧩 TXT模块词库（全模块）",
     null,
     () => setModuleLibraryExpanded(
       node,
@@ -381,7 +402,7 @@ function installModuleLibraryWidgets(node) {
     ),
   );
   const importButton = addHelperWidget(
-    node, "button", "导入人物/动作TXT词库", null, () => chooseTxtModuleFile(node),
+    node, "button", "导入结构化模块TXT词库", null, () => chooseTxtModuleFile(node),
   );
   const moduleWidget = addHelperWidget(
     node,
@@ -400,7 +421,7 @@ function installModuleLibraryWidgets(node) {
     { values: [EMPTY_VALUE] },
   );
   const applyButton = addHelperWidget(
-    node, "button", "应用到人物模块（当前：未设置）", null,
+    node, "button", "应用到画面基础模块（当前：未设置）", null,
     () => applySelectedModuleEntry(node),
   );
   const clearModuleButton = addHelperWidget(
