@@ -83,4 +83,36 @@ for (const testCase of behaviorCases) {
   assert.equal(Object.prototype.hasOwnProperty.call(widget.options, "hidden"), false);
 }
 
+for (const relativePath of visibilityFiles) {
+  const sourcePath = new URL(relativePath, import.meta.url);
+  const source = fs.readFileSync(sourcePath, "utf8");
+  const functionSource = extractFunction(source, "resizeNode");
+  const context = {};
+  vm.runInNewContext(
+    `${functionSource}\nthis.resizeNode = resizeNode;`,
+    context,
+  );
+
+  const originalWidgets = [{ name: "toggle" }, { name: "control" }];
+  let currentWidgets = originalWidgets;
+  let widgetAssignments = 0;
+  let appliedSize;
+  const node = {
+    computeSize: () => [320, 123],
+    setSize: (size) => { appliedSize = Array.from(size); },
+  };
+  Object.defineProperty(node, "widgets", {
+    get: () => currentWidgets,
+    set: (widgets) => {
+      widgetAssignments += 1;
+      currentWidgets = widgets;
+    },
+  });
+
+  context.resizeNode(node);
+  assert.equal(widgetAssignments, 1);
+  assert.notEqual(currentWidgets, originalWidgets);
+  assert.deepEqual(appliedSize, [360, 123]);
+}
+
 console.log("frontend Node 2.0 hidden widget layout ok");

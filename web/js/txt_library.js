@@ -31,6 +31,7 @@ function markDirty(node) {
 }
 
 function resizeNode(node) {
+  if (Array.isArray(node.widgets)) node.widgets = [...node.widgets];
   const computed = node.computeSize?.();
   if (computed) node.setSize?.([Math.max(computed[0], 360), computed[1]]);
 }
