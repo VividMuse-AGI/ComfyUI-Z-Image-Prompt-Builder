@@ -82,11 +82,21 @@ function setWidgetVisible(widget, visible) {
   if (!visible && !widget.__vividMuseTxtModuleHidden) {
     widget.__vividMuseTxtModuleOriginalType ??= widget.type;
     widget.__vividMuseTxtModuleOriginalComputeSize ??= widget.computeSize;
+    widget.__vividMuseTxtModuleOriginalOptionsHidden = widget.options?.hidden;
+    widget.options ??= {};
+    widget.options.hidden = true;
     widget.type = "hidden";
     widget.computeSize = () => [0, -4];
   } else if (visible && widget.__vividMuseTxtModuleHidden) {
     widget.type = widget.__vividMuseTxtModuleOriginalType;
     widget.computeSize = widget.__vividMuseTxtModuleOriginalComputeSize;
+    if (widget.options) {
+      if (widget.__vividMuseTxtModuleOriginalOptionsHidden === undefined) {
+        delete widget.options.hidden;
+      } else {
+        widget.options.hidden = widget.__vividMuseTxtModuleOriginalOptionsHidden;
+      }
+    }
   }
   widget.__vividMuseTxtModuleHidden = !visible;
   widget.hidden = !visible;

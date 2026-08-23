@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import vm from "node:vm";
 
 const visibilityFiles = [
   "../web/js/preset_sync.js",
@@ -15,6 +16,63 @@ for (const relativePath of visibilityFiles) {
     /widget\.type = "hidden";/,
     `${relativePath} must use the Node 2.0 zero-height widget type`,
   );
+}
+function extractFunction(source, functionName) {
+  const start = source.indexOf(`function ${functionName}(`);
+  assert.notEqual(start, -1, `missing ${functionName}`);
+  const braceStart = source.indexOf("{", start);
+  let depth = 0;
+  for (let index = braceStart; index < source.length; index += 1) {
+    if (source[index] === "{") depth += 1;
+    if (source[index] === "}") depth -= 1;
+    if (depth === 0) return source.slice(start, index + 1);
+  }
+  throw new Error(`unterminated ${functionName}`);
+}
+
+const behaviorCases = [
+  {
+    relativePath: "../web/js/preset_sync.js",
+    functionName: "setWidgetVisibilityReason",
+    hide(fn, widget) { fn(widget, "test", false); },
+    show(fn, widget) { fn(widget, "test", true); },
+  },
+  {
+    relativePath: "../web/js/txt_library.js",
+    functionName: "setWidgetVisible",
+    hide(fn, widget) { fn(widget, false); },
+    show(fn, widget) { fn(widget, true); },
+  },
+  {
+    relativePath: "../web/js/txt_module_library.js",
+    functionName: "setWidgetVisible",
+    hide(fn, widget) { fn(widget, false); },
+    show(fn, widget) { fn(widget, true); },
+  },
+];
+
+for (const testCase of behaviorCases) {
+  const sourcePath = new URL(testCase.relativePath, import.meta.url);
+  const source = fs.readFileSync(sourcePath, "utf8");
+  const functionSource = extractFunction(source, testCase.functionName);
+  const context = {};
+  vm.runInNewContext(
+    `${functionSource}\nthis.visibilityFunction = ${testCase.functionName};`,
+    context,
+  );
+
+  const originalComputeSize = () => [320, 20];
+  const widget = { type: "combo", computeSize: originalComputeSize, options: {} };
+  testCase.hide(context.visibilityFunction, widget);
+  assert.equal(widget.type, "hidden");
+  assert.equal(widget.hidden, true);
+  assert.equal(widget.options.hidden, true);
+
+  testCase.show(context.visibilityFunction, widget);
+  assert.equal(widget.type, "combo");
+  assert.equal(widget.hidden, false);
+  assert.equal(widget.computeSize, originalComputeSize);
+  assert.equal(Object.prototype.hasOwnProperty.call(widget.options, "hidden"), false);
 }
 
 console.log("frontend Node 2.0 hidden widget layout ok");

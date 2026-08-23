@@ -487,15 +487,25 @@ function setWidgetVisibilityReason(widget, reason, visible) {
   if (shouldHide && !widget.__vividMuseHidden) {
     widget.__vividMuseOriginalType ??= widget.type;
     widget.__vividMuseOriginalComputeSize ??= widget.computeSize;
+    widget.__vividMuseOriginalOptionsHidden = widget.options?.hidden;
+    widget.options ??= {};
+    widget.options.hidden = true;
     widget.type = "hidden";
     widget.computeSize = () => [0, -4];
   } else if (!shouldHide && widget.__vividMuseHidden) {
     widget.type = widget.__vividMuseOriginalType;
     widget.computeSize = widget.__vividMuseOriginalComputeSize;
+    if (widget.options) {
+      if (widget.__vividMuseOriginalOptionsHidden === undefined) {
+        delete widget.options.hidden;
+      } else {
+        widget.options.hidden = widget.__vividMuseOriginalOptionsHidden;
+      }
+    }
   }
   widget.__vividMuseHidden = shouldHide;
-  // ComfyUI 0.33.x 的 widget 绘制不再完全尊重 "converted-widget" 占位类型，
-  // 隐藏的字段会残留标题文字却无法交互；用 LiteGraph 原生的 hidden 属性彻底隐藏。
+  // 旧版画布读取 widget.hidden；Node 2.0 的 Vue 网格读取 options.hidden。
+  // 两处同时维护，避免控件消失后仍保留空白布局行。
   widget.hidden = shouldHide;
 }
 

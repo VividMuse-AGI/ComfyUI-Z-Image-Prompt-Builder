@@ -48,11 +48,21 @@ function setWidgetVisible(widget, visible) {
   if (!visible && !widget.__vividMuseTxtHidden) {
     widget.__vividMuseTxtOriginalType ??= widget.type;
     widget.__vividMuseTxtOriginalComputeSize ??= widget.computeSize;
+    widget.__vividMuseTxtOriginalOptionsHidden = widget.options?.hidden;
+    widget.options ??= {};
+    widget.options.hidden = true;
     widget.type = "hidden";
     widget.computeSize = () => [0, -4];
   } else if (visible && widget.__vividMuseTxtHidden) {
     widget.type = widget.__vividMuseTxtOriginalType;
     widget.computeSize = widget.__vividMuseTxtOriginalComputeSize;
+    if (widget.options) {
+      if (widget.__vividMuseTxtOriginalOptionsHidden === undefined) {
+        delete widget.options.hidden;
+      } else {
+        widget.options.hidden = widget.__vividMuseTxtOriginalOptionsHidden;
+      }
+    }
   }
   widget.__vividMuseTxtHidden = !visible;
   widget.hidden = !visible;
