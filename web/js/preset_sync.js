@@ -813,6 +813,18 @@ function clearEverything(node) {
   markDirty(node);
 }
 
+function placeStructuredActionsBeforePromptLibraries(node) {
+  const target = node.__vividMuseFreePromptSpacer || widgetByName(node, "自由提示词");
+  if (!target) return;
+  const actions = [
+    node.__vividMuseRandomButton,
+    node.__vividMuseEnableOnlyModuleButton,
+    node.__vividMuseClearStructuredButton,
+    node.__vividMuseClearEverythingButton,
+  ];
+  for (const action of actions) moveWidgetBefore(node, action, target);
+}
+
 app.registerExtension({
   name: "VividMuse.ZImagePromptBuilder.V4",
   async nodeCreated(node) {
@@ -938,40 +950,30 @@ app.registerExtension({
     }
 
     if (!node.__vividMuseRandomButton) {
-      addNonSerializedWidget(
+      node.__vividMuseRandomButton = addNonSerializedWidget(
         node, "button", "🎲 生成随机组合", null, () => prepareRandomCombination(node),
       );
-      node.__vividMuseRandomButton = node.widgets.at(-1);
-    }
-
-    if (node.__vividMuseEnableOnlyModuleButton && node.__vividMuseRandomButton) {
-      const enableIndex = node.widgets.indexOf(node.__vividMuseEnableOnlyModuleButton);
-      const randomIndex = node.widgets.indexOf(node.__vividMuseRandomButton);
-      if (enableIndex < randomIndex) {
-        node.widgets.splice(enableIndex, 1);
-        node.widgets.splice(node.widgets.indexOf(node.__vividMuseRandomButton) + 1, 0, node.__vividMuseEnableOnlyModuleButton);
-      }
     }
 
     if (!node.__vividMuseClearStructuredButton) {
-      addNonSerializedWidget(
+      node.__vividMuseClearStructuredButton = addNonSerializedWidget(
         node, "button", "清空结构化模块", null, () => clearStructuredFields(node),
       );
-      node.__vividMuseClearStructuredButton = true;
     }
 
     if (!node.__vividMuseClearEverythingButton) {
-      addNonSerializedWidget(
+      node.__vividMuseClearEverythingButton = addNonSerializedWidget(
         node, "button", "全部清空", null, () => clearEverything(node),
       );
-      node.__vividMuseClearEverythingButton = true;
     }
 
+    placeStructuredActionsBeforePromptLibraries(node);
     ensureConfiguredNode(node);
   },
   loadedGraphNode(node) {
     const isTarget = node.comfyClass === NODE_CLASS || node.constructor?.type === NODE_CLASS;
     if (!isTarget || !node.__vividMuseModuleWidget) return;
+    placeStructuredActionsBeforePromptLibraries(node);
     ensureConfiguredNode(node);
   },
 });
