@@ -48,7 +48,7 @@ function setWidgetVisible(widget, visible) {
   if (!visible && !widget.__vividMuseTxtHidden) {
     widget.__vividMuseTxtOriginalType ??= widget.type;
     widget.__vividMuseTxtOriginalComputeSize ??= widget.computeSize;
-    widget.type = "converted-widget";
+    widget.type = "hidden";
     widget.computeSize = () => [0, -4];
   } else if (visible && widget.__vividMuseTxtHidden) {
     widget.type = widget.__vividMuseTxtOriginalType;

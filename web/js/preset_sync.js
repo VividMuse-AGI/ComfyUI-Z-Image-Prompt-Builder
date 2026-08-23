@@ -487,7 +487,7 @@ function setWidgetVisibilityReason(widget, reason, visible) {
   if (shouldHide && !widget.__vividMuseHidden) {
     widget.__vividMuseOriginalType ??= widget.type;
     widget.__vividMuseOriginalComputeSize ??= widget.computeSize;
-    widget.type = "converted-widget";
+    widget.type = "hidden";
     widget.computeSize = () => [0, -4];
   } else if (!shouldHide && widget.__vividMuseHidden) {
     widget.type = widget.__vividMuseOriginalType;
