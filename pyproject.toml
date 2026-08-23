@@ -1,6 +1,6 @@
 [project]
 name = "ComfyUI-Z-Image-Prompt-Builder"
-version = "0.1.0"
+version = "0.2.0"
 description = "A concise Chinese portrait prompt builder with deterministic random combinations and recommended canvas sizes for Z-Image in ComfyUI."
 authors = [{ name = "VividMuse" }]
 readme = "README.md"
