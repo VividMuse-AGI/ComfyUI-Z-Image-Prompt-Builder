@@ -19,6 +19,7 @@ globalThis.__txtLibraryApi = {
   importTxtPromptFile,
   applySelectedTxtPrompt,
   setTxtLibraryExpanded,
+  clearFreePrompt,
   clearTxtPromptLibrary,
 };
 `;
@@ -71,7 +72,7 @@ assert.deepEqual(
 
 const node = makeNode();
 api.installTxtLibraryWidgets(node);
-for (const name of ["📚 TXT用户词库", "导入TXT词库", "词库条目", "词库加入方式", "添加到自由提示词", "清除已导入词库"]) {
+for (const name of ["📚 TXT用户词库", "导入TXT词库", "词库条目", "词库加入方式", "添加到自由提示词", "清空自由提示词", "清除已导入词库"]) {
   const helper = widget(node, name);
   assert.equal(helper.serialize, false);
   assert.equal(helper.options.serialize, false);
@@ -104,6 +105,9 @@ assert.equal(freePrompt.value, "第一条完整中文提示词；用户原有内
 modeWidget.value = "替换自由提示词";
 api.applySelectedTxtPrompt(node);
 assert.equal(freePrompt.value, "第一条完整中文提示词");
+api.clearFreePrompt(node);
+assert.equal(freePrompt.value, "");
+assert.equal(node.properties.vividMuseTxtPromptLibrary.entries.length, 2);
 
 const restored = makeNode();
 restored.properties.vividMuseTxtPromptLibrary = structuredClone(node.properties.vividMuseTxtPromptLibrary);

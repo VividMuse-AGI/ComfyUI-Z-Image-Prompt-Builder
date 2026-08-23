@@ -261,6 +261,15 @@ function clearTxtPromptLibrary(node) {
   syncTxtLibraryControls(node);
 }
 
+function clearFreePrompt(node) {
+  const freePromptWidget = widgetByName(node, "自由提示词");
+  if (!freePromptWidget) return false;
+  freePromptWidget.value = "";
+  freePromptWidget.callback?.(freePromptWidget.value);
+  markDirty(node);
+  return true;
+}
+
 function installTxtLibraryConfigure(node) {
   if (node.__vividMuseTxtLibraryConfigure) return;
   const originalOnConfigure = node.onConfigure;
@@ -314,6 +323,9 @@ function installTxtLibraryWidgets(node) {
   const applyButton = addHelperWidget(
     node, "button", "添加到自由提示词", null, () => applySelectedTxtPrompt(node),
   );
+  const clearFreePromptButton = addHelperWidget(
+    node, "button", "清空自由提示词", null, () => clearFreePrompt(node),
+  );
   const clearButton = addHelperWidget(
     node, "button", "清除已导入词库", null, () => clearTxtPromptLibrary(node),
   );
@@ -326,6 +338,7 @@ function installTxtLibraryWidgets(node) {
     entryWidget,
     modeWidget,
     applyButton,
+    clearFreePromptButton,
     clearButton,
   ];
   for (const widget of [toggle, ...node.__vividMuseTxtLibraryControls]) {
