@@ -4,9 +4,10 @@ const NODE_CLASS = "VividMuse_ZImageChinesePromptBuilder";
 const LIBRARY_PROPERTY = "vividMuseTxtModuleLibrary";
 const EXPANDED_PROPERTY = "vividMuseTxtModuleLibraryExpanded";
 const APPLIED_TITLE_PROPERTY = "vividMuseTxtModuleAppliedTitles";
-const MODULES = [
+const STANDARD_MODULES = [
   "画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现",
 ];
+const MODULES = [...STANDARD_MODULES, "自定义"];
 const TARGET_WIDGETS = {
   "画面基础": "用户画面基础片段",
   "人物": "用户人物片段",
@@ -16,6 +17,7 @@ const TARGET_WIDGETS = {
   "场景": "用户场景片段",
   "摄影": "用户摄影片段",
   "视觉表现": "用户视觉表现片段",
+  "自定义": "用户自定义片段",
 };
 const MODULE_ALIASES = new Map([
   ["画面基础", "画面基础"],
@@ -37,6 +39,7 @@ const MODULE_ALIASES = new Map([
   ["视觉表现", "视觉表现"],
   ["视觉", "视觉表现"],
   ["光影色彩", "视觉表现"],
+  ["自定义", "自定义"],
 ]);
 const EMPTY_VALUE = "当前模块没有词库条目";
 const MAX_FILE_BYTES = 1024 * 1024;
@@ -64,8 +67,21 @@ function markDirty(node) {
   app.graph?.setDirtyCanvas?.(true, true);
 }
 
+function refreshNode2Widgets(node) {
+  const widgets = node.widgets;
+  if (!Array.isArray(widgets)) return;
+  const marker = {
+    name: "__vividMuseNode2RefreshMarker",
+    type: "hidden",
+    hidden: true,
+    options: { hidden: true, serialize: false },
+  };
+  widgets.push(marker);
+  widgets.pop();
+}
+
 function resizeNode(node) {
-  if (Array.isArray(node.widgets)) node.widgets = [...node.widgets];
+  refreshNode2Widgets(node);
   const computed = node.computeSize?.();
   if (computed) node.setSize?.([Math.max(computed[0], 360), computed[1]]);
 }
@@ -76,6 +92,18 @@ function moveWidgetBefore(node, widget, targetWidget) {
   if (oldIndex >= 0) node.widgets.splice(oldIndex, 1);
   const targetIndex = node.widgets.indexOf(targetWidget);
   node.widgets.splice(targetIndex, 0, widget);
+}
+
+function placeModuleLibraryBeforePromptLibrary(node) {
+  const target = node.__vividMuseTxtLibraryToggle || widgetByName(node, "自由提示词");
+  if (!target) return;
+  for (const widget of [
+    node.__vividMuseTxtModuleToggle,
+    ...(node.__vividMuseTxtModuleControls || []),
+  ]) {
+    moveWidgetBefore(node, widget, target);
+  }
+  refreshNode2Widgets(node);
 }
 
 function setWidgetVisible(widget, visible) {
@@ -226,7 +254,8 @@ function syncModuleLibraryControls(node, resize = true) {
   const appliedTitle = node.properties?.[APPLIED_TITLE_PROPERTY]?.[moduleName];
   const targetValue = widgetByName(node, TARGET_WIDGETS[moduleName])?.value;
   const status = appliedTitle || (targetValue ? "已有内容" : "未设置");
-  node.__vividMuseTxtModuleApplyButton.name = `应用到${moduleName}模块（当前：${status.slice(0, 16)}）`;
+  const action = moduleName === "自定义" ? "启用自定义模块" : "应用到" + moduleName + "模块";
+  node.__vividMuseTxtModuleApplyButton.name = action + "（当前：" + status.slice(0, 16) + "）";
   if (resize) resizeNode(node);
   markDirty(node);
 }
@@ -364,7 +393,7 @@ function installExistingControlIntegration(node) {
     "__vividMuseTxtModuleOnlyIntegration",
     () => {
       const activeModule = node.__vividMuseModuleWidget?.value;
-      const keepModule = MODULES.includes(activeModule) ? activeModule : null;
+      const keepModule = STANDARD_MODULES.includes(activeModule) ? activeModule : null;
       clearAllUserModules(node, keepModule);
     },
   );
@@ -378,6 +407,7 @@ function installConfigure(node) {
     for (const targetName of Object.values(TARGET_WIDGETS)) {
       setWidgetVisible(widgetByName(node, targetName), false);
     }
+    placeModuleLibraryBeforePromptLibrary(node);
     syncModuleLibraryControls(node, false);
     setModuleLibraryExpanded(
       node,
@@ -454,13 +484,20 @@ function installModuleLibraryWidgets(node) {
     clearModuleButton,
     clearLibraryButton,
   ];
-  for (const widget of [toggle, ...node.__vividMuseTxtModuleControls]) {
-    moveWidgetBefore(node, widget, freePromptWidget);
-  }
+  placeModuleLibraryBeforePromptLibrary(node);
   syncModuleLibraryControls(node, false);
   setModuleLibraryExpanded(node, Boolean(node.properties?.[EXPANDED_PROPERTY]), false);
   installExistingControlIntegration(node);
-  globalThis.setTimeout?.(() => installExistingControlIntegration(node), 0);
+  globalThis.setTimeout?.(() => {
+    installExistingControlIntegration(node);
+    placeModuleLibraryBeforePromptLibrary(node);
+    setModuleLibraryExpanded(
+      node,
+      Boolean(node.properties?.[EXPANDED_PROPERTY]),
+      false,
+    );
+    resizeNode(node);
+  }, 0);
 }
 
 app.registerExtension({
@@ -477,6 +514,7 @@ app.registerExtension({
     for (const targetName of Object.values(TARGET_WIDGETS)) {
       setWidgetVisible(widgetByName(node, targetName), false);
     }
+    placeModuleLibraryBeforePromptLibrary(node);
     syncModuleLibraryControls(node, false);
     setModuleLibraryExpanded(node, Boolean(node.properties?.[EXPANDED_PROPERTY]));
     installExistingControlIntegration(node);

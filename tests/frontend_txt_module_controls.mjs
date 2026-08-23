@@ -18,6 +18,7 @@ const modules = ["画面基础", "人物", "发型", "服装", "姿态动作", "
 const targets = [
   "用户画面基础片段", "用户人物片段", "用户发型片段", "用户服装片段",
   "用户姿态动作片段", "用户场景片段", "用户摄影片段", "用户视觉表现片段",
+  "用户自定义片段",
 ];
 const baseWidget = (name, type = "text") => ({
   name, type, value: "", options: {}, computeSize() { return [360, 24]; },

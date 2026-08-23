@@ -30,8 +30,21 @@ function markDirty(node) {
   app.graph?.setDirtyCanvas?.(true, true);
 }
 
+function refreshNode2Widgets(node) {
+  const widgets = node.widgets;
+  if (!Array.isArray(widgets)) return;
+  const marker = {
+    name: "__vividMuseNode2RefreshMarker",
+    type: "hidden",
+    hidden: true,
+    options: { hidden: true, serialize: false },
+  };
+  widgets.push(marker);
+  widgets.pop();
+}
+
 function resizeNode(node) {
-  if (Array.isArray(node.widgets)) node.widgets = [...node.widgets];
+  refreshNode2Widgets(node);
   const computed = node.computeSize?.();
   if (computed) node.setSize?.([Math.max(computed[0], 360), computed[1]]);
 }

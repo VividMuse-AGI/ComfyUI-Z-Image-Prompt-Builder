@@ -15,7 +15,7 @@ class TxtModuleLibraryBackendTests(unittest.TestCase):
             density="标准", user_module_fragments=fragments,
         )
         output_order = [
-            "画面基础", "人物", "发型", "服装", "姿态动作", "场景", "视觉表现", "摄影",
+            "画面基础", "人物", "发型", "服装", "姿态动作", "场景", "视觉表现", "摄影", "自定义",
         ]
         positions = [prompt.index(f"自定义{name}模块") for name in output_order]
         self.assertEqual(positions, sorted(positions))

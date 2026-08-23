@@ -24,6 +24,7 @@ A Chinese portrait prompt builder node for ComfyUI by VividMuse. Generate natura
 - Outputs recommended **width and height** for setting the latent size.
 - Frontend provides a "🎲 Generate random combination" button.
 - A "current editing module" switcher shows one module at a time without changing any field values.
+- Structured TXT module libraries can replace any of the eight standard modules or enable one independent **Custom** fragment appended after them.
 - **No third-party Python dependencies, no model loading, no VRAM usage.**
 
 ## Built-in Presets

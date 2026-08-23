@@ -45,4 +45,34 @@ assert.deepEqual(node.widgets.map((widget) => widget.name), [
   "📚 TXT用户词库",
   "自由提示词",
 ]);
+
+const actionWidgets = [random, enableOnly, clearStructured, clearEverything];
+const promptLibraryWidgets = [moduleLibrary, fullLibrary];
+const libraryAnchorPermutations = [
+  [spacer, moduleLibrary, fullLibrary],
+  [spacer, fullLibrary, moduleLibrary],
+  [moduleLibrary, spacer, fullLibrary],
+  [moduleLibrary, fullLibrary, spacer],
+  [fullLibrary, spacer, moduleLibrary],
+  [fullLibrary, moduleLibrary, spacer],
+];
+
+for (const anchors of libraryAnchorPermutations) {
+  const permutationNode = {
+    widgets: [field, ...anchors, freePrompt, ...actionWidgets],
+    __vividMuseFreePromptSpacer: spacer,
+    __vividMuseTxtModuleToggle: moduleLibrary,
+    __vividMuseTxtLibraryToggle: fullLibrary,
+    __vividMuseRandomButton: random,
+    __vividMuseEnableOnlyModuleButton: enableOnly,
+    __vividMuseClearStructuredButton: clearStructured,
+    __vividMuseClearEverythingButton: clearEverything,
+  };
+  globalThis.__layoutApi.placeStructuredActionsBeforePromptLibraries(permutationNode);
+  globalThis.__layoutApi.placeStructuredActionsBeforePromptLibraries(permutationNode);
+  const lastActionIndex = Math.max(...actionWidgets.map(widget => permutationNode.widgets.indexOf(widget)));
+  assert.ok(promptLibraryWidgets.every(widget => lastActionIndex < permutationNode.widgets.indexOf(widget)));
+  assert.deepEqual(permutationNode.widgets.slice(1, 5), actionWidgets);
+}
+
 console.log("frontend structured actions layout order ok");

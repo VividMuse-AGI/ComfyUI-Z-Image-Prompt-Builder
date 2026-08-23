@@ -86,15 +86,27 @@ for (const testCase of behaviorCases) {
 for (const relativePath of visibilityFiles) {
   const sourcePath = new URL(relativePath, import.meta.url);
   const source = fs.readFileSync(sourcePath, "utf8");
+  assert.doesNotMatch(
+    source,
+    /node\.widgets\s*=\s*\[\.\.\.node\.widgets\]/u,
+    relativePath + " must mutate the Node 2.0 reactive array instead of replacing it",
+  );
+  const refreshFunctionSource = extractFunction(source, "refreshNode2Widgets");
   const functionSource = extractFunction(source, "resizeNode");
   const context = {};
   vm.runInNewContext(
-    `${functionSource}\nthis.resizeNode = resizeNode;`,
+    `${refreshFunctionSource}\n${functionSource}\nthis.resizeNode = resizeNode;`,
     context,
   );
 
   const originalWidgets = [{ name: "toggle" }, { name: "control" }];
-  let currentWidgets = originalWidgets;
+  let arrayMutations = 0;
+  const reactiveWidgets = new Proxy(originalWidgets, {
+    set(target, key, value) {
+      arrayMutations += 1;
+      return Reflect.set(target, key, value);
+    },
+  });
   let widgetAssignments = 0;
   let appliedSize;
   const node = {
@@ -102,16 +114,16 @@ for (const relativePath of visibilityFiles) {
     setSize: (size) => { appliedSize = Array.from(size); },
   };
   Object.defineProperty(node, "widgets", {
-    get: () => currentWidgets,
-    set: (widgets) => {
+    get: () => reactiveWidgets,
+    set: () => {
       widgetAssignments += 1;
-      currentWidgets = widgets;
     },
   });
 
   context.resizeNode(node);
-  assert.equal(widgetAssignments, 1);
-  assert.notEqual(currentWidgets, originalWidgets);
+  assert.equal(widgetAssignments, 0);
+  assert.ok(arrayMutations > 0);
+  assert.deepEqual(reactiveWidgets.map((widget) => widget.name), ["toggle", "control"]);
   assert.deepEqual(appliedSize, [360, 123]);
 }
 

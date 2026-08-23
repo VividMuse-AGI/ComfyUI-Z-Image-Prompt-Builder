@@ -23,5 +23,5 @@ jobs:
         run: python -m unittest discover -s tests -p "test_*.py" -v
       - name: Run frontend regressions
         run: |
-          node --check web/js/preset_sync.js
-          node tests/frontend_preset_values.mjs
+          for source in web/js/*.js; do node --check "$source"; done
+          for test in tests/frontend_*.mjs; do node "$test"; done

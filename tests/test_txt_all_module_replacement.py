@@ -16,6 +16,19 @@ class TxtAllModuleReplacementTests(unittest.TestCase):
                 )
                 self.assertEqual(prompt, f"{fragment}。")
 
+    def test_custom_module_appends_without_replacing_standard_modules(self):
+        requested = {field: nodes.FOLLOW_PRESET for field in nodes.FIELD_ORDER}
+        fields = nodes.resolve_fields(
+            nodes.PRESET_OPTIONS[0], nodes.RANDOM_SCOPES[0], 0, requested
+        )
+        prompt = nodes.compose_prompt_text(
+            fields,
+            "标准",
+            user_module_fragments={"自定义": "额外品牌要求"},
+        )
+        self.assertIn(nodes._person_identity_text(fields), prompt)
+        self.assertTrue(prompt.endswith("额外品牌要求。"))
+
     def test_all_custom_modules_replace_all_matching_builtin_groups(self):
         requested = {field: nodes.FOLLOW_PRESET for field in nodes.FIELD_ORDER}
         fields = nodes.resolve_fields(

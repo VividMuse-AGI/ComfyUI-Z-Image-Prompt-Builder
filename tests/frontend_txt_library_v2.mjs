@@ -70,6 +70,14 @@ assert.deepEqual(
   ["同名", "同名（2）"],
 );
 
+const exampleText = fs.readFileSync(
+  new URL("../examples/TXT词库示例.txt", import.meta.url),
+  "utf8",
+);
+const exampleEntries = api.parseTxtPromptLibrary(exampleText);
+assert.equal(exampleEntries.length, 10);
+assert.equal(exampleEntries.some((entry) => entry.prompt.includes("写法说明")), false);
+
 const node = makeNode();
 api.installTxtLibraryWidgets(node);
 for (const name of ["📚 TXT用户词库", "导入TXT词库", "词库条目", "词库加入方式", "添加到自由提示词", "清空自由提示词", "清除已导入词库"]) {

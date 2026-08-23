@@ -509,8 +509,24 @@ function setWidgetVisibilityReason(widget, reason, visible) {
   widget.hidden = shouldHide;
 }
 
+function refreshNode2Widgets(node) {
+  const widgets = node.widgets;
+  if (!Array.isArray(widgets)) return;
+  // Node 2.0 keeps a shallow-reactive reference to this array. Replacing
+  // node.widgets does not invalidate its computed widget list, while a
+  // synchronous hidden marker push/pop does.
+  const marker = {
+    name: "__vividMuseNode2RefreshMarker",
+    type: "hidden",
+    hidden: true,
+    options: { hidden: true, serialize: false },
+  };
+  widgets.push(marker);
+  widgets.pop();
+}
+
 function resizeNode(node) {
-  if (Array.isArray(node.widgets)) node.widgets = [...node.widgets];
+  refreshNode2Widgets(node);
   const computed = node.computeSize?.();
   if (computed) node.setSize?.([Math.max(computed[0], 360), computed[1]]);
 }
@@ -692,6 +708,7 @@ function syncEthnicityBranchOptions(node, chooseFirst = false) {
   } else if (!choices.includes(branchWidget.value)) {
     branchWidget.value = FOLLOW_PRESET;
   }
+  refreshNode2Widgets(node);
 }
 
 function syncThemeOptions(node, chooseFirst = false) {
@@ -711,6 +728,7 @@ function syncThemeOptions(node, chooseFirst = false) {
   } else if (!choices.includes(themeWidget.value)) {
     themeWidget.value = FOLLOW_PRESET;
   }
+  refreshNode2Widgets(node);
 }
 
 function syncSceneLocationOptions(node, chooseFirst = false) {
@@ -730,6 +748,7 @@ function syncSceneLocationOptions(node, chooseFirst = false) {
   } else if (!choices.includes(locationWidget.value)) {
     locationWidget.value = FOLLOW_PRESET;
   }
+  refreshNode2Widgets(node);
 }
 
 function randomFieldsForScope(scope) {
@@ -825,7 +844,15 @@ function clearEverything(node) {
 }
 
 function placeStructuredActionsBeforePromptLibraries(node) {
-  const target = node.__vividMuseFreePromptSpacer || widgetByName(node, "自由提示词");
+  const targets = [
+    node.__vividMuseTxtModuleToggle,
+    node.__vividMuseTxtLibraryToggle,
+    node.__vividMuseFreePromptSpacer,
+    widgetByName(node, "自由提示词"),
+  ].filter(widget => widget && node.widgets?.includes(widget));
+  const target = targets.sort(
+    (left, right) => node.widgets.indexOf(left) - node.widgets.indexOf(right),
+  )[0];
   if (!target) return;
   const actions = [
     node.__vividMuseRandomButton,
@@ -834,6 +861,7 @@ function placeStructuredActionsBeforePromptLibraries(node) {
     node.__vividMuseClearEverythingButton,
   ];
   for (const action of actions) moveWidgetBefore(node, action, target);
+  refreshNode2Widgets(node);
 }
 
 app.registerExtension({

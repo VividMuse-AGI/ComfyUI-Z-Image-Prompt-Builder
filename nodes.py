@@ -49,6 +49,7 @@ USER_MODULE_INPUTS = {
     "场景": "用户场景片段",
     "摄影": "用户摄影片段",
     "视觉表现": "用户视觉表现片段",
+    "自定义": "用户自定义片段",
 }
 
 LIBRARY_ROOT = Path(__file__).resolve().parent / "phrase_library"
@@ -4392,6 +4393,7 @@ def compose_prompt_text(
     user_scene_text = user_modules["场景"]
     user_camera_text = user_modules["摄影"]
     user_visual_text = user_modules["视觉表现"]
+    user_custom_text = user_modules["自定义"]
     person_core_text = user_person_text or f"{identity}，{person_detail_text}，{body_text}"
     pose_core_text = user_pose_text or _pose_prompt_text(fields, density)
     standard_pose_core_text = user_pose_text or f"人物{pose_core_text}"
@@ -4582,6 +4584,8 @@ def compose_prompt_text(
                 continue
             if fields.get(field) != EMPTY_CHOICE:
                 parts.append(formatter(field).rstrip("，；。 "))
+        if user_custom_text:
+            parts.append(user_custom_text)
         prompt_body = "；".join(part for part in parts if part)
         return f"{prompt_body}。" if prompt_body else ""
 
@@ -4600,6 +4604,8 @@ def compose_prompt_text(
             f"{visual_text}；",
             f"{camera_text}。",
         ]
+        if user_custom_text:
+            segments.append(f"{user_custom_text}。")
         return "".join(segments)
 
     if density == "标准":
@@ -4617,6 +4623,8 @@ def compose_prompt_text(
             f"{visual_text}。",
             f"{camera_text}。",
         ]
+        if user_custom_text:
+            segments.append(f"{user_custom_text}。")
         return "".join(segments)
 
     base_text = user_base_text or f"{full('画面比例')}，{full('成像媒介')}，{full('写真主题')}"
@@ -4633,6 +4641,8 @@ def compose_prompt_text(
         f"{visual_text}；",
         f"{camera_text}。",
     ]
+    if user_custom_text:
+        segments.append(f"{user_custom_text}。")
     return "".join(segments)
 
 
@@ -4793,6 +4803,11 @@ class ZImageChinesePromptBuilder:
                 "STRING",
                 {"default": "", "multiline": True, "dynamicPrompts": False,
                  "tooltip": "由TXT模块词库写入的用户视觉表现描述。"},
+            ),
+            "用户自定义片段": (
+                "STRING",
+                {"default": "", "multiline": True, "dynamicPrompts": False,
+                 "tooltip": "由TXT模块词库启用的独立自定义描述，拼接在八个标准模块之后。"},
             ),
         }
         return {"required": inputs, "optional": optional}

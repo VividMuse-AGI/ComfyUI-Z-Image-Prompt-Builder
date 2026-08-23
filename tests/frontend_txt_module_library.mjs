@@ -22,8 +22,8 @@ vm.runInThisContext(source, { filename: sourcePath.pathname });
 const api = globalThis.__txtModuleLibraryApi;
 assert.ok(extension);
 
-const modules = ["画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现"];
-const inputModules = ["基础画面", "人物设定", "头发", "穿搭", "动作", "环境", "镜头", "光影色彩"];
+const modules = ["画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现", "自定义"];
+const inputModules = ["基础画面", "人物设定", "头发", "穿搭", "动作", "环境", "镜头", "光影色彩", "自定义"];
 const targets = {
   "画面基础": "用户画面基础片段",
   "人物": "用户人物片段",
@@ -33,6 +33,7 @@ const targets = {
   "场景": "用户场景片段",
   "摄影": "用户摄影片段",
   "视觉表现": "用户视觉表现片段",
+  "自定义": "用户自定义片段",
 };
 const text = inputModules.map((moduleName, index) => `
 ## ${modules[index]}测试条目
@@ -45,17 +46,27 @@ function backendWidget(name) {
   return { name, type: "text", value: "", options: {}, computeSize() { return [360, 24]; } };
 }
 function makeNode() {
+  const userLibraryToggle = backendWidget("📚 TXT用户词库");
+  const userLibraryControl = backendWidget("用户词库测试控件");
   return {
     comfyClass: "VividMuse_ZImageChinesePromptBuilder",
     properties: {},
-    widgets: [backendWidget("自由提示词"), ...Object.values(targets).map(backendWidget)],
+    widgets: [
+      userLibraryToggle,
+      userLibraryControl,
+      backendWidget("自由提示词"),
+      ...Object.values(targets).map(backendWidget),
+    ],
+    __vividMuseTxtLibraryToggle: userLibraryToggle,
+    __vividMuseTxtLibraryControls: [userLibraryControl],
+    appliedSizes: [],
     addWidget(type, name, value, callback, options = {}) {
       const widget = { type, name, value, callback, options, computeSize() { return [360, 24]; } };
       this.widgets.push(widget);
       return widget;
     },
     computeSize() { return [360, 400]; },
-    setSize() {},
+    setSize(size) { this.appliedSizes.push(Array.from(size)); },
     setDirtyCanvas() {},
   };
 }
@@ -71,8 +82,27 @@ assert.throws(() => api.parseTxtModuleLibrary("每行一条不适用于模块词
 assert.throws(() => api.parseTxtModuleLibrary("## 缺少模块\n正文"), /缺少有效/);
 assert.throws(() => api.parseTxtModuleLibrary("## 错误模块\n模块：声音\n正文"), /缺少有效/);
 
+const exampleText = fs.readFileSync(
+  new URL("../examples/TXT模块词库示例.txt", import.meta.url),
+  "utf8",
+);
+const exampleEntries = api.parseTxtModuleLibrary(exampleText);
+assert.equal(exampleEntries.length, 18);
+assert.deepEqual(
+  modules.map((moduleName) => exampleEntries.filter((entry) => entry.module === moduleName).length),
+  modules.map(() => 2),
+);
+assert.equal(exampleEntries.some((entry) => entry.prompt.includes("写法说明")), false);
+
 const node = makeNode();
 extension.nodeCreated(node);
+await new Promise((resolve) => setTimeout(resolve, 10));
+assert.deepEqual(node.appliedSizes.at(-1), [360, 400]);
+assert.ok(
+  node.widgets.indexOf(node.__vividMuseTxtModuleToggle)
+    < node.widgets.indexOf(node.__vividMuseTxtLibraryToggle),
+  "TXT模块词库必须显示在TXT用户词库上方",
+);
 for (const name of [
   "🧩 TXT模块词库（全模块）", "导入结构化模块TXT词库", "词库模块",
   "模块词库条目", "应用到画面基础模块（当前：未设置）",
@@ -90,7 +120,7 @@ for (const targetName of Object.values(targets)) {
 await api.importTxtModuleFile(node, {
   name: "摄影师全模块词库.txt", size: 1024, async text() { return text; },
 });
-assert.equal(node.properties.vividMuseTxtModuleLibrary.entries.length, 8);
+assert.equal(node.properties.vividMuseTxtModuleLibrary.entries.length, 9);
 const moduleWidget = widget(node, "词库模块");
 for (const moduleName of modules) {
   moduleWidget.value = moduleName;
