@@ -4339,7 +4339,20 @@ def _visual_prompt_text(fields: Mapping[str, str], density: str) -> str:
     return "；".join(sections)
 
 
-def compose_prompt_text(fields: Mapping[str, str], density: str = "标准") -> str:
+def _normalize_user_module_fragment(value: str) -> str:
+    """Trim only outer separators so imported Chinese prose joins cleanly."""
+
+    if not isinstance(value, str):
+        return ""
+    return value.strip().strip("，；。,. ;\t\r\n")
+
+
+def compose_prompt_text(
+    fields: Mapping[str, str],
+    density: str = "标准",
+    user_person_fragment: str = "",
+    user_pose_fragment: str = "",
+) -> str:
     """Compose a positive prompt at the requested information density."""
 
     if density not in PROMPT_DENSITIES:
@@ -4351,6 +4364,11 @@ def compose_prompt_text(fields: Mapping[str, str], density: str = "标准") -> s
     identity = _person_identity_text(fields)
     person_detail_text = _person_detail_prompt_text(fields, density)
     body_text = _body_prompt_text(fields, density)
+    user_person_text = _normalize_user_module_fragment(user_person_fragment)
+    user_pose_text = _normalize_user_module_fragment(user_pose_fragment)
+    person_core_text = user_person_text or f"{identity}，{person_detail_text}，{body_text}"
+    pose_core_text = user_pose_text or _pose_prompt_text(fields, density)
+    standard_pose_core_text = user_pose_text or f"人物{pose_core_text}"
 
     # When any module is disabled, compose only the modules the user kept.
     # This makes the clear button a blank canvas for partial prompts.
@@ -4392,7 +4410,12 @@ def compose_prompt_text(fields: Mapping[str, str], density: str = "标准") -> s
             and fields.get(field)
             not in DEPENDENCY_PLACEHOLDER_VALUES.get(field, ())
         ]
-        if not selected_fields and not identity:
+        if (
+            not selected_fields
+            and not identity
+            and not user_person_text
+            and not user_pose_text
+        ):
             return ""
         formatter = full
         if density == "精简":
@@ -4431,15 +4454,21 @@ def compose_prompt_text(fields: Mapping[str, str], density: str = "标准") -> s
         for field in output_fields:
             if field in IDENTITY_FIELDS:
                 if not identity_added:
-                    identity_text = group_text_or_atomic_fallback(
-                        identity, IDENTITY_FIELDS
-                    )
-                    if identity_text:
-                        parts.append(identity_text)
+                    if user_person_text:
+                        parts.append(user_person_text)
+                    else:
+                        identity_text = group_text_or_atomic_fallback(
+                            identity, IDENTITY_FIELDS
+                        )
+                        if identity_text:
+                            parts.append(identity_text)
                     identity_added = True
                 continue
             if field in PERSON_DETAIL_OUTPUT_FIELDS:
                 if not person_detail_added:
+                    if user_person_text:
+                        person_detail_added = True
+                        continue
                     rendered = group_text_or_atomic_fallback(
                         person_detail_text,
                         PERSON_DETAIL_OUTPUT_FIELDS,
@@ -4451,6 +4480,9 @@ def compose_prompt_text(fields: Mapping[str, str], density: str = "标准") -> s
                 continue
             if field in BODY_OUTPUT_FIELDS:
                 if not body_added:
+                    if user_person_text:
+                        body_added = True
+                        continue
                     rendered = group_text_or_atomic_fallback(
                         body_text, BODY_OUTPUT_FIELDS
                     )
@@ -4460,12 +4492,14 @@ def compose_prompt_text(fields: Mapping[str, str], density: str = "标准") -> s
                 continue
             if field in POSE_OUTPUT_FIELDS:
                 if not pose_added:
-                    pose_text = _pose_prompt_text(fields, density)
-                    rendered = group_text_or_atomic_fallback(
-                        pose_text, POSE_OUTPUT_FIELDS
-                    )
-                    if rendered:
-                        parts.append(rendered)
+                    if user_pose_text:
+                        parts.append(user_pose_text)
+                    else:
+                        rendered = group_text_or_atomic_fallback(
+                            pose_core_text, POSE_OUTPUT_FIELDS
+                        )
+                        if rendered:
+                            parts.append(rendered)
                     pose_added = True
                 continue
             if field in SCENE_OUTPUT_FIELDS:
@@ -4526,14 +4560,13 @@ def compose_prompt_text(fields: Mapping[str, str], density: str = "标准") -> s
     if density == "精简":
         hair_text = _hair_prompt_text(fields, density)
         clothing_text = _clothing_prompt_text(fields, density)
-        pose_text = _pose_prompt_text(fields, density)
         scene_text = _scene_prompt_text(fields, density)
         camera_text = _camera_prompt_text(fields, density)
         visual_text = _visual_prompt_text(fields, density)
         segments = [
             f"{brief('画面比例')}，{brief('成像媒介')}，{brief('写真主题')}；",
-            f"{identity}，{person_detail_text}，{body_text}，{hair_text}，{clothing_text}；",
-            f"{pose_text}；",
+            f"{person_core_text}，{hair_text}，{clothing_text}；",
+            f"{pose_core_text}；",
             f"{scene_text}；",
             f"{visual_text}；",
             f"{camera_text}。",
@@ -4543,14 +4576,13 @@ def compose_prompt_text(fields: Mapping[str, str], density: str = "标准") -> s
     if density == "标准":
         hair_text = _hair_prompt_text(fields, density)
         clothing_text = _clothing_prompt_text(fields, density)
-        pose_text = _pose_prompt_text(fields, density)
         scene_text = _scene_prompt_text(fields, density)
         camera_text = _camera_prompt_text(fields, density)
         visual_text = _visual_prompt_text(fields, density)
         segments = [
-            f"{brief('画面比例')}，{brief('成像媒介')}，{brief('写真主题')}。{identity}，{person_detail_text}，{body_text}；",
+            f"{brief('画面比例')}，{brief('成像媒介')}，{brief('写真主题')}。{person_core_text}；",
             f"{hair_text}；{clothing_text}。",
-            f"人物{pose_text}。",
+            f"{standard_pose_core_text}。",
             f"{scene_text}。",
             f"{visual_text}。",
             f"{camera_text}。",
@@ -4559,14 +4591,13 @@ def compose_prompt_text(fields: Mapping[str, str], density: str = "标准") -> s
 
     hair_text = _hair_prompt_text(fields, density)
     clothing_text = _clothing_prompt_text(fields, density)
-    pose_text = _pose_prompt_text(fields, density)
     scene_text = _scene_prompt_text(fields, density)
     camera_text = _camera_prompt_text(fields, density)
     visual_text = _visual_prompt_text(fields, density)
     segments = [
-        f"{full('画面比例')}，{full('成像媒介')}，{full('写真主题')}，{identity}，{person_detail_text}，{body_text}；",
+        f"{full('画面比例')}，{full('成像媒介')}，{full('写真主题')}，{person_core_text}；",
         f"{hair_text}；{clothing_text}；",
-        f"人物{pose_text}；",
+        f"{standard_pose_core_text}；",
         f"{scene_text}；",
         f"{visual_text}；",
         f"{camera_text}。",
@@ -4606,11 +4637,15 @@ def build_prompt_text(
     density: str = "标准",
     free_prompt: str = "",
     join_position: str = "自由提示词在前",
+    user_person_fragment: str = "",
+    user_pose_fragment: str = "",
 ) -> str:
     """Resolve fields and compose one Chinese natural-language positive prompt."""
 
     fields = resolve_fields(preset, random_scope, seed, requested)
-    structured_prompt = compose_prompt_text(fields, density)
+    structured_prompt = compose_prompt_text(
+        fields, density, user_person_fragment, user_pose_fragment
+    )
     return join_prompt_text(free_prompt, structured_prompt, join_position)
 
 
@@ -4675,6 +4710,24 @@ class ZImageChinesePromptBuilder:
                     "tooltip": "决定自由提示词与结构化模块的先后顺序。",
                 },
             ),
+            "用户人物片段": (
+                "STRING",
+                {
+                    "default": "",
+                    "multiline": True,
+                    "dynamicPrompts": False,
+                    "tooltip": "由TXT模块词库写入的用户人物描述。",
+                },
+            ),
+            "用户姿态动作片段": (
+                "STRING",
+                {
+                    "default": "",
+                    "multiline": True,
+                    "dynamicPrompts": False,
+                    "tooltip": "由TXT模块词库写入的用户姿态动作描述。",
+                },
+            ),
         }
         return {"required": inputs, "optional": optional}
 
@@ -4683,10 +4736,17 @@ class ZImageChinesePromptBuilder:
         density = kwargs.pop("提示词密度", "标准")
         free_prompt = kwargs.pop("自由提示词", "")
         join_position = kwargs.pop("拼接位置", PROMPT_JOIN_POSITIONS[0])
+        user_person_fragment = kwargs.pop("用户人物片段", "")
+        user_pose_fragment = kwargs.pop("用户姿态动作片段", "")
         random_scope = kwargs.pop("随机范围", RANDOM_SCOPES[0])
         seed = kwargs.pop("随机种子", 0)
         fields = resolve_fields(preset, random_scope, seed, kwargs)
-        structured_prompt = compose_prompt_text(fields, density)
+        structured_prompt = compose_prompt_text(
+            fields,
+            density,
+            user_person_fragment,
+            user_pose_fragment,
+        )
         prompt = join_prompt_text(free_prompt, structured_prompt, join_position)
         aspect = fields["画面比例"]
         if aspect not in ASPECT_RESOLUTIONS:
