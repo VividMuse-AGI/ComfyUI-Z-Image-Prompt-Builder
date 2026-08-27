@@ -31,16 +31,19 @@ A Chinese portrait prompt builder node for ComfyUI by VividMuse. Generate natura
 
 ## Built-in Presets
 
-- Japanese forest-summer soft-light portrait (日系森系夏日柔光写真)
+- Japanese summer bicycle portrait on grass (日系草地单车夏日柔光写真)
 - Japanese café warm-tone close-up portrait (日系咖啡馆暖调近景人像)
 - Nighttime indoor luxury hard-flash fashion portrait (夜间室内轻奢硬闪时尚写真)
 - Urban workplace light-luxury seated portrait (都市职场轻奢坐姿写真)
-- Historical Hanfu portrait (古风汉服写真)
-- Seaside vacation portrait (海边假日度假写真)
+- Soft-light Hanfu garden portrait (古风汉服园林柔光写真)
+- Summer beach swimwear portrait (海边夏日泳装写真)
 - Cyberpunk city night portrait (赛博都市夜景写真)
+- Studio dewy-makeup beauty close-up (影棚水光妆美容特写)
+- Window-light yoga shaping portrait (落地窗瑜伽塑形写真)
+- Hotel-window cinematic still (旅馆窗边电影静帧)
 - Custom combination (自定义组合)
 
-Seven portrait presets are decomposed into editable person, styling, action, environment, lighting, composition, and imaging fields. Custom combination provides a minimal neutral starting point.
+Ten portrait presets are decomposed into editable person, styling, action, environment, lighting, composition, and imaging fields. Custom combination provides a minimal neutral starting point.
 
 ## Installation
 

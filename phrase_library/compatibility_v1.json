@@ -374,7 +374,7 @@
     {
       "id":"medium_generic_digital","label":"通用数码媒介偏好",
       "when":{"field":"capture.medium","values":["professional_digital","crop_mirrorless","digital_slr"]},
-      "prefer_bundles":{"camera_setups":["headshot_85","classic_waist_85","fashion_three_quarter_70","studio_full_70"],"visual_profiles":["clean_beauty_editorial","night_flash_fashion","ecommerce_accurate","urban_neon_cinema","low_key_warm_black"]},"weight":3
+      "prefer_bundles":{"camera_setups":["headshot_85","classic_waist_85","fashion_three_quarter_70","studio_full_70"],"visual_profiles":["clean_beauty_editorial","night_flash_fashion","ecommerce_accurate","urban_neon_cinema","low_key_warm_black","beach_vacation","purple_neon_digital","sport_bright_crisp","earthy_outdoor"]},"weight":3
     },
     {
       "id":"medium_full_frame_mirrorless","label":"全画幅微单媒介偏好",

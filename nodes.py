@@ -14,15 +14,23 @@ RANDOM_CHOICE = "随机抽取"
 EMPTY_CHOICE = "不使用"
 CUSTOM_PRESET = "自定义组合"
 MAX_SEED = 0xFFFFFFFFFFFFFFFF
+LEGACY_PRESET_NAMES = {
+    "日系森系夏日柔光写真": "日系草地单车夏日柔光写真",
+    "古风汉服写真": "古风汉服园林柔光写真",
+    "海边假日度假写真": "海边夏日泳装写真",
+}
 
 PRESET_OPTIONS = [
-    "日系森系夏日柔光写真",
+    "日系草地单车夏日柔光写真",
     "日系咖啡馆暖调近景人像",
     "夜间室内轻奢硬闪时尚写真",
     "都市职场轻奢坐姿写真",
-    "古风汉服写真",
-    "海边假日度假写真",
+    "古风汉服园林柔光写真",
+    "海边夏日泳装写真",
     "赛博都市夜景写真",
+    "影棚水光妆美容特写",
+    "落地窗瑜伽塑形写真",
+    "旅馆窗边电影静帧",
     CUSTOM_PRESET,
 ]
 
@@ -236,7 +244,7 @@ LANDSCAPE_CAMERA_BUNDLES = _camera_bundles(
 )
 
 PROFILE_CAMERA_BUNDLES = {
-    "日系森系夏日柔光写真": _camera_bundles(
+    "日系草地单车夏日柔光写真": _camera_bundles(
         "forest_chest_85", "headshot_85", "classic_waist_85"
     ),
     "日系咖啡馆暖调近景人像": _camera_bundles(
@@ -248,16 +256,29 @@ PROFILE_CAMERA_BUNDLES = {
     "都市职场轻奢坐姿写真": _camera_bundles(
         "office_seated_70", "sofa_seated_85", "classic_waist_85"
     ),
-    "古风汉服写真": _camera_bundles(
+    "古风汉服园林柔光写真": _camera_bundles(
         "classic_waist_85", "frame_within_frame_50", "garment_detail_105"
     ),
-    "海边假日度假写真": _camera_bundles(
+    "海边夏日泳装写真": _camera_bundles(
         "travel_environment_35", "landscape_gaze_space_50", "telephoto_environment_135"
     ),
     "赛博都市夜景写真": _camera_bundles(
         "leading_lines_env_35", "street_full_50", "fashion_three_quarter_70"
     ),
 }
+
+PROFILE_CAMERA_BUNDLES.update({
+    "日系草地单车夏日柔光写真": _camera_bundles("classic_waist_85", "travel_environment_35", "hands_prop_85"),
+    "日系咖啡馆暖调近景人像": _camera_bundles("high_angle_full_35", "phone_waist", "cafe_chest_50"),
+    "夜间室内轻奢硬闪时尚写真": _camera_bundles("triangle_full_50", "sofa_seated_85", "flash_full_65"),
+    "都市职场轻奢坐姿写真": _camera_bundles("office_seated_70", "sofa_seated_85", "classic_waist_85"),
+    "古风汉服园林柔光写真": _camera_bundles("classic_waist_85", "frame_within_frame_50", "hands_prop_85"),
+    "海边夏日泳装写真": _camera_bundles("landscape_gaze_space_50", "travel_environment_35", "low_angle_full_28"),
+    "赛博都市夜景写真": _camera_bundles("leading_lines_env_35", "landscape_gaze_space_50", "low_angle_dynamic_35"),
+    "影棚水光妆美容特写": _camera_bundles("beauty_face_105", "headshot_85", "hands_prop_85"),
+    "落地窗瑜伽塑形写真": _camera_bundles("landscape_gaze_space_50", "sport_dynamic_50", "low_angle_full_28"),
+    "旅馆窗边电影静帧": _camera_bundles("landscape_gaze_space_50", "interior_environment_28", "frame_within_frame_50"),
+})
 
 POSE_LIBRARY_FIELDS = {
     "画面瞬间": "pose.event",
@@ -616,7 +637,7 @@ for _bundle in _ADVANCED_LIBRARY["bundles"]["hair_style_bundles"]:
     HAIR_STRUCTURE_BUNDLE_BY_ID[_bundle["id"]] = _converted
 
 HAIR_PROFILE_BUNDLE_IDS = {
-    "日系森系夏日柔光写真": (
+    "日系草地单车夏日柔光写真": (
         "chest_soft_waves_air", "waist_straight_wispy", "half_up_curtain", "straw_hat_long_waves"
     ),
     "日系咖啡馆暖调近景人像": (
@@ -628,11 +649,11 @@ HAIR_PROFILE_BUNDLE_IDS = {
     "都市职场轻奢坐姿写真": (
         "low_ponytail_center", "low_bun_middle", "collarbone_sleek_side", "french_twist_side"
     ),
-    "古风汉服写真": (
+    "古风汉服园林柔光写真": (
         "low_bun_middle", "low_bun_wispy", "flower_pin_low_bun",
         "gold_pin_high_bun", "single_braid_jade_pin",
     ),
-    "海边假日度假写真": (
+    "海边夏日泳装写真": (
         "chest_soft_waves_air", "straw_hat_long_waves", "waist_loose_curls_center",
         "low_ponytail_center", "single_braid_wispy",
     ),
@@ -641,6 +662,19 @@ HAIR_PROFILE_BUNDLE_IDS = {
         "half_up_pearl_clip", "collarbone_sleek_side",
     ),
 }
+HAIR_PROFILE_BUNDLE_IDS.update({
+    "日系草地单车夏日柔光写真": ("half_up_curtain", "chest_soft_waves_air", "waist_straight_wispy"),
+    "日系咖啡馆暖调近景人像": ("waist_straight_wispy", "chest_soft_waves_air", "collarbone_loose_curtain"),
+    "夜间室内轻奢硬闪时尚写真": ("side_swept_large_waves", "chest_large_waves_middle", "french_twist_open"),
+    "都市职场轻奢坐姿写真": ("waist_straight_wispy", "collarbone_sleek_side", "low_bun_middle"),
+    "古风汉服园林柔光写真": ("flower_pin_low_bun", "gold_pin_high_bun", "single_braid_jade_pin"),
+    "海边夏日泳装写真": ("chest_soft_waves_air", "waist_straight_wispy", "low_ponytail_center"),
+    "赛博都市夜景写真": ("chin_bob_wispy", "chin_bob_air_bangs", "collarbone_sleek_side"),
+    "影棚水光妆美容特写": ("low_bun_wispy", "collarbone_sleek_side", "high_bun_face_strands"),
+    "落地窗瑜伽塑形写真": ("shoulder_waves_center", "high_ponytail_open", "messy_bun_air"),
+    "旅馆窗边电影静帧": ("collarbone_loose_curtain", "low_ponytail_center", "shoulder_waves_center"),
+})
+
 PROFILE_HAIR_BUNDLES = {
     preset: [HAIR_STRUCTURE_BUNDLE_BY_ID[bundle_id] for bundle_id in bundle_ids]
     for preset, bundle_ids in HAIR_PROFILE_BUNDLE_IDS.items()
@@ -757,14 +791,27 @@ CLOTHING_RECIPES = [
 ]
 CLOTHING_RECIPE_BY_ID = {recipe["id"]: recipe for recipe in CLOTHING_RECIPES}
 CLOTHING_PROFILE_RECIPE_IDS = {
-    "日系森系夏日柔光写真": ("summer_forest_girl", "flower_shop_ccd", "seaside_golden_vacation"),
+    "日系草地单车夏日柔光写真": ("summer_forest_girl", "flower_shop_ccd", "seaside_golden_vacation"),
     "日系咖啡馆暖调近景人像": ("warm_cafe_portrait", "bookstore_intellectual", "french_apartment_window", "retro_hongkong_diner"),
     "夜间室内轻奢硬闪时尚写真": ("doorway_flash_fashion", "low_key_hotel_cinema", "urban_neon_walk"),
     "都市职场轻奢坐姿写真": ("office_luxury_seated", "minimal_gallery_editorial", "neutral_ecommerce_full"),
-    "古风汉服写真": ("hanfu_garden_portrait",),
-    "海边假日度假写真": ("seaside_golden_vacation",),
+    "古风汉服园林柔光写真": ("hanfu_garden_portrait",),
+    "海边夏日泳装写真": ("seaside_golden_vacation",),
     "赛博都市夜景写真": ("cyber_neon_night",),
 }
+
+CLOTHING_PROFILE_RECIPE_IDS.update({
+    "日系草地单车夏日柔光写真": ("seaside_golden_vacation", "tennis_active", "flower_shop_ccd"),
+    "日系咖啡馆暖调近景人像": ("warm_cafe_portrait", "french_apartment_window", "bookstore_intellectual"),
+    "夜间室内轻奢硬闪时尚写真": ("low_key_hotel_cinema", "doorway_flash_fashion", "urban_neon_walk"),
+    "都市职场轻奢坐姿写真": ("office_luxury_seated", "minimal_gallery_editorial", "neutral_ecommerce_full"),
+    "古风汉服园林柔光写真": ("hanfu_garden_portrait", "new_chinese_tearoom"),
+    "海边夏日泳装写真": ("seaside_golden_vacation", "tennis_active"),
+    "赛博都市夜景写真": ("cyber_neon_night", "urban_neon_walk"),
+    "影棚水光妆美容特写": ("studio_beauty_closeup",),
+    "落地窗瑜伽塑形写真": ("tennis_active", "neutral_ecommerce_full"),
+    "旅馆窗边电影静帧": ("low_key_hotel_cinema", "french_apartment_window"),
+})
 
 LEGACY_CLOTHING_COMBINATIONS = {
     "薄荷碎花吊带连衣裙": {
@@ -1254,10 +1301,110 @@ for _background_label, _background_text in FIELD_TEXT["背景环境"].items():
             "背景为", "场景位于", 1
         )
 
+
+# Preset-specific atoms keep the built-in examples faithful to their approved
+# references while still exposing every detail as an editable structured field.
+_PRESET_FIELD_TEXT_ADDITIONS = {
+    "发色": {"银白色": "银白色头发"},
+    "发型造型": {"双环发髻": "头发梳成精致双环发髻"},
+    "连体服类型": {"无袖瑜伽连体衣": "修身无袖瑜伽连体衣"},
+    "上装类型": {
+        "简洁短袖T恤": "简洁短袖T恤",
+        "亮片吊带上衣": "亮片修身吊带上衣",
+        "挂脖比基尼上装": "挂脖比基尼上装",
+    },
+    "下装类型": {
+        "高开衩缎面长裙": "高开衩缎面长裙",
+        "系带比基尼泳裤": "侧边系带比基尼泳裤",
+    },
+    "上装颜色": {"珊瑚红": "珊瑚红色"},
+    "下装颜色": {"珊瑚红": "珊瑚红色"},
+    "上装材质": {
+        "亮片面料": "细密亮片面料",
+        "泳装弹力面料": "泳装弹力面料",
+    },
+    "下装材质": {"泳装弹力面料": "泳装弹力面料"},
+    "服装配件": {"浅粉色修身长袖内搭": "浅粉色修身长袖内搭"},
+    "画面瞬间": {
+        "夜间会所短暂停留": "在夜间会所短暂停留",
+        "沙滩上短暂停留": "在沙滩上短暂停留",
+        "瑜伽体式停留": "保持瑜伽体式的片刻",
+        "窗边安静独处": "在窗边安静独处",
+    },
+    "基础姿态": {
+        "单车侧坐": "侧身坐在复古自行车车座上",
+        "复古扶手椅坐姿": "坐在复古雕花扶手椅上",
+        "沙滩侧卧": "侧卧在明亮沙滩上并微微撑起上半身",
+        "地面侧坐": "侧坐在地面上",
+        "低位鸽子式": "在瑜伽垫上完成低位鸽子式变体",
+        "窗边座椅坐姿": "侧身坐在窗边座椅上",
+    },
+    "手部动作": {
+        "举白玫瑰并扶大腿": "一只手将白玫瑰举至脸侧，另一只手自然落在大腿上",
+        "双手放在脑后": "双手抬起放在脑后，手臂自然展开",
+        "一手扶膝一手搭扶手": "一只手轻放在膝盖上，另一只手搭在座椅扶手上",
+        "双手持刺绣团扇": "双手一上一下握住一柄刺绣团扇",
+        "侧卧双手支撑": "一侧前臂支撑身体，另一只手自然落在沙面",
+        "双手交叠搭膝": "双手与前臂自然交叠在抬起的膝盖上",
+        "瑜伽手部支撑": "一只手轻放在前侧大腿，另一只手自然落在髋侧",
+        "双手捧白色瓷杯": "双手轻轻捧住一只白色瓷杯",
+    },
+    "腿部动作": {
+        "扶手椅曲腿伸展": "一条腿屈膝抬起，另一条腿向画面下方舒展",
+        "侧卧屈伸腿": "一条腿自然舒展，另一条腿屈曲形成清晰层次",
+        "地面屈膝伸腿": "一条腿屈膝抬起，另一条腿沿地面向前伸展",
+        "鸽子式腿部伸展": "前侧腿屈膝折叠，另一条腿沿地面向后伸直，脚背自然贴地",
+    },
+    "场景地点": {
+        "公园草地": "场景位于阳光下的公园草地",
+        "复古会所": "场景位于昏暗复古会所",
+        "工业地下通道": "场景位于地下工业通道",
+    },
+    "背景环境": {
+        "阳光公园草坪": "背景为阳光下的公园草坪与虚化树木",
+        "复古会所雕花座椅": "背景为深色雕花座椅与东方装饰屏风",
+        "工业通道铁丝网": "背景为铁丝网、混凝土地面与幽暗工业通道",
+        "珊瑚粉薄荷绿渐变背景": "背景为珊瑚粉与薄荷绿色柔和渐变",
+        "明亮落地窗客厅": "背景为浅灰布艺沙发、通透落地窗与室内绿植",
+        "旧式旅馆房间": "背景为窗户、床铺、旧木家具与暖黄台灯组成的旧式旅馆房间",
+    },
+    "环境细节": {
+        "复古自行车与白玫瑰": "复古自行车、白玫瑰与明亮草坪",
+        "仙鹤屏风与深色家具": "东方仙鹤装饰屏风与深色木质家具",
+        "铁丝网与工业地面": "铁丝网、混凝土地面与彩色灯光反射",
+        "美容反光板": "影棚渐变背景与下方美容反光板",
+        "沙发落地窗与绿植": "浅灰布艺沙发、落地窗与室内绿植",
+        "旧木家具与暖黄台灯": "旧木家具、床铺与暖黄台灯",
+    },
+    "主配色": {
+        "珊瑚粉与薄荷绿": "珊瑚粉与薄荷绿",
+        "浅灰与暖白": "浅灰与暖白",
+        "香槟粉与深棕黑": "香槟粉与深棕黑",
+        "冷蓝与暖黄": "冷蓝与暖黄",
+    },
+}
+for _field_name, _values in _PRESET_FIELD_TEXT_ADDITIONS.items():
+    FIELD_TEXT[_field_name].update(_values)
+    for _module_text in (
+        POSE_VALUE_TEXT,
+        SCENE_VALUE_TEXT,
+        CLOTHING_VALUE_TEXT,
+        HAIR_FIELD_TEXT,
+        VISUAL_VALUE_TEXT,
+    ):
+        if _field_name in _module_text:
+            _module_text[_field_name].update(_values)
+
+_PRESET_POSE_STANDARD_TEXT = {
+    label: text
+    for field_name in POSE_OUTPUT_FIELDS
+    for label, text in _PRESET_FIELD_TEXT_ADDITIONS.get(field_name, {}).items()
+}
+
 FIELD_OPTIONS = {name: list(FIELD_TEXT[name]) for name in FIELD_ORDER}
 
 PRESETS: Dict[str, Dict[str, str]] = {
-    "日系森系夏日柔光写真": {
+    "日系草地单车夏日柔光写真": {
         "画面比例": "2:3竖构图",
         "成像媒介": "35毫米胶片摄影",
         "写真大类": "自然户外",
@@ -1525,7 +1672,7 @@ PRESETS: Dict[str, Dict[str, str]] = {
         "对焦位置": "双眼与面部",
         "成像质感": "细腻商业精修柔焦",
     },
-    "古风汉服写真": {
+    "古风汉服园林柔光写真": {
         "画面比例": "2:3竖构图",
         "成像媒介": "全画幅微单摄影",
         "写真大类": "中式美学",
@@ -1619,7 +1766,7 @@ PRESETS: Dict[str, Dict[str, str]] = {
         "高光处理": "轻微溢光",
         "颗粒质感": "细微颗粒",
     },
-    "海边假日度假写真": {
+    "海边夏日泳装写真": {
         "画面比例": "2:3竖构图",
         "成像媒介": "便携数码相机摄影",
         "写真大类": "旅行度假",
@@ -1809,11 +1956,299 @@ PRESETS: Dict[str, Dict[str, str]] = {
     },
 }
 
+
+def _new_empty_preset() -> Dict[str, str]:
+    return {field_name: EMPTY_CHOICE for field_name in FIELD_ORDER}
+
+
+for _new_preset_name in (
+    "影棚水光妆美容特写",
+    "落地窗瑜伽塑形写真",
+    "旅馆窗边电影静帧",
+):
+    PRESETS[_new_preset_name] = _new_empty_preset()
+
+
+_PRESET_BASE_OVERRIDES = {
+    "日系草地单车夏日柔光写真": {
+        "画面比例": "2:3竖构图", "成像媒介": "全画幅微单摄影",
+        "写真大类": "运动健康", "写真主题": "户外骑行活力写真",
+        "年龄阶段": "20–29岁", "族裔大类": "东亚", "地域族裔分支": "大类通用外观",
+        "发色模式": "基础发色", "发色": "深棕黑色",
+        "发色色调": EMPTY_CHOICE, "染色方式": EMPTY_CHOICE,
+        "头发长度": "及胸长发", "发质与卷度": "柔和微卷",
+        "发型造型": "半扎发", "刘海": "自然中分", "头部配饰": EMPTY_CHOICE,
+        "穿搭结构": "上装＋下装",
+        "上装类型": "简洁短袖T恤", "上装颜色": "奶油白",
+        "上装材质": "棉质", "上装图案": EMPTY_CHOICE,
+        "下装类型": "直筒牛仔裤", "下装颜色": "藏青色",
+        "下装材质": "牛仔", "下装图案": EMPTY_CHOICE,
+        "版型细节": "高腰结构", "袜装": EMPTY_CHOICE,
+        "鞋履": EMPTY_CHOICE,
+        "画面瞬间": "回眸一笑", "基础姿态": "单车侧坐",
+        "身体方向": "右侧三分之二身", "身体重心": "坐姿重心居中",
+        "肩颈状态": "双肩放松平稳", "手部动作": "举白玫瑰并扶大腿",
+        "腿部动作": "坐姿一腿稍向前", "头部方向": "向左回眸",
+        "视线": "柔和看向镜头", "表情": "温柔浅笑",
+        "场景大类": "自然户外", "场景地点": "公园草地",
+        "时间切片": "日落前金色时刻", "天气状态": "晴朗日照",
+        "前景框景": "失焦绿叶", "背景环境": "阳光公园草坪",
+        "环境细节": "复古自行车与白玫瑰", "空间材质": EMPTY_CHOICE,
+        "空间层次": "开阔户外纵深",
+        "景别": "三分之二身", "画面布局": "中央偏左",
+        "等效焦段": "85mm", "拍摄距离": "2米", "机位": "平视",
+        "景深": "浅景深", "对焦位置": "双眼与面部",
+    },
+    "日系咖啡馆暖调近景人像": {
+        "画面比例": "3:4竖构图", "成像媒介": "手机计算摄影",
+        "写真大类": "日常生活", "写真主题": "日系咖啡馆生活写真",
+        "年龄阶段": "20–29岁", "族裔大类": "东亚", "地域族裔分支": "大类通用外观",
+        "发色模式": "基础发色", "发色": "深栗棕色",
+        "发色色调": EMPTY_CHOICE, "染色方式": EMPTY_CHOICE,
+        "头发长度": "及胸长发", "发质与卷度": "自然顺直",
+        "发型造型": "自然披散", "刘海": "轻薄空气刘海", "头部配饰": EMPTY_CHOICE,
+        "穿搭结构": "上装＋下装", "上装类型": "一字肩上衣",
+        "上装颜色": "天蓝色", "上装材质": "柔软针织", "上装图案": "横向条纹",
+        "下装类型": "直筒西裤", "下装颜色": "玄黑色",
+        "下装材质": "西装面料", "下装图案": EMPTY_CHOICE,
+        "版型细节": "宽松垂坠", "袜装": EMPTY_CHOICE, "鞋履": EMPTY_CHOICE,
+        "画面瞬间": "端起咖啡杯", "基础姿态": "椅子前缘坐姿",
+        "身体方向": "正面朝向镜头", "身体重心": "坐姿重心居中",
+        "肩颈状态": "肩膀轻微内收", "手部动作": "双手托住咖啡杯",
+        "腿部动作": "坐姿双膝并拢", "头部方向": "头部正对镜头",
+        "视线": "直视镜头", "表情": "平静自然",
+        "场景大类": "餐饮与酒店", "场景地点": "咖啡馆窗边",
+        "时间切片": "上午晚些时候", "天气状态": "晴朗日照",
+        "前景框景": "浅木桌沿", "背景环境": "临街咖啡馆窗景",
+        "环境细节": "浅木餐桌、咖啡杯碟", "空间材质": "暖木材质",
+        "空间层次": "俯视纵深",
+        "景别": "坐姿半身", "画面布局": "居中构图",
+        "等效焦段": "28mm", "拍摄距离": "1米", "机位": "高位俯拍",
+        "景深": "中浅景深", "对焦位置": "双眼与面部",
+    },
+    "夜间室内轻奢硬闪时尚写真": {
+        "画面比例": "3:4竖构图", "成像媒介": "早期CCD数码摄影",
+        "写真大类": "时尚编辑", "写真主题": "夜间室内轻奢时尚写真",
+        "年龄阶段": "20–29岁", "族裔大类": "东亚", "地域族裔分支": "大类通用外观",
+        "发色模式": "基础发色", "发色": "自然黑色",
+        "发色色调": EMPTY_CHOICE, "染色方式": EMPTY_CHOICE,
+        "头发长度": "及胸长发", "发质与卷度": "柔和微卷",
+        "发型造型": "自然披散", "刘海": "自然露额", "头部配饰": EMPTY_CHOICE,
+        "穿搭结构": "上装＋下装", "上装类型": "亮片吊带上衣",
+        "上装颜色": "奶油白", "上装材质": "亮片面料", "上装图案": EMPTY_CHOICE,
+        "下装类型": "高开衩缎面长裙", "下装颜色": "干枯玫瑰色",
+        "下装材质": "缎面", "下装图案": EMPTY_CHOICE,
+        "版型细节": "侧开衩", "袜装": EMPTY_CHOICE, "鞋履": "高跟凉鞋",
+        "画面瞬间": "夜间会所短暂停留", "基础姿态": "复古扶手椅坐姿",
+        "身体方向": "斜向镜头前方", "身体重心": "重心落向右侧坐骨",
+        "肩颈状态": "双肩向后打开", "手部动作": "双手放在脑后",
+        "腿部动作": "扶手椅曲腿伸展", "头部方向": "头部正对镜头",
+        "视线": "直视镜头", "表情": "明艳自信",
+        "场景大类": "餐饮与酒店", "场景地点": "复古会所",
+        "时间切片": "深夜", "天气状态": EMPTY_CHOICE,
+        "前景框景": "椅背边缘", "背景环境": "复古会所雕花座椅",
+        "环境细节": "仙鹤屏风与深色家具", "空间材质": "深棕皮革",
+        "空间层次": "紧凑室内层次",
+        "景别": "全身构图", "画面布局": "对角线构图",
+        "等效焦段": "50mm", "拍摄距离": "2.5米", "机位": "略低机位",
+        "景深": "中等景深", "对焦位置": "完整人物",
+    },
+    "都市职场轻奢坐姿写真": {
+        "画面比例": "3:4竖构图", "成像媒介": "全画幅微单摄影",
+        "写真大类": "商业广告", "写真主题": "都市职场轻奢写真",
+        "年龄阶段": "30–39岁", "族裔大类": "东亚", "地域族裔分支": "大类通用外观",
+        "发色模式": "基础发色", "发色": "深棕黑色",
+        "发色色调": EMPTY_CHOICE, "染色方式": EMPTY_CHOICE,
+        "头发长度": "及胸长发", "发质与卷度": "自然顺直",
+        "发型造型": "自然披散", "刘海": "自然中分", "头部配饰": EMPTY_CHOICE,
+        "穿搭结构": "上装＋下装", "上装类型": "垂坠衬衫",
+        "上装颜色": "巧克力棕", "上装材质": "柔软针织", "上装图案": EMPTY_CHOICE,
+        "下装类型": "西装短裙", "下装颜色": "象牙白",
+        "下装材质": "西装面料", "下装图案": EMPTY_CHOICE,
+        "版型细节": "修身贴合", "袜装": "蕾丝袜口大腿袜",
+        "鞋履": "漆皮高跟鞋",
+        "画面瞬间": "坐下整理思绪", "基础姿态": "椅子前缘坐姿",
+        "身体方向": "正面朝向镜头", "身体重心": "坐姿重心居中",
+        "肩颈状态": "双肩放松平稳", "手部动作": "一手扶膝一手搭扶手",
+        "腿部动作": "膝部交叠坐姿", "头部方向": "头部正对镜头",
+        "视线": "直视镜头", "表情": "冷静自信",
+        "场景大类": "办公工作", "场景地点": "行政办公室",
+        "时间切片": "上午晚些时候", "天气状态": "晴朗日照",
+        "前景框景": "桌面文件", "背景环境": "玻璃建筑大堂",
+        "环境细节": "绿色植物、玻璃立柱、浅色石材地面",
+        "空间材质": "通透玻璃", "空间层次": "前中后三层",
+        "景别": "全身构图", "画面布局": "居中构图",
+        "等效焦段": "70mm", "拍摄距离": "3.5米", "机位": "平视",
+        "景深": "中浅景深", "对焦位置": "完整人物",
+    },
+    "古风汉服园林柔光写真": {
+        "画面比例": "3:4竖构图", "成像媒介": "全画幅微单摄影",
+        "写真大类": "中式美学", "写真主题": "汉服襦裙写真",
+        "年龄阶段": "20–29岁", "族裔大类": "东亚", "地域族裔分支": "大类通用外观",
+        "发色模式": "基础发色", "发色": "深棕黑色",
+        "发色色调": EMPTY_CHOICE, "染色方式": EMPTY_CHOICE,
+        "头发长度": "及胸长发", "发质与卷度": "自然顺直",
+        "发型造型": "双环发髻", "刘海": "轻薄空气刘海", "头部配饰": "小白花发饰",
+        "穿搭结构": "连衣裙", "连衣裙类型": "汉服",
+        "连衣裙颜色": "象牙白", "连衣裙材质": "薄纱", "连衣裙图案": "花卉刺绣",
+        "版型细节": "层叠衣摆", "袜装": EMPTY_CHOICE, "鞋履": EMPTY_CHOICE,
+        "画面瞬间": "回眸一笑", "基础姿态": "侧身站立",
+        "身体方向": "四分之三背身", "身体重心": "右腿承重",
+        "肩颈状态": "双肩放松平稳", "手部动作": "双手持刺绣团扇",
+        "腿部动作": "一腿轻微屈膝", "头部方向": "向右回眸",
+        "视线": "柔和看向镜头", "表情": "明朗笑容",
+        "场景大类": "东方传统", "场景地点": "江南园林",
+        "时间切片": "夏日午后", "天气状态": "薄云天气",
+        "前景框景": "树枝前景", "背景环境": "江南园林",
+        "环境细节": "木质屏风、茶具、竹影", "空间材质": "暖木材质",
+        "空间层次": "植物层叠空间",
+        "景别": "胸部以上", "画面布局": "中央偏右",
+        "等效焦段": "85mm", "拍摄距离": "1.5米", "机位": "平视",
+        "景深": "浅景深", "对焦位置": "双眼与面部",
+    },
+    "海边夏日泳装写真": {
+        "画面比例": "3:2横构图", "成像媒介": "数码单反摄影",
+        "写真大类": "旅行度假", "写真主题": "海边夏日度假写真",
+        "年龄阶段": "20–29岁", "族裔大类": "东亚", "地域族裔分支": "大类通用外观",
+        "发色模式": "基础发色", "发色": "深棕黑色",
+        "发色色调": EMPTY_CHOICE, "染色方式": EMPTY_CHOICE,
+        "头发长度": "及胸长发", "发质与卷度": "自然顺直",
+        "发型造型": "自然披散", "刘海": "轻薄空气刘海", "头部配饰": EMPTY_CHOICE,
+        "穿搭结构": "上装＋下装", "上装类型": "挂脖比基尼上装",
+        "上装颜色": "珊瑚红", "上装材质": "泳装弹力面料", "上装图案": EMPTY_CHOICE,
+        "下装类型": "系带比基尼泳裤", "下装颜色": "珊瑚红",
+        "下装材质": "泳装弹力面料", "下装图案": EMPTY_CHOICE,
+        "版型细节": "修身贴合", "袜装": EMPTY_CHOICE, "鞋履": EMPTY_CHOICE,
+        "画面瞬间": "沙滩上短暂停留", "基础姿态": "沙滩侧卧",
+        "身体方向": "右侧侧身", "身体重心": "重心落向右侧坐骨",
+        "肩颈状态": "肩背舒展", "手部动作": "侧卧双手支撑",
+        "腿部动作": "侧卧屈伸腿", "头部方向": "头部正对镜头",
+        "视线": "柔和看向镜头", "表情": "自然放松微笑",
+        "场景大类": "自然户外", "场景地点": "沙滩",
+        "时间切片": "正午", "天气状态": "晴朗日照",
+        "前景框景": "无明显前景", "背景环境": "海边地平线",
+        "环境细节": "细小海浪", "空间材质": EMPTY_CHOICE,
+        "空间层次": "开阔户外纵深",
+        "景别": "全身构图", "画面布局": "对角线构图",
+        "等效焦段": "50mm", "拍摄距离": "2.5米", "机位": "贴近地面",
+        "景深": "中浅景深", "对焦位置": "完整人物",
+    },
+    "赛博都市夜景写真": {
+        "画面比例": "3:2横构图", "成像媒介": "专业数码相机摄影",
+        "写真大类": "幻想概念", "写真主题": "未来都市赛博写真",
+        "年龄阶段": "20–29岁", "族裔大类": "东亚", "地域族裔分支": "大类通用外观",
+        "发色模式": "基础发色", "发色": "银白色",
+        "发色色调": EMPTY_CHOICE, "染色方式": EMPTY_CHOICE,
+        "头发长度": "齐下巴", "发质与卷度": "自然顺直",
+        "发型造型": "利落短发轮廓", "刘海": "全幅齐刘海", "头部配饰": EMPTY_CHOICE,
+        "穿搭结构": "连体服", "连体服类型": "收腰连体短裤",
+        "连体服颜色": "玄黑色", "连体服材质": "哑光皮革", "连体服图案": "拼色结构",
+        "版型细节": "修身贴合", "袜装": EMPTY_CHOICE, "鞋履": "过膝长靴",
+        "画面瞬间": "墙边安静等待", "基础姿态": "地面侧坐",
+        "身体方向": "右侧三分之二身", "身体重心": "重心落向右侧坐骨",
+        "肩颈状态": "肩膀轻微内收", "手部动作": "双手交叠搭膝",
+        "腿部动作": "地面屈膝伸腿", "头部方向": "头部转向左侧",
+        "视线": "看向画面左侧近处", "表情": "清冷疏离",
+        "场景大类": "工业功能", "场景地点": "工业地下通道",
+        "时间切片": "深夜", "天气状态": EMPTY_CHOICE,
+        "前景框景": "失焦光点", "背景环境": "工业通道铁丝网",
+        "环境细节": "铁丝网与工业地面", "空间材质": "清水混凝土",
+        "空间层次": "走廊纵深",
+        "景别": "全身构图", "画面布局": "对角线构图",
+        "等效焦段": "35mm", "拍摄距离": "2.5米", "机位": "贴近地面",
+        "景深": "中等景深", "对焦位置": "完整人物",
+    },
+    "影棚水光妆美容特写": {
+        "画面比例": "4:5竖构图", "成像媒介": "中画幅数码摄影",
+        "写真大类": "美妆美容", "写真主题": "影棚水光妆美容特写",
+        "年龄阶段": "20–29岁", "族裔大类": "东亚", "地域族裔分支": "大类通用外观",
+        "发色模式": "基础发色", "发色": "深棕黑色",
+        "发色色调": EMPTY_CHOICE, "染色方式": EMPTY_CHOICE,
+        "头发长度": "锁骨发", "发质与卷度": "自然顺直",
+        "发型造型": "整洁低盘发", "刘海": "轻盈碎刘海", "头部配饰": EMPTY_CHOICE,
+        "穿搭结构": EMPTY_CHOICE,
+        "画面瞬间": "棚拍间隙调整姿态", "基础姿态": "自然站立",
+        "身体方向": "正面朝向镜头", "身体重心": "双脚均衡承重",
+        "肩颈状态": "双肩放松平稳", "手部动作": "一手托腮",
+        "腿部动作": EMPTY_CHOICE, "头部方向": "向右轻微侧倾",
+        "视线": "直视镜头", "表情": "温柔浅笑",
+        "场景大类": "专业特色", "场景地点": "摄影棚",
+        "时间切片": EMPTY_CHOICE, "天气状态": EMPTY_CHOICE,
+        "前景框景": "发丝前景", "背景环境": "珊瑚粉薄荷绿渐变背景",
+        "环境细节": "美容反光板", "空间材质": "白色涂料墙面",
+        "空间层次": "单侧环境留白",
+        "景别": "面部特写", "画面布局": "贴近裁切",
+        "等效焦段": "105mm", "拍摄距离": "0.5米", "机位": "平视",
+        "景深": "极浅景深", "对焦位置": "双眼与面部",
+    },
+    "落地窗瑜伽塑形写真": {
+        "画面比例": "16:9横构图", "成像媒介": "全画幅微单摄影",
+        "写真大类": "运动健康", "写真主题": "瑜伽普拉提生活写真",
+        "年龄阶段": "20–29岁", "族裔大类": "东亚", "地域族裔分支": "大类通用外观",
+        "发色模式": "基础发色", "发色": "深棕黑色",
+        "发色色调": EMPTY_CHOICE, "染色方式": EMPTY_CHOICE,
+        "头发长度": "锁骨发", "发质与卷度": "柔和微卷",
+        "发型造型": "自然披散", "刘海": "自然露额", "头部配饰": EMPTY_CHOICE,
+        "穿搭结构": "连体服", "连体服类型": "无袖瑜伽连体衣",
+        "连体服颜色": "炭灰色", "连体服材质": "细罗纹针织", "连体服图案": EMPTY_CHOICE,
+        "版型细节": "修身贴合", "袜装": EMPTY_CHOICE, "鞋履": EMPTY_CHOICE,
+        "画面瞬间": "瑜伽体式停留", "基础姿态": "低位鸽子式",
+        "身体方向": "右侧侧身", "身体重心": "重心落向右侧坐骨",
+        "肩颈状态": "肩背舒展", "手部动作": "瑜伽手部支撑",
+        "腿部动作": "鸽子式腿部伸展", "头部方向": "头部转向左侧",
+        "视线": "侧目看向镜头", "表情": "平静自然",
+        "场景大类": "居住空间", "场景地点": "采光客厅",
+        "时间切片": "上午晚些时候", "天气状态": "晴朗日照",
+        "前景框景": "无明显前景", "背景环境": "明亮落地窗客厅",
+        "环境细节": "沙发落地窗与绿植", "空间材质": "米杏织物",
+        "空间层次": "窗内外层次",
+        "景别": "全身构图", "画面布局": "中央偏右",
+        "等效焦段": "50mm", "拍摄距离": "2.5米", "机位": "贴近地面",
+        "景深": "中浅景深", "对焦位置": "面部与上半身",
+    },
+    "旅馆窗边电影静帧": {
+        "画面比例": "21:9横构图", "成像媒介": "35毫米胶片摄影",
+        "写真大类": "电影叙事", "写真主题": "旅馆窗边电影静帧",
+        "年龄阶段": "30–39岁", "族裔大类": "东亚", "地域族裔分支": "大类通用外观",
+        "发色模式": "基础发色", "发色": "深棕黑色",
+        "发色色调": EMPTY_CHOICE, "染色方式": EMPTY_CHOICE,
+        "头发长度": "锁骨发", "发质与卷度": "柔和微卷",
+        "发型造型": "自然披散", "刘海": "自然中分", "头部配饰": EMPTY_CHOICE,
+        "穿搭结构": "上装＋下装", "上装类型": "针织套头毛衣",
+        "上装颜色": "燕麦色", "上装材质": "柔软针织", "上装图案": EMPTY_CHOICE,
+        "下装类型": "垂坠中长裙", "下装颜色": "炭灰色",
+        "下装材质": "棉麻", "下装图案": EMPTY_CHOICE,
+        "版型细节": "宽松垂坠", "袜装": EMPTY_CHOICE, "鞋履": EMPTY_CHOICE,
+        "画面瞬间": "窗边安静独处", "基础姿态": "窗边座椅坐姿",
+        "身体方向": "左侧侧身", "身体重心": "重心落向左侧坐骨",
+        "肩颈状态": "肩膀轻微内收", "手部动作": "双手捧白色瓷杯",
+        "腿部动作": "坐姿双腿偏向一侧", "头部方向": "头部转向右侧",
+        "视线": "看向窗外", "表情": "若有所思",
+        "场景大类": "餐饮与酒店", "场景地点": "酒店客房",
+        "时间切片": "蓝调时刻", "天气状态": "阴天",
+        "前景框景": "窗帘边缘", "背景环境": "旧式旅馆房间",
+        "环境细节": "旧木家具与暖黄台灯", "空间材质": "暖木材质",
+        "空间层次": "窗内外层次",
+        "景别": "环境人像", "画面布局": "左侧三分线",
+        "等效焦段": "50mm", "拍摄距离": "2.5米", "机位": "平视",
+        "景深": "中等景深", "对焦位置": "人物与环境",
+    },
+}
+for _preset_name, _overrides in _PRESET_BASE_OVERRIDES.items():
+    PRESETS[_preset_name].update(_overrides)
+    _active_clothing_fields = set(
+        CLOTHING_MODE_FIELDS.get(PRESETS[_preset_name]["穿搭结构"], ())
+    )
+    for _field_name in CLOTHING_BRANCH_FIELDS:
+        if _field_name not in _active_clothing_fields:
+            PRESETS[_preset_name][_field_name] = EMPTY_CHOICE
+
+
 _EMPTY_CUSTOM_MAKEUP = {
     field_name: EMPTY_CHOICE for field_name in MAKEUP_CUSTOM_FIELDS
 }
 _PRESET_PERSON_VALUES = {
-    "日系森系夏日柔光写真": {
+    "日系草地单车夏日柔光写真": {
         "脸型": "标准鹅蛋脸", "轮廓细节": "下颌线柔和",
         "眼型": "杏仁眼", "瞳色": "深棕色", "眼睑特征": "自然双眼皮",
         "肤色": "暖白肤色", "肤质": "自然细腻",
@@ -1849,7 +2284,7 @@ _PRESET_PERSON_VALUES = {
         "基础身形": "自然匀称", "身量观感": "中等身量",
         "线条重点": "腰线自然清晰",
     },
-    "古风汉服写真": {
+    "古风汉服园林柔光写真": {
         "脸型": "标准鹅蛋脸",
         "轮廓细节": "下颌线柔和",
         "眼型": "杏仁眼",
@@ -1869,7 +2304,7 @@ _PRESET_PERSON_VALUES = {
         "线条重点": "肩颈线条舒展",
         **_EMPTY_CUSTOM_MAKEUP,
     },
-    "海边假日度假写真": {
+    "海边夏日泳装写真": {
         "脸型": "标准鹅蛋脸",
         "轮廓细节": "下颌线柔和",
         "眼型": "杏仁眼",
@@ -1911,14 +2346,57 @@ _PRESET_PERSON_VALUES = {
     },
 }
 _PRESET_CLOTHING_ACCESSORIES = {
-    "日系森系夏日柔光写真": "珍珠耳坠",
+    "日系草地单车夏日柔光写真": "珍珠耳坠",
     "日系咖啡馆暖调近景人像": "珍珠耳坠",
     "夜间室内轻奢硬闪时尚写真": "金属流苏耳饰",
     "都市职场轻奢坐姿写真": "细框矩形眼镜",
-    "古风汉服写真": "珍珠耳坠",
-    "海边假日度假写真": "珍珠耳坠",
+    "古风汉服园林柔光写真": "珍珠耳坠",
+    "海边夏日泳装写真": "珍珠耳坠",
     "赛博都市夜景写真": "金属流苏耳饰",
 }
+
+_PRESET_PERSON_VALUES.update({
+    "影棚水光妆美容特写": {
+        "脸型": "标准鹅蛋脸", "轮廓细节": "下颌线柔和",
+        "眼型": "杏仁眼", "瞳色": "深棕色", "眼睑特征": "自然双眼皮",
+        "肤色": "暖白肤色", "肤质": "柔润水光",
+        "妆容模式": "整体预设", "整体妆容预设": "蜜桃珊瑚妆",
+        **_EMPTY_CUSTOM_MAKEUP,
+        "基础身形": "自然匀称", "身量观感": "中等身量",
+        "线条重点": "肩颈线条舒展",
+    },
+    "落地窗瑜伽塑形写真": {
+        "脸型": "标准鹅蛋脸", "轮廓细节": "下颌线柔和",
+        "眼型": "杏仁眼", "瞳色": "深棕色", "眼睑特征": "自然双眼皮",
+        "肤色": "暖白肤色", "肤质": "真实皮肤纹理",
+        "妆容模式": "整体预设", "整体妆容预设": "自然裸妆",
+        **_EMPTY_CUSTOM_MAKEUP,
+        "基础身形": "健康运动型", "身量观感": "中等身量",
+        "线条重点": "腰胯曲线柔和",
+    },
+    "旅馆窗边电影静帧": {
+        "脸型": "标准鹅蛋脸", "轮廓细节": "颧骨柔和",
+        "眼型": "杏仁眼", "瞳色": "深棕色", "眼睑特征": "自然双眼皮",
+        "肤色": "自然浅肤色", "肤质": "真实皮肤纹理",
+        "妆容模式": "整体预设", "整体妆容预设": "自然裸妆",
+        **_EMPTY_CUSTOM_MAKEUP,
+        "基础身形": "自然匀称", "身量观感": "中等身量",
+        "线条重点": "肩颈线条舒展",
+    },
+})
+_PRESET_CLOTHING_ACCESSORIES.update({
+    "日系草地单车夏日柔光写真": "金属腕表",
+    "日系咖啡馆暖调近景人像": "纤细项链",
+    "夜间室内轻奢硬闪时尚写真": "金属流苏耳饰",
+    "都市职场轻奢坐姿写真": EMPTY_CHOICE,
+    "古风汉服园林柔光写真": EMPTY_CHOICE,
+    "海边夏日泳装写真": EMPTY_CHOICE,
+    "赛博都市夜景写真": "浅粉色修身长袖内搭",
+    "影棚水光妆美容特写": EMPTY_CHOICE,
+    "落地窗瑜伽塑形写真": EMPTY_CHOICE,
+    "旅馆窗边电影静帧": EMPTY_CHOICE,
+})
+
 for _preset_name, _person_values in _PRESET_PERSON_VALUES.items():
     _preset = PRESETS[_preset_name]
     _preset.update(_person_values)
@@ -1927,7 +2405,7 @@ for _preset_name, _person_values in _PRESET_PERSON_VALUES.items():
 # The first prototype stored visual direction in three large phrases. Expand
 # those presets into atomic controls so users can override only one property.
 _PRESET_VISUAL_BUNDLES = {
-    "日系森系夏日柔光写真": (
+    "日系草地单车夏日柔光写真": (
         "forest_dappled_backlight", "japanese_summer_film"
     ),
     "日系咖啡馆暖调近景人像": (
@@ -1939,16 +2417,29 @@ _PRESET_VISUAL_BUNDLES = {
     "都市职场轻奢坐姿写真": (
         "bounce_front_fill", "office_luxury_clean"
     ),
-    "古风汉服写真": (
+    "古风汉服园林柔光写真": (
         "window_soft_side", "new_chinese_matte"
     ),
-    "海边假日度假写真": (
+    "海边夏日泳装写真": (
         "golden_backlight", "beach_vacation"
     ),
     "赛博都市夜景写真": (
         "neon_mixed_side", "purple_neon_digital"
     ),
 }
+_PRESET_VISUAL_BUNDLES.update({
+    "日系草地单车夏日柔光写真": ("golden_backlight", "earthy_outdoor"),
+    "日系咖啡馆暖调近景人像": ("window_soft_side", "phone_natural"),
+    "夜间室内轻奢硬闪时尚写真": ("camera_hard_flash", "ccd_lifestyle"),
+    "都市职场轻奢坐姿写真": ("window_soft_side", "office_luxury_clean"),
+    "古风汉服园林柔光写真": ("forest_dappled_backlight", "new_chinese_matte"),
+    "海边夏日泳装写真": ("direct_sun_side", "beach_vacation"),
+    "赛博都市夜景写真": ("neon_mixed_side", "purple_neon_digital"),
+    "影棚水光妆美容特写": ("beauty_clamshell", "clean_beauty_editorial"),
+    "落地窗瑜伽塑形写真": ("window_soft_side", "sport_bright_crisp"),
+    "旅馆窗边电影静帧": ("tungsten_practical_side", "hongkong_tungsten_film"),
+})
+
 for _preset_name, (_lighting_id, _visual_id) in _PRESET_VISUAL_BUNDLES.items():
     _preset = PRESETS[_preset_name]
     _preset.pop("光线方案", None)
@@ -1962,6 +2453,36 @@ for _preset_name, (_lighting_id, _visual_id) in _PRESET_VISUAL_BUNDLES.items():
         field_name: VISUAL_PROFILE_BY_ID[_visual_id][field_name]
         for field_name in (*COLOR_OUTPUT_FIELDS, *FINISH_OUTPUT_FIELDS)
     })
+
+_PRESET_VISUAL_FIELD_OVERRIDES = {
+    "夜间室内轻奢硬闪时尚写真": {
+        "主配色": "香槟粉与深棕黑", "色温倾向": "轻微偏暖",
+        "画面对比": "中高反差", "影像风格": "CCD数码相机",
+        "细节质地": "CCD直接感", "高光处理": "镜面高光",
+        "颗粒质感": "CCD彩色噪点",
+    },
+    "影棚水光妆美容特写": {
+        "主配色": "珊瑚粉与薄荷绿", "色温倾向": "中性",
+        "画面对比": "中低反差", "影像风格": "中画幅相机",
+        "细节质地": "细腻商业精修", "高光处理": "明亮洁净",
+        "颗粒质感": "洁净画面",
+    },
+    "落地窗瑜伽塑形写真": {
+        "主配色": "浅灰与暖白", "色温倾向": "中性",
+        "画面对比": "低反差", "影像风格": "全画幅相机",
+        "细节质地": "自然细节", "高光处理": "柔和过渡",
+        "颗粒质感": "洁净画面",
+    },
+    "旅馆窗边电影静帧": {
+        "主配色": "冷蓝与暖黄", "色温倾向": "冷暖混合",
+        "画面对比": "中低反差", "影像风格": "电影剧照",
+        "细节质地": "胶片柔度", "高光处理": "暖色辉光",
+        "颗粒质感": "细微颗粒",
+    },
+}
+for _preset_name, _values in _PRESET_VISUAL_FIELD_OVERRIDES.items():
+    PRESETS[_preset_name].update(_values)
+
 
 PRESETS[CUSTOM_PRESET] = {
     field_name: EMPTY_CHOICE for field_name in FIELD_ORDER
@@ -1987,7 +2508,7 @@ for _preset_name in PRESET_OPTIONS:
 CUSTOM_DEFAULTS = dict(PRESETS[CUSTOM_PRESET])
 
 PROFILE_POOLS: Dict[str, Dict[str, Sequence[str]]] = {
-    "日系森系夏日柔光写真": {
+    "日系草地单车夏日柔光写真": {
         "画面比例": ["2:3竖构图", "3:4竖构图", "4:5竖构图", "3:2横构图", "4:3横构图"],
         "成像媒介": ["全画幅微单摄影", "35毫米胶片摄影", "便携数码相机摄影"],
         "写真大类": ["自然户外", "旅行度假", "中式美学"],
@@ -2099,7 +2620,7 @@ PROFILE_POOLS: Dict[str, Dict[str, Sequence[str]]] = {
         "前景框景": ["深灰文件夹前景", "浅木色桌沿前景", "窗框留白框景"],
         "背景环境": ["米杏沙发浅灰紫墙面", "奶油色窗边室内", "高级灰摄影棚"],
     },
-    "古风汉服写真": {
+    "古风汉服园林柔光写真": {
         "画面比例": ["2:3竖构图", "3:4竖构图", "4:5竖构图", "3:2横构图", "4:3横构图"],
         "成像媒介": ["全画幅微单摄影", "35毫米胶片摄影", "便携数码相机摄影"],
         "写真大类": ["中式美学"],
@@ -2127,7 +2648,7 @@ PROFILE_POOLS: Dict[str, Dict[str, Sequence[str]]] = {
         "前景框景": ["树枝前景", "纱帘前景", "屏风边缘"],
         "背景环境": ["江南园林", "木质新中式室内"],
     },
-    "海边假日度假写真": {
+    "海边夏日泳装写真": {
         "画面比例": ["2:3竖构图", "3:4竖构图", "4:5竖构图", "3:2横构图", "4:3横构图"],
         "成像媒介": ["全画幅微单摄影", "35毫米胶片摄影", "便携数码相机摄影"],
         "写真大类": ["旅行度假", "自然户外"],
@@ -2185,6 +2706,51 @@ PROFILE_POOLS: Dict[str, Dict[str, Sequence[str]]] = {
     },
 }
 
+
+PROFILE_POOLS["日系草地单车夏日柔光写真"].update({
+    "画面比例": ["2:3竖构图", "3:4竖构图", "3:2横构图", "4:3横构图"],
+    "成像媒介": ["全画幅微单摄影", "35毫米胶片摄影", "便携数码相机摄影"],
+    "写真大类": ["运动健康", "自然户外", "日常生活"],
+    "写真主题": ["户外骑行活力写真", "日系森系夏日写真", "乡间小路生活写真"],
+    "前景框景": ["失焦绿叶", "无明显前景", "失焦光点"],
+    "背景环境": ["阳光公园草坪", "乡间小路", "静谧湖畔"],
+})
+PROFILE_POOLS["海边夏日泳装写真"].update({
+    "画面比例": ["3:2横构图", "4:3横构图", "16:9横构图", "3:4竖构图"],
+    "成像媒介": ["数码单反摄影", "全画幅微单摄影", "便携数码相机摄影"],
+    "写真大类": ["旅行度假", "自然户外"],
+    "写真主题": ["海边夏日度假写真", "热带泳池假日写真", "海岛小镇漫步写真"],
+})
+PROFILE_POOLS.update({
+    "影棚水光妆美容特写": {
+        "画面比例": ["4:5竖构图", "3:4竖构图", "1:1方形构图"],
+        "成像媒介": ["中画幅数码摄影", "专业数码相机摄影", "全画幅微单摄影"],
+        "写真大类": ["美妆美容", "商业广告"],
+        "写真主题": ["影棚水光妆美容特写", "自然真实肤质特写", "清透裸妆美容写真"],
+        "年龄阶段": ["20–29岁", "30–39岁"],
+        "族裔大类": ["东亚"],
+        "背景环境": ["珊瑚粉薄荷绿渐变背景", "高级灰摄影棚", "彩色几何摄影棚"],
+    },
+    "落地窗瑜伽塑形写真": {
+        "画面比例": ["16:9横构图", "3:2横构图", "4:3横构图"],
+        "成像媒介": ["全画幅微单摄影", "专业数码相机摄影", "手机计算摄影"],
+        "写真大类": ["运动健康", "日常生活"],
+        "写真主题": ["瑜伽普拉提生活写真", "健身房力量训练写真", "居家晨光松弛写真"],
+        "年龄阶段": ["20–29岁", "30–39岁"],
+        "族裔大类": ["东亚"],
+        "背景环境": ["明亮落地窗客厅", "明亮健身训练室", "奶油公寓客厅"],
+    },
+    "旅馆窗边电影静帧": {
+        "画面比例": ["21:9横构图", "16:9横构图", "3:2横构图"],
+        "成像媒介": ["35毫米胶片摄影", "全画幅微单摄影", "早期CCD数码摄影"],
+        "写真大类": ["电影叙事", "复古年代"],
+        "写真主题": ["旅馆窗边电影静帧", "室内克制情绪电影写真", "暖调室内电影叙事写真"],
+        "年龄阶段": ["20–29岁", "30–39岁", "40–49岁"],
+        "族裔大类": ["东亚"],
+        "背景环境": ["旧式旅馆房间", "奶油色窗边室内", "暖色酒店走廊"],
+    },
+})
+
 # Older releases exposed three combined camera dropdowns. Keep a narrow
 # migration map so saved workflows resolve to the nearest formal setup.
 LEGACY_CAMERA_BUNDLE_BY_VALUE = {
@@ -2218,7 +2784,7 @@ def _pose_bundles(*bundle_ids: str) -> list[Mapping[str, str]]:
 
 
 PROFILE_POSE_BUNDLES = {
-    "日系森系夏日柔光写真": _pose_bundles(
+    "日系草地单车夏日柔光写真": _pose_bundles(
         "forest_hat_bouquet", "window_curtain_quiet", "side_hair_touch_beauty"
     ),
     "日系咖啡馆暖调近景人像": _pose_bundles(
@@ -2230,16 +2796,29 @@ PROFILE_POSE_BUNDLES = {
     "都市职场轻奢坐姿写真": _pose_bundles(
         "workplace_folder_forward", "glasses_sofa_confident", "studio_stool_direct", "elevator_handbag_wait"
     ),
-    "古风汉服写真": _pose_bundles(
+    "古风汉服园林柔光写真": _pose_bundles(
         "hanfu_garden_lookback", "new_chinese_folded_hands", "sword_standing"
     ),
-    "海边假日度假写真": _pose_bundles(
+    "海边夏日泳装写真": _pose_bundles(
         "seaside_turn_smile", "walking_turn_street", "balcony_railing_distance"
     ),
     "赛博都市夜景写真": _pose_bundles(
         "cyber_walk_confident", "walking_turn_street"
     ),
 }
+
+PROFILE_POSE_BUNDLES.update({
+    "日系草地单车夏日柔光写真": _pose_bundles("cycling_bike", "seaside_turn_smile", "side_hair_touch_beauty"),
+    "日系咖啡馆暖调近景人像": _pose_bundles("cafe_cup_relaxed", "cafe_table_candid", "cafe_booth_direct"),
+    "夜间室内轻奢硬闪时尚写真": _pose_bundles("sofa_relaxed_side_gaze", "wall_collar_fashion", "doorway_fan_flash"),
+    "都市职场轻奢坐姿写真": _pose_bundles("studio_stool_direct", "workplace_folder_forward", "glasses_sofa_confident"),
+    "古风汉服园林柔光写真": _pose_bundles("hanfu_garden_lookback", "new_chinese_folded_hands"),
+    "海边夏日泳装写真": _pose_bundles("seaside_turn_smile", "sofa_relaxed_side_gaze"),
+    "赛博都市夜景写真": _pose_bundles("sofa_relaxed_side_gaze", "cyber_walk_confident"),
+    "影棚水光妆美容特写": _pose_bundles("side_hair_touch_beauty", "waist_hand_direct"),
+    "落地窗瑜伽塑形写真": _pose_bundles("sport_shoelace_crouch", "sofa_relaxed_side_gaze"),
+    "旅馆窗边电影静帧": _pose_bundles("window_curtain_quiet", "cafe_cup_relaxed", "chair_elbow_thoughtful"),
+})
 
 THEME_CATEGORY_POSE_BUNDLES = {
     "日常生活": _pose_bundles("cafe_booth_direct", "cafe_cup_relaxed", "cafe_table_candid", "window_curtain_quiet", "sofa_relaxed_side_gaze"),
@@ -2281,7 +2860,7 @@ def _scene_bundles(*bundle_ids: str) -> list[Mapping[str, str]]:
 
 
 PROFILE_SCENE_BUNDLES = {
-    "日系森系夏日柔光写真": _scene_bundles(
+    "日系草地单车夏日柔光写真": _scene_bundles(
         "summer_forest_garden", "forest_path_morning", "flower_shop_morning",
         "enclosed_balcony_scene"
     ),
@@ -2297,11 +2876,11 @@ PROFILE_SCENE_BUNDLES = {
         "workplace_lounge", "glass_lobby_day", "executive_office_scene",
         "meeting_room_scene", "fashion_atelier_scene"
     ),
-    "古风汉服写真": _scene_bundles(
+    "古风汉服园林柔光写真": _scene_bundles(
         "new_chinese_tearoom", "tearoom_scene", "traditional_study_scene",
         "bamboo_grove_fog"
     ),
-    "海边假日度假写真": _scene_bundles(
+    "海边夏日泳装写真": _scene_bundles(
         "seaside_dusk", "sandy_beach_afternoon", "lighthouse_dawn",
         "hotel_balcony_golden_hour", "wharf_dusk"
     ),
@@ -2310,6 +2889,19 @@ PROFILE_SCENE_BUNDLES = {
         "subway_platform_scene", "warehouse_scene", "steampunk_room_concept"
     ),
 }
+
+PROFILE_SCENE_BUNDLES.update({
+    "日系草地单车夏日柔光写真": _scene_bundles("campus_playground_afternoon", "flower_shop_morning", "lakeside_dusk"),
+    "日系咖啡馆暖调近景人像": _scene_bundles("cafe_window_day", "wood_cafe_scene", "warm_cafe_booth"),
+    "夜间室内轻奢硬闪时尚写真": _scene_bundles("cocktail_bar_scene", "hotel_lounge_scene", "hotel_room_scene"),
+    "都市职场轻奢坐姿写真": _scene_bundles("executive_office_scene", "glass_lobby_day", "workplace_lounge"),
+    "古风汉服园林柔光写真": _scene_bundles("bamboo_grove_fog", "new_chinese_tearoom", "traditional_study_scene"),
+    "海边夏日泳装写真": _scene_bundles("sandy_beach_afternoon", "seaside_dusk", "lighthouse_dawn"),
+    "赛博都市夜景写真": _scene_bundles("warehouse_scene", "subway_platform_scene", "cyber_street_concept"),
+    "影棚水光妆美容特写": _scene_bundles("photo_studio_scene", "gray_photo_studio"),
+    "落地窗瑜伽塑形写真": _scene_bundles("sunlit_living_room_scene", "yoga_scene", "fitness_studio_day"),
+    "旅馆窗边电影静帧": _scene_bundles("hotel_room_scene", "cream_apartment_window", "cream_bedroom_scene"),
+})
 
 THEME_CATEGORY_SCENE_CATEGORIES = {
     "日常生活": {"居住空间", "餐饮与酒店", "商业零售", "文化艺术"},
@@ -3082,6 +3674,7 @@ STANDARD_FIELD_TEXT: Dict[str, Dict[str, str]] = {
 
 
 def _preset_values(preset: str) -> Dict[str, str]:
+    preset = LEGACY_PRESET_NAMES.get(preset, preset)
     return dict(PRESETS.get(preset, CUSTOM_DEFAULTS))
 
 
@@ -3307,6 +3900,7 @@ def resolve_fields(
 ) -> Dict[str, str]:
     """Resolve presets, explicit locks and deterministic random fields."""
 
+    preset = LEGACY_PRESET_NAMES.get(preset, preset)
     random_scope = LEGACY_RANDOM_SCOPES.get(random_scope, random_scope)
     if random_scope not in RANDOM_SCOPES:
         random_scope = RANDOM_SCOPES[0]
@@ -4104,6 +4698,7 @@ def _pose_prompt_text(fields: Mapping[str, str], density: str) -> str:
             if field_name not in selected:
                 continue
             value = selected[field_name]
+            value = _PRESET_POSE_STANDARD_TEXT.get(value, value)
             if field_name == "画面瞬间" and value.startswith((
                 "枝叶下", "墙边", "咖啡馆", "沙发上", "窗边", "阳台",
                 "电梯前", "棚拍间隙", "雨中"

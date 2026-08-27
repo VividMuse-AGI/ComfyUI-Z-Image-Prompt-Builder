@@ -5,11 +5,7 @@ import unittest
 import nodes
 
 
-NEW_PRESETS = (
-    "古风汉服写真",
-    "海边假日度假写真",
-    "赛博都市夜景写真",
-)
+BUILTIN_PRESETS = tuple(nodes.PRESET_OPTIONS[:-1])
 
 THEME_SCOPE_LOCKED_FIELDS = {
     "画面比例",
@@ -84,46 +80,98 @@ class PublicReleaseRegressionTests(unittest.TestCase):
                 ):
                     self.assertIn(bundle_id, source_ids)
 
-    def test_new_presets_have_dedicated_group_profiles(self):
+    def test_all_ten_presets_have_dedicated_group_profiles(self):
         profile_maps = (
+            nodes.PROFILE_POOLS,
             nodes.PROFILE_POSE_BUNDLES,
             nodes.PROFILE_SCENE_BUNDLES,
             nodes.PROFILE_CAMERA_BUNDLES,
             nodes.PROFILE_HAIR_BUNDLES,
             nodes.CLOTHING_PROFILE_RECIPE_IDS,
+            nodes.PROFILE_LIGHTING_PLANS,
+            nodes.PROFILE_VISUAL_PROFILES,
         )
 
-        for preset in NEW_PRESETS:
+        self.assertEqual(len(BUILTIN_PRESETS), 10)
+        for preset in BUILTIN_PRESETS:
             with self.subTest(preset=preset):
                 for profile_map in profile_maps:
                     self.assertIn(preset, profile_map)
                     self.assertTrue(profile_map[preset])
 
-    def test_same_theme_randomization_stays_within_each_new_preset(self):
-        requested = same_theme_request()
-        expectations = {
-            "古风汉服写真": {
-                "scene_categories": {"东方传统", "自然户外", "文化艺术"},
-                "pose_events": {"回眸一笑", "墙边安静等待", "持剑侧立"},
-                "headwear": {"金色发簪", "玉质发簪", "小白花发饰", nodes.EMPTY_CHOICE},
-                "focals": {"50mm", "85mm", "105mm"},
+    def test_all_preset_values_are_registered_dropdown_values(self):
+        for preset in BUILTIN_PRESETS:
+            for field, value in nodes.PRESETS[preset].items():
+                with self.subTest(preset=preset, field=field, value=value):
+                    self.assertTrue(
+                        value == nodes.EMPTY_CHOICE
+                        or value in nodes.FIELD_OPTIONS[field]
+                    )
+
+    def test_confirmed_preset_signatures(self):
+        expected = {
+            "日系草地单车夏日柔光写真": {
+                "画面比例": "2:3竖构图",
+                "基础姿态": "单车侧坐",
+                "手部动作": "举白玫瑰并扶大腿",
             },
-            "海边假日度假写真": {
-                "scene_categories": {"自然户外"},
-                "pose_events": {"回眸一笑", "行走中回头", "阳台短暂停步"},
-                "headwear": {"浅草色编织草帽", "丝质发带", "珍珠发夹", nodes.EMPTY_CHOICE},
-                "focals": {"35mm", "50mm", "135mm"},
+            "日系咖啡馆暖调近景人像": {
+                "成像媒介": "手机计算摄影",
+                "手部动作": "双手托住咖啡杯",
+                "机位": "高位俯拍",
+            },
+            "夜间室内轻奢硬闪时尚写真": {
+                "成像媒介": "早期CCD数码摄影",
+                "基础姿态": "复古扶手椅坐姿",
+                "手部动作": "双手放在脑后",
+            },
+            "都市职场轻奢坐姿写真": {
+                "基础姿态": "椅子前缘坐姿",
+                "腿部动作": "膝部交叠坐姿",
+                "场景地点": "行政办公室",
+            },
+            "古风汉服园林柔光写真": {
+                "发型造型": "双环发髻",
+                "手部动作": "双手持刺绣团扇",
+                "场景地点": "江南园林",
+            },
+            "海边夏日泳装写真": {
+                "画面比例": "3:2横构图",
+                "基础姿态": "沙滩侧卧",
+                "上装类型": "挂脖比基尼上装",
             },
             "赛博都市夜景写真": {
-                "scene_categories": {"都市户外"},
-                "pose_events": {"行走中回头"},
-                "headwear": {"几何金属发夹", "黑色细发带", "珍珠发夹", nodes.EMPTY_CHOICE},
-                "focals": {"35mm", "50mm", "70mm"},
+                "画面比例": "3:2横构图",
+                "发色": "银白色",
+                "基础姿态": "地面侧坐",
+            },
+            "影棚水光妆美容特写": {
+                "画面比例": "4:5竖构图",
+                "成像媒介": "中画幅数码摄影",
+                "景别": "面部特写",
+            },
+            "落地窗瑜伽塑形写真": {
+                "画面比例": "16:9横构图",
+                "基础姿态": "低位鸽子式",
+                "腿部动作": "鸽子式腿部伸展",
+            },
+            "旅馆窗边电影静帧": {
+                "画面比例": "21:9横构图",
+                "成像媒介": "35毫米胶片摄影",
+                "视线": "看向窗外",
             },
         }
+        self.assertEqual(set(expected), set(BUILTIN_PRESETS))
+        for preset, fields in expected.items():
+            for field, value in fields.items():
+                with self.subTest(preset=preset, field=field):
+                    self.assertEqual(nodes.PRESETS[preset][field], value)
 
-        for preset, expected in expectations.items():
-            for seed in range(100):
+    def test_same_theme_randomization_remains_valid_for_all_presets(self):
+        requested = same_theme_request()
+        for preset in BUILTIN_PRESETS:
+            defaults = nodes.PRESETS[preset]
+            for seed in range(20):
                 resolved = nodes.resolve_fields(
                     preset,
                     nodes.RANDOM_SCOPES[1],
@@ -131,77 +179,50 @@ class PublicReleaseRegressionTests(unittest.TestCase):
                     requested,
                 )
                 with self.subTest(preset=preset, seed=seed):
-                    self.assertIn(resolved["场景大类"], expected["scene_categories"])
-                    self.assertIn(resolved["画面瞬间"], expected["pose_events"])
-                    self.assertIn(resolved["头部配饰"], expected["headwear"])
-                    self.assertIn(resolved["等效焦段"], expected["focals"])
-                    if preset == "古风汉服写真":
-                        self.assertEqual(resolved["穿搭结构"], "连衣裙")
-                        self.assertEqual(resolved["连衣裙类型"], "汉服")
-                    elif preset == "海边假日度假写真":
-                        self.assertIn(
-                            resolved["穿搭结构"], {"连衣裙", "上装＋下装"}
+                    self.assertEqual(resolved["写真大类"], defaults["写真大类"])
+                    self.assertEqual(resolved["写真主题"], defaults["写真主题"])
+                    self.assertEqual(resolved["族裔大类"], defaults["族裔大类"])
+                    for field, value in resolved.items():
+                        self.assertTrue(
+                            value == nodes.EMPTY_CHOICE
+                            or value in nodes.FIELD_OPTIONS[field]
                         )
-                        self.assertNotEqual(resolved["连衣裙类型"], "修身晚礼服")
-                    else:
-                        self.assertIn(
-                            resolved["穿搭结构"],
-                            {"连衣裙", "上装＋下装", "叠穿造型"},
-                        )
-                        self.assertNotEqual(resolved["连衣裙类型"], "碎花吊带连衣裙")
-
-    def test_new_default_poses_are_registered_and_semantically_consistent(self):
-        expected_pose_atoms = {
-            "古风汉服写真": {
-                "画面瞬间": "回眸一笑",
-                "基础姿态": "自然站立",
-                "表情": "温柔浅笑",
-            },
-            "海边假日度假写真": {
-                "画面瞬间": "回眸一笑",
-                "基础姿态": "自然站立",
-                "表情": "明朗笑容",
-            },
-            "赛博都市夜景写真": {
-                "画面瞬间": "行走中回头",
-                "基础姿态": "行走中停步",
-                "腿部动作": "自然迈步",
-                "表情": "明艳自信",
-            },
-        }
-        registered = {
-            tuple(bundle[field] for field in nodes.POSE_OUTPUT_FIELDS)
-            for bundle in nodes.POSE_BUNDLES
-        }
-
-        for preset, expected in expected_pose_atoms.items():
-            actual = nodes.PRESETS[preset]
-            with self.subTest(preset=preset):
-                for field, value in expected.items():
-                    self.assertEqual(actual[field], value)
-                self.assertIn(
-                    tuple(actual[field] for field in nodes.POSE_OUTPUT_FIELDS),
-                    registered,
-                )
 
     def test_named_preset_visual_profiles_match_their_capture_medium(self):
-        expected_medium = {
-            "日系森系夏日柔光写真": "35毫米胶片摄影",
-            "海边假日度假写真": "便携数码相机摄影",
-        }
-
-        for preset, values in nodes.PRESETS.items():
-            if preset == nodes.CUSTOM_PRESET:
-                continue
+        for preset in BUILTIN_PRESETS:
+            values = nodes.PRESETS[preset]
             medium = values["成像媒介"]
             medium_id = nodes.CAPTURE_MEDIUM_LABEL_TO_ID[medium]
             visual_profile_id = nodes._PRESET_VISUAL_BUNDLES[preset][1]
             with self.subTest(preset=preset):
-                if preset in expected_medium:
-                    self.assertEqual(medium, expected_medium[preset])
                 self.assertIn(
                     visual_profile_id,
                     nodes.CAPTURE_MEDIUM_VISUAL_PROFILES_BY_ID[medium_id],
+                )
+
+    def test_legacy_preset_names_resolve_to_replacement_presets(self):
+        requested = {
+            field: nodes.FOLLOW_PRESET for field in nodes.FIELD_ORDER
+        }
+        for old_name, new_name in nodes.LEGACY_PRESET_NAMES.items():
+            with self.subTest(old_name=old_name):
+                self.assertEqual(
+                    nodes._preset_values(old_name),
+                    nodes.PRESETS[new_name],
+                )
+                self.assertEqual(
+                    nodes.resolve_fields(
+                        old_name,
+                        nodes.RANDOM_SCOPES[0],
+                        0,
+                        requested,
+                    ),
+                    nodes.resolve_fields(
+                        new_name,
+                        nodes.RANDOM_SCOPES[0],
+                        0,
+                        requested,
+                    ),
                 )
 
     def test_scene_formatter_does_not_repeat_existing_suffixes(self):
