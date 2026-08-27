@@ -71,7 +71,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.2.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.2.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.2.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`.
+For the recommended manual install, open the [`v0.3.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.3.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.3.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -137,7 +137,7 @@ Recommended block format:
 Format rules:
 
 - `## Title` identifies an entry. Duplicate titles receive an automatic numeric suffix.
-- `标签：` is optional and accepts Chinese or English commas. Tags are never added to the prompt. In `v0.2.0` they are stored as metadata but are not yet exposed as a filter.
+- `标签：` is optional and accepts Chinese or English commas. Tags are never added to the prompt. They are currently stored as metadata but are not yet exposed as a filter.
 - Everything after the title and optional tags is the prompt body; it may span multiple lines.
 - A line containing only `---` is the recommended separator. A new `## Title` also closes the previous entry.
 - Put explanatory comments before the first entry and start them with `#`.
@@ -281,7 +281,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.2.0`
+- Current version: `0.3.0`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

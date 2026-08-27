@@ -74,7 +74,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.2.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.2.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.2.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。
+推荐从 [`v0.3.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.3.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.3.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -157,7 +157,7 @@ git pull
 格式规则：
 
 - `## 标题`：必需的条目名称；重复标题会自动附加序号。
-- `标签：`：可省略，使用中文或英文逗号分隔。标签不会进入最终提示词；`v0.2.0` 暂不提供标签筛选，它主要用于文件内整理和后续扩展。
+- `标签：`：可省略，使用中文或英文逗号分隔。标签不会进入最终提示词；当前版本暂不提供标签筛选，它主要用于文件内整理和后续扩展。
 - 正文：标题和标签之后的所有内容，可以是一行或多行。
 - `---`：建议用于分隔条目；遇到下一个 `## 标题` 时也会自动结束上一条。
 - 说明性注释应放在第一个 `## 标题` 之前，并以 `#` 开头。
@@ -350,7 +350,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.2.0`
+- 当前版本：`0.3.0`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上
