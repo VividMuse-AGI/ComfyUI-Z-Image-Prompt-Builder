@@ -68,7 +68,9 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-You can also download a specific Source code archive from [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases). After extracting it, make sure the final folder is named `ComfyUI-Z-Image-Prompt-Builder`.
+For the recommended manual install, open the [`v0.2.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.2.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.2.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`.
+
+GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
 ### Updating an Existing Installation
 
