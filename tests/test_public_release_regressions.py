@@ -46,6 +46,13 @@ def same_theme_request():
 
 
 class PublicReleaseRegressionTests(unittest.TestCase):
+    def test_unspecified_pose_does_not_filter_camera_bundles(self):
+        sample = nodes.CAMERA_BUNDLES[:5]
+        for pose in ("", nodes.EMPTY_CHOICE, nodes.FOLLOW_PRESET):
+            self.assertEqual(
+                nodes._pose_compatible_camera_bundles(pose, sample),
+                sample,
+            )
     def test_new_compatibility_recipe_bundle_references_exist_in_source_libraries(self):
         library_root = pathlib.Path(__file__).resolve().parents[1] / "phrase_library"
         compatibility = json.loads(

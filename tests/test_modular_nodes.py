@@ -187,6 +187,64 @@ class ModularNodeTests(unittest.TestCase):
             txt_prompt.zimage_resolved_fields,
             camera_context,
         )
+        self.assertEqual(txt_prompt.zimage_opaque_modules, frozenset())
+
+    def test_txt_module_override_clears_stale_context(self):
+        pose_prompt = modular_nodes.ZImagePoseModule().build_module(
+            随机种子=1,
+            **{
+                field_name: nodes.RANDOM_CHOICE
+                for field_name in modular_nodes.MODULE_FIELD_GROUPS["姿态动作"]
+            },
+        )[0]
+        txt_prompt = modular_nodes.ZImageTxtModuleLibrary().build_prompt(
+            前置提示词=pose_prompt,
+            模块类型="姿态动作",
+            模块提示词="人物盘腿坐在地面，双手轻搭膝盖。",
+            拼接位置="前置提示词在前",
+        )[0]
+
+        self.assertEqual(txt_prompt.zimage_opaque_modules, {"姿态动作"})
+        for field_name in modular_nodes.MODULE_FIELD_GROUPS["姿态动作"]:
+            self.assertNotIn(field_name, txt_prompt.zimage_resolved_fields)
+
+        camera_prompt = modular_nodes.ZImageCameraModule().build_module(
+            前置提示词=txt_prompt,
+            随机种子=1,
+            **{
+                field_name: nodes.RANDOM_CHOICE
+                for field_name in modular_nodes.MODULE_FIELD_GROUPS["摄影"]
+            },
+        )[0]
+        self.assertEqual(camera_prompt.zimage_opaque_modules, {"姿态动作"})
+        for field_name in modular_nodes.MODULE_FIELD_GROUPS["姿态动作"]:
+            self.assertNotIn(field_name, camera_prompt.zimage_resolved_fields)
+
+    def test_structured_module_replaces_txt_module_unknown_context(self):
+        txt_prompt = modular_nodes.ZImageTxtModuleLibrary().build_prompt(
+            模块类型="姿态动作",
+            模块提示词="人物盘腿坐在地面。",
+        )[0]
+        pose_prompt = modular_nodes.ZImagePoseModule().build_module(
+            前置提示词=txt_prompt,
+        )[0]
+        self.assertNotIn("姿态动作", pose_prompt.zimage_opaque_modules)
+        for field_name in modular_nodes.MODULE_FIELD_GROUPS["姿态动作"]:
+            self.assertIn(field_name, pose_prompt.zimage_resolved_fields)
+
+    def test_custom_or_empty_txt_module_does_not_hide_structured_context(self):
+        pose_prompt = modular_nodes.ZImagePoseModule().build_module()[0]
+        for module_type, module_text in (("自定义", "附加内容"), ("姿态动作", "")):
+            txt_prompt = modular_nodes.ZImageTxtModuleLibrary().build_prompt(
+                前置提示词=pose_prompt,
+                模块类型=module_type,
+                模块提示词=module_text,
+            )[0]
+            self.assertEqual(
+                txt_prompt.zimage_resolved_fields,
+                pose_prompt.zimage_resolved_fields,
+            )
+            self.assertEqual(txt_prompt.zimage_opaque_modules, frozenset())
 
     def test_txt_nodes_join_or_replace_chain_text(self):
         prompt_node = modular_nodes.ZImageTxtPromptLibrary()

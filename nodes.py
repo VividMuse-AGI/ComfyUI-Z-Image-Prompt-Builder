@@ -3036,6 +3036,8 @@ def _pose_compatible_camera_bundles(
     base_pose: str, bundles: Iterable[Mapping[str, str]]
 ) -> list[Mapping[str, str]]:
     bundles = list(bundles)
+    if base_pose in ("", EMPTY_CHOICE, FOLLOW_PRESET):
+        return bundles
     if base_pose in SEATED_POSES:
         seated_or_close = [
             bundle

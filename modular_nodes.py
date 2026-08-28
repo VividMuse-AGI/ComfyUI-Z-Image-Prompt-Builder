@@ -45,9 +45,10 @@ CHAIN_JOIN_POSITIONS = ("前置提示词在前", "当前节点内容在前")
 class PromptChainText(str):
     """String output that also carries resolved module fields at runtime."""
 
-    def __new__(cls, value="", resolved_fields=None):
+    def __new__(cls, value="", resolved_fields=None, opaque_modules=None):
         instance = super().__new__(cls, value)
         instance.zimage_resolved_fields = dict(resolved_fields or {})
+        instance.zimage_opaque_modules = frozenset(opaque_modules or ())
         return instance
 
 
@@ -60,6 +61,7 @@ def join_chain_text(prefix: str, current: str, position: str) -> str:
     """Join one chainable node body without rewriting either fragment."""
 
     resolved_fields = getattr(prefix, "zimage_resolved_fields", None)
+    opaque_modules = getattr(prefix, "zimage_opaque_modules", None)
     prefix_text = "" if prefix is None else str(prefix)
     current_text = "" if current is None else str(current)
     if position == "当前节点内容在前":
@@ -74,8 +76,8 @@ def join_chain_text(prefix: str, current: str, position: str) -> str:
             current_text,
             "自由提示词在前",
         )
-    if resolved_fields is not None:
-        return PromptChainText(joined, resolved_fields)
+    if resolved_fields is not None or opaque_modules is not None:
+        return PromptChainText(joined, resolved_fields, opaque_modules)
     return joined
 
 
@@ -195,8 +197,9 @@ class ZImageModuleNodeBase:
         prompt: str,
         fields: Mapping[str, str],
         context_fields: Mapping[str, str],
+        opaque_modules=(),
     ):
-        return (PromptChainText(prompt, context_fields),)
+        return (PromptChainText(prompt, context_fields, opaque_modules),)
 
     def build_module(self, **kwargs):
         preset = kwargs.pop("预设", DEFAULT_MODULE_PRESET)
@@ -206,12 +209,18 @@ class ZImageModuleNodeBase:
         upstream_context = dict(
             getattr(prefix, "zimage_resolved_fields", {}) or {}
         )
+        upstream_opaque_modules = set(
+            getattr(prefix, "zimage_opaque_modules", ()) or ()
+        )
         requested = {
             field_name: core.FOLLOW_PRESET for field_name in core.FIELD_ORDER
         }
         for field_name in core.FIELD_ORDER:
             if field_name in upstream_context:
                 requested[field_name] = upstream_context[field_name]
+        for module_name in upstream_opaque_modules:
+            for field_name in MODULE_FIELD_GROUPS.get(module_name, ()):
+                requested[field_name] = core.EMPTY_CHOICE
         for field_name in MODULE_FIELD_GROUPS[self.MODULE_NAME]:
             requested[field_name] = kwargs.get(
                 field_name,
@@ -224,15 +233,24 @@ class ZImageModuleNodeBase:
             requested,
         )
         context_fields = dict(upstream_context)
+        for module_name in upstream_opaque_modules:
+            for field_name in MODULE_FIELD_GROUPS.get(module_name, ()):
+                context_fields.pop(field_name, None)
         context_fields.update(
             {
                 field_name: fields[field_name]
                 for field_name in MODULE_FIELD_GROUPS[self.MODULE_NAME]
             }
         )
+        upstream_opaque_modules.discard(self.MODULE_NAME)
         fragment = render_module_fragment(self.MODULE_NAME, fields, density)
         prompt = join_chain_text(prefix, fragment, CHAIN_JOIN_POSITIONS[0])
-        return self._result(prompt, fields, context_fields)
+        return self._result(
+            prompt,
+            fields,
+            context_fields,
+            upstream_opaque_modules,
+        )
 
 
 class ZImageCanvasModule(ZImageModuleNodeBase):
@@ -246,12 +264,13 @@ class ZImageCanvasModule(ZImageModuleNodeBase):
         prompt: str,
         fields: Mapping[str, str],
         context_fields: Mapping[str, str],
+        opaque_modules=(),
     ):
         aspect = fields.get("画面比例", core.EMPTY_CHOICE)
         if aspect not in core.ASPECT_RESOLUTIONS:
             aspect = core.PRESETS[DEFAULT_MODULE_PRESET]["画面比例"]
         width, height = core.ASPECT_RESOLUTIONS[aspect]
-        return PromptChainText(prompt, context_fields), width, height
+        return PromptChainText(prompt, context_fields, opaque_modules), width, height
 
 
 class ZImagePersonModule(ZImageModuleNodeBase):
@@ -366,13 +385,27 @@ class ZImageTxtModuleLibrary:
         }
 
     def build_prompt(self, **kwargs):
-        return (
-            join_chain_text(
-                kwargs.get("前置提示词", ""),
-                kwargs.get("模块提示词", ""),
-                kwargs.get("拼接位置", CHAIN_JOIN_POSITIONS[0]),
-            ),
+        prefix = kwargs.get("前置提示词", "")
+        module_text = kwargs.get("模块提示词", "")
+        prompt = join_chain_text(
+            prefix,
+            module_text,
+            kwargs.get("拼接位置", CHAIN_JOIN_POSITIONS[0]),
         )
+        module_name = kwargs.get("模块类型", TXT_MODULE_TYPES[0])
+        if module_name not in MODULE_FIELD_GROUPS or not str(module_text).strip():
+            return (prompt,)
+
+        context_fields = dict(
+            getattr(prefix, "zimage_resolved_fields", {}) or {}
+        )
+        for field_name in MODULE_FIELD_GROUPS[module_name]:
+            context_fields.pop(field_name, None)
+        opaque_modules = set(
+            getattr(prefix, "zimage_opaque_modules", ()) or ()
+        )
+        opaque_modules.add(module_name)
+        return (PromptChainText(prompt, context_fields, opaque_modules),)
 
 
 NODE_CLASS_MAPPINGS = {
