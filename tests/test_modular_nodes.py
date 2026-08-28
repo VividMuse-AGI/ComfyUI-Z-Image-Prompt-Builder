@@ -139,6 +139,55 @@ class ModularNodeTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertTrue(first[0].startswith("人物"))
 
+    def test_chain_carries_resolved_fields_into_downstream_randomization(self):
+        pose_kwargs = {
+            field_name: nodes.RANDOM_CHOICE
+            for field_name in modular_nodes.MODULE_FIELD_GROUPS["姿态动作"]
+        }
+        pose_prompt = modular_nodes.ZImagePoseModule().build_module(
+            随机种子=1,
+            **pose_kwargs,
+        )[0]
+        self.assertIsInstance(pose_prompt, str)
+        pose_context = pose_prompt.zimage_resolved_fields
+
+        camera_kwargs = {
+            field_name: nodes.RANDOM_CHOICE
+            for field_name in modular_nodes.MODULE_FIELD_GROUPS["摄影"]
+        }
+        camera_prompt = modular_nodes.ZImageCameraModule().build_module(
+            前置提示词=pose_prompt,
+            随机种子=1,
+            **camera_kwargs,
+        )[0]
+
+        requested = {
+            field_name: nodes.FOLLOW_PRESET for field_name in nodes.FIELD_ORDER
+        }
+        requested.update(pose_context)
+        requested.update(camera_kwargs)
+        expected = nodes.resolve_fields(
+            modular_nodes.DEFAULT_MODULE_PRESET,
+            nodes.RANDOM_SCOPES[1],
+            1,
+            requested,
+        )
+        camera_context = camera_prompt.zimage_resolved_fields
+        for field_name in modular_nodes.MODULE_FIELD_GROUPS["姿态动作"]:
+            self.assertEqual(camera_context[field_name], pose_context[field_name])
+        for field_name in modular_nodes.MODULE_FIELD_GROUPS["摄影"]:
+            self.assertEqual(camera_context[field_name], expected[field_name])
+
+        txt_prompt = modular_nodes.ZImageTxtPromptLibrary().build_prompt(
+            前置提示词=camera_prompt,
+            自由提示词="补充文本",
+            拼接位置="前置提示词在前",
+        )[0]
+        self.assertEqual(
+            txt_prompt.zimage_resolved_fields,
+            camera_context,
+        )
+
     def test_txt_nodes_join_or_replace_chain_text(self):
         prompt_node = modular_nodes.ZImageTxtPromptLibrary()
         self.assertEqual(

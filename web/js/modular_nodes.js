@@ -163,8 +163,64 @@ function setWidgetVisible(widget, visible) {
   widget.hidden = !visible;
 }
 
+function promptData() {
+  return globalThis.__vividMuseZImagePromptData || {};
+}
+
+function effectiveFieldValue(node, fieldName) {
+  const value = widgetByName(node, fieldName)?.value;
+  if (value !== FOLLOW_PRESET) return value;
+  const preset = widgetByName(node, "预设")?.value;
+  return promptData().PRESETS?.[preset]?.[fieldName] ?? value;
+}
+
+function syncFilteredOptions(
+  node,
+  parentField,
+  childField,
+  mappingName,
+  chooseFirst = false,
+  resize = true,
+) {
+  const mapping = promptData()[mappingName];
+  const childWidget = widgetByName(node, childField);
+  if (!mapping || !childWidget) return;
+  const allowed = mapping[effectiveFieldValue(node, parentField)];
+  const allValues = [...new Set(Object.values(mapping).flat())];
+  const values = [FOLLOW_PRESET, RANDOM_CHOICE, EMPTY_CHOICE, ...(allowed || allValues)];
+  childWidget.options ??= {};
+  childWidget.options.values = values;
+  if (chooseFirst && allowed?.length) {
+    childWidget.value = allowed[0];
+  } else if (!values.includes(childWidget.value)) {
+    childWidget.value = FOLLOW_PRESET;
+  }
+  refreshNode2Widgets(node);
+  if (resize) resizeNode(node);
+}
+
+function syncThemeOptions(node, chooseFirst = false, resize = true) {
+  syncFilteredOptions(
+    node, "写真大类", "写真主题", "THEME_OPTIONS_BY_CATEGORY", chooseFirst, resize,
+  );
+}
+
+function syncEthnicityOptions(node, chooseFirst = false, resize = true) {
+  syncFilteredOptions(
+    node, "族裔大类", "地域族裔分支",
+    "ETHNICITY_BRANCHES_BY_CATEGORY", chooseFirst, resize,
+  );
+}
+
+function syncSceneOptions(node, chooseFirst = false, resize = true) {
+  syncFilteredOptions(
+    node, "场景大类", "场景地点",
+    "SCENE_LOCATIONS_BY_CATEGORY", chooseFirst, resize,
+  );
+}
+
 function syncHairVisibility(node, resize = true) {
-  const mode = widgetByName(node, "发色模式")?.value;
+  const mode = effectiveFieldValue(node, "发色模式");
   const visible = !["基础发色", EMPTY_CHOICE].includes(mode);
   for (const fieldName of HAIR_ADVANCED_FIELDS) {
     setWidgetVisible(widgetByName(node, fieldName), visible);
@@ -173,7 +229,7 @@ function syncHairVisibility(node, resize = true) {
 }
 
 function syncMakeupVisibility(node, resize = true) {
-  const mode = widgetByName(node, "妆容模式")?.value;
+  const mode = effectiveFieldValue(node, "妆容模式");
   const special = [FOLLOW_PRESET, RANDOM_CHOICE].includes(mode);
   setWidgetVisible(
     widgetByName(node, "整体妆容预设"),
@@ -189,7 +245,7 @@ function syncMakeupVisibility(node, resize = true) {
 }
 
 function syncClothingVisibility(node, resize = true) {
-  const mode = widgetByName(node, "穿搭结构")?.value;
+  const mode = effectiveFieldValue(node, "穿搭结构");
   const visibleFields = new Set(CLOTHING_MODE_FIELDS[mode] || []);
   const showAll = [FOLLOW_PRESET, RANDOM_CHOICE].includes(mode);
   for (const fieldName of CLOTHING_BRANCH_FIELDS) {
@@ -205,6 +261,9 @@ function syncDependencies(node, resize = true) {
   syncHairVisibility(node, false);
   syncMakeupVisibility(node, false);
   syncClothingVisibility(node, false);
+  syncThemeOptions(node, false, false);
+  syncEthnicityOptions(node, false, false);
+  syncSceneOptions(node, false, false);
   if (resize) resizeNode(node);
 }
 
@@ -230,6 +289,20 @@ function setAllModuleFields(node, value) {
     widget.callback?.(value);
   }
   syncDependencies(node);
+}
+
+function prepareModuleRandomCombination(node) {
+  setAllModuleFields(node, RANDOM_CHOICE);
+  const seedWidget = widgetByName(node, "随机种子");
+  if (seedWidget) {
+    let nextSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+    if (nextSeed === Number(seedWidget.value)) {
+      nextSeed = (nextSeed + 1) % Number.MAX_SAFE_INTEGER;
+    }
+    seedWidget.value = nextSeed;
+    seedWidget.callback?.(seedWidget.value);
+  }
+  markDirty(node);
 }
 
 function installPresetCallback(node) {
@@ -266,6 +339,15 @@ function installModuleNode(node) {
   wrapDependencyCallback(node, "发色模式", syncHairVisibility);
   wrapDependencyCallback(node, "妆容模式", syncMakeupVisibility);
   wrapDependencyCallback(node, "穿搭结构", syncClothingVisibility);
+  wrapDependencyCallback(
+    node, "写真大类", (target) => syncThemeOptions(target, true),
+  );
+  wrapDependencyCallback(
+    node, "族裔大类", (target) => syncEthnicityOptions(target, true),
+  );
+  wrapDependencyCallback(
+    node, "场景大类", (target) => syncSceneOptions(target, true),
+  );
 
   const firstField = widgetByName(node, fields[0]);
   const randomButton = addHelperWidget(
@@ -273,7 +355,7 @@ function installModuleNode(node) {
     "button",
     "🎲 生成本模块随机组合",
     null,
-    () => setAllModuleFields(node, RANDOM_CHOICE),
+    () => prepareModuleRandomCombination(node),
   );
   const presetButton = addHelperWidget(
     node,

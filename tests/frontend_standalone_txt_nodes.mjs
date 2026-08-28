@@ -72,6 +72,13 @@ assert.ok(
   txtNode.widgets.indexOf(txtNode.__vividMuseTxtLibraryToggle)
     < txtNode.widgets.indexOf(widget(txtNode, "自由提示词")),
 );
+const txtSerialized = { widgets_values: [] };
+for (const [index, item] of txtNode.widgets.entries()) {
+  if (item.serialize !== false) txtSerialized.widgets_values[index] = item.value;
+}
+txtNode.onSerialize(txtSerialized);
+assert.deepEqual(txtSerialized.widgets_values, ["", "添加到前置提示词后"]);
+
 await globalThis.__standaloneTxtApi.importTxtPromptFile(txtNode, {
   name: "个人提示词.txt",
   size: 64,
@@ -100,7 +107,17 @@ await new Promise((resolve) => setTimeout(resolve, 10));
 assert.ok(moduleNode.__vividMuseTxtModuleToggle);
 assert.equal(moduleNode.__vividMuseTxtModuleModuleWidget, widget(moduleNode, "模块类型"));
 assert.equal(moduleNode.widgets.some((item) => item.name === "词库模块"), false);
-assert.equal(widget(moduleNode, "模块提示词").hidden, true);
+assert.notEqual(widget(moduleNode, "模块提示词").hidden, true);
+
+const moduleSerialized = { widgets_values: [] };
+for (const [index, item] of moduleNode.widgets.entries()) {
+  if (item.serialize !== false) moduleSerialized.widgets_values[index] = item.value;
+}
+moduleNode.onSerialize(moduleSerialized);
+assert.deepEqual(
+  moduleSerialized.widgets_values,
+  ["人物", "", "添加到前置提示词后"],
+);
 
 const moduleText = `
 ## 清透人物
@@ -129,6 +146,10 @@ const moduleType = widget(moduleNode, "模块类型");
 moduleType.value = "姿态动作";
 moduleType.callback("姿态动作");
 assert.equal(widget(moduleNode, "模块提示词").value, "");
+assert.equal(
+  moduleNode.properties.vividMuseTxtModuleAppliedTitles?.["人物"],
+  undefined,
+);
 assert.deepEqual(widget(moduleNode, "模块词库条目").options.values, ["自然坐姿"]);
 globalThis.__standaloneModuleApi.applySelectedModuleEntry(moduleNode);
 assert.equal(

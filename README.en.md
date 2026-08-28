@@ -120,7 +120,8 @@ Canvas → Person → Hair → Clothing → Pose & Action → Scene → Photogra
 - The Canvas node also outputs the recommended width and height.
 - Every module has its own preset, density, and seed, plus buttons to randomize the module, restore preset-following values, or clear the module.
 - Bypass a module with `Ctrl+B` to pass its incoming string directly to the next node.
-- Standalone nodes do not share field state. Use the full builder when one preset should centrally control all 92 fields.
+- Standalone nodes do not share editable widget state. In a direct chain, however, the combined string carries resolved upstream fields at runtime, so downstream random photography can remain compatible with the actual pose, scene, and other completed modules. The standalone TXT nodes preserve this context too.
+- A third-party text node that creates a new plain string may discard that runtime context. Use the full builder when one preset should centrally control all 92 fields.
 - `Z-Image TXT提示词库` inserts reusable full prompts; `Z-Image TXT模块词库` inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual, or Custom.
 
 ## TXT Libraries

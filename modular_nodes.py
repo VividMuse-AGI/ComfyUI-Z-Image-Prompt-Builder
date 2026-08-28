@@ -42,6 +42,15 @@ TXT_MODULE_TYPES = (*MODULE_FIELD_GROUPS, "自定义")
 CHAIN_JOIN_POSITIONS = ("前置提示词在前", "当前节点内容在前")
 
 
+class PromptChainText(str):
+    """String output that also carries resolved module fields at runtime."""
+
+    def __new__(cls, value="", resolved_fields=None):
+        instance = super().__new__(cls, value)
+        instance.zimage_resolved_fields = dict(resolved_fields or {})
+        return instance
+
+
 def _finish_fragment(text: str) -> str:
     normalized = (text or "").strip().strip("，；。,. ;\t\r\n")
     return f"{normalized}。" if normalized else ""
@@ -50,11 +59,24 @@ def _finish_fragment(text: str) -> str:
 def join_chain_text(prefix: str, current: str, position: str) -> str:
     """Join one chainable node body without rewriting either fragment."""
 
+    resolved_fields = getattr(prefix, "zimage_resolved_fields", None)
     prefix_text = "" if prefix is None else str(prefix)
     current_text = "" if current is None else str(current)
     if position == "当前节点内容在前":
-        return core.join_prompt_text(current_text, prefix_text, "自由提示词在前")
-    return core.join_prompt_text(prefix_text, current_text, "自由提示词在前")
+        joined = core.join_prompt_text(
+            current_text,
+            prefix_text,
+            "自由提示词在前",
+        )
+    else:
+        joined = core.join_prompt_text(
+            prefix_text,
+            current_text,
+            "自由提示词在前",
+        )
+    if resolved_fields is not None:
+        return PromptChainText(joined, resolved_fields)
+    return joined
 
 
 def render_module_fragment(
@@ -168,17 +190,28 @@ class ZImageModuleNodeBase:
             },
         }
 
-    def _result(self, prompt: str, fields: Mapping[str, str]):
-        return (prompt,)
+    def _result(
+        self,
+        prompt: str,
+        fields: Mapping[str, str],
+        context_fields: Mapping[str, str],
+    ):
+        return (PromptChainText(prompt, context_fields),)
 
     def build_module(self, **kwargs):
         preset = kwargs.pop("预设", DEFAULT_MODULE_PRESET)
         density = kwargs.pop("提示词密度", "标准")
         seed = kwargs.pop("随机种子", 0)
         prefix = kwargs.pop("前置提示词", "")
+        upstream_context = dict(
+            getattr(prefix, "zimage_resolved_fields", {}) or {}
+        )
         requested = {
             field_name: core.FOLLOW_PRESET for field_name in core.FIELD_ORDER
         }
+        for field_name in core.FIELD_ORDER:
+            if field_name in upstream_context:
+                requested[field_name] = upstream_context[field_name]
         for field_name in MODULE_FIELD_GROUPS[self.MODULE_NAME]:
             requested[field_name] = kwargs.get(
                 field_name,
@@ -190,9 +223,16 @@ class ZImageModuleNodeBase:
             seed,
             requested,
         )
+        context_fields = dict(upstream_context)
+        context_fields.update(
+            {
+                field_name: fields[field_name]
+                for field_name in MODULE_FIELD_GROUPS[self.MODULE_NAME]
+            }
+        )
         fragment = render_module_fragment(self.MODULE_NAME, fields, density)
         prompt = join_chain_text(prefix, fragment, CHAIN_JOIN_POSITIONS[0])
-        return self._result(prompt, fields)
+        return self._result(prompt, fields, context_fields)
 
 
 class ZImageCanvasModule(ZImageModuleNodeBase):
@@ -201,12 +241,17 @@ class ZImageCanvasModule(ZImageModuleNodeBase):
     RETURN_NAMES = ("组合提示词", "推荐宽度", "推荐高度")
     DESCRIPTION = "生成画面比例、成像媒介和写真主题，并输出推荐画布尺寸。"
 
-    def _result(self, prompt: str, fields: Mapping[str, str]):
+    def _result(
+        self,
+        prompt: str,
+        fields: Mapping[str, str],
+        context_fields: Mapping[str, str],
+    ):
         aspect = fields.get("画面比例", core.EMPTY_CHOICE)
         if aspect not in core.ASPECT_RESOLUTIONS:
             aspect = core.PRESETS[DEFAULT_MODULE_PRESET]["画面比例"]
         width, height = core.ASPECT_RESOLUTIONS[aspect]
-        return prompt, width, height
+        return PromptChainText(prompt, context_fields), width, height
 
 
 class ZImagePersonModule(ZImageModuleNodeBase):

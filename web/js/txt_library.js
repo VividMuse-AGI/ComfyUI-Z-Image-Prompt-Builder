@@ -4,9 +4,14 @@ const NODE_CLASSES = new Set([
   "VividMuse_ZImageChinesePromptBuilder",
   "VividMuse_ZImageTxtPromptLibrary",
 ]);
+const STANDALONE_NODE_CLASS = "VividMuse_ZImageTxtPromptLibrary";
 
 function isTargetNode(node) {
   return NODE_CLASSES.has(node.comfyClass || node.constructor?.type);
+}
+
+function isStandaloneNode(node) {
+  return (node.comfyClass || node.constructor?.type) === STANDALONE_NODE_CLASS;
 }
 const LIBRARY_PROPERTY = "vividMuseTxtPromptLibrary";
 const EXPANDED_PROPERTY = "vividMuseTxtLibraryExpanded";
@@ -30,6 +35,21 @@ function addHelperWidget(node, type, name, value, callback, options = {}) {
   widget.options ??= {};
   widget.options.serialize = false;
   return widget;
+}
+
+function installCompactWidgetSerialization(node) {
+  if (node.__vividMuseTxtCompactSerialization) return;
+  const originalOnSerialize = node.onSerialize;
+  node.onSerialize = function (info) {
+    const result = originalOnSerialize?.apply(this, arguments);
+    if (Array.isArray(info.widgets_values)) {
+      info.widgets_values = (node.widgets || []).flatMap((widget, index) => (
+        widget.serialize === false ? [] : [info.widgets_values[index]]
+      ));
+    }
+    return result;
+  };
+  node.__vividMuseTxtCompactSerialization = true;
 }
 
 function markDirty(node) {
@@ -383,6 +403,7 @@ app.registerExtension({
   name: "VividMuse.ZImagePromptBuilder.TxtLibrary",
   nodeCreated(node) {
     if (!isTargetNode(node)) return;
+    if (isStandaloneNode(node)) installCompactWidgetSerialization(node);
     installTxtLibraryConfigure(node);
     installTxtLibraryWidgets(node);
   },

@@ -78,6 +78,21 @@ function addHelperWidget(node, type, name, value, callback, options = {}) {
   return widget;
 }
 
+function installCompactWidgetSerialization(node) {
+  if (node.__vividMuseTxtModuleCompactSerialization) return;
+  const originalOnSerialize = node.onSerialize;
+  node.onSerialize = function (info) {
+    const result = originalOnSerialize?.apply(this, arguments);
+    if (Array.isArray(info.widgets_values)) {
+      info.widgets_values = (node.widgets || []).flatMap((widget, index) => (
+        widget.serialize === false ? [] : [info.widgets_values[index]]
+      ));
+    }
+    return result;
+  };
+  node.__vividMuseTxtModuleCompactSerialization = true;
+}
+
 function markDirty(node) {
   node.setDirtyCanvas?.(true, true);
   app.graph?.setDirtyCanvas?.(true, true);
@@ -424,7 +439,7 @@ function installConfigure(node) {
   node.onConfigure = function (info) {
     const result = originalOnConfigure?.apply(this, arguments);
     const targetNames = isStandaloneNode(node)
-      ? ["模块提示词"]
+      ? []
       : Object.values(TARGET_WIDGETS);
     for (const targetName of targetNames) {
       setWidgetVisible(widgetByName(node, targetName), false);
@@ -454,8 +469,10 @@ function installModuleLibraryWidgets(node) {
   if (!anchorWidget || requiredTargets.some((name) => !widgetByName(node, name))) {
     return;
   }
-  for (const targetName of requiredTargets) {
-    setWidgetVisible(widgetByName(node, targetName), false);
+  if (!standalone) {
+    for (const targetName of requiredTargets) {
+      setWidgetVisible(widgetByName(node, targetName), false);
+    }
   }
 
   const toggle = addHelperWidget(
@@ -488,7 +505,13 @@ function installModuleLibraryWidgets(node) {
       const result = originalCallback?.apply(this, arguments);
       if (previous && previous !== value) {
         const targetWidget = widgetByName(node, "模块提示词");
-        if (targetWidget) targetWidget.value = "";
+        if (targetWidget) {
+          targetWidget.value = "";
+          targetWidget.callback?.(targetWidget.value);
+        }
+        if (node.properties?.[APPLIED_TITLE_PROPERTY]) {
+          delete node.properties[APPLIED_TITLE_PROPERTY][previous];
+        }
       }
       node.properties ??= {};
       node.properties[SELECTED_MODULE_PROPERTY] = value;
@@ -550,13 +573,14 @@ app.registerExtension({
   name: "VividMuse.ZImagePromptBuilder.TxtModuleLibrary",
   nodeCreated(node) {
     if (!isTargetNode(node)) return;
+    if (isStandaloneNode(node)) installCompactWidgetSerialization(node);
     installConfigure(node);
     installModuleLibraryWidgets(node);
   },
   loadedGraphNode(node) {
     if (!isTargetNode(node) || !node.__vividMuseTxtModuleToggle) return;
     const targetNames = isStandaloneNode(node)
-      ? ["模块提示词"]
+      ? []
       : Object.values(TARGET_WIDGETS);
     for (const targetName of targetNames) {
       setWidgetVisible(widgetByName(node, targetName), false);

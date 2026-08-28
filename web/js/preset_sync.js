@@ -1172,6 +1172,13 @@ const PRESETS = {
   }
 };
 
+globalThis.__vividMuseZImagePromptData = {
+  PRESETS,
+  THEME_OPTIONS_BY_CATEGORY,
+  ETHNICITY_BRANCHES_BY_CATEGORY,
+  SCENE_LOCATIONS_BY_CATEGORY,
+};
+
 function widgetByName(node, name) {
   return node.widgets?.find((widget) => widget.name === name);
 }

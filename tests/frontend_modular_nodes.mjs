@@ -8,6 +8,31 @@ globalThis.__modularTestApp = {
   graph: { setDirtyCanvas() {} },
   registerExtension(extension) { registeredExtension = extension; },
 };
+globalThis.__vividMuseZImagePromptData = {
+  PRESETS: {
+    "日系草地单车夏日柔光写真": {
+      "写真大类": "日常生活", "族裔大类": "东亚", "场景大类": "自然户外",
+      "发色模式": "基础发色", "妆容模式": "整体预设", "穿搭结构": "上装＋下装",
+    },
+    "日系咖啡馆暖调近景人像": {
+      "写真大类": "日常生活", "族裔大类": "东亚", "场景大类": "城市生活",
+      "发色模式": "基础发色", "妆容模式": "整体预设", "穿搭结构": "上装＋下装",
+    },
+  },
+  THEME_OPTIONS_BY_CATEGORY: {
+    "日常生活": ["户外骑行活力写真", "日系咖啡馆生活写真"],
+    "商业时尚": ["轻奢时尚写真"],
+  },
+  ETHNICITY_BRANCHES_BY_CATEGORY: {
+    "东亚": ["大类通用外观", "东亚北方地域外观"],
+    "欧洲": ["大类通用外观", "斯拉夫裔"],
+  },
+  SCENE_LOCATIONS_BY_CATEGORY: {
+    "自然户外": ["公园草地", "森林步道"],
+    "城市生活": ["暖调咖啡馆", "街角"],
+  },
+};
+
 const source = fs.readFileSync(sourcePath, "utf8").replace(
   'import { app } from "../../scripts/app.js";',
   "const app = globalThis.__modularTestApp;",
@@ -85,7 +110,9 @@ assert.equal(widget(hairNode, "发色色调").options.hidden, true);
 change(hairNode, "发色模式", "备用值");
 assert.equal(widget(hairNode, "发色色调").hidden, false);
 
+const seedBeforeRandom = widget(hairNode, "随机种子").value;
 widget(hairNode, "🎲 生成本模块随机组合").callback();
+assert.notEqual(widget(hairNode, "随机种子").value, seedBeforeRandom);
 for (const name of [
   "发色模式", "发色", "发色色调", "染色方式", "头发长度",
   "发质与卷度", "发型造型", "刘海", "头部配饰",
@@ -133,5 +160,49 @@ assert.equal(widget(clothingNode, "连衣裙类型").hidden, false);
 assert.equal(widget(clothingNode, "连体服类型").hidden, true);
 assert.equal(widget(clothingNode, "上装类型").hidden, true);
 assert.equal(widget(clothingNode, "鞋履").hidden, undefined);
+
+change(hairNode, "发色模式", "跟随预设");
+assert.equal(widget(hairNode, "发色色调").hidden, true);
+
+change(personNode, "妆容模式", "跟随预设");
+assert.equal(widget(personNode, "整体妆容预设").hidden, false);
+assert.equal(widget(personNode, "底妆质感").hidden, true);
+assert.deepEqual(
+  widget(personNode, "地域族裔分支").options.values,
+  [...SPECIAL_VALUES, "大类通用外观", "东亚北方地域外观"],
+);
+change(personNode, "族裔大类", "欧洲");
+assert.equal(widget(personNode, "地域族裔分支").value, "大类通用外观");
+
+change(clothingNode, "穿搭结构", "跟随预设");
+assert.equal(widget(clothingNode, "连衣裙类型").hidden, true);
+assert.equal(widget(clothingNode, "上装类型").hidden, false);
+assert.equal(widget(clothingNode, "下装类型").hidden, false);
+
+const canvasNode = makeNode("VividMuse_ZImageCanvasModule", {
+  "画面比例": "跟随预设", "成像媒介": "跟随预设",
+  "写真大类": "跟随预设", "写真主题": "跟随预设",
+});
+registeredExtension.nodeCreated(canvasNode);
+assert.deepEqual(
+  widget(canvasNode, "写真主题").options.values,
+  [...SPECIAL_VALUES, "户外骑行活力写真", "日系咖啡馆生活写真"],
+);
+change(canvasNode, "写真大类", "商业时尚");
+assert.equal(widget(canvasNode, "写真主题").value, "轻奢时尚写真");
+
+const sceneNode = makeNode("VividMuse_ZImageSceneModule", {
+  "场景大类": "跟随预设", "场景地点": "跟随预设",
+  "时间切片": "跟随预设", "天气状态": "跟随预设",
+  "前景框景": "跟随预设", "背景环境": "跟随预设",
+  "环境细节": "跟随预设", "空间材质": "跟随预设", "空间层次": "跟随预设",
+});
+registeredExtension.nodeCreated(sceneNode);
+assert.deepEqual(
+  widget(sceneNode, "场景地点").options.values,
+  [...SPECIAL_VALUES, "公园草地", "森林步道"],
+);
+change(sceneNode, "场景大类", "城市生活");
+assert.equal(widget(sceneNode, "场景地点").value, "暖调咖啡馆");
 
 console.log("frontend modular nodes ok");
