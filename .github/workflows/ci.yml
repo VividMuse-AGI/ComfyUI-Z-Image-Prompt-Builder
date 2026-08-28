@@ -17,7 +17,7 @@ jobs:
           node-version: "22"
       - name: Compile Python and parse phrase libraries
         run: |
-          python -m py_compile nodes.py __init__.py
+          python -m py_compile nodes.py modular_nodes.py __init__.py
           python -c "import glob,json; [json.load(open(path, encoding='utf-8')) for path in glob.glob('phrase_library/*.json')]"
       - name: Run Python regressions
         run: python -m unittest discover -s tests -p "test_*.py" -v

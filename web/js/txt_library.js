@@ -1,6 +1,13 @@
 import { app } from "../../scripts/app.js";
 
-const NODE_CLASS = "VividMuse_ZImageChinesePromptBuilder";
+const NODE_CLASSES = new Set([
+  "VividMuse_ZImageChinesePromptBuilder",
+  "VividMuse_ZImageTxtPromptLibrary",
+]);
+
+function isTargetNode(node) {
+  return NODE_CLASSES.has(node.comfyClass || node.constructor?.type);
+}
 const LIBRARY_PROPERTY = "vividMuseTxtPromptLibrary";
 const EXPANDED_PROPERTY = "vividMuseTxtLibraryExpanded";
 const MAX_FILE_BYTES = 1024 * 1024;
@@ -375,14 +382,12 @@ function installTxtLibraryWidgets(node) {
 app.registerExtension({
   name: "VividMuse.ZImagePromptBuilder.TxtLibrary",
   nodeCreated(node) {
-    const isTarget = node.comfyClass === NODE_CLASS || node.constructor?.type === NODE_CLASS;
-    if (!isTarget) return;
+    if (!isTargetNode(node)) return;
     installTxtLibraryConfigure(node);
     installTxtLibraryWidgets(node);
   },
   loadedGraphNode(node) {
-    const isTarget = node.comfyClass === NODE_CLASS || node.constructor?.type === NODE_CLASS;
-    if (!isTarget || !node.__vividMuseTxtLibraryToggle) return;
+    if (!isTargetNode(node) || !node.__vividMuseTxtLibraryToggle) return;
     syncTxtLibraryControls(node, false);
     setTxtLibraryExpanded(node, Boolean(node.properties?.[EXPANDED_PROPERTY]));
   },

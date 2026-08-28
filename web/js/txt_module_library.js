@@ -1,9 +1,11 @@
 import { app } from "../../scripts/app.js";
 
-const NODE_CLASS = "VividMuse_ZImageChinesePromptBuilder";
+const FULL_NODE_CLASS = "VividMuse_ZImageChinesePromptBuilder";
+const STANDALONE_NODE_CLASS = "VividMuse_ZImageTxtModuleLibrary";
 const LIBRARY_PROPERTY = "vividMuseTxtModuleLibrary";
 const EXPANDED_PROPERTY = "vividMuseTxtModuleLibraryExpanded";
 const APPLIED_TITLE_PROPERTY = "vividMuseTxtModuleAppliedTitles";
+const SELECTED_MODULE_PROPERTY = "vividMuseTxtModuleSelectedModule";
 const STANDARD_MODULES = [
   "画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现",
 ];
@@ -19,6 +21,20 @@ const TARGET_WIDGETS = {
   "视觉表现": "用户视觉表现片段",
   "自定义": "用户自定义片段",
 };
+
+function isStandaloneNode(node) {
+  return (node.comfyClass || node.constructor?.type) === STANDALONE_NODE_CLASS;
+}
+
+function isTargetNode(node) {
+  const nodeClass = node.comfyClass || node.constructor?.type;
+  return nodeClass === FULL_NODE_CLASS || nodeClass === STANDALONE_NODE_CLASS;
+}
+
+function targetWidgetName(node, moduleName) {
+  return isStandaloneNode(node) ? "模块提示词" : TARGET_WIDGETS[moduleName];
+}
+
 const MODULE_ALIASES = new Map([
   ["画面基础", "画面基础"],
   ["基础画面", "画面基础"],
@@ -95,7 +111,9 @@ function moveWidgetBefore(node, widget, targetWidget) {
 }
 
 function placeModuleLibraryBeforePromptLibrary(node) {
-  const target = node.__vividMuseTxtLibraryToggle || widgetByName(node, "自由提示词");
+  const target = isStandaloneNode(node)
+    ? widgetByName(node, "模块提示词")
+    : node.__vividMuseTxtLibraryToggle || widgetByName(node, "自由提示词");
   if (!target) return;
   for (const widget of [
     node.__vividMuseTxtModuleToggle,
@@ -252,7 +270,7 @@ function syncModuleLibraryControls(node, resize = true) {
     : "🧩 TXT模块词库（全模块）";
 
   const appliedTitle = node.properties?.[APPLIED_TITLE_PROPERTY]?.[moduleName];
-  const targetValue = widgetByName(node, TARGET_WIDGETS[moduleName])?.value;
+  const targetValue = widgetByName(node, targetWidgetName(node, moduleName))?.value;
   const status = appliedTitle || (targetValue ? "已有内容" : "未设置");
   const action = moduleName === "自定义" ? "启用自定义模块" : "应用到" + moduleName + "模块";
   node.__vividMuseTxtModuleApplyButton.name = action + "（当前：" + status.slice(0, 16) + "）";
@@ -325,7 +343,7 @@ function applySelectedModuleEntry(node) {
     notifyError(new Error("请先导入并选择当前模块的一条提示词。"));
     return false;
   }
-  const targetWidget = widgetByName(node, TARGET_WIDGETS[moduleName]);
+  const targetWidget = widgetByName(node, targetWidgetName(node, moduleName));
   if (!targetWidget) return false;
   targetWidget.value = selected.prompt;
   targetWidget.callback?.(targetWidget.value);
@@ -338,7 +356,7 @@ function applySelectedModuleEntry(node) {
 
 function clearCurrentModule(node) {
   const moduleName = currentModule(node);
-  const targetWidget = widgetByName(node, TARGET_WIDGETS[moduleName]);
+  const targetWidget = widgetByName(node, targetWidgetName(node, moduleName));
   if (!targetWidget) return false;
   targetWidget.value = "";
   targetWidget.callback?.(targetWidget.value);
@@ -357,7 +375,7 @@ function clearModuleLibrary(node) {
 function clearAllUserModules(node, keepModule = null) {
   for (const moduleName of MODULES) {
     if (moduleName === keepModule) continue;
-    const targetWidget = widgetByName(node, TARGET_WIDGETS[moduleName]);
+    const targetWidget = widgetByName(node, targetWidgetName(node, moduleName));
     if (targetWidget) {
       targetWidget.value = "";
       targetWidget.callback?.(targetWidget.value);
@@ -381,6 +399,7 @@ function wrapButtonCallback(widget, marker, afterCallback) {
 }
 
 function installExistingControlIntegration(node) {
+  if (isStandaloneNode(node)) return;
   for (const buttonName of ["清空结构化模块", "全部清空"]) {
     wrapButtonCallback(
       widgetByName(node, buttonName),
@@ -404,7 +423,10 @@ function installConfigure(node) {
   const originalOnConfigure = node.onConfigure;
   node.onConfigure = function (info) {
     const result = originalOnConfigure?.apply(this, arguments);
-    for (const targetName of Object.values(TARGET_WIDGETS)) {
+    const targetNames = isStandaloneNode(node)
+      ? ["模块提示词"]
+      : Object.values(TARGET_WIDGETS);
+    for (const targetName of targetNames) {
       setWidgetVisible(widgetByName(node, targetName), false);
     }
     placeModuleLibraryBeforePromptLibrary(node);
@@ -424,11 +446,15 @@ function installModuleLibraryWidgets(node) {
     syncModuleLibraryControls(node, false);
     return;
   }
-  const freePromptWidget = widgetByName(node, "自由提示词");
-  if (!freePromptWidget || Object.values(TARGET_WIDGETS).some((name) => !widgetByName(node, name))) {
+  const standalone = isStandaloneNode(node);
+  const anchorWidget = standalone
+    ? widgetByName(node, "模块提示词")
+    : widgetByName(node, "自由提示词");
+  const requiredTargets = standalone ? ["模块提示词"] : Object.values(TARGET_WIDGETS);
+  if (!anchorWidget || requiredTargets.some((name) => !widgetByName(node, name))) {
     return;
   }
-  for (const targetName of Object.values(TARGET_WIDGETS)) {
+  for (const targetName of requiredTargets) {
     setWidgetVisible(widgetByName(node, targetName), false);
   }
 
@@ -445,14 +471,34 @@ function installModuleLibraryWidgets(node) {
   const importButton = addHelperWidget(
     node, "button", "导入结构化模块TXT词库", null, () => chooseTxtModuleFile(node),
   );
-  const moduleWidget = addHelperWidget(
-    node,
-    "combo",
-    "词库模块",
-    MODULES[0],
-    () => syncModuleLibraryControls(node),
-    { values: MODULES },
-  );
+  const moduleWidget = standalone
+    ? widgetByName(node, "模块类型")
+    : addHelperWidget(
+      node,
+      "combo",
+      "词库模块",
+      MODULES[0],
+      () => syncModuleLibraryControls(node),
+      { values: MODULES },
+    );
+  if (standalone && !moduleWidget.__vividMuseStandaloneModuleCallback) {
+    const originalCallback = moduleWidget.callback;
+    moduleWidget.callback = function (value) {
+      const previous = node.properties?.[SELECTED_MODULE_PROPERTY];
+      const result = originalCallback?.apply(this, arguments);
+      if (previous && previous !== value) {
+        const targetWidget = widgetByName(node, "模块提示词");
+        if (targetWidget) targetWidget.value = "";
+      }
+      node.properties ??= {};
+      node.properties[SELECTED_MODULE_PROPERTY] = value;
+      syncModuleLibraryControls(node);
+      return result;
+    };
+    moduleWidget.__vividMuseStandaloneModuleCallback = true;
+    node.properties ??= {};
+    node.properties[SELECTED_MODULE_PROPERTY] ??= moduleWidget.value;
+  }
   const entryWidget = addHelperWidget(
     node,
     "combo",
@@ -503,15 +549,16 @@ function installModuleLibraryWidgets(node) {
 app.registerExtension({
   name: "VividMuse.ZImagePromptBuilder.TxtModuleLibrary",
   nodeCreated(node) {
-    const isTarget = node.comfyClass === NODE_CLASS || node.constructor?.type === NODE_CLASS;
-    if (!isTarget) return;
+    if (!isTargetNode(node)) return;
     installConfigure(node);
     installModuleLibraryWidgets(node);
   },
   loadedGraphNode(node) {
-    const isTarget = node.comfyClass === NODE_CLASS || node.constructor?.type === NODE_CLASS;
-    if (!isTarget || !node.__vividMuseTxtModuleToggle) return;
-    for (const targetName of Object.values(TARGET_WIDGETS)) {
+    if (!isTargetNode(node) || !node.__vividMuseTxtModuleToggle) return;
+    const targetNames = isStandaloneNode(node)
+      ? ["模块提示词"]
+      : Object.values(TARGET_WIDGETS);
+    for (const targetName of targetNames) {
       setWidgetVisible(widgetByName(node, targetName), false);
     }
     placeModuleLibraryBeforePromptLibrary(node);

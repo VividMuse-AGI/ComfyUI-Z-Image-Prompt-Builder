@@ -24,6 +24,8 @@ A Chinese portrait prompt builder node for ComfyUI by VividMuse. Generate natura
 - Outputs recommended **width and height** for setting the latent size.
 - Frontend provides a "🎲 Generate random combination" button.
 - A "current editing module" switcher shows one module at a time without changing any field values.
+- In addition to the full builder, eight chainable module nodes expose only their own fields and combine text through a `previous prompt → combined prompt` interface. Any unwanted module can be bypassed with `Ctrl+B`.
+- Two standalone TXT nodes provide reusable full-prompt and structured-module libraries without duplicating library controls across all eight module nodes.
 - A TXT user library can import complete Chinese prompts and add them before or after the free-prompt text, or replace it.
 - Structured TXT module libraries can replace any of the eight standard modules or enable one independent **Custom** fragment appended after them.
 - Both local TXT libraries are stored with the node in the workflow and accept up to 500 entries from a file no larger than 1MB.
@@ -59,6 +61,8 @@ Restart ComfyUI and force-refresh the browser. The node is under:
 
 ```text
 VividMuse → Z-Image → Z-Image 中文提示词生成器
+VividMuse → Z-Image → 模块 → 8 standalone module nodes
+VividMuse → Z-Image → 词库 → 2 standalone TXT nodes
 ```
 
 ### Manual
@@ -101,6 +105,23 @@ Do not keep two copies of the node under different folders, because ComfyUI may 
 6. Use "Current editing module" to edit one category at a time; switching modules only changes the display and preserves every field value. Use "Enable current module only" to change enabled state, "Clear structured modules" to keep free text, or "Clear all" to wipe both.
 7. Connect "中文提示词" (Chinese prompt) to a text-encoding node.
 8. Connect "推荐宽度" (recommended width) and "推荐高度" (recommended height) to compatible latent width/height inputs, or type the same values manually.
+
+### Standalone Module Nodes
+
+Use these when you want the prompt structure to remain visible on the canvas and individual sections to be bypassable. The original full builder remains available; both workflows are supported.
+
+Recommended order:
+
+```text
+Canvas → Person → Hair → Clothing → Pose & Action → Scene → Photography → Visual
+```
+
+- Each node accepts an optional previous prompt and outputs the combined prompt. The first node can be left unconnected.
+- The Canvas node also outputs the recommended width and height.
+- Every module has its own preset, density, and seed, plus buttons to randomize the module, restore preset-following values, or clear the module.
+- Bypass a module with `Ctrl+B` to pass its incoming string directly to the next node.
+- Standalone nodes do not share field state. Use the full builder when one preset should centrally control all 92 fields.
+- `Z-Image TXT提示词库` inserts reusable full prompts; `Z-Image TXT模块词库` inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual, or Custom.
 
 ## TXT Libraries
 
