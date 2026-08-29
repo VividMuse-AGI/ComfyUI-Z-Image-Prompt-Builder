@@ -135,10 +135,10 @@ class ZImageModuleNodeBase:
     MODULE_NAME = ""
     CATEGORY = "VividMuse/Z-Image/模块"
     FUNCTION = "build_module"
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("组合提示词",)
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("组合提示词", "英文提示词")
     OUTPUT_NODE = False
-    DESCRIPTION = "生成一个可串联、可旁路的中文结构化提示词模块。"
+    DESCRIPTION = "生成一个可串联、可旁路的中英文结构化提示词模块。"
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -185,7 +185,16 @@ class ZImageModuleNodeBase:
                     {
                         "forceInput": True,
                         "tooltip": (
-                            "连接上一个模块；旁路当前节点时由同类型输入传递到输出。"
+                            "连接上一个模块的中文输出；旁路当前节点时可直接传递。"
+                        ),
+                    },
+                ),
+                "前置英文提示词": (
+                    "STRING",
+                    {
+                        "forceInput": True,
+                        "tooltip": (
+                            "连接上一个模块的英文输出，形成独立的英文提示词链。"
                         ),
                     },
                 ),
@@ -195,22 +204,30 @@ class ZImageModuleNodeBase:
     def _result(
         self,
         prompt: str,
+        english_prompt: str,
         fields: Mapping[str, str],
         context_fields: Mapping[str, str],
         opaque_modules=(),
     ):
-        return (PromptChainText(prompt, context_fields, opaque_modules),)
+        return (
+            PromptChainText(prompt, context_fields, opaque_modules),
+            PromptChainText(english_prompt, context_fields, opaque_modules),
+        )
 
     def build_module(self, **kwargs):
         preset = kwargs.pop("预设", DEFAULT_MODULE_PRESET)
         density = kwargs.pop("提示词密度", "标准")
         seed = kwargs.pop("随机种子", 0)
         prefix = kwargs.pop("前置提示词", "")
+        english_prefix = kwargs.pop("前置英文提示词", "")
+        context_source = prefix
+        if not hasattr(context_source, "zimage_resolved_fields"):
+            context_source = english_prefix
         upstream_context = dict(
-            getattr(prefix, "zimage_resolved_fields", {}) or {}
+            getattr(context_source, "zimage_resolved_fields", {}) or {}
         )
         upstream_opaque_modules = set(
-            getattr(prefix, "zimage_opaque_modules", ()) or ()
+            getattr(context_source, "zimage_opaque_modules", ()) or ()
         )
         requested = {
             field_name: core.FOLLOW_PRESET for field_name in core.FIELD_ORDER
@@ -244,9 +261,16 @@ class ZImageModuleNodeBase:
         )
         upstream_opaque_modules.discard(self.MODULE_NAME)
         fragment = render_module_fragment(self.MODULE_NAME, fields, density)
+        english_fragment = core.render_english_module_fragment(
+            self.MODULE_NAME, fields, density
+        )
         prompt = join_chain_text(prefix, fragment, CHAIN_JOIN_POSITIONS[0])
+        english_prompt = core.join_english_prompt_text(
+            english_prefix, english_fragment
+        )
         return self._result(
             prompt,
+            english_prompt,
             fields,
             context_fields,
             upstream_opaque_modules,
@@ -255,13 +279,14 @@ class ZImageModuleNodeBase:
 
 class ZImageCanvasModule(ZImageModuleNodeBase):
     MODULE_NAME = "画面基础"
-    RETURN_TYPES = ("STRING", "INT", "INT")
-    RETURN_NAMES = ("组合提示词", "推荐宽度", "推荐高度")
-    DESCRIPTION = "生成画面比例、成像媒介和写真主题，并输出推荐画布尺寸。"
+    RETURN_TYPES = ("STRING", "INT", "INT", "STRING")
+    RETURN_NAMES = ("组合提示词", "推荐宽度", "推荐高度", "英文提示词")
+    DESCRIPTION = "生成中英文画面基础提示词，并输出推荐画布尺寸。"
 
     def _result(
         self,
         prompt: str,
+        english_prompt: str,
         fields: Mapping[str, str],
         context_fields: Mapping[str, str],
         opaque_modules=(),
@@ -270,8 +295,12 @@ class ZImageCanvasModule(ZImageModuleNodeBase):
         if aspect not in core.ASPECT_RESOLUTIONS:
             aspect = core.PRESETS[DEFAULT_MODULE_PRESET]["画面比例"]
         width, height = core.ASPECT_RESOLUTIONS[aspect]
-        return PromptChainText(prompt, context_fields, opaque_modules), width, height
-
+        return (
+            PromptChainText(prompt, context_fields, opaque_modules),
+            width,
+            height,
+            PromptChainText(english_prompt, context_fields, opaque_modules),
+        )
 
 class ZImagePersonModule(ZImageModuleNodeBase):
     MODULE_NAME = "人物"

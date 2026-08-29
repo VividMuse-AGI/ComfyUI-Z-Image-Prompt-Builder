@@ -65,6 +65,11 @@ class ModularNodeTests(unittest.TestCase):
                 input_types["optional"]["前置提示词"][1]["forceInput"],
                 True,
             )
+            self.assertEqual(
+                input_types["optional"]["前置英文提示词"][1]["forceInput"],
+                True,
+            )
+            self.assertEqual(node_class.RETURN_NAMES[-1], "英文提示词")
 
     def test_all_eight_modules_chain_as_plain_strings(self):
         node_classes = (
@@ -108,9 +113,12 @@ class ModularNodeTests(unittest.TestCase):
                     self.assertIsInstance(result[0], str)
 
     def test_canvas_module_returns_recommended_dimensions(self):
-        prompt, width, height = modular_nodes.ZImageCanvasModule().build_module()
+        prompt, width, height, english_prompt = (
+            modular_nodes.ZImageCanvasModule().build_module()
+        )
         self.assertTrue(prompt)
         self.assertEqual((width, height), (832, 1248))
+        self.assertTrue(english_prompt)
 
     def test_empty_module_passes_prefix_through_unchanged(self):
         kwargs = {
@@ -121,7 +129,7 @@ class ModularNodeTests(unittest.TestCase):
             前置提示词="保留上游文本。",
             **kwargs,
         )
-        self.assertEqual(result, ("保留上游文本。",))
+        self.assertEqual(result, ("保留上游文本。", ""))
 
     def test_module_randomization_is_seed_deterministic(self):
         kwargs = {

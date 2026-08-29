@@ -51,7 +51,7 @@ class TxtModuleLibraryBackendTests(unittest.TestCase):
         )
         kwargs = {field: nodes.FOLLOW_PRESET for field in nodes.FIELD_ORDER}
         kwargs.update({name: f"槽位{name}" for name in module_input_names})
-        prompt, _, _ = nodes.ZImageChinesePromptBuilder().build_prompt(
+        prompt, _, _, _ = nodes.ZImageChinesePromptBuilder().build_prompt(
             预设=nodes.PRESET_OPTIONS[0], 提示词密度="标准",
             随机范围=nodes.RANDOM_SCOPES[0], 随机种子=0, **kwargs,
         )

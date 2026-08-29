@@ -1,12 +1,12 @@
 # ComfyUI-Z-Image-Prompt-Builder
 
-A Chinese portrait prompt builder node for ComfyUI by VividMuse. Generate natural-language Chinese positive prompts for Z-Image and Z-Image-Turbo through portrait presets, structured dropdown fields, and reproducible random combinations.
+A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-language Chinese and English positive prompts through portrait presets, structured dropdown fields, and reproducible random combinations.
 
 > English docs | [中文文档](README.md)
 
 ## Features
 
-- Outputs **Chinese positive prompts only**; no negative prompts are generated.
+- Outputs both **Chinese and English positive prompts**; no negative prompts are generated. English is rendered deterministically from built-in structured fields without an online translation service.
 - Follows Z-Image's natural-language style — no traditional weight tags or "8K / masterpiece" quality meta-tags.
 - Three prompt densities: **concise / standard / detailed** (standard is the default).
 - **92 structured fields** across 8 modules — Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, and Visual. Each field can be set to "Follow preset", "Random", "Disabled", or a specific value; dependent fields collapse according to the current mode.
@@ -21,7 +21,7 @@ A Chinese portrait prompt builder node for ComfyUI by VividMuse. Generate natura
 - Visual covers 12 fields (key light, direction, quality, target, shadow, palette, temperature, contrast, capture style, texture, highlight, grain); random draws from 29 lighting plans and 30 visual profiles.
 - Random results are **seed-controlled and reproducible**; manually locked values always take priority.
 - Camera setups are filtered by aspect ratio, theme category, and seated/standing pose to avoid conflicting lens, distance, shot-size, and focus combinations.
-- Outputs recommended **width and height** for setting the latent size.
+- Outputs recommended **width and height** for setting the latent size. The English prompt is appended as a new final output, leaving the existing Chinese, width, and height output positions unchanged.
 - Frontend provides a "🎲 Generate random combination" button.
 - A "current editing module" switcher shows one module at a time without changing any field values.
 - In addition to the full builder, eight chainable module nodes expose only their own fields and combine text through a `previous prompt → combined prompt` interface. Any unwanted module can be bypassed with `Ctrl+B`.
@@ -103,7 +103,7 @@ Do not keep two copies of the node under different folders, because ComfyUI may 
 4. Set fields you want varied to "Random", then set a random scope and seed.
 5. Alternatively click the "🎲 Generate random combination" button.
 6. Use "Current editing module" to edit one category at a time; switching modules only changes the display and preserves every field value. Use "Enable current module only" to change enabled state, "Clear structured modules" to keep free text, or "Clear all" to wipe both.
-7. Connect "中文提示词" (Chinese prompt) to a text-encoding node.
+7. Connect "中文提示词" (Chinese prompt) to a Z-Image text-encoding node, or use the final "英文提示词" output for a workflow that expects English natural language.
 8. Connect "推荐宽度" (recommended width) and "推荐高度" (recommended height) to compatible latent width/height inputs, or type the same values manually.
 
 ### Standalone Module Nodes
@@ -116,13 +116,14 @@ Recommended order:
 Canvas → Person → Hair → Clothing → Pose & Action → Scene → Photography → Visual
 ```
 
-- Each node accepts an optional previous prompt and outputs the combined prompt. The first node can be left unconnected.
-- The Canvas node also outputs the recommended width and height.
+- Every node provides two independent chains: `前置提示词 → 组合提示词` for Chinese and `前置英文提示词 → 英文提示词` for English. Either chain may start with its first input unconnected.
+- The Canvas node preserves the original `combined prompt, width, height` order and appends the English prompt as its final output.
 - Every module has its own preset, density, and seed, plus buttons to randomize the module, restore preset-following values, or clear the module.
 - Bypass a module with `Ctrl+B` to pass its incoming string directly to the next node.
 - Standalone nodes do not share editable widget state. In a direct chain, however, the combined string carries resolved upstream fields at runtime, so downstream random photography can remain compatible with the actual pose, scene, and other completed modules. The TXT prompt-library node preserves this context. When a TXT module fragment replaces a standard module, that module's stale structured fields are removed so downstream nodes do not keep filtering against an obsolete pose or scene. Arbitrary TXT fragments cannot be reliably parsed back into every widget field, so the replacement is treated as opaque user content.
 - A third-party text node that creates a new plain string may discard that runtime context. Use the full builder when one preset should centrally control all 92 fields.
 - `Z-Image TXT提示词库` inserts reusable full prompts; `Z-Image TXT模块词库` inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual, or Custom. To replace a standalone structured module, put the TXT module node in that module's position or bypass the original module with `Ctrl+B`; the TXT node does not remove module text that is already present in its incoming string.
+- The English interface renders built-in dropdown fields only. It does not silently translate arbitrary Chinese free text or Chinese TXT bodies. If a user TXT fragment replaces a standard module, that module is omitted from the English output so stale built-in fields are not emitted. Prepare English TXT/free text and join it downstream when custom content must also reach an English-language model.
 
 ## TXT Libraries
 
@@ -271,6 +272,7 @@ Density controls the information level, not an official token limit.
 | 中文提示词 | `STRING` | Connect to a Z-Image text-encoding node |
 | 推荐宽度 | `INT` | Set the latent width |
 | 推荐高度 | `INT` | Set the latent height |
+| 英文提示词 | `STRING` | Connect to a text encoder that expects English natural language, such as a Krea 2 workflow |
 
 ## Compatibility
 

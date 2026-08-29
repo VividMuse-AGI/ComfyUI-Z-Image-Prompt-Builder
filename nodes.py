@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import random
+import re
 from itertools import product
 from pathlib import Path
 from typing import Dict, Iterable, Mapping, Sequence
@@ -4947,6 +4948,692 @@ def _visual_prompt_text(fields: Mapping[str, str], density: str) -> str:
     return "；".join(sections)
 
 
+_ENGLISH_FIELD_LIBRARY_SOURCES = {
+    "成像媒介": (_THEME_MEDIA_LIBRARY, "capture.medium"),
+    "写真主题": (_THEME_MEDIA_LIBRARY, "theme.subject"),
+    "年龄阶段": (_CORE_LIBRARY, "person.age"),
+    "族裔大类": (_CORE_LIBRARY, "person.ethnicity"),
+    "地域族裔分支": (_CORE_LIBRARY, "person.ethnicity_branch"),
+    **PERSON_FIELD_LIBRARY_IDS,
+    **HAIR_LIBRARY_FIELDS,
+    **{
+        field_name: (_CORE_LIBRARY, field_id)
+        for field_name, field_id in CLOTHING_LIBRARY_FIELDS.items()
+    },
+    **{
+        field_name: (_POSE_LIBRARY, field_id)
+        for field_name, field_id in POSE_LIBRARY_FIELDS.items()
+    },
+    **{
+        field_name: (_SCENE_LIBRARY, field_id)
+        for field_name, field_id in SCENE_LIBRARY_FIELDS.items()
+    },
+    **{
+        field_name: (_CAMERA_VISUAL_LIBRARY, field_id)
+        for field_name, field_id in {
+            **CAMERA_LIBRARY_FIELDS, **VISUAL_LIBRARY_FIELDS,
+        }.items()
+    },
+}
+
+_ENGLISH_OPTION_ID_MAPS = {
+    field_name: _library_label_to_id(library, field_id)
+    for field_name, (library, field_id) in _ENGLISH_FIELD_LIBRARY_SOURCES.items()
+}
+_ENGLISH_OPTION_ID_MAPS["场景地点"].update(
+    _library_label_to_id(_ADVANCED_LIBRARY, "scene.indoor_location")
+)
+
+_ENGLISH_THEME_OVERRIDES = {
+    "阳台绿植晨间写真": "morning balcony portrait among green plants",
+    "深夜书房独处写真": "late-night solitary study-room portrait",
+    "复古胶片质感时尚写真": "retro film fashion editorial",
+    "高定礼服后台写真": "haute couture backstage portrait",
+    "汽车商业广告写真": "automotive commercial portrait",
+    "食品饮料广告写真": "food and beverage commercial photography",
+    "美甲特写美容写真": "nail-art beauty close-up",
+    "香氛喷雾美容广告": "fragrance mist beauty campaign",
+    "夜市烟火叙事写真": "night-market documentary portrait",
+    "雨伞街头剪影写真": "street portrait with an umbrella silhouette",
+    "瀑布溪流清新写真": "fresh waterfall and stream portrait",
+    "高原湖泊纯净写真": "clean highland lake portrait",
+    "和服京都之旅写真": "Kyoto travel portrait in kimono",
+    "温泉度假休闲写真": "relaxed hot-spring resort portrait",
+    "滑雪运动写真": "skiing sports portrait",
+    "冲浪运动写真": "surfing sports portrait",
+    "汉服襦裙写真": "traditional Hanfu ruqun portrait",
+    "少数民族风情写真": "ethnic folk-style portrait",
+    "昭和和风复古写真": "retro Showa-era Japanese portrait",
+    "上海滩十里洋场写真": "vintage cosmopolitan Shanghai portrait",
+    "剧院舞台电影静帧": "cinematic theater-stage still",
+    "海港码头电影静帧": "cinematic harbor-pier still",
+    "人鱼海岸概念写真": "mermaid coast concept portrait",
+    "天使羽翼概念写真": "angel-wings concept portrait",
+}
+
+_ENGLISH_VALUE_OVERRIDES = {
+    ("发色", "银白色"): "silver-white hair",
+    ("发型造型", "双环发髻"): "ornate double-loop buns",
+    ("连体服类型", "无袖瑜伽连体衣"): "a fitted sleeveless yoga bodysuit",
+    ("上装类型", "简洁短袖T恤"): "a clean short-sleeve T-shirt",
+    ("上装类型", "亮片吊带上衣"): "a fitted sequined camisole",
+    ("上装类型", "挂脖比基尼上装"): "a halter bikini top",
+    ("下装类型", "高开衩缎面长裙"): "a high-slit satin maxi skirt",
+    ("下装类型", "系带比基尼泳裤"): "side-tie bikini bottoms",
+    ("上装颜色", "珊瑚红"): "coral red",
+    ("下装颜色", "珊瑚红"): "coral red",
+    ("上装材质", "亮片面料"): "fine sequined fabric",
+    ("上装材质", "泳装弹力面料"): "stretch swimwear fabric",
+    ("下装材质", "泳装弹力面料"): "stretch swimwear fabric",
+    ("服装配件", "浅粉色修身长袖内搭"): "a fitted pale-pink long-sleeve underlayer",
+    ("画面瞬间", "夜间会所短暂停留"): "a brief pause in a nightclub",
+    ("画面瞬间", "沙滩上短暂停留"): "a brief pause on the beach",
+    ("画面瞬间", "瑜伽体式停留"): "holding a yoga pose",
+    ("画面瞬间", "窗边安静独处"): "a quiet moment alone by the window",
+    ("基础姿态", "单车侧坐"): "sitting sideways on a vintage bicycle saddle",
+    ("基础姿态", "复古扶手椅坐姿"): "seated in an ornate vintage armchair",
+    ("基础姿态", "沙滩侧卧"): "reclining sideways on a bright beach with the upper body slightly raised",
+    ("基础姿态", "地面侧坐"): "seated sideways on the floor",
+    ("基础姿态", "低位鸽子式"): "a low pigeon-pose variation on a yoga mat",
+    ("基础姿态", "窗边座椅坐姿"): "seated sideways on a chair by the window",
+    ("手部动作", "举白玫瑰并扶大腿"): "one hand holding white roses beside the face, the other resting on the thigh",
+    ("手部动作", "双手放在脑后"): "both hands placed behind the head, elbows open",
+    ("手部动作", "一手扶膝一手搭扶手"): "one hand on the knee and the other on the armrest",
+    ("手部动作", "双手持刺绣团扇"): "holding an embroidered round fan with both hands",
+    ("手部动作", "侧卧双手支撑"): "one forearm supporting the body and the other hand resting on the sand",
+    ("手部动作", "双手交叠搭膝"): "forearms and hands crossed loosely over the raised knee",
+    ("手部动作", "瑜伽手部支撑"): "one hand on the front thigh and the other relaxed near the hip",
+    ("手部动作", "双手捧白色瓷杯"): "holding a white porcelain cup gently with both hands",
+    ("腿部动作", "扶手椅曲腿伸展"): "one knee raised while the other leg extends downward",
+    ("腿部动作", "侧卧屈伸腿"): "one leg extended and the other bent to create clear layering",
+    ("腿部动作", "地面屈膝伸腿"): "one knee raised and the other leg extended along the floor",
+    ("腿部动作", "鸽子式腿部伸展"): "front leg folded, rear leg extended straight back with the instep on the floor",
+    ("场景地点", "公园草地"): "a sunlit park lawn",
+    ("场景地点", "复古会所"): "a dimly lit vintage club interior",
+    ("场景地点", "工业地下通道"): "an underground industrial passage",
+    ("背景环境", "阳光公园草坪"): "a sunlit park lawn with softly blurred trees",
+    ("背景环境", "复古会所雕花座椅"): "a dark ornate armchair and an East Asian decorative screen",
+    ("背景环境", "工业通道铁丝网"): "chain-link fencing, concrete flooring, and a dark industrial passage",
+    ("背景环境", "珊瑚粉薄荷绿渐变背景"): "a soft coral-pink and mint-green gradient backdrop",
+    ("背景环境", "明亮落地窗客厅"): "a bright living room with a gray sofa, floor-to-ceiling windows, and indoor plants",
+    ("背景环境", "旧式旅馆房间"): "an old hotel room with a window, bed, worn wooden furniture, and a warm table lamp",
+    ("环境细节", "复古自行车与白玫瑰"): "a vintage bicycle, white roses, and a bright lawn",
+    ("环境细节", "仙鹤屏风与深色家具"): "a crane-decorated screen and dark wooden furniture",
+    ("主配色", "珊瑚粉与薄荷绿"): "coral pink and mint green",
+    ("主配色", "银白与霓虹蓝紫"): "silver white with neon blue and violet",
+    ("主配色", "奶油白与暖木色"): "cream white and warm wood tones",
+    ("主配色", "浅灰与柔和肤色"): "light gray and soft skin tones",
+}
+
+_ENGLISH_VALUE_OVERRIDES.update({
+    ("前景框景", "失焦嫩绿枫叶框景"): "large out-of-focus tender green maple leaves creating natural foreground framing",
+    ("前景框景", "浅木色桌沿前景"): "a pale wooden table edge defining the lower foreground",
+    ("前景框景", "灰色门框纵向框景"): "gray door panels and a doorframe creating vertical framing",
+    ("前景框景", "深灰文件夹前景"): "a dark gray folder held upright in the foreground",
+    ("前景框景", "虚化咖啡杯与桌角"): "a softly blurred coffee cup and table corner in the foreground",
+    ("前景框景", "窗框留白框景"): "a window frame creating clean vertical framing and negative space",
+    ("前景框景", "无明显前景"): "a clean unobstructed foreground",
+    ("场景地点", "高亮庭院绿景"): "a bright green garden courtyard",
+    ("场景地点", "林间纵深"): "a deep forest setting with receding tree trunks",
+    ("场景地点", "窗外街景"): "a window-side setting overlooking a city street",
+    ("场景地点", "奶油色客厅"): "an airy cream-toned living room",
+    ("场景地点", "办公沙发与墙面"): "a modern office lounge with a sofa and clean walls",
+    ("场景地点", "暖色酒店走廊"): "a warm modern hotel corridor",
+    ("场景地点", "灰色门板与走廊"): "a corridor framed by gray wooden doors",
+    ("场景地点", "高级灰渐变背景"): "a refined gray gradient studio",
+    ("场景地点", "木质新中式空间"): "a restrained new-Chinese interior with warm wood",
+    ("场景地点", "复古茶餐厅内景"): "a retro Hong Kong-style diner interior",
+    ("场景地点", "都市玻璃建筑"): "a modern urban glass building",
+    ("场景地点", "大堂玻璃反射"): "a glass-walled lobby with layered reflections",
+    ("场景地点", "城市天际线"): "a rooftop overlooking the city skyline",
+    ("场景地点", "白墙展厅"): "a white-walled contemporary gallery",
+    ("场景地点", "鲜花陈列"): "a street-facing flower shop filled with floral displays",
+    ("场景地点", "网球场围网"): "an outdoor tennis court beside a metal fence",
+    ("场景地点", "健身房镜面"): "a bright mirrored fitness studio",
+    ("场景地点", "校园教学楼"): "a campus academic building",
+    ("场景地点", "密林暗影"): "a shadowed dense forest",
+    ("场景地点", "沙漠沙丘"): "open desert dunes",
+    ("场景地点", "湖面倒影"): "a quiet lakeside with natural reflections",
+    ("场景地点", "高亮夏日树林庭院"): "a bright summer garden surrounded by dense foliage",
+    ("场景地点", "暖木咖啡馆卡座"): "a warm wood cafe with a dark leather booth",
+    ("场景地点", "临街咖啡馆窗景"): "a window seat in a street-facing cafe",
+    ("场景地点", "暖色走廊灰色门板"): "a warm corridor framed by gray door panels",
+    ("场景地点", "米杏沙发浅灰紫墙面"): "a simple office lounge with a beige sofa and pale gray-lilac wall",
+    ("场景地点", "奶油色窗边室内"): "a cream-toned interior beside a softly lit window",
+    ("场景地点", "现代办公休息区"): "a clean modern office lounge",
+    ("场景地点", "玻璃幕墙都市夜景"): "a modern glass-walled interior overlooking city lights at night",
+    ("场景地点", "当代美术馆白墙"): "a spacious contemporary gallery with white walls",
+    ("场景地点", "婚纱礼服陈列厅"): "a bright elegant bridal gown showroom",
+    ("场景地点", "火车站候车厅"): "a railway-station waiting hall",
+    ("背景环境", "高亮夏日树林庭院"): "a bright softly blurred summer garden with dense green foliage",
+    ("背景环境", "暖木咖啡馆卡座"): "warm wood walls, a dark leather booth, tables, and a softly blurred menu board",
+    ("背景环境", "临街咖啡馆窗景"): "a street-facing cafe window with a softly blurred urban view",
+    ("背景环境", "暖色走廊灰色门板"): "a warm corridor with pale walls, floor tiles, and textured gray door panels",
+    ("背景环境", "米杏沙发浅灰紫墙面"): "a beige sofa, pale gray-lilac wall, and a softly blurred green plant",
+    ("背景环境", "奶油色窗边室内"): "a cream-toned window interior with a pale tabletop and soft curtains",
+    ("背景环境", "现代办公休息区"): "a tidy modern office lounge with a beige sofa, pale gray walls, and green plants",
+    ("背景环境", "玻璃幕墙都市夜景"): "softly blurred glass walls and city lights at night",
+    ("背景环境", "当代美术馆白墙"): "spacious white contemporary-gallery walls with a few large artworks",
+    ("背景环境", "复古茶餐厅"): "retro booth seating, patterned wall tiles, and warm pendant lights",
+    ("背景环境", "婚纱礼服陈列厅"): "a bright elegant bridal showroom with simple drapery and mirrors",
+    ("背景环境", "火车站候车厅"): "station benches, a timetable display, and a platform entrance receding into the distance",
+    ("环境细节", "铁丝网与工业地面"): "chain-link fencing and a textured industrial floor",
+    ("环境细节", "美容反光板"): "a restrained beauty reflector near the frame edge",
+    ("环境细节", "沙发落地窗与绿植"): "a pale gray sofa, floor-to-ceiling windows, and indoor plants",
+    ("环境细节", "旧木家具与暖黄台灯"): "worn wooden furniture and a warm amber table lamp",
+    ("主配色", "浅灰与暖白"): "light gray and warm white",
+    ("主配色", "珊瑚粉、薄荷绿与肤色"): "coral pink, mint green, and natural skin tones",
+    ("主配色", "暖棕与暖黄"): "warm brown and amber",
+    ("主配色", "香槟粉与深棕黑"): "champagne pink and deep brown-black",
+    ("主配色", "冷蓝与暖黄"): "cool blue and warm amber",
+})
+
+_ENGLISH_VALUE_OVERRIDES.update({
+    ("背景环境", "林间小径树干纵深"): "a forest path receding between tall tree trunks and layered foliage",
+    ("背景环境", "奶油公寓客厅"): "an airy cream-toned apartment with a pale sofa and soft curtains",
+    ("背景环境", "都市商业街"): "a modern shopping street with glass facades and softly blurred pedestrians",
+    ("背景环境", "玻璃建筑大堂"): "a modern glass-walled lobby with stone flooring and layered reflections",
+    ("背景环境", "酒店阳台开阔景观"): "a hotel balcony overlooking an open city or coastal view",
+    ("背景环境", "城市天台天际线"): "a rooftop with layered building silhouettes and a distant city skyline",
+    ("背景环境", "海边地平线"): "a sandy shore, open sea, and a clear horizon",
+    ("背景环境", "独立书店书架"): "orderly wooden bookshelves filled with visible book spines",
+    ("背景环境", "临街花店陈列"): "layered displays of flowers, green leaves, and wrapping paper in a street-facing flower shop",
+    ("背景环境", "室外网球场"): "a green outdoor tennis court with crisp white lines and a distant metal fence",
+    ("背景环境", "明亮健身训练室"): "a bright fitness studio with mirrors, training equipment, and pale flooring",
+    ("背景环境", "高级灰摄影棚"): "a restrained gray studio with a smooth tonal gradient and minimal props",
+    ("背景环境", "木质新中式室内"): "a restrained new-Chinese wood interior with a screen, table, and bamboo shadows",
+    ("背景环境", "家庭烘焙厨房"): "a bright tidy home kitchen with a wooden worktop, oven, and a few baking tools",
+    ("背景环境", "复古唱片店"): "a retro record store with wooden racks, album-cover displays, and warm wall lights",
+    ("背景环境", "自然采光画室"): "a naturally lit art studio with an easel, canvases, and neatly arranged painting tools",
+    ("背景环境", "周末市集摊位"): "an outdoor weekend market with awnings, flowers, and craft stalls receding along the street",
+    ("背景环境", "彩色几何摄影棚"): "a studio built from clean colorful geometric planes with minimal props",
+    ("背景环境", "花艺装置摄影棚"): "a floral installation studio with large branches and generous negative space",
+    ("背景环境", "夜间便利店"): "bright convenience-store shelves, glass doors, and street lights at night",
+    ("背景环境", "地下停车场"): "a cool gray underground parking garage with columns, ceiling lights, and receding bay lines",
+    ("背景环境", "繁忙街道路口"): "an urban intersection with a crosswalk, traffic lights, and softly blurred pedestrians",
+    ("背景环境", "城市人行天桥"): "a modern pedestrian overpass with railing lines and strong architectural perspective",
+    ("背景环境", "春日花海"): "a broad field of spring flowers opening toward soft distant greenery",
+    ("背景环境", "静谧湖畔"): "a calm lake, near-shore grass, and a distant tree line with natural reflections",
+    ("背景环境", "开阔草原"): "open grassland beneath a broad sky and a low distant horizon",
+    ("背景环境", "秋日枫林"): "layered red-orange maple foliage and a leaf-covered path",
+    ("背景环境", "冬日雪林"): "a quiet snowy forest with pale ground and dark tree trunks",
+    ("背景环境", "清幽竹林"): "a tranquil bamboo grove with vertical depth and a narrow stone path",
+    ("背景环境", "海岸悬崖"): "a coastal cliff above rolling sea and open sky",
+    ("背景环境", "沙漠旷野"): "rolling desert dunes with clear wind patterns and an open horizon",
+    ("背景环境", "乡间小路"): "a country lane winding through fields and hedges into the distance",
+    ("背景环境", "海岛小镇街巷"): "pale lanes and low buildings in an island town with the sea beyond",
+    ("背景环境", "山间露营地"): "a restrained mountain campsite with grass, a simple tent, and layered ridgelines",
+    ("背景环境", "葡萄园庄园"): "ordered vineyard rows, a pale manor building, and gently sloping terrain",
+    ("背景环境", "拳击训练馆"): "a boxing gym with a ring, heavy bags, and dark training equipment",
+    ("背景环境", "户外骑行道路"): "an open cycling road with continuous guardrails and distant natural scenery",
+    ("背景环境", "室内羽毛球馆"): "a bright indoor badminton court with a visible net, boundary lines, and high roof structure",
+    ("背景环境", "室内攀岩馆"): "a deep indoor climbing space with colorful holds and high wall structures",
+    ("背景环境", "江南园林"): "a Jiangnan garden with white walls, dark roof tiles, winding corridors, and damp stone paths",
+    ("背景环境", "敦煌壁画空间"): "an ochre interior inspired by Dunhuang murals with flying-apsara motifs and restrained gold details",
+    ("背景环境", "明制中式庭院"): "an orderly Ming-style courtyard with timber doors, windows, and gray brick paving",
+    ("背景环境", "传统书院"): "a traditional academy with wooden shelves, a long table, and courtyard light entering the room",
+    ("背景环境", "七十年代客厅"): "a warm 1970s living room with wooden furniture, patterned textiles, and a vintage lamp",
+    ("背景环境", "复古迪斯科舞厅"): "a retro disco with a mirror ball, colored light strips, and a dark dance floor",
+    ("背景环境", "经典火车站月台"): "a classic railway platform with an old station sign and tracks receding into the distance",
+    ("背景环境", "美式公路餐厅"): "an American roadside diner with red booths, metal-edged tables, and neon signage",
+    ("背景环境", "月夜森林"): "a dark moonlit forest with thin mist and a few glowing plants",
+    ("背景环境", "哥特古堡厅堂"): "a restrained Gothic castle hall with pointed arches, stone columns, and tall windows",
+    ("背景环境", "未来赛博街区"): "a futuristic city district with neon signs, wet pavement, and high-rise buildings",
+    ("背景环境", "蒸汽机械空间"): "a steampunk mechanical interior of copper pipes, gears, and pressure gauges",
+    ("背景环境", "超现实梦境花园"): "a surreal garden of oversized flowers, pale mist, and a curving path",
+    ("背景环境", "星云神殿"): "a fantasy temple with tall stone columns, a nebula sky, and faint luminous patterns",
+    ("背景环境", "水下幻境"): "a clear underwater dreamscape with floating bubbles and gently moving aquatic plants",
+    ("背景环境", "冰雪宫殿"): "a cool ice palace of translucent columns, crystal arches, and snow-covered ground",
+    ("背景环境", "云海仙境"): "layered clouds, distant mountains, and faint pale classical architecture",
+    ("背景环境", "花瓣风暴装置空间"): "a minimal studio transformed by a dynamic installation of suspended petals",
+    ("背景环境", "温泉汤池"): "a steaming hot-spring pool against warm stone walls with soft ripples on the water",
+    ("背景环境", "和风木造庭院"): "a Japanese timber courtyard with a dry garden, shoji doors, and translucent light",
+    ("背景环境", "瀑布溪流"): "a waterfall and clear stream with misty spray and wet rock walls",
+    ("背景环境", "剧院舞台"): "a dim theater stage with deep red curtains and a single overhead beam",
+    ("背景环境", "海港码头"): "a pier extending into the sea with bollards and moored boats",
+    ("背景环境", "天使羽翼殿堂"): "a pure white hall filled with soft luminous mist and descending light columns",
+    ("背景环境", "少数民族集市"): "a richly colored folk market with hanging brocade and silver ornaments",
+    ("背景环境", "昭和和风房间"): "a Showa-era Japanese room with shoji doors, a low table, and an old warm lamp",
+    ("背景环境", "上海滩街景"): "a vintage Shanghai street with neon signs, shikumen buildings, and rickshaw silhouettes",
+})
+
+_ENGLISH_SCENE_DETAIL_LABEL_IDS = {
+    option["label"]: option["id"]
+    for option in _SCENE_LIBRARY["fields"]["scene.detail"]["options"]
+}
+
+_ENGLISH_SCENE_THEME_MAPS = {
+    field_name: {} for field_name in SCENE_OUTPUT_FIELDS
+}
+for _theme_label, _theme_bundles in THEME_SCENE_BUNDLES_BY_THEME.items():
+    for _bundle in _theme_bundles:
+        for _field_name in SCENE_OUTPUT_FIELDS:
+            _selected_value = _bundle.get(_field_name)
+            if _selected_value not in (None, EMPTY_CHOICE):
+                _ENGLISH_SCENE_THEME_MAPS[_field_name].setdefault(
+                    _selected_value, _theme_label
+                )
+
+_ENGLISH_SCENE_BUNDLE_MAPS = {
+    field_name: {} for field_name in SCENE_OUTPUT_FIELDS
+}
+for _bundle in SCENE_BUNDLES:
+    _bundle_id = _bundle.get("id", "")
+    if not re.fullmatch(r"[A-Za-z0-9_:-]+", _bundle_id):
+        continue
+    for _field_name in SCENE_OUTPUT_FIELDS:
+        _selected_value = _bundle.get(_field_name)
+        if _selected_value not in (None, EMPTY_CHOICE):
+            _ENGLISH_SCENE_BUNDLE_MAPS[_field_name].setdefault(
+                _selected_value, _bundle_id
+            )
+
+_ENGLISH_FIELD_PREFIXES = {
+    "发色": ("color_",),
+    "发色色调": ("undertone_",),
+    "染色方式": ("dye_",),
+    "头发长度": ("length_",),
+    "发质与卷度": ("texture_",),
+    "发型造型": ("style_",),
+    "刘海": ("bangs_",),
+    "头部配饰": ("headwear_",),
+    "连衣裙类型": ("dress_",),
+    "连体服类型": ("jumpsuit_",),
+    "上装类型": ("top_",),
+    "下装类型": ("bottom_",),
+    "连衣裙颜色": ("color_",),
+    "连体服颜色": ("color_",),
+    "上装颜色": ("color_",),
+    "下装颜色": ("color_",),
+    "连衣裙材质": ("material_",),
+    "连体服材质": ("material_",),
+    "上装材质": ("material_",),
+    "下装材质": ("material_",),
+    "连衣裙图案": ("pattern_",),
+    "连体服图案": ("pattern_",),
+    "上装图案": ("pattern_",),
+    "下装图案": ("pattern_",),
+    "版型细节": ("fit_",),
+    "袜装": ("legwear_",),
+    "鞋履": ("shoes_",),
+    "服装配件": ("accessory_",),
+    "画面瞬间": ("event_",),
+    "基础姿态": ("base_", "pose_"),
+    "身体方向": ("body_direction_", "direction_"),
+    "身体重心": ("weight_",),
+    "肩颈状态": ("shoulders_",),
+    "手部动作": ("hand_action_", "hands_", "hand_"),
+    "腿部动作": ("leg_action_", "legs_", "leg_"),
+    "头部方向": ("head_direction_", "head_"),
+    "视线": ("gaze_",),
+    "表情": ("expression_",),
+    "场景地点": ("location_",),
+    "时间切片": ("time_",),
+    "天气状态": ("weather_",),
+    "前景框景": ("foreground_",),
+    "背景环境": ("background_",),
+    "环境细节": ("detail_",),
+    "空间材质": ("surface_",),
+    "空间层次": ("spatial_",),
+    "景别": ("shot_",),
+    "画面布局": ("composition_",),
+    "等效焦段": ("lens_",),
+    "拍摄距离": ("distance_",),
+    "机位": ("angle_",),
+    "景深": ("depth_",),
+    "对焦位置": ("focus_",),
+    "主光来源": ("source_",),
+    "光线方向": ("direction_",),
+    "光线质地": ("quality_",),
+    "照明落点": ("target_",),
+    "阴影表现": ("shadow_",),
+    "主配色": ("palette_",),
+    "色温倾向": ("temperature_",),
+    "画面对比": ("contrast_",),
+    "影像风格": ("capture_",),
+    "细节质地": ("texture_",),
+    "高光处理": ("highlight_",),
+    "颗粒质感": ("grain_",),
+}
+
+_ENGLISH_FIELD_TEMPLATES = {
+    "脸型": "{value} face shape",
+    "轮廓细节": "{value} facial contours",
+    "眼型": "{value} eyes",
+    "瞳色": "{value} irises",
+    "眼睑特征": "{value} eyelids",
+    "肤色": "{value} skin tone",
+    "肤质": "{value} skin texture",
+    "整体妆容预设": "{value} makeup",
+    "底妆质感": "{value} base makeup",
+    "眼影色系": "{value} eyeshadow",
+    "眼线造型": "{value} eyeliner",
+    "唇妆颜色": "{value} lip color",
+    "唇面质感": "{value} lip finish",
+    "基础身形": "{value} build",
+    "身量观感": "{value} stature",
+    "线条重点": "{value} body-line emphasis",
+    "发色": "{value} hair",
+    "发色色调": "{value} hair undertone",
+    "染色方式": "{value} hair coloring",
+    "头发长度": "{value} hair length",
+    "发质与卷度": "{value} hair texture",
+    "发型造型": "{value} hairstyle",
+    "刘海": "{value} bangs",
+    "头部配饰": "{value} hair accessory",
+    "版型细节": "{value} fit details",
+    "袜装": "{value}",
+    "鞋履": "{value}",
+    "服装配件": "{value}",
+    "画面瞬间": "{value}",
+    "基础姿态": "{value} pose",
+    "身体方向": "body turned {value}",
+    "身体重心": "weight {value}",
+    "肩颈状态": "{value} shoulders and neck",
+    "手部动作": "hands {value}",
+    "腿部动作": "legs {value}",
+    "头部方向": "head {value}",
+    "视线": "gaze {value}",
+    "表情": "{value} expression",
+    "场景地点": "a {value} setting",
+    "时间切片": "during {value}",
+    "天气状态": "{value} conditions",
+    "前景框景": "{value} in the foreground",
+    "背景环境": "{value} in the background",
+    "环境细节": "environment details: {value}",
+    "空间材质": "{value} surfaces",
+    "空间层次": "{value} spatial depth",
+    "景别": "{value} shot",
+    "画面布局": "{value} composition",
+    "等效焦段": "{value} full-frame-equivalent lens",
+    "拍摄距离": "camera distance {value}",
+    "机位": "{value} camera angle",
+    "景深": "{value} depth of field",
+    "对焦位置": "focus on {value}",
+    "主光来源": "{value} as the key light",
+    "光线方向": "light from {value}",
+    "光线质地": "{value} light quality",
+    "照明落点": "light falling on {value}",
+    "阴影表现": "{value} shadows",
+    "主配色": "{value} color palette",
+    "色温倾向": "{value} color temperature",
+    "画面对比": "{value} contrast",
+    "影像风格": "{value} image style",
+    "细节质地": "{value} detail rendering",
+    "高光处理": "{value} highlights",
+    "颗粒质感": "{value} grain",
+}
+
+_ENGLISH_MODULE_ORDER = (
+    "画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现",
+)
+
+
+def _humanize_english_id(field_name: str, option_id: str) -> str:
+    value = option_id
+    for prefix in _ENGLISH_FIELD_PREFIXES.get(field_name, ()):
+        if value.startswith(prefix):
+            value = value[len(prefix):]
+            break
+    value = value.replace("_plus_", " and ").replace("_and_", " and ")
+    value = value.replace("_", " ")
+    value = re.sub(r"\s+", " ", value).strip()
+    exact_replacements = {
+        "black white": "black-and-white",
+        "t shirt": "T-shirt",
+        "a line": "A-line",
+        "east asian": "East Asian",
+        "southeast asian": "Southeast Asian",
+        "south asian": "South Asian",
+        "central asian": "Central Asian",
+        "west asian middle eastern": "West Asian or Middle Eastern",
+        "latin american": "Latin American",
+    }
+    value = exact_replacements.get(value, value)
+    for source, replacement in (
+        ("full frame", "full-frame"),
+        ("medium format", "medium-format"),
+        ("close up", "close-up"),
+        ("three quarter", "three-quarter"),
+        ("dark brown black", "dark brown-black"),
+        ("half up", "half-up"),
+        ("soft rolloff", "soft roll-off"),
+    ):
+        value = value.replace(source, replacement)
+    return value
+
+
+def _english_option_id(field_name: str, value: str) -> str:
+    return _ENGLISH_OPTION_ID_MAPS.get(field_name, {}).get(value, "")
+
+
+def _english_atomic_value(field_name: str, value: str) -> str:
+    if value in (None, EMPTY_CHOICE) or value in DEPENDENCY_PLACEHOLDER_VALUES.get(
+        field_name, ()
+    ):
+        return ""
+    override = _ENGLISH_VALUE_OVERRIDES.get((field_name, value))
+    if override:
+        return override
+    if field_name == "场景地点":
+        background_override = _ENGLISH_VALUE_OVERRIDES.get(("背景环境", value))
+        if background_override:
+            return f"set in {background_override}"
+    if field_name == "画面比例":
+        width, height = ASPECT_RESOLUTIONS.get(value, (0, 0))
+        ratio = value.split("竖构图", 1)[0].split("横构图", 1)[0].split("方形构图", 1)[0]
+        orientation = "square" if width == height else ("landscape" if width > height else "portrait")
+        return f"{ratio} {orientation} composition"
+    if field_name == "写真主题" and value in _ENGLISH_THEME_OVERRIDES:
+        return f"photorealistic {_ENGLISH_THEME_OVERRIDES[value]}"
+    option_id = _english_option_id(field_name, value)
+    if not option_id and field_name == "环境细节":
+        detail_labels = re.split(r"[、，]", value)
+        if detail_labels and all(
+            label in _ENGLISH_SCENE_DETAIL_LABEL_IDS for label in detail_labels
+        ):
+            details = [
+                _humanize_english_id(
+                    field_name, _ENGLISH_SCENE_DETAIL_LABEL_IDS[label]
+                )
+                for label in detail_labels
+            ]
+            return f"environment details: {', '.join(details)}"
+    if not option_id and field_name in SCENE_OUTPUT_FIELDS:
+        theme_label = _ENGLISH_SCENE_THEME_MAPS[field_name].get(value, "")
+        bundle_id = _ENGLISH_SCENE_BUNDLE_MAPS[field_name].get(value, "")
+        if theme_label:
+            theme_core = _ENGLISH_THEME_OVERRIDES.get(theme_label, "")
+            if not theme_core:
+                theme_id = _english_option_id("写真主题", theme_label)
+                theme_core = _humanize_english_id("写真主题", theme_id)
+            scene_fallbacks = {
+                "场景地点": f"a setting designed for {theme_core}",
+                "前景框景": f"foreground framing suited to {theme_core}",
+                "背景环境": f"a softly detailed {theme_core} background",
+                "环境细节": f"environment details consistent with {theme_core}",
+            }
+            if field_name in scene_fallbacks:
+                return scene_fallbacks[field_name]
+        if bundle_id:
+            bundle_core = _humanize_english_id(field_name, bundle_id)
+            bundle_fallbacks = {
+                "场景地点": f"a {bundle_core} setting",
+                "前景框景": f"{bundle_core} foreground framing",
+                "背景环境": f"a {bundle_core} background",
+                "环境细节": f"{bundle_core} environmental details",
+            }
+            if field_name in bundle_fallbacks:
+                return bundle_fallbacks[field_name]
+    if not option_id:
+        return ""
+    if field_name == "年龄阶段":
+        return {
+            "age_20s": "around 25 years old",
+            "age_30s": "around 35 years old",
+            "age_40s": "around 45 years old",
+            "age_50s": "around 55 years old",
+            "age_60s": "around 65 years old",
+            "age_70_plus": "around 75 years old",
+        }.get(option_id, _humanize_english_id(field_name, option_id))
+    humanized = _humanize_english_id(field_name, option_id)
+    if field_name == "成像媒介":
+        return f"{humanized} photography"
+    if field_name == "写真主题":
+        return f"photorealistic {humanized} portrait photography"
+    if field_name == "场景地点":
+        article = "an" if humanized[:1].lower() in "aeiou" else "a"
+        return f"{article} {humanized} setting"
+    if field_name == "脸型" and humanized.endswith(" face"):
+        return humanized
+    if field_name == "头发长度":
+        length_terms = {
+            "chin": "chin-length hair",
+            "collarbone": "collarbone-length hair",
+            "shoulder": "shoulder-length hair",
+            "chest": "chest-length hair",
+            "waist": "waist-length hair",
+        }
+        return length_terms.get(humanized, f"{humanized} hair length")
+    if field_name == "刘海":
+        return humanized if humanized.endswith(("bangs", "fringe")) else f"{humanized} bangs"
+    if field_name == "细节质地" and humanized.endswith(" detail"):
+        return f"{humanized} rendering"
+    if field_name == "颗粒质感" and humanized.endswith(("grain", "noise", "surface")):
+        return humanized
+    template = _ENGLISH_FIELD_TEMPLATES.get(field_name, "{value}")
+    return template.format(value=humanized)
+
+
+def _english_person_identity_text(fields: Mapping[str, str]) -> str:
+    age = _english_atomic_value("年龄阶段", fields.get("年龄阶段", EMPTY_CHOICE))
+    branch = fields.get("地域族裔分支", EMPTY_CHOICE)
+    ethnicity_field = "地域族裔分支"
+    if branch in (EMPTY_CHOICE, ETHNICITY_BRANCH_GENERIC):
+        branch = fields.get("族裔大类", EMPTY_CHOICE)
+        ethnicity_field = "族裔大类"
+    ethnicity = _english_atomic_value(ethnicity_field, branch)
+    if ethnicity:
+        ethnicity = ethnicity.replace(" descent", "")
+    if age and ethnicity:
+        return f"an adult {ethnicity} woman {age}"
+    if ethnicity:
+        return f"an adult {ethnicity} woman"
+    if age:
+        return f"an adult woman {age}"
+    return ""
+
+
+def _english_module_fields(module_name: str, fields: Mapping[str, str], density: str) -> tuple[str, ...]:
+    if module_name == "画面基础":
+        return ("画面比例", "成像媒介", "写真主题")
+    if module_name == "人物":
+        makeup_fields = ()
+        if fields.get("妆容模式") == "整体预设":
+            makeup_fields = ("整体妆容预设",)
+        elif fields.get("妆容模式") == "分项自定义":
+            makeup_fields = MAKEUP_CUSTOM_FIELDS
+        detail_fields = (
+            *PERSON_FACE_FIELDS, *PERSON_EYE_FIELDS, *PERSON_SKIN_FIELDS,
+            *makeup_fields, *BODY_OUTPUT_FIELDS,
+        )
+        if density == "精简":
+            return ("脸型", "眼型", "肤色", *makeup_fields[:1], "基础身形")
+        return detail_fields
+    if module_name == "发型":
+        if density == "精简":
+            return ("发色", "头发长度", "发型造型", "刘海")
+        return HAIR_OUTPUT_FIELDS
+    if module_name == "服装":
+        active = tuple(CLOTHING_MODE_FIELDS.get(fields.get("穿搭结构"), ()))
+        fields_to_render = (*active, "版型细节", "袜装", "鞋履", "服装配件")
+        if density == "精简":
+            fields_to_render = tuple(
+                field_name for field_name in fields_to_render
+                if field_name.endswith("类型") or field_name.endswith("颜色") or field_name in ("鞋履",)
+            )
+        return fields_to_render
+    if module_name == "姿态动作":
+        if density == "精简":
+            return ("基础姿态", "手部动作", "视线", "表情")
+        return POSE_OUTPUT_FIELDS
+    if module_name == "场景":
+        if density == "精简":
+            return ("场景地点", "时间切片", "前景框景", "背景环境")
+        if density == "标准":
+            return ("场景地点", "时间切片", "天气状态", "前景框景", "背景环境", "环境细节")
+        return SCENE_OUTPUT_FIELDS
+    if module_name == "摄影":
+        if density == "精简":
+            return ("景别", "等效焦段", "机位", "对焦位置")
+        if density == "标准":
+            return tuple(field_name for field_name in CAMERA_OUTPUT_FIELDS if field_name != "拍摄距离")
+        return CAMERA_OUTPUT_FIELDS
+    if module_name == "视觉表现":
+        if density == "精简":
+            return ("主光来源", "光线方向", "光线质地", "主配色", "影像风格")
+        return VISUAL_OUTPUT_FIELDS
+    return ()
+
+
+def render_english_module_fragment(
+    module_name: str,
+    fields: Mapping[str, str],
+    density: str = "标准",
+) -> str:
+    """Render one built-in structured module as an English positive prompt."""
+
+    if density not in PROMPT_DENSITIES:
+        density = "标准"
+    parts = []
+    if module_name == "人物":
+        identity = _english_person_identity_text(fields)
+        if identity:
+            parts.append(identity)
+    for field_name in _english_module_fields(module_name, fields, density):
+        value = fields.get(field_name, EMPTY_CHOICE)
+        rendered = _english_atomic_value(field_name, value)
+        if rendered:
+            parts.append(rendered)
+    if not parts:
+        return ""
+    return f"{', '.join(parts)}."
+
+
+def compose_english_prompt_text(
+    fields: Mapping[str, str],
+    density: str = "标准",
+    excluded_modules: Iterable[str] = (),
+) -> str:
+    """Compose offline English from built-in fields only.
+
+    Arbitrary Chinese free text and user TXT fragments are intentionally not
+    machine-translated. A user fragment that replaces a module excludes that
+    module from this English output instead of silently emitting stale fields.
+    """
+
+    excluded = set(excluded_modules)
+    fragments = [
+        render_english_module_fragment(module_name, fields, density).rstrip(". ")
+        for module_name in _ENGLISH_MODULE_ORDER
+        if module_name not in excluded
+    ]
+    body = ". ".join(fragment for fragment in fragments if fragment)
+    return f"{body}." if body else ""
+
+
+def join_english_prompt_text(first: str, second: str) -> str:
+    """Join two English prompt fragments with stable sentence punctuation."""
+
+    first_text = "" if first is None else str(first).strip()
+    second_text = "" if second is None else str(second).strip()
+    if not first_text:
+        return second_text
+    if not second_text:
+        return first_text
+    separator = " " if first_text.endswith((".", "!", "?", ";", ":", ",")) else ". "
+    return f"{first_text}{separator}{second_text}"
+
 def _normalize_user_module_fragment(value: str) -> str:
     """Trim only outer separators so imported Chinese prose joins cleanly."""
 
@@ -5297,11 +5984,11 @@ class ZImageChinesePromptBuilder:
 
     CATEGORY = "VividMuse/Z-Image"
     FUNCTION = "build_prompt"
-    RETURN_TYPES = ("STRING", "INT", "INT")
-    RETURN_NAMES = ("中文提示词", "推荐宽度", "推荐高度")
+    RETURN_TYPES = ("STRING", "INT", "INT", "STRING")
+    RETURN_NAMES = ("中文提示词", "推荐宽度", "推荐高度", "英文提示词")
     OUTPUT_NODE = False
     DESCRIPTION = (
-        "通过写真预设、下拉字段和确定性随机种子，生成中文自然语言正向提示词。"
+        "通过写真预设、下拉字段和确定性随机种子，生成中英文自然语言正向提示词。"
     )
 
     @classmethod
@@ -5425,11 +6112,19 @@ class ZImageChinesePromptBuilder:
             fields, density, user_module_fragments=user_module_fragments
         )
         prompt = join_prompt_text(free_prompt, structured_prompt, join_position)
+        replaced_modules = {
+            module_name
+            for module_name, fragment in user_module_fragments.items()
+            if str(fragment).strip()
+        }
+        english_prompt = compose_english_prompt_text(
+            fields, density, excluded_modules=replaced_modules
+        )
         aspect = fields["画面比例"]
         if aspect not in ASPECT_RESOLUTIONS:
             aspect = _preset_values(preset)["画面比例"]
         width, height = ASPECT_RESOLUTIONS[aspect]
-        return prompt, width, height
+        return prompt, width, height, english_prompt
 
 
 NODE_CLASS_MAPPINGS = {
