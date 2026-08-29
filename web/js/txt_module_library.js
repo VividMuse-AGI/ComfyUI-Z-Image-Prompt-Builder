@@ -56,6 +56,18 @@ const MODULE_ALIASES = new Map([
   ["视觉", "视觉表现"],
   ["光影色彩", "视觉表现"],
   ["自定义", "自定义"],
+  ["canvas", "画面基础"],
+  ["person", "人物"],
+  ["hair", "发型"],
+  ["clothing", "服装"],
+  ["pose", "姿态动作"],
+  ["pose & action", "姿态动作"],
+  ["scene", "场景"],
+  ["photography", "摄影"],
+  ["camera", "摄影"],
+  ["visual", "视觉表现"],
+  ["visual style", "视觉表现"],
+  ["custom", "自定义"],
 ]);
 const EMPTY_VALUE = "当前模块没有词库条目";
 const MAX_FILE_BYTES = 1024 * 1024;
@@ -165,7 +177,10 @@ function setWidgetVisible(widget, visible) {
 }
 
 function normalizeModule(rawModule) {
-  return MODULE_ALIASES.get(String(rawModule || "").trim()) || null;
+  const normalized = String(rawModule || "").trim();
+  return MODULE_ALIASES.get(normalized)
+    || MODULE_ALIASES.get(normalized.toLowerCase())
+    || null;
 }
 
 function uniqueModuleTitles(entries) {
@@ -226,12 +241,12 @@ function parseTxtModuleLibrary(text) {
       continue;
     }
     if (!current) continue;
-    const moduleLine = line.match(/^\s*模块\s*[:：]\s*(.*?)\s*$/u);
+    const moduleLine = line.match(/^\s*(?:模块|module)\s*[:：]\s*(.*?)\s*$/iu);
     if (moduleLine) {
       current.module = normalizeModule(moduleLine[1]);
       continue;
     }
-    const tagLine = line.match(/^\s*标签\s*[:：]\s*(.*?)\s*$/u);
+    const tagLine = line.match(/^\s*(?:标签|tags?)\s*[:：]\s*(.*?)\s*$/iu);
     if (tagLine) {
       current.tags = tagLine[1]
         .split(/[,，]/u)
@@ -289,6 +304,7 @@ function syncModuleLibraryControls(node, resize = true) {
   const status = appliedTitle || (targetValue ? "已有内容" : "未设置");
   const action = moduleName === "自定义" ? "启用自定义模块" : "应用到" + moduleName + "模块";
   node.__vividMuseTxtModuleApplyButton.name = action + "（当前：" + status.slice(0, 16) + "）";
+  globalThis.__vividMuseZImageI18n?.localizeNode?.(node);
   if (resize) resizeNode(node);
   markDirty(node);
 }
@@ -304,7 +320,9 @@ function setModuleLibraryExpanded(node, expanded, resize = true) {
 }
 
 function notifyError(error) {
-  const message = error instanceof Error ? error.message : String(error);
+  const rawMessage = error instanceof Error ? error.message : String(error);
+  const message = globalThis.__vividMuseZImageI18n?.translateMessage?.(rawMessage)
+    || rawMessage;
   console.error("VividMuse TXT module library:", error);
   globalThis.alert?.(message);
 }

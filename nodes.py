@@ -5426,6 +5426,8 @@ def _english_atomic_value(field_name: str, value: str) -> str:
         return f"{ratio} {orientation} composition"
     if field_name == "写真主题" and value in _ENGLISH_THEME_OVERRIDES:
         return f"photorealistic {_ENGLISH_THEME_OVERRIDES[value]}"
+    if field_name == "拍摄距离":
+        return f"camera distance {str(value).removesuffix('米')} m"
     option_id = _english_option_id(field_name, value)
     if not option_id and field_name == "环境细节":
         detail_labels = re.split(r"[、，]", value)

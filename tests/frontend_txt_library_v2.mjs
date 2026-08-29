@@ -69,6 +69,15 @@ assert.deepEqual(
     .map((entry) => entry.title),
   ["同名", "同名（2）"],
 );
+assert.deepEqual(api.parseTxtPromptLibrary(`
+## English portrait
+Tags: portrait, cafe
+A warm cafe portrait with soft window light.
+`), [{
+  title: "English portrait",
+  tags: ["portrait", "cafe"],
+  prompt: "A warm cafe portrait with soft window light.",
+}]);
 
 const exampleText = fs.readFileSync(
   new URL("../examples/TXT词库示例.txt", import.meta.url),
@@ -77,6 +86,11 @@ const exampleText = fs.readFileSync(
 const exampleEntries = api.parseTxtPromptLibrary(exampleText);
 assert.equal(exampleEntries.length, 10);
 assert.equal(exampleEntries.some((entry) => entry.prompt.includes("写法说明")), false);
+const englishExampleEntries = api.parseTxtPromptLibrary(fs.readFileSync(
+  new URL("../examples/TXT-prompt-library-example.en.txt", import.meta.url),
+  "utf8",
+));
+assert.equal(englishExampleEntries.length, 5);
 
 const node = makeNode();
 api.installTxtLibraryWidgets(node);

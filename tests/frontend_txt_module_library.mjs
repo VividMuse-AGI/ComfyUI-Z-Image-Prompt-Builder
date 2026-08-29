@@ -78,6 +78,19 @@ function widget(node, name) {
 
 const parsed = api.parseTxtModuleLibrary(text);
 assert.deepEqual(parsed.map((entry) => entry.module), modules);
+const englishParsed = api.parseTxtModuleLibrary(`
+## Soft window lighting
+Module: Visual Style
+Tags: soft light, low contrast
+Soft window light, a low-contrast pastel palette, and fine film grain.
+---
+## Handheld product
+Module: Custom
+Tag: product
+The subject holds a clear glass perfume bottle with its label facing the camera.
+`);
+assert.deepEqual(englishParsed.map((entry) => entry.module), ["视觉表现", "自定义"]);
+assert.deepEqual(englishParsed[0].tags, ["soft light", "low contrast"]);
 assert.throws(() => api.parseTxtModuleLibrary("每行一条不适用于模块词库"), /分块格式/);
 assert.throws(() => api.parseTxtModuleLibrary("## 缺少模块\n正文"), /缺少有效/);
 assert.throws(() => api.parseTxtModuleLibrary("## 错误模块\n模块：声音\n正文"), /缺少有效/);
@@ -93,6 +106,11 @@ assert.deepEqual(
   modules.map(() => 2),
 );
 assert.equal(exampleEntries.some((entry) => entry.prompt.includes("写法说明")), false);
+const englishExampleEntries = api.parseTxtModuleLibrary(fs.readFileSync(
+  new URL("../examples/TXT-module-library-example.en.txt", import.meta.url),
+  "utf8",
+));
+assert.deepEqual(englishExampleEntries.map((entry) => entry.module), modules);
 
 const node = makeNode();
 extension.nodeCreated(node);

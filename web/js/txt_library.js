@@ -176,7 +176,7 @@ function parseTxtPromptLibrary(text) {
       continue;
     }
     if (!current) continue;
-    const tagLine = line.match(/^\s*标签\s*[:：]\s*(.*?)\s*$/u);
+    const tagLine = line.match(/^\s*(?:标签|tags?)\s*[:：]\s*(.*?)\s*$/iu);
     if (tagLine) {
       current.tags = tagLine[1]
         .split(/[,，]/u)
@@ -214,6 +214,7 @@ function syncTxtLibraryControls(node, resize = true) {
   node.__vividMuseTxtLibraryToggle.name = entries.length
     ? `📚 TXT用户词库（${fileName || "未命名"} · ${entries.length}条）`
     : "📚 TXT用户词库";
+  globalThis.__vividMuseZImageI18n?.localizeNode?.(node);
   if (resize) resizeNode(node);
   markDirty(node);
 }
@@ -229,7 +230,9 @@ function setTxtLibraryExpanded(node, expanded, resize = true) {
 }
 
 function notifyError(error) {
-  const message = error instanceof Error ? error.message : String(error);
+  const rawMessage = error instanceof Error ? error.message : String(error);
+  const message = globalThis.__vividMuseZImageI18n?.translateMessage?.(rawMessage)
+    || rawMessage;
   console.error("VividMuse TXT prompt library:", error);
   globalThis.alert?.(message);
 }

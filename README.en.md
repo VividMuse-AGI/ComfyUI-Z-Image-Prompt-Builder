@@ -7,6 +7,7 @@ A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-langua
 ## Features
 
 - Outputs both **Chinese and English positive prompts**; no negative prompts are generated. English is rendered deterministically from built-in structured fields without an online translation service.
+- The complete frontend supports **Auto / 中文 / English**. Auto follows ComfyUI's language while saved field identifiers and combo values remain Chinese for backward compatibility.
 - Follows Z-Image's natural-language style — no traditional weight tags or "8K / masterpiece" quality meta-tags.
 - Three prompt densities: **concise / standard / detailed** (standard is the default).
 - **92 structured fields** across 8 modules — Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, and Visual. Each field can be set to "Follow preset", "Random", "Disabled", or a specific value; dependent fields collapse according to the current mode.
@@ -97,6 +98,8 @@ Do not keep two copies of the node under different folders, because ComfyUI may 
 
 ## Quick Start
 
+Set **Z-Image Prompt Builder: Interface language / 界面语言** in ComfyUI Settings to Auto, 中文, or English. The language can be changed without converting saved workflow values.
+
 1. Add the "Z-Image 中文提示词生成器" node.
 2. Pick a portrait preset and a prompt density.
 3. Leave fields as "Follow preset", or set specific values anywhere.
@@ -148,19 +151,19 @@ Recommended block format:
 
 ```text
 ## Japanese café close-up
-标签：portrait, café, warm tone
+Tags: portrait, café, warm tone
 3:4竖构图，真实写实暖调咖啡馆近景人像，一位25岁左右的东亚成年女性……
 ---
 
 ## Rainy city night
-标签：portrait, night, cinematic
+Tags: portrait, night, cinematic
 3:2横构图，真实写实城市雨夜环境人像……
 ```
 
 Format rules:
 
 - `## Title` identifies an entry. Duplicate titles receive an automatic numeric suffix.
-- `标签：` is optional and accepts Chinese or English commas. Tags are never added to the prompt. They are currently stored as metadata but are not yet exposed as a filter.
+- `Tags:` or `Tag:` is optional and accepts Chinese or English commas. Chinese `标签：` remains supported. Tags are never added to the prompt and are currently stored as metadata rather than exposed as a filter.
 - Everything after the title and optional tags is the prompt body; it may span multiple lines.
 - A line containing only `---` is the recommended separator. A new `## Title` also closes the previous entry.
 - Put explanatory comments before the first entry and start them with `#`.
@@ -173,7 +176,7 @@ If the whole file contains no `## Title`, simple mode treats each non-empty, non
 | 添加到前面 | Put the selected entry before the current free prompt |
 | 替换自由提示词 | Replace the free prompt with the selected entry |
 
-See [`examples/TXT词库示例.txt`](examples/TXT词库示例.txt) for a complete Chinese example library.
+See [`examples/TXT-prompt-library-example.en.txt`](examples/TXT-prompt-library-example.en.txt) for a complete English guide and [`examples/TXT词库示例.txt`](examples/TXT词库示例.txt) for the Chinese example.
 
 ### Structured TXT Module Library
 
@@ -189,14 +192,14 @@ Every entry must use block format and include a `模块：` line:
 
 ```text
 ## Clear Japanese-style person
-模块：人物
-标签：East Asian, twenties, clean makeup
+Module: Person
+Tags: East Asian, twenties, clean makeup
 一位25岁左右的东亚成年女性，小巧鹅蛋脸，深棕色杏仁眼，暖白自然肤质，清透裸粉妆。
 ---
 
 ## Product-layout whitespace
-模块：自定义
-标签：product, layout, whitespace
+Module: Custom
+Tags: product, layout, whitespace
 人物右侧保留大面积干净留白，前景加入一只透明香水瓶作为视觉锚点。
 ```
 
@@ -215,6 +218,8 @@ Supported standard module names:
 
 Recognized aliases include `基础画面`, `人物设定`, `角色`, `头发`, `穿搭`, `姿态`, `动作`, `环境`, `镜头`, `视觉`, and `光影色彩`. The UI normalizes aliases to the standard names after import.
 
+English files may use `Module:` with Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual Style, or Custom. `Tags:` and `Tag:` are also accepted; all Chinese keywords and module names remain compatible.
+
 ### Standard Modules vs. Custom
 
 - A non-empty user fragment applied to one of the eight standard modules replaces that entire built-in module in the final output, preventing duplicate descriptions.
@@ -222,7 +227,7 @@ Recognized aliases include `基础画面`, `人物设定`, `角色`, `头发`, `
 - `拼接位置` controls whether the free prompt appears before or after the complete structured result. The Custom fragment remains part of the structured result.
 - Preset changes and random generation keep applied user-module fragments. `仅启用当前模块` clears user fragments from the other modules.
 
-See [`examples/TXT模块词库示例.txt`](examples/TXT模块词库示例.txt) for entries covering every standard module and Custom.
+See [`examples/TXT-module-library-example.en.txt`](examples/TXT-module-library-example.en.txt) for the English format guide and [`examples/TXT模块词库示例.txt`](examples/TXT模块词库示例.txt) for the Chinese library.
 
 ### Clear and Remove Actions
 

@@ -48,6 +48,20 @@ class EnglishOutputTests(unittest.TestCase):
                 self.assertTrue(rendered, (field_name, value))
                 self.assertIsNone(CJK_RE.search(rendered), (field_name, value, rendered))
 
+    def test_camera_distance_keeps_decimal_points(self):
+        self.assertEqual(
+            nodes._english_atomic_value("拍摄距离", "0.5米"),
+            "camera distance 0.5 m",
+        )
+        self.assertEqual(
+            nodes._english_atomic_value("拍摄距离", "1.5米"),
+            "camera distance 1.5 m",
+        )
+        self.assertEqual(
+            nodes._english_atomic_value("拍摄距离", "3.5米"),
+            "camera distance 3.5 m",
+        )
+
     def test_eight_module_nodes_form_independent_chinese_and_english_chains(self):
         canvas_result = modular_nodes.ZImageCanvasModule().build_module()
         chinese_prompt = canvas_result[0]

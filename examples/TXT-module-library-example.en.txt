@@ -1,0 +1,69 @@
+# TXT Module Library — English Format Guide
+# Lines before the first "##" heading are comments and are ignored during import.
+# This library stores one prompt module per entry; it is not a complete prompt library.
+#
+# Required block format:
+# 1. Title: ## My module title
+# 2. Module: Module: Canvas | Person | Hair | Clothing | Pose & Action |
+#    Scene | Photography | Visual Style | Custom
+# 3. Tags: optional. Use "Tags: tag one, tag two" or "Tag: tag one".
+# 4. Body: describe only the selected module. Keep it concise, positive, and
+#    ready to join directly to adjacent prompt fragments.
+# 5. Custom does not replace any of the eight standard modules. Use it for a
+#    product prop, poster whitespace, narrative requirement, or other add-on.
+# 6. Separate entries with --- on its own line.
+# Chinese keywords (模块：/标签：) and Chinese module names remain supported.
+# Limits: 1 MB per file, 500 entries total, 20,000 characters per entry.
+
+## Full-frame vertical portrait
+Module: Canvas
+Tags: portrait, photorealistic, digital
+2:3 portrait composition, photorealistic full-frame digital portrait photography.
+---
+
+## East Asian woman in her mid-20s
+Module: Person
+Tags: East Asian, woman, natural skin
+An adult East Asian woman in her mid-20s with a balanced oval face, dark brown almond eyes, warm fair skin with natural texture, subtle nude-pink makeup, and a balanced build.
+---
+
+## Long dark soft waves
+Module: Hair
+Tags: long hair, dark brown, soft waves
+Long dark brown hair falls naturally to the chest with soft waves, a center part, and a few fine face-framing strands.
+---
+
+## Cream knit and blue denim
+Module: Clothing
+Tags: casual, knit, denim
+A cream fine-knit short-sleeve top tucked into high-waisted blue straight-leg jeans, finished with a slim white leather belt and a small analog wristwatch.
+---
+
+## Seated three-quarter turn
+Module: Pose & Action
+Tags: seated, three-quarter, relaxed
+The subject sits sideways, keeps her shoulders relaxed, turns her head toward the camera, rests one hand lightly on her thigh, and holds a small flower near her face with the other hand.
+---
+
+## Warm wooden cafe
+Module: Scene
+Tags: interior, cafe, warm wood
+A quiet cafe interior with warm wood walls, a narrow table, a leather seat, large windows, and softly blurred plants in the background.
+---
+
+## 85mm chest-up portrait
+Module: Photography
+Tags: 85mm, close portrait, shallow depth of field
+Chest-up framing with an 85mm full-frame-equivalent lens, camera distance about 1.5 meters, eye-level angle, shallow depth of field, and focus locked on both eyes.
+---
+
+## Soft backlight film finish
+Module: Visual Style
+Tags: backlight, low contrast, film
+Soft backlight enters from behind the subject, with a low-contrast warm-green palette, gentle highlight bloom, natural skin detail, and fine film grain.
+---
+
+## Perfume product prop
+Module: Custom
+Tags: product, perfume, prop
+The subject holds a clear glass perfume bottle naturally, with its label facing the camera and crisp highlights defining the glass edges.

@@ -1,0 +1,40 @@
+# TXT Prompt Library — English Format Guide
+# Lines before the first "##" heading are comments and are ignored during import.
+#
+# Recommended block format:
+# 1. Title: start a line with two hash signs and one space: ## My prompt title
+# 2. Tags: optional. Use "Tags: tag one, tag two" or "Tag: tag one".
+#    Tags are stored for organization only; they are never added to the prompt.
+# 3. Prompt body: every line after Title/Tags and before the next separator is
+#    stored as the prompt. It may be one line or multiple lines.
+# 4. Separator: put --- on its own line between entries.
+# 5. Plain-line mode: if the file contains no ## headings, every non-empty,
+#    non-comment line becomes one complete prompt.
+# 6. Write direct, positive natural language. Organize details as subject,
+#    action, environment, lighting, camera, composition, and visual finish.
+# 7. Omit unwanted details instead of writing negative instructions.
+# Limits: 1 MB per file, 500 entries total, 20,000 characters per entry.
+
+## Japanese summer bicycle portrait
+Tags: portrait, outdoors, summer, bicycle
+2:3 portrait composition, photorealistic Japanese summer lifestyle photography. An East Asian woman in her mid-20s sits sideways on a bicycle in a sunlit park, holding two white roses near her face and looking calmly toward the camera. White T-shirt, blue straight-leg jeans, long dark wavy hair, soft backlight, shallow depth of field, natural green background, gentle film-like color.
+---
+
+## Warm cafe close portrait
+Tags: portrait, cafe, warm light
+3:4 portrait composition, photorealistic cafe close portrait. An East Asian woman in her mid-20s sits beside a wooden table and holds a ceramic latte cup with both hands. She wears a pale blue and cream striped off-shoulder knit top. Slightly high eye-level camera, 50mm full-frame-equivalent lens, soft window light, warm wood interior, low contrast, natural portable-digital-camera character.
+---
+
+## Urban office editorial
+Tags: portrait, office, fashion
+2:3 portrait composition, photorealistic urban office fashion portrait. A European woman in her mid-30s sits cross-legged on an ergonomic office chair, wearing a dark brown fitted blouse, an ivory pencil skirt, sheer black tights, and pointed black heels. Bright glass-walled office, clean daylight, 70mm full-frame-equivalent lens, full-body framing, restrained commercial finish.
+---
+
+## Rainy city cinematic still
+Tags: cinematic, night, rain, city
+2.39:1 ultrawide composition, realistic rainy-night cinematic still. A West Asian man in his mid-30s stands alone beneath a convenience-store awning, looking down at a folded umbrella. Place him on the right third with wet pavement and distant headlights filling the left side. 50mm lens, medium shot, blue ambient light separated from warm storefront light, subdued saturation, visible rain and reflections.
+---
+
+## Clean beauty close-up
+Tags: beauty, close-up, makeup
+4:5 portrait composition, photorealistic clean beauty close-up. A South Asian woman in her mid-20s turns slightly toward the camera. Preserve natural warm-brown skin texture; use a dewy base, brown-gold eyeshadow, and muted rose glossy lips. 100mm macro lens, focus on the near eye, large soft light from the front side, pale beige seamless background, controlled highlights, polished beauty-advertising finish.
