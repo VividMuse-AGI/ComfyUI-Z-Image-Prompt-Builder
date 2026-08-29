@@ -1,3 +1,4 @@
+import re
 import unittest
 from pathlib import Path
 
@@ -24,6 +25,15 @@ class FrontendI18nAssetTests(unittest.TestCase):
 
         self.assertEqual([], missing, f"Missing English help documents: {missing}")
         self.assertEqual([], empty, f"Empty English help documents: {empty}")
+
+    def test_english_readme_limits_chinese_to_legacy_reference(self):
+        readme = (ROOT / "README.en.md").read_text(encoding="utf-8")
+        summary = "<summary>Legacy Chinese compatibility reference</summary>"
+        before, remainder = readme.split(summary, 1)
+        legacy_reference, after = remainder.split("</details>", 1)
+        cjk = re.compile(r"[\u3400-\u9fff]")
+        self.assertIsNone(cjk.search(before + after))
+        self.assertIsNotNone(cjk.search(legacy_reference))
 
     def test_registry_package_keeps_user_facing_examples(self):
         ignored = {

@@ -2,12 +2,12 @@
 
 A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-language Chinese and English positive prompts through portrait presets, structured dropdown fields, and reproducible random combinations.
 
-> English docs | [中文文档](README.md)
+> English documentation | [Chinese documentation](README.md)
 
 ## Features
 
 - Outputs both **Chinese and English positive prompts**; no negative prompts are generated. English is rendered deterministically from built-in structured fields without an online translation service.
-- The complete frontend supports **Auto / 中文 / English**. Auto follows ComfyUI's language while saved field identifiers and combo values remain Chinese for backward compatibility.
+- The complete frontend supports **Auto / Chinese / English**. Auto follows ComfyUI's language while saved field identifiers and combo values remain unchanged for backward compatibility.
 - Follows Z-Image's natural-language style — no traditional weight tags or "8K / masterpiece" quality meta-tags.
 - Three prompt densities: **concise / standard / detailed** (standard is the default).
 - **92 structured fields** across 8 modules — Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, and Visual. Each field can be set to "Follow preset", "Random", "Disabled", or a specific value; dependent fields collapse according to the current mode.
@@ -34,17 +34,17 @@ A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-langua
 
 ## Built-in Presets
 
-- Japanese summer bicycle portrait on grass (日系草地单车夏日柔光写真)
-- Japanese café warm-tone close-up portrait (日系咖啡馆暖调近景人像)
-- Nighttime indoor luxury hard-flash fashion portrait (夜间室内轻奢硬闪时尚写真)
-- Urban workplace light-luxury seated portrait (都市职场轻奢坐姿写真)
-- Soft-light Hanfu garden portrait (古风汉服园林柔光写真)
-- Summer beach swimwear portrait (海边夏日泳装写真)
-- Cyberpunk city night portrait (赛博都市夜景写真)
-- Studio dewy-makeup beauty close-up (影棚水光妆美容特写)
-- Window-light yoga shaping portrait (落地窗瑜伽塑形写真)
-- Hotel-window cinematic still (旅馆窗边电影静帧)
-- Custom combination (自定义组合)
+- Japanese Summer Bicycle Soft-light Portrait
+- Warm Japanese Cafe Close Portrait
+- Night Luxury Direct-flash Fashion Portrait
+- Urban Office Luxury Seated Portrait
+- Hanfu Garden Soft-light Portrait
+- Summer Beach Swimwear Portrait
+- Cyberpunk City Night Portrait
+- Studio Dewy Makeup Beauty Close-up
+- Window-light Yoga Fitness Portrait
+- Hotel Window Cinematic Still
+- Custom Combination
 
 Ten portrait presets are decomposed into editable person, styling, action, environment, lighting, composition, and imaging fields. Custom combination provides a minimal neutral starting point.
 
@@ -61,9 +61,9 @@ git clone https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder.git
 Restart ComfyUI and force-refresh the browser. The node is under:
 
 ```text
-VividMuse → Z-Image → Z-Image 中文提示词生成器
-VividMuse → Z-Image → 模块 → 8 standalone module nodes
-VividMuse → Z-Image → TXT词库 → 2 standalone TXT nodes
+VividMuse → Z-Image → Z-Image Prompt Builder
+VividMuse → Z-Image → Modules → 8 standalone module nodes
+VividMuse → Z-Image → TXT Libraries → 2 standalone TXT nodes
 ```
 
 ### Manual
@@ -98,16 +98,16 @@ Do not keep two copies of the node under different folders, because ComfyUI may 
 
 ## Quick Start
 
-Set **Z-Image Prompt Builder: Interface language / 界面语言** in ComfyUI Settings to Auto, 中文, or English. The language can be changed without converting saved workflow values.
+In ComfyUI Settings, search for **Z-Image Prompt Builder: Interface language** and select Auto, Chinese, or English. The setting name itself is bilingual so it remains easy to find before a language is selected. Changing the interface language does not convert saved workflow values.
 
-1. Add the **Z-Image Prompt Builder** node (shown as **Z-Image 中文提示词生成器** while the interface is Chinese).
+1. Add the **Z-Image Prompt Builder** node.
 2. Pick a portrait preset and a prompt density.
-3. Leave fields as "Follow preset", or set specific values anywhere.
-4. Set fields you want varied to "Random", then set a random scope and seed.
-5. Alternatively click the "🎲 Generate random combination" button.
-6. Use "Current editing module" to edit one category at a time; switching modules only changes the display and preserves every field value. Use "Enable current module only" to change enabled state, "Clear structured modules" to keep free text, or "Clear all" to wipe both.
-7. Connect "中文提示词" (Chinese prompt) to a Z-Image text-encoding node, or use the final "英文提示词" output for a workflow that expects English natural language.
-8. Connect "推荐宽度" (recommended width) and "推荐高度" (recommended height) to compatible latent width/height inputs, or type the same values manually.
+3. Leave fields as **Follow Preset**, or set specific values anywhere.
+4. Set fields you want varied to **Random**, then set a random scope and seed.
+5. Alternatively click **🎲 Generate Random Combination**.
+6. Use **Module to Edit** to edit one category at a time; switching modules only changes the display and preserves every field value. Use **Enable Only This Module** to change enabled state, **Clear Structured Modules** to keep free text, or **Clear Everything** to wipe both.
+7. Connect **Chinese Prompt** to a Z-Image text-encoding node, or use **English Prompt** for a workflow that expects English natural language.
+8. Connect **Recommended Width** and **Recommended Height** to compatible latent width/height inputs, or type the same values manually.
 
 ### Standalone Module Nodes
 
@@ -119,13 +119,13 @@ Recommended order:
 Canvas → Person → Hair → Clothing → Pose & Action → Scene → Photography → Visual
 ```
 
-- Every node provides two independent chains: `前置提示词 → 组合提示词` for Chinese and `前置英文提示词 → 英文提示词` for English. Either chain may start with its first input unconnected.
+- Every node provides two independent chains: **Previous Prompt → Combined Prompt** for Chinese and **Previous English Prompt → English Prompt** for English. Either chain may start with its first input unconnected.
 - The Canvas node preserves the original `combined prompt, width, height` order and appends the English prompt as its final output.
 - Every module has its own preset, density, and seed, plus buttons to randomize the module, restore preset-following values, or clear the module.
 - Bypass a module with `Ctrl+B` to pass its incoming string directly to the next node.
 - Standalone nodes do not share editable widget state. In a direct chain, however, the combined string carries resolved upstream fields at runtime, so downstream random photography can remain compatible with the actual pose, scene, and other completed modules. The TXT prompt-library node preserves this context. When a TXT module fragment replaces a standard module, that module's stale structured fields are removed so downstream nodes do not keep filtering against an obsolete pose or scene. Arbitrary TXT fragments cannot be reliably parsed back into every widget field, so the replacement is treated as opaque user content.
 - A third-party text node that creates a new plain string may discard that runtime context. Use the full builder when one preset should centrally control all 92 fields.
-- `Z-Image TXT提示词库` inserts reusable full prompts; `Z-Image TXT模块词库` inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual, or Custom. To replace a standalone structured module, put the TXT module node in that module's position or bypass the original module with `Ctrl+B`; the TXT node does not remove module text that is already present in its incoming string.
+- **Z-Image TXT Prompt Library** inserts reusable full prompts; **Z-Image TXT Module Library** inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual Style, or Custom. To replace a standalone structured module, put the TXT module node in that module's position or bypass the original module with **Ctrl+B**; the TXT node does not remove module text that is already present in its incoming string.
 - The English interface renders built-in dropdown fields only. It does not silently translate arbitrary Chinese free text or Chinese TXT bodies. If a user TXT fragment replaces a standard module, that module is omitted from the English output so stale built-in fields are not emitted. Prepare English TXT/free text and join it downstream when custom content must also reach an English-language model.
 
 ## TXT Libraries
@@ -141,29 +141,29 @@ Both panels are collapsed by default. Their node order is structured actions →
 
 Use this library for complete prompts that can stand on their own.
 
-1. Expand `📚 TXT用户词库`.
-2. Click `导入TXT词库` and choose a local `.txt` file.
-3. Select a title from `词库条目`.
-4. Choose `添加到后面` (append), `添加到前面` (prepend), or `替换自由提示词` (replace).
-5. Click `添加到自由提示词`.
+1. Expand **📚 TXT Prompt Library**.
+2. Click **Import TXT Library** and choose a local .txt file.
+3. Select a title from **Library Entry**.
+4. In **Join Position**, choose **Append**, **Prepend**, or **Replace Free Prompt**.
+5. Click **Add to Free Prompt**.
 
 Recommended block format:
 
 ```text
 ## Japanese café close-up
 Tags: portrait, café, warm tone
-3:4竖构图，真实写实暖调咖啡馆近景人像，一位25岁左右的东亚成年女性……
+3:4 portrait composition, photorealistic warm café close-up. An East Asian woman in her mid-20s holds a ceramic latte cup beside a wooden table, lit by soft window light.
 ---
 
 ## Rainy city night
 Tags: portrait, night, cinematic
-3:2横构图，真实写实城市雨夜环境人像……
+3:2 landscape composition, realistic rainy city-night portrait with wet pavement, distant headlights, blue ambient light, and warm storefront light.
 ```
 
 Format rules:
 
 - `## Title` identifies an entry. Duplicate titles receive an automatic numeric suffix.
-- `Tags:` or `Tag:` is optional and accepts Chinese or English commas. Chinese `标签：` remains supported. Tags are never added to the prompt and are currently stored as metadata rather than exposed as a filter.
+- **Tags:** or **Tag:** is optional and accepts either English or Chinese commas. Tags are stored as metadata and never added to the prompt. Legacy Chinese keyword variants remain supported; see the compatibility reference below.
 - Everything after the title and optional tags is the prompt body; it may span multiple lines.
 - A line containing only `---` is the recommended separator. A new `## Title` also closes the previous entry.
 - Put explanatory comments before the first entry and start them with `#`.
@@ -172,74 +172,97 @@ If the whole file contains no `## Title`, simple mode treats each non-empty, non
 
 | Join mode | Result |
 | --- | --- |
-| 添加到后面 | Keep the current free prompt and append the selected entry |
-| 添加到前面 | Put the selected entry before the current free prompt |
-| 替换自由提示词 | Replace the free prompt with the selected entry |
+| Append | Keep the current free prompt and append the selected entry |
+| Prepend | Put the selected entry before the current free prompt |
+| Replace Free Prompt | Replace the free prompt with the selected entry |
 
-See [`examples/TXT-prompt-library-example.en.txt`](examples/TXT-prompt-library-example.en.txt) for a complete English guide and [`examples/TXT词库示例.txt`](examples/TXT词库示例.txt) for the Chinese example.
+See [the English TXT prompt-library guide](examples/TXT-prompt-library-example.en.txt) and [the Chinese example](examples/TXT%E8%AF%8D%E5%BA%93%E7%A4%BA%E4%BE%8B.txt).
 
 ### Structured TXT Module Library
 
 Use this library for reusable person, hair, clothing, action, scene, camera, or visual fragments. Each entry should describe only one module rather than a complete prompt.
 
-1. Expand `🧩 TXT模块词库（全模块）`.
-2. Click `导入结构化模块TXT词库`.
-3. Select a module in `词库模块`.
-4. Select one matching entry in `模块词库条目`.
-5. Click the `应用到……模块` button. For Custom entries, the button reads `启用自定义模块`.
+1. Expand **🧩 TXT Module Library (All Modules)**.
+2. Click **Import Structured TXT Library**.
+3. Select a module in **Library Module**.
+4. Select one matching entry in **Module Library Entry**.
+5. Click the dynamic **Apply to [Module] Module** button. For Custom entries, use **Enable Custom Module**.
 
-Every entry must use block format and include a `模块：` line:
+Every English-language entry must use block format and include a **Module:** line:
 
 ```text
 ## Clear Japanese-style person
 Module: Person
 Tags: East Asian, twenties, clean makeup
-一位25岁左右的东亚成年女性，小巧鹅蛋脸，深棕色杏仁眼，暖白自然肤质，清透裸粉妆。
+An East Asian woman in her mid-20s with a balanced oval face, dark brown almond eyes, warm fair skin with natural texture, and subtle nude-pink makeup.
 ---
 
 ## Product-layout whitespace
 Module: Custom
 Tags: product, layout, whitespace
-人物右侧保留大面积干净留白，前景加入一只透明香水瓶作为视觉锚点。
+Keep generous clean negative space to the right of the subject, and place a clear perfume bottle in the foreground as a visual anchor.
 ```
 
 Supported standard module names:
 
-| Chinese module | Content |
+| Module | Content |
 | --- | --- |
-| 画面基础 | Aspect ratio, capture medium, and portrait theme |
-| 人物 | Age, ethnicity, facial traits, skin, makeup, and body shape |
-| 发型 | Hair color, length, texture, style, bangs, and headwear |
-| 服装 | Garment structure, color, material, pattern, shoes, and accessories |
-| 姿态动作 | Pose, balance, limbs, gaze, and expression |
-| 场景 | Location, time, weather, foreground, background, and environment |
-| 摄影 | Shot size, composition, focal length, distance, angle, depth, and focus |
-| 视觉表现 | Light, shadow, color, contrast, texture, highlights, and grain |
+| Canvas | Aspect ratio, capture medium, and portrait theme |
+| Person | Age, ethnicity, facial traits, skin, makeup, and body shape |
+| Hair | Hair color, length, texture, style, bangs, and headwear |
+| Clothing | Garment structure, color, material, pattern, shoes, and accessories |
+| Pose & Action | Pose, balance, limbs, gaze, and expression |
+| Scene | Location, time, weather, foreground, background, and environment |
+| Photography | Shot size, composition, focal length, distance, angle, depth, and focus |
+| Visual Style | Light, shadow, color, contrast, texture, highlights, and grain |
 
-Recognized aliases include `基础画面`, `人物设定`, `角色`, `头发`, `穿搭`, `姿态`, `动作`, `环境`, `镜头`, `视觉`, and `光影色彩`. The UI normalizes aliases to the standard names after import.
+Legacy Chinese module names and aliases remain accepted for existing libraries; see the compatibility reference below.
 
-English files may use `Module:` with Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual Style, or Custom. `Tags:` and `Tag:` are also accepted; all Chinese keywords and module names remain compatible.
+English files may use **Module:** with Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual Style, or Custom. **Tags:** and **Tag:** are also accepted.
+
+<details>
+<summary>Legacy Chinese compatibility reference</summary>
+
+Existing Chinese TXT libraries remain fully supported.
+
+| English | Chinese-compatible value |
+| --- | --- |
+| Module: | 模块： |
+| Tags: / Tag: | 标签： |
+| Canvas | 画面基础 |
+| Person | 人物 |
+| Hair | 发型 |
+| Clothing | 服装 |
+| Pose & Action | 姿态动作 |
+| Scene | 场景 |
+| Photography | 摄影 |
+| Visual Style | 视觉表现 |
+| Custom | 自定义 |
+
+Recognized legacy aliases: 基础画面, 人物设定, 角色, 头发, 穿搭, 姿态, 动作, 环境, 镜头, 视觉, 光影色彩.
+
+</details>
 
 ### Standard Modules vs. Custom
 
 - A non-empty user fragment applied to one of the eight standard modules replaces that entire built-in module in the final output, preventing duplicate descriptions.
-- `自定义` does not replace a standard module. It is appended after the eight structured modules and is suitable for props, layout whitespace, text placement, or extra narrative constraints.
-- `拼接位置` controls whether the free prompt appears before or after the complete structured result. The Custom fragment remains part of the structured result.
-- Preset changes and random generation keep applied user-module fragments. `仅启用当前模块` clears user fragments from the other modules.
+- **Custom** does not replace a standard module. It is appended after the eight structured modules and is suitable for props, layout whitespace, text placement, or extra narrative constraints.
+- **Join Position** controls whether the free prompt appears before or after the complete structured result. The Custom fragment remains part of the structured result.
+- Preset changes and random generation keep applied user-module fragments. **Enable Only This Module** clears user fragments from the other modules.
 
-See [`examples/TXT-module-library-example.en.txt`](examples/TXT-module-library-example.en.txt) for the English format guide and [`examples/TXT模块词库示例.txt`](examples/TXT模块词库示例.txt) for the Chinese library.
+See [the English TXT module-library guide](examples/TXT-module-library-example.en.txt) and [the Chinese example](examples/TXT%E6%A8%A1%E5%9D%97%E8%AF%8D%E5%BA%93%E7%A4%BA%E4%BE%8B.txt).
 
 ### Clear and Remove Actions
 
 | UI action | Clears | Keeps |
 | --- | --- | --- |
-| 清空自由提示词 | Free-prompt text | Imported TXT user library, structured fields, user modules |
-| 清除已导入词库 | TXT user-library entry list | Text already written into the free prompt |
-| 清空当前用户模块 | Applied text for the selected library module | Library entries, other user modules, built-in fields |
-| 清除模块词库 | TXT module-library entry list | Text already applied to modules |
-| 清空结构化模块 | All 92 built-in fields and all applied user modules | Free prompt and both imported libraries |
-| 全部清空 | Free prompt, structured fields, and all applied user modules | Both imported libraries for reuse |
-| 仅启用当前模块 | Other standard fields and other user-module fragments | Current standard module, free prompt, and imported libraries |
+| Clear Free Prompt | Free-prompt text | Imported TXT user library, structured fields, user modules |
+| Remove Imported Library | TXT user-library entry list | Text already written into the free prompt |
+| Clear Current User Module | Applied text for the selected library module | Library entries, other user modules, built-in fields |
+| Remove Module Library | TXT module-library entry list | Text already applied to modules |
+| Clear Structured Modules | All 92 built-in fields and all applied user modules | Free prompt and both imported libraries |
+| Clear Everything | Free prompt, structured fields, and all applied user modules | Both imported libraries for reuse |
+| Enable Only This Module | Other standard fields and other user-module fragments | Current standard module, free prompt, and imported libraries |
 
 In short, a **clear** action usually removes content currently participating in output, while a **remove library** action unloads the selectable source entries without deleting text already applied.
 
@@ -254,35 +277,35 @@ In short, a **clear** action usually removes content currently participating in 
 
 The limits protect frontend responsiveness, node serialization, and workflow-save performance. Files are read locally in the browser and are not uploaded by this node. Imported entries are stored in the node properties inside the workflow, so sharing a workflow may also share the imported library text.
 
-UTF-8 is recommended. Write concise, affirmative Chinese natural language that can be joined directly; omit absent details instead of adding negative phrases such as “not wearing headwear.”
+UTF-8 is recommended. Write concise, affirmative natural language in the language expected by your target model; omit absent details instead of adding negative phrases such as “not wearing headwear.”
 
 ## Prompt Density
 
-- **Concise (精简)** — subject, core appearance, main action, scene anchor, and key camera info.
-- **Standard (标准)** — common clothing, action, scene, key light, and lens intent, omitting repeated controls like camera distance and precise subject ratio.
-- **Detailed (详细)** — all field details, expanded with exact shooting distance and full photography description.
+- **Concise** — subject, core appearance, main action, scene anchor, and key camera info.
+- **Standard** — common clothing, action, scene, key light, and lens intent, omitting repeated controls like camera distance and precise subject ratio.
+- **Detailed** — all field details, expanded with exact shooting distance and full photography description.
 
 Density controls the information level, not an official token limit.
 
 ## Random Scopes
 
-- **Local tweak (局部微调)** — keeps the main person, clothing, scene, and composition; only varies action chains and visual details (color, contrast, texture, highlight, grain).
-- **Same-theme reshoot (同主题重拍)** — keeps aspect ratio, theme, age stage, and ethnicity; varies the remaining fields.
-- **Cross-style mix (跨风格混搭)** — all fields enter the global pool for the widest combinations.
+- **Fine Tune (pose, expression, color, texture)** — keeps the main person, clothing, scene, and composition; only varies action chains and visual details.
+- **Same Theme Reshoot (keep theme and person)** — keeps aspect ratio, theme, age stage, and ethnicity; varies the remaining fields.
+- **Cross-style Mix (all fields)** — all fields enter the global pool for the widest combinations.
 
 ## Outputs
 
 | Output | Type | Purpose |
 | --- | --- | --- |
-| 中文提示词 | `STRING` | Connect to a Z-Image text-encoding node |
-| 推荐宽度 | `INT` | Set the latent width |
-| 推荐高度 | `INT` | Set the latent height |
-| 英文提示词 | `STRING` | Connect to a text encoder that expects English natural language, such as a Krea 2 workflow |
+| Chinese Prompt | STRING | Connect to a Z-Image text-encoding node |
+| Recommended Width | INT | Set the latent width |
+| Recommended Height | INT | Set the latent height |
+| English Prompt | STRING | Connect to a text encoder that expects English natural language, such as a Krea 2 workflow |
 
 ## Compatibility
 
 - Development target: ComfyUI 0.31.1+
-- Known test environment: Aki (秋叶) bundle, PyTorch 2.9.1+cu130
+- Known test environment: Aki ComfyUI bundle, PyTorch 2.9.1+cu130
 - Supports both the classic ComfyUI node UI and Node 2.0; hidden Node 2.0 fields do not keep consuming node height.
 - After updating, restart ComfyUI and force-refresh the browser to load the new frontend extensions.
 - The node only handles strings and integers, so it is unaffected by CUDA, GPU, or model-version differences.
