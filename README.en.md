@@ -100,7 +100,7 @@ Do not keep two copies of the node under different folders, because ComfyUI may 
 
 Set **Z-Image Prompt Builder: Interface language / 界面语言** in ComfyUI Settings to Auto, 中文, or English. The language can be changed without converting saved workflow values.
 
-1. Add the "Z-Image 中文提示词生成器" node.
+1. Add the **Z-Image Prompt Builder** node (shown as **Z-Image 中文提示词生成器** while the interface is Chinese).
 2. Pick a portrait preset and a prompt density.
 3. Leave fields as "Follow preset", or set specific values anywhere.
 4. Set fields you want varied to "Random", then set a random scope and seed.
@@ -310,14 +310,14 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.3.0`
+- Current source version: `0.4.0` (unreleased; the latest public Release remains `v0.3.0`)
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`
 - Required host: ComfyUI `0.31.1` or newer
 - License: MIT
 
-The Registry package uses `.comfyignore` to exclude tests, browser prototypes, examples, and internal planning files while retaining the runtime node, frontend scripts, and JSON phrase libraries.
+The Registry package uses `.comfyignore` to exclude tests, browser prototypes, and internal planning files while retaining the runtime node, frontend scripts, user-facing TXT examples, and JSON phrase libraries.
 
 ## License
 

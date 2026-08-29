@@ -183,19 +183,17 @@ function localizeNode(node) {
 }
 
 function allGraphNodes() {
-  const roots = [app.graph, app.rootGraph].filter(Boolean);
+  const pendingGraphs = [app.graph, app.rootGraph].filter(Boolean);
   const nodes = [];
   const seenGraphs = new Set();
-  for (const graph of roots) {
-    if (seenGraphs.has(graph)) continue;
+  while (pendingGraphs.length) {
+    const graph = pendingGraphs.pop();
+    if (!graph || seenGraphs.has(graph)) continue;
     seenGraphs.add(graph);
     for (const node of graph._nodes || graph.nodes || []) {
       nodes.push(node);
       const subgraph = node.subgraph || node.graphData;
-      if (subgraph && !seenGraphs.has(subgraph)) {
-        seenGraphs.add(subgraph);
-        nodes.push(...(subgraph._nodes || subgraph.nodes || []));
-      }
+      if (subgraph && !seenGraphs.has(subgraph)) pendingGraphs.push(subgraph);
     }
   }
   return [...new Set(nodes)];
@@ -263,6 +261,8 @@ function translateMessage(message) {
     "TXT模块词库内容超过1MB字符上限。": "TXT module-library content exceeds the 1 MB character limit.",
     "模块词库必须使用“## 标题”分块格式。": "A module library must use the '## Title' block format.",
     "TXT模块词库中没有可用条目。": "The TXT module library contains no usable entries.",
+    "请先导入并选择一条提示词。": "Import a TXT prompt library and select an entry first.",
+    "请先导入并选择当前模块的一条提示词。": "Import a TXT module library and select an entry for the current module first.",
   };
   if (exact[text]) return exact[text];
   const patterns = [

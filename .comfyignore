@@ -4,7 +4,6 @@
 .codex-skill-review-*/
 docs/superpowers/
 docs/model-evaluation-v0.4.md
-examples/
 prototype/
 tests/
 phrase_library/*_review.md

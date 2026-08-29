@@ -21,6 +21,10 @@ jobs:
           python -c "import glob,json; [json.load(open(path, encoding='utf-8')) for path in glob.glob('phrase_library/*.json')]"
       - name: Run Python regressions
         run: python -m unittest discover -s tests -p "test_*.py" -v
+      - name: Verify generated frontend translation catalog
+        run: |
+          python scripts/generate_frontend_i18n.py
+          git diff --exit-code -- web/js/i18n_catalog.js
       - name: Run frontend regressions
         run: |
           for source in web/js/*.js; do node --check "$source"; done

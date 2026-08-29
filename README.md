@@ -379,13 +379,13 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.3.0`
+- 当前源码版本：`0.4.0`（待发布；最新公开 Release 仍为 `v0.3.0`）
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上
 - 许可证：MIT
 
-Registry 发布包通过 `.comfyignore` 排除测试、浏览器原型和内部计划，但保留正式节点、前端脚本以及全部运行时 JSON 词库。
+Registry 发布包通过 `.comfyignore` 排除测试、浏览器原型和内部计划，但保留正式节点、前端脚本、用户可直接参考的 TXT 示例以及全部运行时 JSON 词库。
 
 ## 许可证
 

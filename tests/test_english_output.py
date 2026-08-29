@@ -1,4 +1,7 @@
+import os
 import re
+import subprocess
+import sys
 import unittest
 
 import modular_nodes
@@ -117,6 +120,78 @@ class EnglishOutputTests(unittest.TestCase):
         second = nodes.ZImageChinesePromptBuilder().build_prompt(**kwargs)[3]
         self.assertEqual(first, second)
         self.assertIsNone(CJK_RE.search(first))
+
+    def test_natural_phrase_maps_cover_their_public_option_ids(self):
+        for field_name, phrases in nodes._ENGLISH_NATURAL_ID_PHRASES.items():
+            public_ids = set(nodes._ENGLISH_OPTION_ID_MAPS[field_name].values())
+            self.assertEqual(
+                set(),
+                public_ids - set(phrases),
+                (field_name, sorted(public_ids - set(phrases))),
+            )
+
+    def test_default_english_preset_uses_natural_photographic_language(self):
+        fields = nodes.PRESETS["日系草地单车夏日柔光写真"]
+        prompt = nodes.compose_english_prompt_text(fields, "标准")
+        for fragment in (
+            "shoulder neck body-line emphasis",
+            "legs one leg extended",
+            "head look back left",
+            "gaze camera soft",
+            "eye level camera angle",
+            "glowing backlight light quality",
+            "documentary real detail rendering",
+        ):
+            self.assertNotIn(fragment, prompt)
+        for fragment in (
+            "an East Asian woman around 25 years old",
+            "with a clean shoulder-and-neck line",
+            "wearing a clean short-sleeve T-shirt in cream white cotton",
+            "with one leg extended",
+            "head turned back over the left shoulder",
+            "looking softly toward the camera",
+            "shot at 85mm full-frame-equivalent",
+            "with luminous backlighting",
+            "with realistic documentary detail",
+        ):
+            self.assertIn(fragment, prompt)
+
+    def test_concise_clothing_keeps_type_and_color_but_omits_material(self):
+        fields = nodes.PRESETS["日系草地单车夏日柔光写真"]
+        concise = nodes.render_english_module_fragment("服装", fields, "精简")
+        self.assertIn("clean short-sleeve T-shirt in cream white", concise)
+        self.assertIn("straight jeans in navy", concise)
+        self.assertNotIn("cotton", concise)
+        self.assertNotIn("denim", concise)
+        self.assertNotIn("high-waisted", concise)
+        self.assertNotIn("wristwatch", concise)
+
+    def test_scene_english_output_is_stable_across_python_hash_seeds(self):
+        code = (
+            "import nodes; "
+            "fields={name:nodes.EMPTY_CHOICE for name in nodes.FIELD_ORDER}; "
+            "fields['环境细节']='漂浮气泡、水生植物、折射光纹'; "
+            "print(nodes.render_english_module_fragment('场景', fields, '详细'))"
+        )
+        outputs = set()
+        for hash_seed in (1, 3, 8):
+            environment = dict(os.environ)
+            environment["PYTHONHASHSEED"] = str(hash_seed)
+            environment["PYTHONIOENCODING"] = "utf-8"
+            completed = subprocess.run(
+                [sys.executable, "-c", code],
+                check=True,
+                capture_output=True,
+                env=environment,
+            )
+            outputs.add(completed.stdout.decode("utf-8").strip())
+        self.assertEqual(
+            outputs,
+            {
+                "environment details: floating bubbles, aquatic plants, "
+                "and refracted light patterns."
+            },
+        )
 
 
 if __name__ == "__main__":

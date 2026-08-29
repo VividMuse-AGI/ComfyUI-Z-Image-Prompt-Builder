@@ -25,6 +25,14 @@ class FrontendI18nAssetTests(unittest.TestCase):
         self.assertEqual([], missing, f"Missing English help documents: {missing}")
         self.assertEqual([], empty, f"Empty English help documents: {empty}")
 
+    def test_registry_package_keeps_user_facing_examples(self):
+        ignored = {
+            line.strip()
+            for line in (ROOT / ".comfyignore").read_text(encoding="utf-8").splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        }
+        self.assertNotIn("examples/", ignored)
+
     def test_generated_catalog_and_english_examples_exist(self):
         required = (
             ROOT / "web" / "js" / "i18n_catalog.js",

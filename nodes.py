@@ -3463,7 +3463,7 @@ def _build_location_theme_scene_bundles(
 
 THEME_SCENE_BUNDLES_BY_THEME = {
     theme: _build_location_theme_scene_bundles(theme)
-    for theme in LOCATION_SPECIFIC_THEMES
+    for theme in sorted(LOCATION_SPECIFIC_THEMES)
 }
 ALL_LOCATION_THEME_SCENE_BUNDLES = tuple(
     bundle
@@ -5121,6 +5121,9 @@ _ENGLISH_VALUE_OVERRIDES.update({
     ("环境细节", "美容反光板"): "a restrained beauty reflector near the frame edge",
     ("环境细节", "沙发落地窗与绿植"): "a pale gray sofa, floor-to-ceiling windows, and indoor plants",
     ("环境细节", "旧木家具与暖黄台灯"): "worn wooden furniture and a warm amber table lamp",
+    ("环境细节", "漂浮气泡、水生植物、折射光纹"): (
+        "environment details: floating bubbles, aquatic plants, and refracted light patterns"
+    ),
     ("主配色", "浅灰与暖白"): "light gray and warm white",
     ("主配色", "珊瑚粉、薄荷绿与肤色"): "coral pink, mint green, and natural skin tones",
     ("主配色", "暖棕与暖黄"): "warm brown and amber",
@@ -5343,26 +5346,327 @@ _ENGLISH_FIELD_TEMPLATES = {
     "环境细节": "environment details: {value}",
     "空间材质": "{value} surfaces",
     "空间层次": "{value} spatial depth",
-    "景别": "{value} shot",
-    "画面布局": "{value} composition",
-    "等效焦段": "{value} full-frame-equivalent lens",
+    "景别": "{value} framing",
+    "画面布局": "with a {value} composition",
+    "等效焦段": "shot at {value} full-frame-equivalent",
     "拍摄距离": "camera distance {value}",
-    "机位": "{value} camera angle",
-    "景深": "{value} depth of field",
-    "对焦位置": "focus on {value}",
-    "主光来源": "{value} as the key light",
-    "光线方向": "light from {value}",
-    "光线质地": "{value} light quality",
-    "照明落点": "light falling on {value}",
-    "阴影表现": "{value} shadows",
-    "主配色": "{value} color palette",
-    "色温倾向": "{value} color temperature",
-    "画面对比": "{value} contrast",
-    "影像风格": "{value} image style",
-    "细节质地": "{value} detail rendering",
-    "高光处理": "{value} highlights",
-    "颗粒质感": "{value} grain",
+    "机位": "from a {value} camera angle",
+    "景深": "with {value} depth of field",
+    "对焦位置": "focused on {value}",
+    "主光来源": "lit by {value}",
+    "光线方向": "with light coming from the {value}",
+    "光线质地": "with {value} lighting",
+    "照明落点": "illuminating {value}",
+    "阴影表现": "with {value} shadows",
+    "主配色": "with a {value} color palette",
+    "色温倾向": "with a {value} color temperature",
+    "画面对比": "with {value} contrast",
+    "影像风格": "captured in a {value} style",
+    "细节质地": "with {value} detail rendering",
+    "高光处理": "with {value} highlights",
+    "颗粒质感": "with {value} grain",
 }
+
+_ENGLISH_NATURAL_ID_PHRASES = {
+    "肤质": {
+        "real_texture": "realistic skin texture",
+        "naturally_refined": "naturally refined skin texture",
+        "soft_dewy": "soft, dewy skin texture",
+        "soft_matte": "soft, matte skin texture",
+    },
+    "画面瞬间": {
+        "adjust_hat": "caught while adjusting the hat",
+        "answering_phone": "caught while answering a phone call",
+        "blowing_bubbles": "caught while blowing soap bubbles",
+        "cuddling_pet": "sharing a quiet moment with a small pet",
+        "cycling_bike": "caught while riding a bicycle",
+        "dance_spin": "caught mid-spin",
+        "hair_toss": "caught in a natural hair toss",
+        "holding_sword": "pausing with a sword in hand",
+        "horseback_riding": "caught while riding horseback",
+        "jumping": "caught mid-jump",
+        "laugh_head_back": "laughing with the head tipped back",
+        "lift_coffee": "lifting a coffee cup",
+        "look_back_smile": "glancing back with a smile",
+        "painting_canvas": "painting at a canvas",
+        "pause_at_door": "pausing in a doorway",
+        "pause_in_thought": "pausing in thought",
+        "pause_on_balcony": "pausing on a balcony",
+        "pause_under_branches": "pausing beneath leafy branches",
+        "reading_book": "quietly reading a book",
+        "rest_at_cafe": "resting at a cafe table",
+        "rest_on_sofa": "resting comfortably on a sofa",
+        "review_folder": "reviewing a folder",
+        "shelter_under_umbrella": "sheltering beneath an umbrella",
+        "studio_pose_reset": "a brief pause between studio poses",
+        "tie_shoelace": "tying a shoelace",
+        "touch_curtain": "pausing to touch a curtain",
+        "turn_during_walk": "turning naturally mid-walk",
+        "wait_by_wall": "waiting beside a wall",
+        "wait_for_elevator": "waiting for an elevator",
+    },
+    "线条重点": {
+        "shoulder_neck": "with a clean shoulder-and-neck line",
+        "waistline": "with a naturally defined waistline",
+        "soft_waist_hip": "with soft waist-and-hip curves",
+        "long_legs": "with long, balanced leg lines",
+        "strong_shoulder_back": "with a strong shoulder-and-back line",
+    },
+    "基础姿态": {
+        "standing_relaxed": "standing naturally",
+        "standing_three_quarter": "standing in a three-quarter pose",
+        "standing_doorway": "standing in a doorway",
+        "leaning_wall": "leaning lightly against a wall",
+        "walking_pause": "pausing mid-step",
+        "sitting_chair_edge": "sitting near the edge of a chair",
+        "sitting_sofa_forward": "sitting forward on a sofa",
+        "sitting_sofa_relaxed": "sitting comfortably on a sofa",
+        "sitting_booth_relaxed": "sitting comfortably in a booth",
+        "sitting_stool": "sitting on a stool",
+        "crouching_sport": "holding a low athletic crouch",
+        "squat": "squatting naturally",
+        "kneel_sit": "sitting back on the heels",
+        "cross_legged": "sitting cross-legged",
+        "hand_on_hip": "standing with one hand on the hip",
+        "standing_with_sword": "standing with a sword",
+        "horseback_sitting": "sitting upright on horseback",
+        "cycling_posture": "riding a bicycle",
+    },
+    "身体方向": {
+        "front": "facing the camera",
+        "left_quarter": "turned slightly to the left",
+        "right_quarter": "turned slightly to the right",
+        "left_profile": "shown in left profile",
+        "right_profile": "shown in right profile",
+        "back_turn_left": "turned away and looking back over the left shoulder",
+        "back_turn_right": "turned away and looking back over the right shoulder",
+        "diagonal_forward": "angled diagonally toward the camera",
+        "three_quarter_back": "shown from a three-quarter back view",
+    },
+    "身体重心": {
+        "balanced_both_feet": "with weight balanced across both feet",
+        "left_leg": "with weight resting on the left leg",
+        "right_leg": "with weight resting on the right leg",
+        "forward": "with the body weight shifted slightly forward",
+        "back": "with the body weight shifted slightly back",
+        "left_hip": "with weight resting on the left hip",
+        "right_hip": "with weight resting on the right hip",
+        "centered_seated": "with the seated weight centered",
+    },
+    "肩颈状态": {
+        "relaxed_level": "with relaxed, level shoulders",
+        "relaxed_inward": "with the shoulders drawn gently inward",
+        "one_shoulder_forward": "with one shoulder angled toward the camera",
+        "one_shoulder_lower": "with one shoulder lowered naturally",
+        "open_chest": "with an open chest and elongated neck",
+        "forward_relaxed": "with the shoulders leaning forward naturally",
+        "shrug": "with a subtle shoulder lift",
+        "shoulders_back": "with the shoulders drawn back",
+    },
+    "手部动作": {
+        "arms_relaxed_sides": "with both arms relaxed at the sides",
+        "hands_folded_front": "with both hands folded naturally in front",
+        "one_hand_waist": "with one hand resting on the waist",
+        "one_hand_pocket": "with one hand tucked into a pocket",
+        "adjust_collar": "gently adjusting the collar",
+        "adjust_glasses": "gently adjusting the glasses",
+        "glasses_and_folder": "adjusting the glasses while holding a folder",
+        "touch_hair": "gently touching the hair",
+        "hold_hat_brim": "lightly holding the brim of the hat",
+        "bouquet_and_hat": "holding a bouquet while touching the hat brim",
+        "hold_coffee_cup": "holding a coffee cup with both hands",
+        "cup_and_table": "holding a cup with one hand and resting the other on the table",
+        "hold_folder": "holding a folder close to the body",
+        "pen_and_folder": "holding a pen and an upright folder",
+        "door_handle_and_fan": "holding the door handle with one hand and a folding fan with the other",
+        "hold_handbag": "holding a handbag naturally",
+        "touch_railing": "resting one hand lightly on the railing",
+        "touch_curtain": "gently touching the curtain",
+        "hold_umbrella": "holding an umbrella naturally",
+        "hands_on_thighs": "with both hands resting on the thighs",
+        "elbow_on_knee": "with one elbow resting on a knee",
+        "adjust_shoelace": "adjusting a shoelace with both hands",
+        "arms_crossed": "with both arms crossed",
+        "hand_on_chin": "resting the chin lightly on one hand",
+        "peace_sign": "making a relaxed peace sign",
+        "point_distance": "pointing toward the distance",
+        "tuck_hair": "tucking a loose strand of hair behind one ear",
+        "holding_book": "holding an open book",
+        "holding_paintbrush": "holding a paintbrush near the canvas",
+        "cradling_pet": "cradling a small pet gently",
+        "holding_bubble_wand": "holding a bubble wand near the lips",
+        "gripping_sword": "holding the sword securely",
+        "holding_reins": "holding the reins with both hands",
+        "gripping_handlebar": "holding the bicycle handlebars naturally",
+        "phone_to_ear": "holding a phone to one ear",
+    },
+    "腿部动作": {
+        "feet_parallel": "with both feet parallel",
+        "one_foot_forward": "with one foot placed slightly forward",
+        "ankles_crossed": "with the ankles crossed",
+        "one_knee_bent": "with one knee bent",
+        "raised_crossed_leg": "with one leg raised and crossed over the other",
+        "walking_step": "with one leg moving through a natural walking step",
+        "knees_together": "with the knees together",
+        "knees_side": "with both knees angled to one side",
+        "one_leg_extended": "with one leg extended",
+        "legs_crossed_knee": "with the legs crossed at the knee",
+        "stool_foot_rest": "with one foot resting on the stool support",
+        "sport_crouch": "with both knees bent in an athletic crouch",
+        "cross_legged_sit": "with the legs folded cross-legged",
+        "one_leg_raised": "with one leg raised",
+        "knee_up": "with one knee raised",
+        "feet_in_stirrups": "with both feet placed in the stirrups",
+        "pedaling": "with the legs positioned naturally on the pedals",
+    },
+    "头部方向": {
+        "front": "head facing forward",
+        "turn_left": "head turned to the left",
+        "turn_right": "head turned to the right",
+        "look_back_left": "head turned back over the left shoulder",
+        "look_back_right": "head turned back over the right shoulder",
+        "slight_tilt_left": "head tilted slightly to the left",
+        "slight_tilt_right": "head tilted slightly to the right",
+        "slight_lower": "chin lowered slightly",
+        "head_tilt_up": "chin lifted slightly",
+    },
+    "视线": {
+        "camera_direct": "looking directly into the camera",
+        "camera_soft": "looking softly toward the camera",
+        "left_near": "looking toward a nearby point on the left",
+        "right_near": "looking toward a nearby point on the right",
+        "left_distance": "looking into the distance on the left",
+        "right_distance": "looking into the distance on the right",
+        "down_prop": "looking down at the object in hand",
+        "window": "looking out of the window",
+        "slightly_above": "looking slightly above the camera",
+        "side_camera": "glancing sideways toward the camera",
+        "eyes_closed": "eyes gently closed",
+        "look_up": "looking upward",
+        "look_down": "looking downward",
+    },
+    "主光来源": {
+        "beauty_dish": "lit by a beauty dish",
+        "campfire": "lit by a campfire",
+        "candlelight": "lit by candlelight",
+        "car_headlight": "lit by car headlights",
+        "ceiling_ambient": "lit by soft ambient ceiling light",
+        "continuous_panel": "lit by a continuous LED panel",
+        "direct_sun": "lit by direct sunlight",
+        "hard_flash": "lit by hard on-camera flash",
+        "large_softbox": "lit by a large softbox",
+        "leaf_filtered_sun": "lit by sunlight filtered through leaves",
+        "neon_signs": "lit by neon signage",
+        "overcast_skylight": "lit by soft overcast skylight",
+        "phone_screen": "lit by a phone screen",
+        "projector": "lit by projected light",
+        "reflected_bounce": "lit by reflected bounce light",
+        "ring_fill": "lit by ring-light fill",
+        "soft_flash": "lit by soft flash",
+        "storefront_light": "lit by storefront light",
+        "sunset_sun": "lit by warm sunset light",
+        "tungsten_practical": "lit by tungsten practical lamps",
+        "window_daylight": "lit by window daylight",
+    },
+    "光线质地": {
+        "butterfly": "with classic butterfly lighting",
+        "crisp_hard": "with crisp, hard lighting",
+        "dappled": "with dappled lighting",
+        "even_flat": "with soft, even lighting",
+        "glowing_backlight": "with luminous backlighting",
+        "low_key": "with low-key lighting",
+        "mixed_color": "with mixed-color lighting",
+        "rembrandt": "with Rembrandt lighting",
+        "silhouette_backlight": "with silhouette backlighting",
+        "soft_diffused": "with soft, diffused lighting",
+        "soft_directional": "with soft directional lighting",
+        "specular": "with specular lighting",
+        "very_soft": "with very soft lighting",
+    },
+    "细节质地": {
+        "atmospheric_haze": "with gently atmospheric haze",
+        "ccd_direct": "with direct early-digital detail",
+        "clean_crisp": "with clean, crisp detail",
+        "delicate_retouch": "with delicate professional retouching",
+        "documentary_real": "with realistic documentary detail",
+        "dreamy_soft": "with dreamy soft detail",
+        "film_softness": "with gentle film softness",
+        "glossy_fashion": "with glossy fashion-editorial detail",
+        "matte": "with a restrained matte finish",
+        "matte_grain": "with matte, grain-rich detail",
+        "natural_detail": "with natural detail",
+        "oil_painting": "with oil-painting texture",
+        "slightly_soft": "with slightly softened detail",
+        "watercolor": "with watercolor texture",
+    },
+    "机位": {
+        "eye_level": "at eye level",
+        "chest_level": "from chest height",
+        "waist_level": "from waist height",
+        "slightly_high": "from a slightly elevated angle",
+        "slightly_low": "from a slightly low angle",
+        "high_angle": "from a high angle",
+        "low_angle": "from a low angle",
+        "ground_level": "from ground level",
+        "overhead": "from directly overhead",
+        "dutch_angle": "with a Dutch angle",
+        "profile_view": "from a profile viewpoint",
+        "three_quarter_view": "from a three-quarter viewpoint",
+    },
+    "对焦位置": {
+        "both_eyes": "focused precisely on both eyes",
+        "near_eye": "focused precisely on the nearer eye",
+        "face": "focused on the face",
+        "face_environment": "focused on the face while retaining environmental context",
+        "full_figure": "focused on the full figure",
+        "upper_body": "focused on the upper body",
+        "hands_prop": "focused on the hands and prop",
+        "garment_detail": "focused on garment details",
+        "moving_subject": "tracking focus on the moving subject",
+    },
+    "表情": {
+        "gentle_smile": "with a gentle smile",
+        "sweet_smile": "with a sweet smile",
+        "bright_smile": "with a bright smile",
+        "relaxed_smile": "with a relaxed smile",
+        "calm": "with a calm expression",
+        "calm_confident": "with a calm, confident expression",
+        "bright_confident": "with a bright, confident expression",
+        "cool": "with a cool, composed expression",
+        "focused": "with a focused expression",
+        "thoughtful": "with a thoughtful expression",
+        "restrained": "with a restrained expression",
+        "soft_serious": "with a softly serious expression",
+        "shy": "with a shy expression",
+        "lazy": "with a languid expression",
+        "surprised": "with a surprised expression",
+        "playful_wink": "with a playful wink",
+        "bright_laugh": "laughing brightly",
+    },
+}
+
+_ENGLISH_FIT_PHRASES = {
+    "fitted": "with a fitted silhouette",
+    "relaxed": "with a relaxed drape",
+    "defined_waist": "with a clearly defined waist",
+    "high_waist": "with a high-waisted cut",
+    "deep_v": "with a deep V neckline",
+    "square_neck": "with a square neckline",
+    "boat_neck": "with a boat neckline",
+    "high_neck": "with a high neckline",
+    "slit": "with a side slit",
+    "pleated": "with structured pleats",
+    "draped": "with natural draping",
+    "layered": "with layered construction",
+    "backless": "with an open back",
+    "puff_sleeve": "with puff sleeves",
+    "ruffle": "with ruffled trim",
+    "tie_waist": "with a tied waist",
+    "lantern_sleeve": "with lantern sleeves",
+    "crop": "with a cropped cut",
+    "strapless": "with a strapless neckline",
+}
+
 
 _ENGLISH_MODULE_ORDER = (
     "画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现",
@@ -5398,6 +5702,8 @@ def _humanize_english_id(field_name: str, option_id: str) -> str:
         ("dark brown black", "dark brown-black"),
         ("half up", "half-up"),
         ("soft rolloff", "soft roll-off"),
+        ("center left", "center-left"),
+        ("center right", "center-right"),
     ):
         value = value.replace(source, replacement)
     return value
@@ -5414,6 +5720,8 @@ def _english_atomic_value(field_name: str, value: str) -> str:
         return ""
     override = _ENGLISH_VALUE_OVERRIDES.get((field_name, value))
     if override:
+        if field_name == "主配色" and not override.endswith("color palette"):
+            return f"with a {override} color palette"
         return override
     if field_name == "场景地点":
         background_override = _ENGLISH_VALUE_OVERRIDES.get(("背景环境", value))
@@ -5478,7 +5786,15 @@ def _english_atomic_value(field_name: str, value: str) -> str:
             "age_60s": "around 65 years old",
             "age_70_plus": "around 75 years old",
         }.get(option_id, _humanize_english_id(field_name, option_id))
+    natural_phrase = _ENGLISH_NATURAL_ID_PHRASES.get(field_name, {}).get(option_id)
+    if natural_phrase:
+        return natural_phrase
+    if field_name == "版型细节" and option_id in _ENGLISH_FIT_PHRASES:
+        return _ENGLISH_FIT_PHRASES[option_id]
     humanized = _humanize_english_id(field_name, option_id)
+    if field_name == "主配色":
+        article = "an" if humanized[:1].lower() in "aeiou" else "a"
+        return f"with {article} {humanized} color palette"
     if field_name == "成像媒介":
         return f"{humanized} photography"
     if field_name == "写真主题":
@@ -5502,7 +5818,7 @@ def _english_atomic_value(field_name: str, value: str) -> str:
     if field_name == "细节质地" and humanized.endswith(" detail"):
         return f"{humanized} rendering"
     if field_name == "颗粒质感" and humanized.endswith(("grain", "noise", "surface")):
-        return humanized
+        return f"with {humanized}"
     template = _ENGLISH_FIELD_TEMPLATES.get(field_name, "{value}")
     return template.format(value=humanized)
 
@@ -5518,12 +5834,179 @@ def _english_person_identity_text(fields: Mapping[str, str]) -> str:
     if ethnicity:
         ethnicity = ethnicity.replace(" descent", "")
     if age and ethnicity:
-        return f"an adult {ethnicity} woman {age}"
+        return f"an {ethnicity} woman {age}"
     if ethnicity:
         return f"an adult {ethnicity} woman"
     if age:
         return f"an adult woman {age}"
     return ""
+
+
+def _join_english_list(items: Sequence[str]) -> str:
+    cleaned = [item for item in items if item]
+    if len(cleaned) < 2:
+        return cleaned[0] if cleaned else ""
+    if len(cleaned) == 2:
+        return f"{cleaned[0]} and {cleaned[1]}"
+    return f"{', '.join(cleaned[:-1])}, and {cleaned[-1]}"
+
+
+def _english_garment_phrase(
+    fields: Mapping[str, str],
+    prefix: str,
+    density: str,
+) -> str:
+    type_field = f"{prefix}类型"
+    garment_type = _english_atomic_value(type_field, fields.get(type_field, EMPTY_CHOICE))
+    if not garment_type:
+        return ""
+    garment_type = re.sub(r"^(?:a|an)\s+", "", garment_type, flags=re.IGNORECASE)
+
+    color_field = f"{prefix}颜色"
+    material_field = f"{prefix}材质"
+    pattern_field = f"{prefix}图案"
+    color = _english_atomic_value(color_field, fields.get(color_field, EMPTY_CHOICE))
+    material = ""
+    pattern = ""
+    if density != "精简":
+        material = _english_atomic_value(
+            material_field, fields.get(material_field, EMPTY_CHOICE)
+        )
+        pattern = _english_atomic_value(
+            pattern_field, fields.get(pattern_field, EMPTY_CHOICE)
+        )
+        if _english_option_id(
+            pattern_field, fields.get(pattern_field, EMPTY_CHOICE)
+        ) == "solid":
+            pattern = ""
+
+    plural_endings = (
+        "jeans", "trousers", "pants", "shorts", "leggings", "bottoms", "culottes",
+    )
+    article = "" if garment_type.lower().endswith(plural_endings) else (
+        "an" if garment_type[:1].lower() in "aeiou" else "a"
+    )
+    phrase = f"{article} {garment_type}".strip()
+    fabric_description = " ".join(part for part in (color, material) if part)
+    if fabric_description:
+        phrase = f"{phrase} in {fabric_description}"
+    if pattern:
+        phrase = f"{phrase} with {pattern}"
+    return phrase
+
+
+_ENGLISH_LEGWEAR_PHRASES = {
+    "black_sheer_tights": "black sheer tights",
+    "dark_gray_sheer_tights": "dark-gray sheer tights",
+    "black_thigh_high": "black thigh-high stockings",
+    "lace_top_thigh_high": "lace-top thigh-high stockings",
+    "cream_ankle_socks": "cream ankle socks",
+    "ribbed_knee_socks": "ribbed knee-high socks",
+    "sports_socks": "white sports socks",
+    "lace_ankle_socks": "lace ankle socks",
+    "fishnet": "fishnet tights",
+    "thigh_high_socks": "thigh-high socks",
+    "ankle_socks": "ankle socks",
+    "black_sheer": "black sheer stockings",
+}
+
+_ENGLISH_SHOE_PHRASES = {
+    "pointed_stiletto": "pointed-toe stiletto heels",
+    "patent_pumps": "patent-leather pumps",
+    "slingback_heels": "slingback heels",
+    "block_heels": "block-heel pumps",
+    "loafers": "leather loafers",
+    "mary_jane": "Mary Jane shoes",
+    "ankle_boots": "pointed-toe ankle boots",
+    "knee_boots": "knee-high boots",
+    "white_sneakers": "white sneakers",
+    "retro_sneakers": "retro sneakers",
+    "flat_sandals": "flat strappy sandals",
+    "mules": "pointed-toe mules",
+    "over_knee_boots": "over-the-knee boots",
+    "canvas_sneakers": "canvas sneakers",
+    "ballet_flats": "ballet flats",
+    "martin_boots": "lace-up combat boots",
+    "heeled_sandals": "heeled sandals",
+}
+
+_ENGLISH_ACCESSORY_PHRASES = {
+    "pearl_studs": "pearl stud earrings",
+    "pearl_drop": "pearl drop earrings",
+    "metal_tassel": "metal tassel earrings",
+    "gold_hoops": "gold hoop earrings",
+    "geometric_earrings": "geometric earrings",
+    "fine_necklace": "a fine necklace",
+    "pearl_necklace": "a pearl necklace",
+    "rectangle_glasses": "slim rectangular glasses",
+    "round_glasses": "slim round glasses",
+    "leather_belt": "a slim leather belt",
+    "structured_handbag": "a structured handbag",
+    "shoulder_bag": "a small shoulder bag",
+    "silk_scarf": "a narrow silk scarf",
+    "wristwatch": "a wristwatch",
+    "sunglasses": "sunglasses",
+    "hair_clip": "a hair clip",
+    "choker": "a leather choker",
+    "brooch": "a brooch",
+    "bracelet": "a bracelet",
+    "hair_band": "a headband",
+    "shawl": "a shawl",
+}
+
+
+def _english_clothing_prompt_text(
+    fields: Mapping[str, str],
+    density: str,
+) -> str:
+    mode = fields.get("穿搭结构", EMPTY_CHOICE)
+    garment_prefixes = {
+        "连衣裙": ("连衣裙",),
+        "连体服": ("连体服",),
+        "上装＋下装": ("上装", "下装"),
+        "西装套装": ("上装", "下装"),
+        "叠穿造型": ("上装", "下装"),
+    }.get(mode, ())
+    garments = [
+        _english_garment_phrase(fields, prefix, density)
+        for prefix in garment_prefixes
+    ]
+    garments = [garment for garment in garments if garment]
+    if not garments:
+        return ""
+    if len(garments) == 2:
+        outfit = f"{garments[0]} paired with {garments[1]}"
+    else:
+        outfit = _join_english_list(garments)
+    parts = [f"wearing {outfit}"]
+
+    if density != "精简":
+        fit = _english_atomic_value("版型细节", fields.get("版型细节", EMPTY_CHOICE))
+        if fit:
+            parts.append(fit)
+
+        legwear_value = fields.get("袜装", EMPTY_CHOICE)
+        legwear_id = _english_option_id("袜装", legwear_value)
+        legwear = _ENGLISH_LEGWEAR_PHRASES.get(
+            legwear_id, _english_atomic_value("袜装", legwear_value)
+        )
+        shoes_value = fields.get("鞋履", EMPTY_CHOICE)
+        shoes_id = _english_option_id("鞋履", shoes_value)
+        shoes = _ENGLISH_SHOE_PHRASES.get(
+            shoes_id, _english_atomic_value("鞋履", shoes_value)
+        )
+        if legwear or shoes:
+            parts.append(f"styled with {_join_english_list([legwear, shoes])}")
+
+        accessory_value = fields.get("服装配件", EMPTY_CHOICE)
+        accessory_id = _english_option_id("服装配件", accessory_value)
+        accessory = _ENGLISH_ACCESSORY_PHRASES.get(
+            accessory_id, _english_atomic_value("服装配件", accessory_value)
+        )
+        if accessory:
+            parts.append(f"accessorized with {accessory}")
+
+    return ", ".join(parts)
 
 
 def _english_module_fields(module_name: str, fields: Mapping[str, str], density: str) -> tuple[str, ...]:
@@ -5587,6 +6070,9 @@ def render_english_module_fragment(
 
     if density not in PROMPT_DENSITIES:
         density = "标准"
+    if module_name == "服装":
+        clothing = _english_clothing_prompt_text(fields, density)
+        return f"{clothing}." if clothing else ""
     parts = []
     if module_name == "人物":
         identity = _english_person_identity_text(fields)

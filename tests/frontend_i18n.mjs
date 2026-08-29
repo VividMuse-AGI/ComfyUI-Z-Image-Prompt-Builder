@@ -140,5 +140,28 @@ assert.equal(
   globalThis.__vividMuseZImageI18n.translateMessage("条目“Lighting”没有提示词正文。"),
   "Entry 'Lighting' has no prompt body.",
 );
+assert.equal(
+  globalThis.__vividMuseZImageI18n.translateMessage("请先导入并选择一条提示词。"),
+  "Import a TXT prompt library and select an entry first.",
+);
+assert.equal(
+  globalThis.__vividMuseZImageI18n.translateMessage("请先导入并选择当前模块的一条提示词。"),
+  "Import a TXT module library and select an entry for the current module first.",
+);
+
+const deeplyNestedNode = {
+  comfyClass: "VividMuse_ZImagePersonModule",
+  title: "Z-Image 人物",
+  widgets: [], inputs: [], outputs: [], setDirtyCanvas() {},
+};
+graph._nodes.push({
+  subgraph: {
+    _nodes: [{
+      graphData: { _nodes: [deeplyNestedNode] },
+    }],
+  },
+});
+languageSetting.onChange("en");
+assert.equal(deeplyNestedNode.title, "Z-Image Person");
 
 console.log("frontend i18n ok");
