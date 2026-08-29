@@ -62,7 +62,7 @@ Restart ComfyUI and force-refresh the browser. The node is under:
 ```text
 VividMuse → Z-Image → Z-Image 中文提示词生成器
 VividMuse → Z-Image → 模块 → 8 standalone module nodes
-VividMuse → Z-Image → 词库 → 2 standalone TXT nodes
+VividMuse → Z-Image → TXT词库 → 2 standalone TXT nodes
 ```
 
 ### Manual
@@ -122,7 +122,7 @@ Canvas → Person → Hair → Clothing → Pose & Action → Scene → Photogra
 - Bypass a module with `Ctrl+B` to pass its incoming string directly to the next node.
 - Standalone nodes do not share editable widget state. In a direct chain, however, the combined string carries resolved upstream fields at runtime, so downstream random photography can remain compatible with the actual pose, scene, and other completed modules. The TXT prompt-library node preserves this context. When a TXT module fragment replaces a standard module, that module's stale structured fields are removed so downstream nodes do not keep filtering against an obsolete pose or scene. Arbitrary TXT fragments cannot be reliably parsed back into every widget field, so the replacement is treated as opaque user content.
 - A third-party text node that creates a new plain string may discard that runtime context. Use the full builder when one preset should centrally control all 92 fields.
-- `Z-Image TXT提示词库` inserts reusable full prompts; `Z-Image TXT模块词库` inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual, or Custom.
+- `Z-Image TXT提示词库` inserts reusable full prompts; `Z-Image TXT模块词库` inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual, or Custom. To replace a standalone structured module, put the TXT module node in that module's position or bypass the original module with `Ctrl+B`; the TXT node does not remove module text that is already present in its incoming string.
 
 ## TXT Libraries
 

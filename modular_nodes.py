@@ -355,7 +355,10 @@ class ZImageTxtModuleLibrary:
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("组合提示词",)
     OUTPUT_NODE = False
-    DESCRIPTION = "导入并选择一个结构化 TXT 模块片段，可替代任意内置模块。"
+    DESCRIPTION = (
+        "导入并选择一个结构化 TXT 模块片段；要替代某个独立模块，"
+        "请在链中使用本节点代替该模块，或将同类型模块旁路。"
+    )
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -363,7 +366,13 @@ class ZImageTxtModuleLibrary:
             "required": {
                 "模块类型": (
                     TXT_MODULE_TYPES,
-                    {"default": TXT_MODULE_TYPES[0]},
+                    {
+                        "default": TXT_MODULE_TYPES[0],
+                        "tooltip": (
+                            "声明当前片段所属模块。若链中已有同类型模块，"
+                            "请将其旁路，避免两段描述同时进入提示词。"
+                        ),
+                    },
                 ),
                 "模块提示词": (
                     "STRING",
@@ -371,7 +380,10 @@ class ZImageTxtModuleLibrary:
                         "default": "",
                         "multiline": True,
                         "dynamicPrompts": False,
-                        "tooltip": "由 TXT 模块词库写入，也可以直接手动编辑。",
+                        "tooltip": (
+                            "由 TXT 模块词库写入，也可以直接手动编辑；"
+                            "本节点不会删除已经位于上游字符串中的同类型描述。"
+                        ),
                     },
                 ),
                 "拼接位置": (

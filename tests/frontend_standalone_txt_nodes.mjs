@@ -141,6 +141,17 @@ assert.equal(
   widget(moduleNode, "模块提示词").value,
   "一位二十岁左右的东亚成年女性，神态自然。",
 );
+assert.equal(
+  moduleNode.properties.vividMuseTxtModuleAppliedTitles?.["人物"],
+  "清透人物",
+);
+widget(moduleNode, "模块提示词").value = "用户手动修改的人物描述。";
+widget(moduleNode, "模块提示词").callback?.("用户手动修改的人物描述。");
+assert.equal(
+  moduleNode.properties.vividMuseTxtModuleAppliedTitles?.["人物"],
+  undefined,
+);
+assert.match(moduleNode.__vividMuseTxtModuleApplyButton.name, /已有内容/u);
 
 const moduleType = widget(moduleNode, "模块类型");
 moduleType.value = "姿态动作";

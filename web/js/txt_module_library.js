@@ -361,12 +361,36 @@ function applySelectedModuleEntry(node) {
   const targetWidget = widgetByName(node, targetWidgetName(node, moduleName));
   if (!targetWidget) return false;
   targetWidget.value = selected.prompt;
-  targetWidget.callback?.(targetWidget.value);
+  node.__vividMuseTxtModuleApplyingEntry = true;
+  try {
+    targetWidget.callback?.(targetWidget.value);
+  } finally {
+    node.__vividMuseTxtModuleApplyingEntry = false;
+  }
   node.properties ??= {};
   node.properties[APPLIED_TITLE_PROPERTY] ??= {};
   node.properties[APPLIED_TITLE_PROPERTY][moduleName] = selected.title;
   syncModuleLibraryControls(node);
   return true;
+}
+
+function installStandaloneTargetEditTracking(node) {
+  if (!isStandaloneNode(node)) return;
+  const targetWidget = widgetByName(node, "模块提示词");
+  if (!targetWidget || targetWidget.__vividMuseTxtModuleEditTracking) return;
+  const originalCallback = targetWidget.callback;
+  targetWidget.callback = function () {
+    const result = originalCallback?.apply(this, arguments);
+    if (!node.__vividMuseTxtModuleApplyingEntry) {
+      const moduleName = currentModule(node);
+      if (node.properties?.[APPLIED_TITLE_PROPERTY]) {
+        delete node.properties[APPLIED_TITLE_PROPERTY][moduleName];
+      }
+      syncModuleLibraryControls(node, false);
+    }
+    return result;
+  };
+  targetWidget.__vividMuseTxtModuleEditTracking = true;
 }
 
 function clearCurrentModule(node) {
@@ -553,6 +577,7 @@ function installModuleLibraryWidgets(node) {
     clearModuleButton,
     clearLibraryButton,
   ];
+  installStandaloneTargetEditTracking(node);
   placeModuleLibraryBeforePromptLibrary(node);
   syncModuleLibraryControls(node, false);
   setModuleLibraryExpanded(node, Boolean(node.properties?.[EXPANDED_PROPERTY]), false);
