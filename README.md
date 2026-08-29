@@ -79,7 +79,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.3.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.3.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.3.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。
+推荐从 [`v0.4.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.4.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.4.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -379,7 +379,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前源码版本：`0.4.0`（待发布；最新公开 Release 仍为 `v0.3.0`）
+- 当前版本：`0.4.0`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上
