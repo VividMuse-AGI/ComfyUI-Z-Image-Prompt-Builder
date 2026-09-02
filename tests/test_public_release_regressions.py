@@ -232,6 +232,54 @@ class PublicReleaseRegressionTests(unittest.TestCase):
                     ),
                 )
 
+    def test_legacy_age_stages_resolve_to_sixty_plus(self):
+        for legacy_age in ("60–69岁", "70岁以上"):
+            requested = {
+                field: nodes.FOLLOW_PRESET for field in nodes.FIELD_ORDER
+            }
+            requested["年龄阶段"] = legacy_age
+            resolved = nodes.resolve_fields(
+                nodes.PRESET_OPTIONS[0],
+                nodes.RANDOM_SCOPES[0],
+                0,
+                requested,
+            )
+            with self.subTest(legacy_age=legacy_age):
+                self.assertEqual(resolved["年龄阶段"], "60岁以上")
+                self.assertIn(
+                    "一位60岁左右的东亚成年女性",
+                    nodes.compose_prompt_text(resolved, "标准"),
+                )
+
+    def test_age_stages_use_decade_anchors(self):
+        expected = {
+            "20–29岁": "20岁左右",
+            "30–39岁": "30岁左右",
+            "40–49岁": "40岁左右",
+            "50–59岁": "50岁左右",
+            "60岁以上": "60岁左右",
+        }
+        self.assertEqual(nodes.AGE_STAGE_TEXT, expected)
+
+        for age_stage, age_text in expected.items():
+            requested = {
+                field: nodes.FOLLOW_PRESET for field in nodes.FIELD_ORDER
+            }
+            requested["年龄阶段"] = age_stage
+            resolved = nodes.resolve_fields(
+                nodes.PRESET_OPTIONS[0],
+                nodes.RANDOM_SCOPES[0],
+                0,
+                requested,
+            )
+            with self.subTest(age_stage=age_stage):
+                self.assertIn(
+                    f"一位{age_text}的东亚成年女性",
+                    nodes.compose_prompt_text(resolved, "标准"),
+                )
+
+
+
     def test_scene_formatter_does_not_repeat_existing_suffixes(self):
         fields = {field: nodes.EMPTY_CHOICE for field in nodes.FIELD_ORDER}
         fields.update(

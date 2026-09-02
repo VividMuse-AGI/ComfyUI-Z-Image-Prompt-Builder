@@ -1087,12 +1087,11 @@ export const EN_CATALOG = {
       "面部与上半身": "Focused on the upper body"
     },
     "年龄阶段": {
-      "20–29岁": "Around 25 years old",
-      "30–39岁": "Around 35 years old",
-      "40–49岁": "Around 45 years old",
-      "50–59岁": "Around 55 years old",
-      "60–69岁": "Around 65 years old",
-      "70岁以上": "Around 75 years old",
+      "20–29岁": "Around 20 years old",
+      "30–39岁": "Around 30 years old",
+      "40–49岁": "Around 40 years old",
+      "50–59岁": "Around 50 years old",
+      "60岁以上": "Around 60 years old",
       "不使用": "None",
       "跟随预设": "Follow Preset",
       "随机抽取": "Random"

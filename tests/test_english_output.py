@@ -16,7 +16,7 @@ class EnglishOutputTests(unittest.TestCase):
         result = nodes.ZImageChinesePromptBuilder().build_prompt()
         self.assertEqual(len(result), 4)
         chinese_prompt, width, height, english_prompt = result
-        self.assertIn("一位25岁左右的东亚成年女性", chinese_prompt)
+        self.assertIn("一位20岁左右的东亚成年女性", chinese_prompt)
         self.assertEqual((width, height), (832, 1248))
         self.assertTrue(english_prompt)
         self.assertIsNone(CJK_RE.search(english_prompt))
@@ -144,7 +144,7 @@ class EnglishOutputTests(unittest.TestCase):
         ):
             self.assertNotIn(fragment, prompt)
         for fragment in (
-            "an East Asian woman around 25 years old",
+            "an East Asian woman around 20 years old",
             "with a clean shoulder-and-neck line",
             "wearing a clean short-sleeve T-shirt in cream white cotton",
             "with one leg extended",

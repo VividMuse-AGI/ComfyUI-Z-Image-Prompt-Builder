@@ -46,6 +46,11 @@ LEGACY_RANDOM_SCOPES = {
     "标准变化": RANDOM_SCOPES[1],
     "大胆探索": RANDOM_SCOPES[2],
 }
+LEGACY_AGE_STAGES = {
+    "60–69岁": "60岁以上",
+    "70岁以上": "60岁以上",
+}
+
 
 PROMPT_DENSITIES = ["精简", "标准", "详细"]
 PROMPT_JOIN_POSITIONS = ["自由提示词在前", "结构化模块在前"]
@@ -958,12 +963,11 @@ THEME_TEXT = {
 }
 
 AGE_STAGE_TEXT = {
-    "20–29岁": "25岁左右",
-    "30–39岁": "35岁左右",
-    "40–49岁": "45岁左右",
-    "50–59岁": "55岁左右",
-    "60–69岁": "65岁左右",
-    "70岁以上": "75岁左右",
+    "20–29岁": "20岁左右",
+    "30–39岁": "30岁左右",
+    "40–49岁": "40岁左右",
+    "50–59岁": "50岁左右",
+    "60岁以上": "60岁左右",
 }
 
 ETHNICITY_BRANCH_GENERIC = "大类通用外观"
@@ -3909,6 +3913,9 @@ def resolve_fields(
         random_scope = RANDOM_SCOPES[0]
 
     requested = dict(requested)
+    requested_age = requested.get("年龄阶段")
+    if requested_age in LEGACY_AGE_STAGES:
+        requested["年龄阶段"] = LEGACY_AGE_STAGES[requested_age]
     legacy_light = requested.get("光线方案")
     if legacy_light == RANDOM_CHOICE:
         for field_name in LIGHTING_OUTPUT_FIELDS:
@@ -5779,12 +5786,11 @@ def _english_atomic_value(field_name: str, value: str) -> str:
         return ""
     if field_name == "年龄阶段":
         return {
-            "age_20s": "around 25 years old",
-            "age_30s": "around 35 years old",
-            "age_40s": "around 45 years old",
-            "age_50s": "around 55 years old",
-            "age_60s": "around 65 years old",
-            "age_70_plus": "around 75 years old",
+            "age_20s": "around 20 years old",
+            "age_30s": "around 30 years old",
+            "age_40s": "around 40 years old",
+            "age_50s": "around 50 years old",
+            "age_60s": "around 60 years old",
         }.get(option_id, _humanize_english_id(field_name, option_id))
     natural_phrase = _ENGLISH_NATURAL_ID_PHRASES.get(field_name, {}).get(option_id)
     if natural_phrase:

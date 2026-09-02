@@ -9,6 +9,10 @@ const LEGACY_PRESET_NAMES = {
   "古风汉服写真": "古风汉服园林柔光写真",
   "海边假日度假写真": "海边夏日泳装写真",
 };
+const LEGACY_AGE_STAGES = {
+  "60–69岁": "60岁以上",
+  "70岁以上": "60岁以上",
+};
 const LOCAL_SCOPE = "局部微调（动作、表情、色彩、质感）";
 const THEME_SCOPE = "同主题重拍（保留主题和人物）";
 const MIX_SCOPE = "跨风格混搭（全部字段）";
@@ -1222,6 +1226,9 @@ function installCompactWidgetConfigure(node) {
     const presetWidget = widgetByName(node, "预设");
     const migratedPreset = LEGACY_PRESET_NAMES[presetWidget?.value];
     if (migratedPreset) presetWidget.value = migratedPreset;
+    const ageWidget = widgetByName(node, "年龄阶段");
+    const migratedAge = LEGACY_AGE_STAGES[ageWidget?.value];
+    if (migratedAge) ageWidget.value = migratedAge;
     ensureConfiguredNode(node);
     return result;
   };

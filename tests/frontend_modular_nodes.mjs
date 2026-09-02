@@ -143,6 +143,9 @@ assert.equal(widget(personNode, "底妆质感").hidden, true);
 change(personNode, "妆容模式", "分项自定义");
 assert.equal(widget(personNode, "整体妆容预设").hidden, true);
 assert.equal(widget(personNode, "底妆质感").hidden, false);
+widget(personNode, "年龄阶段").value = "70岁以上";
+personNode.onConfigure({});
+assert.equal(widget(personNode, "年龄阶段").value, "60岁以上");
 
 const clothingNode = makeNode("VividMuse_ZImageClothingModule", {
   "穿搭结构": "连衣裙",

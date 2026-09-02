@@ -87,7 +87,7 @@ class ModularNodeTests(unittest.TestCase):
             result = node_class().build_module(前置提示词=prompt)
             prompt = result[0]
         self.assertGreaterEqual(prompt.count("。"), 8)
-        self.assertIn("一位25岁左右的东亚成年女性", prompt)
+        self.assertIn("一位20岁左右的东亚成年女性", prompt)
         self.assertIn("发型为", prompt)
         self.assertIn("场景位于", prompt)
         self.assertIn("镜头", prompt)

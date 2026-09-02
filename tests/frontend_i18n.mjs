@@ -107,7 +107,7 @@ assert.equal(widgets[0].label, "Preset");
 assert.equal(widgets[0].options.getOptionLabel(widgets[0].value), "Japanese Summer Bicycle Soft-light Portrait");
 assert.equal(widgets[1].label, "Age Range");
 assert.equal(widgets[1].options.getOptionLabel("跟随预设"), "Follow Preset");
-assert.equal(widgets[1].options.getOptionLabel("20–29岁"), "Around 25 years old");
+assert.equal(widgets[1].options.getOptionLabel("20–29岁"), "Around 20 years old");
 assert.equal(widgets[1].value, "20–29岁");
 assert.equal(widgets[2].label, "Apply to Person Module (Current: Not Set)");
 assert.equal(node.inputs[0].label, "Previous Prompt");

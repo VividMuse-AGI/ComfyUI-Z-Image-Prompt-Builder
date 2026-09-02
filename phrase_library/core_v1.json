@@ -18,38 +18,32 @@
         {
           "id": "age_20s",
           "label": "20–29岁",
-          "value": "25岁左右的成年女性",
-          "fragment": "25岁左右"
+          "value": "20岁左右的成年女性",
+          "fragment": "20岁左右"
         },
         {
           "id": "age_30s",
           "label": "30–39岁",
-          "value": "35岁左右的成年女性",
-          "fragment": "35岁左右"
+          "value": "30岁左右的成年女性",
+          "fragment": "30岁左右"
         },
         {
           "id": "age_40s",
           "label": "40–49岁",
-          "value": "45岁左右的成年女性",
-          "fragment": "45岁左右"
+          "value": "40岁左右的成年女性",
+          "fragment": "40岁左右"
         },
         {
           "id": "age_50s",
           "label": "50–59岁",
-          "value": "55岁左右的成年女性",
-          "fragment": "55岁左右"
+          "value": "50岁左右的成年女性",
+          "fragment": "50岁左右"
         },
         {
           "id": "age_60s",
-          "label": "60–69岁",
-          "value": "65岁左右的成年女性",
-          "fragment": "65岁左右"
-        },
-        {
-          "id": "age_70_plus",
-          "label": "70岁以上",
-          "value": "75岁左右的成年女性",
-          "fragment": "75岁左右"
+          "label": "60岁以上",
+          "value": "60岁左右的成年女性",
+          "fragment": "60岁左右"
         }
       ]
     },

@@ -12,6 +12,7 @@ A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-langua
 - Three prompt densities: **concise / standard / detailed** (standard is the default).
 - **92 structured fields** across 8 modules — Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, and Visual. Each field can be set to "Follow preset", "Random", "Disabled", or a specific value; dependent fields collapse according to the current mode.
 - Person is split into atomic fields (age, ethnicity, face shape, contour, eye shape, iris color, eyelid, skin tone, skin texture, makeup, and body shape); makeup supports two mutually exclusive branches: overall preset vs. per-item customization.
+- Age uses five ranges: 20–29, 30–39, 40–49, 50–59, and 60+. Their prompt anchors are “around 20/30/40/50/60 years old”; legacy 60–69 and 70+ workflow values migrate to 60+.
 - Capture medium is independent of subject and ships 12 digital, phone, film, and instant-photography media.
 - Photo themes use a two-level structure: **12 theme categories × 144 specific themes**.
 - Hair is split into color, length, texture, style, bangs, and headwear, plus optional hair-tone and dye-pattern fields; random generation prefers 37 compatible hair structures.

@@ -3,6 +3,10 @@ import { app } from "../../scripts/app.js";
 const FOLLOW_PRESET = "跟随预设";
 const RANDOM_CHOICE = "随机抽取";
 const EMPTY_CHOICE = "不使用";
+const LEGACY_AGE_STAGES = {
+  "60–69岁": "60岁以上",
+  "70岁以上": "60岁以上",
+};
 
 const MODULE_NODE_FIELDS = {
   VividMuse_ZImageCanvasModule: [
@@ -322,6 +326,9 @@ function installConfigure(node) {
   const originalOnConfigure = node.onConfigure;
   node.onConfigure = function () {
     const result = originalOnConfigure?.apply(this, arguments);
+    const ageWidget = widgetByName(node, "年龄阶段");
+    const migratedAge = LEGACY_AGE_STAGES[ageWidget?.value];
+    if (migratedAge) ageWidget.value = migratedAge;
     syncDependencies(node, false);
     globalThis.setTimeout?.(() => resizeNode(node), 0);
     return result;

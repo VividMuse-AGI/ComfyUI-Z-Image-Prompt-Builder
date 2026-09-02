@@ -8,17 +8,23 @@ source = source.replace(
   'import { app } from "../../scripts/app.js";',
   "const app = { registerExtension() {} };",
 );
+source += "globalThis.__legacyAgeStages = LEGACY_AGE_STAGES;\n";
 source += "\nglobalThis.__presetValues = PRESETS;\nglobalThis.__legacyPresetNames = LEGACY_PRESET_NAMES;\n";
 source += "globalThis.__sceneLocationsByCategory = SCENE_LOCATIONS_BY_CATEGORY;\n";
 vm.runInThisContext(source, { filename: sourcePath.pathname });
 
 const presets = globalThis.__presetValues;
+const legacyAgeStages = globalThis.__legacyAgeStages;
 const legacyPresetNames = globalThis.__legacyPresetNames;
 const sceneLocationsByCategory = globalThis.__sceneLocationsByCategory;
 assert.equal(Object.keys(presets).length, 11);
 assert.equal(legacyPresetNames["日系森系夏日柔光写真"], "日系草地单车夏日柔光写真");
 assert.equal(legacyPresetNames["古风汉服写真"], "古风汉服园林柔光写真");
 assert.equal(legacyPresetNames["海边假日度假写真"], "海边夏日泳装写真");
+assert.deepEqual(legacyAgeStages, {
+  "60–69岁": "60岁以上",
+  "70岁以上": "60岁以上",
+});
 assert.equal(presets["日系草地单车夏日柔光写真"]["基础姿态"], "单车侧坐");
 assert.equal(presets["日系咖啡馆暖调近景人像"]["成像媒介"], "手机计算摄影");
 assert.equal(presets["夜间室内轻奢硬闪时尚写真"]["基础姿态"], "复古扶手椅坐姿");
