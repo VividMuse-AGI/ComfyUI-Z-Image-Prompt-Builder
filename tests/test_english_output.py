@@ -97,16 +97,28 @@ class EnglishOutputTests(unittest.TestCase):
         self.assertIn("年龄阶段", person_english.zimage_resolved_fields)
         self.assertIsNone(CJK_RE.search(person_english))
 
-    def test_arbitrary_chinese_user_text_is_not_silently_mistranslated(self):
+    def test_free_prompt_is_preserved_verbatim_in_both_outputs(self):
         chinese, _, _, english = nodes.ZImageChinesePromptBuilder().build_prompt(
             自由提示词="用户自己写的中文自由提示词",
             用户场景片段="用户自己写的中文场景片段",
         )
         self.assertIn("用户自己写的中文自由提示词", chinese)
         self.assertIn("用户自己写的中文场景片段", chinese)
-        self.assertNotIn("用户自己写的中文自由提示词", english)
+        self.assertIn("用户自己写的中文自由提示词", english)
         self.assertNotIn("用户自己写的中文场景片段", english)
-        self.assertIsNone(CJK_RE.search(english))
+
+    def test_free_prompt_respects_join_position_in_english_output(self):
+        free_prompt = "editorial emphasis"
+        free_first = nodes.ZImageChinesePromptBuilder().build_prompt(
+            自由提示词=free_prompt,
+            拼接位置="自由提示词在前",
+        )[3]
+        structured_first = nodes.ZImageChinesePromptBuilder().build_prompt(
+            自由提示词=free_prompt,
+            拼接位置="结构化模块在前",
+        )[3]
+        self.assertTrue(free_first.startswith(free_prompt))
+        self.assertTrue(structured_first.endswith(free_prompt))
 
     def test_english_output_is_seed_deterministic(self):
         kwargs = {

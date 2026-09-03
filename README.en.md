@@ -77,7 +77,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.4.1` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.4.1), download `ComfyUI-Z-Image-Prompt-Builder-v0.4.1.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`.
+For the recommended manual install, open the [`v0.4.2` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.4.2), download `ComfyUI-Z-Image-Prompt-Builder-v0.4.2.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -127,7 +127,7 @@ Canvas → Person → Hair → Clothing → Pose & Action → Scene → Photogra
 - Standalone nodes do not share editable widget state. In a direct chain, however, the combined string carries resolved upstream fields at runtime, so downstream random photography can remain compatible with the actual pose, scene, and other completed modules. The TXT prompt-library node preserves this context. When a TXT module fragment replaces a standard module, that module's stale structured fields are removed so downstream nodes do not keep filtering against an obsolete pose or scene. Arbitrary TXT fragments cannot be reliably parsed back into every widget field, so the replacement is treated as opaque user content.
 - A third-party text node that creates a new plain string may discard that runtime context. Use the full builder when one preset should centrally control all 92 fields.
 - **Z-Image TXT Prompt Library** inserts reusable full prompts; **Z-Image TXT Module Library** inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual Style, or Custom. To replace a standalone structured module, put the TXT module node in that module's position or bypass the original module with **Ctrl+B**; the TXT node does not remove module text that is already present in its incoming string.
-- The English interface renders built-in dropdown fields only. It does not silently translate arbitrary Chinese free text or Chinese TXT bodies. If a user TXT fragment replaces a standard module, that module is omitted from the English output so stale built-in fields are not emitted. Prepare English TXT/free text and join it downstream when custom content must also reach an English-language model.
+- The English interface renders built-in structured fields in English and inserts the free prompt verbatim according to **Join Position**; it never silently translates user text. Enter English in the free-prompt field or TXT user library when a fully English result is required. If a TXT module fragment replaces a standard module, that module is still omitted from the English output so stale built-in fields are not emitted.
 
 ## TXT Libraries
 
@@ -334,7 +334,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.4.1`
+- Current version: `0.4.2`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

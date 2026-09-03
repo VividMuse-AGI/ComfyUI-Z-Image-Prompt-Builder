@@ -6524,7 +6524,7 @@ class ZImageChinesePromptBuilder:
                     "default": "",
                     "multiline": True,
                     "dynamicPrompts": False,
-                    "tooltip": "输入自己编写的中文正向提示词，可与任意结构化模块拼接。",
+                    "tooltip": "输入自己编写的正向提示词；中英文输出都会原样保留，并按拼接位置组合。",
                 },
             ),
             "拼接位置": (
@@ -6611,9 +6611,17 @@ class ZImageChinesePromptBuilder:
             for module_name, fragment in user_module_fragments.items()
             if str(fragment).strip()
         }
-        english_prompt = compose_english_prompt_text(
+        english_structured_prompt = compose_english_prompt_text(
             fields, density, excluded_modules=replaced_modules
         )
+        if join_position == "结构化模块在前":
+            english_prompt = join_english_prompt_text(
+                english_structured_prompt, free_prompt
+            )
+        else:
+            english_prompt = join_english_prompt_text(
+                free_prompt, english_structured_prompt
+            )
         aspect = fields["画面比例"]
         if aspect not in ASPECT_RESOLUTIONS:
             aspect = _preset_values(preset)["画面比例"]

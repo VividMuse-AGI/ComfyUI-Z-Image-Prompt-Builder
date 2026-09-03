@@ -2416,7 +2416,7 @@ export const EN_CATALOG = {
     "用户画面基础片段": "Filled by the TXT module library; replaces the built-in Canvas module when non-empty.",
     "用户自定义片段": "Filled by the TXT module library; adds an independent Custom fragment after the eight standard modules.",
     "用户视觉表现片段": "Filled by the TXT module library; replaces the built-in Visual Style module when non-empty.",
-    "自由提示词": "Write your own positive prompt and join it with any structured modules.",
+    "自由提示词": "Write your own positive prompt. Both Chinese and English outputs preserve it verbatim and place it according to Join Position.",
     "随机种子": "The same selections and seed produce the same prompt.",
     "随机范围": "Fine Tune changes a few details; Same Theme Reshoot keeps theme and person; Cross-style Mix can change every field.",
     "预设": "Provides compatible preset values and randomization pools."

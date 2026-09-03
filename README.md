@@ -79,7 +79,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.4.1` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.4.1) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.4.1.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。
+推荐从 [`v0.4.2` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.4.2) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.4.2.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -129,7 +129,7 @@ git pull
 - 各节点不共享可编辑的下拉框状态；但直接串联时，“组合提示词”会在运行期携带上游已经解析的字段，使下游随机摄影能够参考实际姿态、场景等兼容信息。TXT 提示词库会原样保留这份信息；TXT 模块词库替换某个标准模块时会清除该模块的旧结构化字段，避免下游继续按照已经被替换的姿态或场景筛选。由于任意 TXT 短语无法可靠反解析成全部下拉字段，被替换模块只按“用户自定义内容”处理。
 - 如果中途接入会重新创建普通字符串的第三方文本节点，上述运行期信息可能丢失；如需由一套预设统一管理全部 92 个字段，继续使用“Z-Image 中文提示词生成器”。
 - “TXT提示词库”适合插入完整自由提示词；“TXT模块词库”适合按画面基础、人物、发型、服装、姿态动作、场景、摄影、视觉表现或自定义类型插入一个模块片段。若要替代某个独立结构化模块，请在链中用 TXT 模块节点占据该模块的位置，或将原同类型模块设为 `Ctrl+B` 旁路；TXT 节点不会删除已经进入上游字符串的旧模块文字。
-- 英文接口只渲染节点内置的结构化下拉字段。任意中文“自由提示词”和中文 TXT 正文不会被自动翻译；若用户 TXT 片段替换了某个标准模块，英文输出会省略该模块，避免继续输出已经失效的内置字段。需要把自定义内容也送入英文模型时，请直接准备英文 TXT／英文自由文本并在下游自行拼接。
+- 英文接口会把内置结构化字段渲染为英文，并将“自由提示词”按“拼接位置”原样加入英文输出，不做自动翻译；因此需要纯英文结果时，请在自由提示词或 TXT 用户词库中输入英文。若 TXT 模块片段替换了某个标准模块，英文输出仍会省略该模块，避免继续输出已经失效的内置字段。
 
 ### 自由提示词与紧凑单模块编辑器
 
@@ -379,7 +379,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.4.1`
+- 当前版本：`0.4.2`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上

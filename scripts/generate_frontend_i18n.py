@@ -246,7 +246,10 @@ TOOLTIPS_EN = {
     "提示词密度": "Concise keeps essentials, Standard keeps primary photography details, and Detailed keeps all fields.",
     "随机范围": "Fine Tune changes a few details; Same Theme Reshoot keeps theme and person; Cross-style Mix can change every field.",
     "随机种子": "The same selections and seed produce the same prompt.",
-    "自由提示词": "Write your own positive prompt and join it with any structured modules.",
+    "自由提示词": (
+        "Write your own positive prompt. Both Chinese and English outputs preserve "
+        "it verbatim and place it according to Join Position."
+    ),
     "拼接位置": "Controls the order of the free/current prompt and the connected structured text.",
     "前置提示词": "Connect the previous Chinese module output to continue the prompt chain.",
     "前置英文提示词": "Connect the previous English module output to continue the English chain.",
