@@ -125,19 +125,334 @@ const ETHNICITY_BRANCHES_BY_CATEGORY = {
 };
 
 const SCENE_LOCATIONS_BY_CATEGORY = {
-  "居住空间": ["采光客厅", "奶油色卧室", "开放式厨房", "窗边书房", "石材浴室", "封闭阳台", "旋转楼梯", "阳光房", "壁炉客厅", "木屋阁楼", "花园门廊", "奶油色公寓", "室内门廊"],
-  "餐饮与酒店": ["暖木咖啡馆", "酒店客房", "酒店休息厅", "餐厅卡座", "鸡尾酒吧", "酒店走廊", "咖啡馆卡座", "咖啡馆窗边", "复古茶餐厅", "酒店阳台", "复古会所"],
-  "商业零售": ["独立书店", "花店", "唱片店", "服装精品店", "珠宝陈列室", "现代药店"],
-  "文化艺术": ["图书馆阅览室", "白墙美术馆", "博物馆展厅", "剧院前厅", "舞蹈排练室", "陶艺工作室", "当代美术馆", "校园教室"],
-  "办公工作": ["行政办公室", "玻璃会议室", "创意工作室", "服装工作室", "新闻编辑室", "洁净实验室", "玻璃连廊", "办公休息区", "玻璃大堂"],
-  "交通空间": ["车站候车厅", "地铁站台", "机场休息室", "列车车厢", "地下停车场", "电梯厅"],
-  "运动康体": ["健身训练室", "瑜伽教室", "室内泳池", "水疗休息区", "运动更衣室", "普拉提教室", "室外网球场", "校园操场", "室外篮球场"],
-  "东方传统": ["新中式茶室", "寺院偏殿", "传统书斋", "老宅厅堂", "传统织造坊", "茶馆内廊", "温泉汤池"],
-  "工业功能": ["仓库通道", "工厂走道", "机械设备间", "地下洗衣房", "后勤走廊", "玻璃温室", "蒸汽机械空间", "工业地下通道"],
-  "专业特色": ["摄影棚", "后台化妆间", "音乐排练室", "钟表工坊", "天文观测室", "档案室", "高级灰影棚", "哥特古堡厅堂", "星云神殿", "水下幻境", "冰雪宫殿", "花瓣风暴装置空间"],
-  "自然户外": ["夏日庭院", "林间小径", "海边", "月夜森林", "超现实梦境花园", "云海仙境", "海边灯塔", "沙滩", "竹林", "湖边", "公园草地"],
-  "都市户外": ["都市街道", "城市天台", "未来赛博街区", "石拱桥", "码头"],
+  "居住空间": [
+    "采光客厅",
+    "奶油色卧室",
+    "开放式厨房",
+    "窗边书房",
+    "石材浴室",
+    "封闭阳台",
+    "旋转楼梯",
+    "阳光房",
+    "壁炉客厅",
+    "木屋阁楼",
+    "花园门廊",
+    "奶油色公寓",
+    "室内门廊"
+  ],
+  "餐饮与酒店": [
+    "暖木咖啡馆",
+    "酒店客房",
+    "酒店休息厅",
+    "餐厅卡座",
+    "鸡尾酒吧",
+    "酒店走廊",
+    "咖啡馆卡座",
+    "咖啡馆窗边",
+    "复古茶餐厅",
+    "酒店阳台",
+    "复古会所"
+  ],
+  "商业零售": [
+    "独立书店",
+    "花店",
+    "唱片店",
+    "服装精品店",
+    "珠宝陈列室",
+    "现代药店"
+  ],
+  "文化艺术": [
+    "图书馆阅览室",
+    "白墙美术馆",
+    "博物馆展厅",
+    "剧院前厅",
+    "舞蹈排练室",
+    "陶艺工作室",
+    "当代美术馆",
+    "校园教室"
+  ],
+  "办公工作": [
+    "行政办公室",
+    "玻璃会议室",
+    "创意工作室",
+    "服装工作室",
+    "新闻编辑室",
+    "洁净实验室",
+    "玻璃连廊",
+    "办公休息区",
+    "玻璃大堂"
+  ],
+  "交通空间": [
+    "车站候车厅",
+    "地铁站台",
+    "机场休息室",
+    "列车车厢",
+    "地下停车场",
+    "电梯厅"
+  ],
+  "运动康体": [
+    "健身训练室",
+    "瑜伽教室",
+    "室内泳池",
+    "水疗休息区",
+    "运动更衣室",
+    "普拉提教室",
+    "室外网球场",
+    "校园操场",
+    "室外篮球场"
+  ],
+  "东方传统": [
+    "新中式茶室",
+    "寺院偏殿",
+    "传统书斋",
+    "老宅厅堂",
+    "传统织造坊",
+    "茶馆内廊",
+    "温泉汤池"
+  ],
+  "工业功能": [
+    "仓库通道",
+    "工厂走道",
+    "机械设备间",
+    "地下洗衣房",
+    "后勤走廊",
+    "玻璃温室",
+    "蒸汽机械空间",
+    "工业地下通道"
+  ],
+  "专业特色": [
+    "摄影棚",
+    "后台化妆间",
+    "音乐排练室",
+    "钟表工坊",
+    "天文观测室",
+    "档案室",
+    "高级灰影棚",
+    "哥特古堡厅堂",
+    "星云神殿",
+    "水下幻境",
+    "冰雪宫殿",
+    "花瓣风暴装置空间"
+  ],
+  "自然户外": [
+    "夏日庭院",
+    "林间小径",
+    "海边",
+    "海边灯塔",
+    "沙滩",
+    "竹林",
+    "湖边",
+    "月夜森林",
+    "超现实梦境花园",
+    "云海仙境",
+    "公园草地"
+  ],
+  "都市户外": [
+    "都市街道",
+    "城市天台",
+    "石拱桥",
+    "码头",
+    "未来赛博街区"
+  ]
 };
+
+const SCENE_LOCATION_VALUES = [
+  "夏日庭院",
+  "林间小径",
+  "咖啡馆卡座",
+  "咖啡馆窗边",
+  "奶油色公寓",
+  "办公休息区",
+  "酒店走廊",
+  "室内门廊",
+  "高级灰影棚",
+  "新中式茶室",
+  "复古茶餐厅",
+  "都市街道",
+  "玻璃大堂",
+  "酒店阳台",
+  "城市天台",
+  "海边",
+  "独立书店",
+  "当代美术馆",
+  "花店",
+  "室外网球场",
+  "健身训练室",
+  "校园教室",
+  "校园操场",
+  "室外篮球场",
+  "石拱桥",
+  "码头",
+  "海边灯塔",
+  "温泉汤池",
+  "沙滩",
+  "竹林",
+  "湖边",
+  "采光客厅",
+  "奶油色卧室",
+  "开放式厨房",
+  "窗边书房",
+  "石材浴室",
+  "封闭阳台",
+  "暖木咖啡馆",
+  "酒店客房",
+  "酒店休息厅",
+  "餐厅卡座",
+  "鸡尾酒吧",
+  "唱片店",
+  "服装精品店",
+  "珠宝陈列室",
+  "现代药店",
+  "图书馆阅览室",
+  "白墙美术馆",
+  "博物馆展厅",
+  "剧院前厅",
+  "舞蹈排练室",
+  "陶艺工作室",
+  "行政办公室",
+  "玻璃会议室",
+  "创意工作室",
+  "服装工作室",
+  "新闻编辑室",
+  "洁净实验室",
+  "车站候车厅",
+  "地铁站台",
+  "机场休息室",
+  "列车车厢",
+  "地下停车场",
+  "电梯厅",
+  "瑜伽教室",
+  "室内泳池",
+  "水疗休息区",
+  "运动更衣室",
+  "普拉提教室",
+  "寺院偏殿",
+  "传统书斋",
+  "老宅厅堂",
+  "传统织造坊",
+  "茶馆内廊",
+  "仓库通道",
+  "工厂走道",
+  "机械设备间",
+  "地下洗衣房",
+  "后勤走廊",
+  "玻璃温室",
+  "摄影棚",
+  "后台化妆间",
+  "音乐排练室",
+  "钟表工坊",
+  "天文观测室",
+  "档案室",
+  "旋转楼梯",
+  "阳光房",
+  "壁炉客厅",
+  "木屋阁楼",
+  "玻璃连廊",
+  "花园门廊",
+  "月夜森林",
+  "哥特古堡厅堂",
+  "未来赛博街区",
+  "蒸汽机械空间",
+  "超现实梦境花园",
+  "星云神殿",
+  "水下幻境",
+  "冰雪宫殿",
+  "云海仙境",
+  "花瓣风暴装置空间",
+  "高亮庭院绿景",
+  "林间纵深",
+  "窗外街景",
+  "奶油色客厅",
+  "办公沙发与墙面",
+  "暖色酒店走廊",
+  "灰色门板与走廊",
+  "高级灰渐变背景",
+  "木质新中式空间",
+  "复古茶餐厅内景",
+  "都市玻璃建筑",
+  "大堂玻璃反射",
+  "阳台开阔景观",
+  "城市天际线",
+  "海面与地平线",
+  "整齐书架",
+  "白墙展厅",
+  "鲜花陈列",
+  "网球场围网",
+  "健身房镜面",
+  "校园教学楼",
+  "密林暗影",
+  "沙漠沙丘",
+  "雪山",
+  "湖面倒影",
+  "夜市灯火",
+  "高亮夏日树林庭院",
+  "林间小径树干纵深",
+  "暖木咖啡馆卡座",
+  "临街咖啡馆窗景",
+  "暖色走廊灰色门板",
+  "米杏沙发浅灰紫墙面",
+  "奶油色窗边室内",
+  "奶油公寓客厅",
+  "现代办公休息区",
+  "玻璃幕墙都市夜景",
+  "都市商业街",
+  "玻璃建筑大堂",
+  "酒店阳台开阔景观",
+  "城市天台天际线",
+  "海边地平线",
+  "独立书店书架",
+  "当代美术馆白墙",
+  "临街花店陈列",
+  "明亮健身训练室",
+  "高级灰摄影棚",
+  "木质新中式室内",
+  "家庭烘焙厨房",
+  "复古唱片店",
+  "自然采光画室",
+  "周末市集摊位",
+  "彩色几何摄影棚",
+  "花艺装置摄影棚",
+  "婚纱礼服陈列厅",
+  "夜间便利店",
+  "繁忙街道路口",
+  "城市人行天桥",
+  "春日花海",
+  "静谧湖畔",
+  "开阔草原",
+  "秋日枫林",
+  "冬日雪林",
+  "清幽竹林",
+  "海岸悬崖",
+  "沙漠旷野",
+  "乡间小路",
+  "海岛小镇街巷",
+  "山间露营地",
+  "葡萄园庄园",
+  "火车站候车厅",
+  "拳击训练馆",
+  "户外骑行道路",
+  "室内羽毛球馆",
+  "室内攀岩馆",
+  "江南园林",
+  "敦煌壁画空间",
+  "明制中式庭院",
+  "传统书院",
+  "七十年代客厅",
+  "复古迪斯科舞厅",
+  "经典火车站月台",
+  "美式公路餐厅",
+  "和风木造庭院",
+  "瀑布溪流",
+  "剧院舞台",
+  "海港码头",
+  "天使羽翼殿堂",
+  "少数民族集市",
+  "昭和和风房间",
+  "上海滩街景",
+  "公园草地",
+  "复古会所",
+  "工业地下通道"
+];
 
 const PRESETS = {
   "日系草地单车夏日柔光写真": {
@@ -1181,6 +1496,7 @@ globalThis.__vividMuseZImagePromptData = {
   THEME_OPTIONS_BY_CATEGORY,
   ETHNICITY_BRANCHES_BY_CATEGORY,
   SCENE_LOCATIONS_BY_CATEGORY,
+  SCENE_LOCATION_VALUES,
 };
 
 function widgetByName(node, name) {
@@ -1223,6 +1539,14 @@ function installCompactWidgetConfigure(node) {
   const originalOnConfigure = node.onConfigure;
   node.onConfigure = function (info) {
     const result = originalOnConfigure?.apply(this, arguments);
+    const layoutWidget = widgetByName(node, "输出排版");
+    const serializedWidgets = (node.widgets || []).filter(widget =>
+      widget.serialize !== false && widget.options?.serialize !== false);
+    const layoutIndex = serializedWidgets.indexOf(layoutWidget);
+    if (layoutWidget && Array.isArray(info?.widgets_values)
+        && layoutIndex >= info.widgets_values.length) {
+      layoutWidget.value = "连续拼接";
+    }
     const presetWidget = widgetByName(node, "预设");
     const migratedPreset = LEGACY_PRESET_NAMES[presetWidget?.value];
     if (migratedPreset) presetWidget.value = migratedPreset;
@@ -1236,6 +1560,7 @@ function installCompactWidgetConfigure(node) {
 }
 
 function markDirty(node) {
+  globalThis.__vividMuseResolution?.refresh(node);
   node.setDirtyCanvas?.(true, true);
   app.graph?.setDirtyCanvas?.(true, true);
 }
@@ -1289,6 +1614,7 @@ function refreshNode2Widgets(node) {
 }
 
 function resizeNode(node) {
+  globalThis.__vividMuseResolution?.refresh(node, false);
   refreshNode2Widgets(node);
   const computed = node.computeSize?.();
   if (computed) node.setSize?.([Math.max(computed[0], 360), computed[1]]);
@@ -1503,6 +1829,12 @@ function syncSceneLocationOptions(node, chooseFirst = false) {
   const allowed = SCENE_LOCATIONS_BY_CATEGORY[category];
   const allLocations = [...new Set(Object.values(SCENE_LOCATIONS_BY_CATEGORY).flat())];
   const choices = [FOLLOW_PRESET, RANDOM_CHOICE, EMPTY_CHOICE, ...(allowed || allLocations)];
+  // Preserve a known saved location until the user explicitly changes category.
+  // Legacy background-like aliases stay valid without cluttering normal menus.
+  if (!chooseFirst && SCENE_LOCATION_VALUES.includes(locationWidget.value)
+      && !choices.includes(locationWidget.value)) {
+    choices.push(locationWidget.value);
+  }
   locationWidget.options = locationWidget.options || {};
   locationWidget.options.values = choices;
 
@@ -1542,8 +1874,12 @@ function prepareRandomCombination(node) {
   const candidateFields = onlyEnabledModule
     ? MODULE_FIELD_GROUPS[onlyEnabledModule]
     : randomFieldsForScope(scope);
+  const locks = new Set(node.properties?.vividMuseRandomLocks || []);
+  const preserved = FIELD_NAMES.filter(name => locks.has(name)).map(name => [
+    name, widgetByName(node, name)?.value,
+  ]);
   for (const fieldName of candidateFields) {
-    setWidgetValue(node, fieldName, RANDOM_CHOICE);
+    if (!locks.has(fieldName)) setWidgetValue(node, fieldName, RANDOM_CHOICE);
   }
 
   const seedWidget = widgetByName(node, "随机种子");
@@ -1556,6 +1892,10 @@ function prepareRandomCombination(node) {
   syncHairAdvancedVisibility(node);
   syncClothingVisibility(node);
   syncSceneLocationOptions(node);
+  for (const [name, value] of preserved) {
+    const widget = widgetByName(node, name);
+    if (widget) widget.value = value;
+  }
   markDirty(node);
 }
 

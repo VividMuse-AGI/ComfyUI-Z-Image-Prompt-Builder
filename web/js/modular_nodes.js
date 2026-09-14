@@ -123,11 +123,13 @@ function refreshNode2Widgets(node) {
 }
 
 function markDirty(node) {
+  globalThis.__vividMuseResolution?.refresh(node);
   node.setDirtyCanvas?.(true, true);
   app.graph?.setDirtyCanvas?.(true, true);
 }
 
 function resizeNode(node) {
+  globalThis.__vividMuseResolution?.refresh(node, false);
   refreshNode2Widgets(node);
   const computed = node.computeSize?.();
   if (computed) node.setSize?.([Math.max(computed[0], 300), computed[1]]);
@@ -192,6 +194,11 @@ function syncFilteredOptions(
   const allowed = mapping[effectiveFieldValue(node, parentField)];
   const allValues = [...new Set(Object.values(mapping).flat())];
   const values = [FOLLOW_PRESET, RANDOM_CHOICE, EMPTY_CHOICE, ...(allowed || allValues)];
+  if (childField === "场景地点" && !chooseFirst
+      && (promptData().SCENE_LOCATION_VALUES || []).includes(childWidget.value)
+      && !values.includes(childWidget.value)) {
+    values.push(childWidget.value);
+  }
   childWidget.options ??= {};
   childWidget.options.values = values;
   if (chooseFirst && allowed?.length) {
@@ -251,7 +258,7 @@ function syncMakeupVisibility(node, resize = true) {
 function syncClothingVisibility(node, resize = true) {
   const mode = effectiveFieldValue(node, "穿搭结构");
   const visibleFields = new Set(CLOTHING_MODE_FIELDS[mode] || []);
-  const showAll = [FOLLOW_PRESET, RANDOM_CHOICE].includes(mode);
+  const showAll = [FOLLOW_PRESET, RANDOM_CHOICE, EMPTY_CHOICE].includes(mode);
   for (const fieldName of CLOTHING_BRANCH_FIELDS) {
     setWidgetVisible(
       widgetByName(node, fieldName),
@@ -284,7 +291,10 @@ function wrapDependencyCallback(node, fieldName, sync) {
 }
 
 function setAllModuleFields(node, value) {
+  const locks = new Set(value === RANDOM_CHOICE ? node.properties?.vividMuseRandomLocks || [] : []);
+  const preserved = (node.widgets || []).filter(w => locks.has(w.name)).map(w => [w, w.value]);
   for (const fieldName of moduleFields(node) || []) {
+    if (locks.has(fieldName)) continue;
     const widget = widgetByName(node, fieldName);
     if (!widget) continue;
     const allowed = widget.options?.values;
@@ -293,6 +303,7 @@ function setAllModuleFields(node, value) {
     widget.callback?.(value);
   }
   syncDependencies(node);
+  for (const [widget, original] of preserved) widget.value = original;
 }
 
 function prepareModuleRandomCombination(node) {

@@ -9,6 +9,11 @@ from itertools import product
 from pathlib import Path
 from typing import Dict, Iterable, Mapping, Sequence
 
+try:
+    from .resolution import ASPECT_RESOLUTIONS, RESOLUTION_INPUTS, resolution_from_options
+except ImportError:
+    from resolution import ASPECT_RESOLUTIONS, RESOLUTION_INPUTS, resolution_from_options
+
 
 FOLLOW_PRESET = "跟随预设"
 RANDOM_CHOICE = "随机抽取"
@@ -110,6 +115,7 @@ _SCENE_LIBRARY = _load_phrase_library("scene_v1.json")
 _CAMERA_VISUAL_LIBRARY = _load_phrase_library("camera_visual_v1.json")
 _THEME_MEDIA_LIBRARY: dict = _load_phrase_library("theme_media_v1.json")
 _DETAIL_PROPS_LIBRARY: dict = _load_phrase_library("detail_props_v1.json")
+_COMBINATION_RULES = _load_phrase_library("combination_rules_v1.json")
 
 CAMERA_LIBRARY_FIELDS = {
     "景别": "camera.shot_size",
@@ -770,6 +776,80 @@ CLOTHING_ID_TO_LABEL = {
     for field_name, field_id in CLOTHING_LIBRARY_FIELDS.items()
 }
 
+ACCESSORY_SET_RECIPE_IDS = {
+    "summer_forest_girl": [
+        "summer_straw",
+        "minimal_pearl"
+    ],
+    "warm_cafe_portrait": [
+        "cafe_soft",
+        "minimal_pearl"
+    ],
+    "office_luxury_seated": [
+        "office_gold",
+        "office_silver"
+    ],
+    "doorway_flash_fashion": [
+        "evening_crystal",
+        "black_gold"
+    ],
+    "studio_beauty_closeup": [
+        "minimal_pearl"
+    ],
+    "urban_neon_walk": [
+        "urban_silver",
+        "street_black"
+    ],
+    "new_chinese_tearoom": [
+        "new_chinese_jade"
+    ],
+    "retro_hongkong_diner": [
+        "retro_clip"
+    ],
+    "seaside_golden_vacation": [
+        "summer_straw",
+        "travel_practical"
+    ],
+    "tennis_active": [
+        "sport_active"
+    ],
+    "minimal_gallery_editorial": [
+        "gallery_geometric",
+        "transparent_modern"
+    ],
+    "bookstore_intellectual": [
+        "bookstore_intellectual"
+    ],
+    "rainy_umbrella_city": [
+        "urban_silver",
+        "travel_practical"
+    ],
+    "french_apartment_window": [
+        "french_gold",
+        "cafe_soft"
+    ],
+    "neutral_ecommerce_full": [
+        "minimal_pearl",
+        "transparent_modern"
+    ],
+    "low_key_hotel_cinema": [
+        "evening_crystal",
+        "black_gold"
+    ],
+    "flower_shop_ccd": [
+        "sweet_ribbon",
+        "summer_straw"
+    ],
+    "hanfu_garden_portrait": [
+        "new_chinese_jade"
+    ],
+    "cyber_neon_night": [
+        "street_black",
+        "urban_silver"
+    ]
+}
+
+
 _CLOTHING_RECIPE_FIELD_MAP = {
     "穿搭结构": "clothing.mode",
     "连衣裙类型": "clothing.dress_type",
@@ -845,20 +925,6 @@ LEGACY_CLOTHING_COMBINATIONS = {
         "上装颜色": "鼠尾草绿", "上装材质": "棉麻",
         "下装类型": "垂坠中长裙", "下装颜色": "象牙白", "下装材质": "棉麻",
     },
-}
-
-ASPECT_RESOLUTIONS = {
-    "2:3竖构图": (832, 1248),
-    "3:4竖构图": (768, 1024),
-    "4:5竖构图": (896, 1120),
-    "9:16竖构图": (720, 1280),
-    "9:21竖构图": (576, 1344),
-    "1:1方形构图": (1024, 1024),
-    "3:2横构图": (1248, 832),
-    "4:3横构图": (1024, 768),
-    "5:4横构图": (1120, 896),
-    "16:9横构图": (1280, 720),
-    "21:9横构图": (1344, 576),
 }
 
 LANDSCAPE_ASPECTS = frozenset(
@@ -1405,6 +1471,39 @@ _PRESET_POSE_STANDARD_TEXT = {
     for field_name in POSE_OUTPUT_FIELDS
     for label, text in _PRESET_FIELD_TEXT_ADDITIONS.get(field_name, {}).items()
 }
+# Product orientation and prop support matter in standard prompts too.
+_PRESET_POSE_STANDARD_TEXT.update({
+    option["label"]: option["value"]
+    for option in _POSE_LIBRARY["fields"]["pose.hand_action"]["options"]
+    if option["id"].endswith("_hands")
+})
+
+# Expose existing accessory sets through one existing widget. Noun phrases
+# deliberately avoid assigning extra hand actions (the pose module owns those).
+ACCESSORY_SET_TEXT = {}
+ACCESSORY_SET_COMPACT_TEXT = {}
+ACCESSORY_SET_LABELS = {}
+for _bundle in _DETAIL_PROPS_LIBRARY["bundles"]["accessory_sets"]:
+    _label = f"配饰组合·{_bundle['label']}"
+    _parts = []
+    for _field_id, _option_id in _bundle["fields"].items():
+        _parts.append(next(
+            option for option in _DETAIL_PROPS_LIBRARY["fields"][_field_id]["options"]
+            if option["id"] == _option_id
+        ))
+    ACCESSORY_SET_LABELS[_bundle["id"]] = _label
+    ACCESSORY_SET_TEXT[_label] = "、".join(part["value"] for part in _parts)
+    ACCESSORY_SET_COMPACT_TEXT[_label] = "、".join(part["label"] for part in _parts)
+FIELD_TEXT["服装配件"].update(ACCESSORY_SET_TEXT)
+CLOTHING_VALUE_TEXT["服装配件"].update(ACCESSORY_SET_TEXT)
+
+# Three preset locations used to exist only in the frontend category lists.
+for _category, _location in (
+    ("自然户外", "公园草地"), ("餐饮与酒店", "复古会所"),
+    ("工业功能", "工业地下通道"),
+):
+    if _location not in SCENE_LOCATIONS_BY_CATEGORY[_category]:
+        SCENE_LOCATIONS_BY_CATEGORY[_category] += (_location,)
 
 FIELD_OPTIONS = {name: list(FIELD_TEXT[name]) for name in FIELD_ORDER}
 
@@ -2784,8 +2883,54 @@ LEGACY_CAMERA_BUNDLE_BY_VALUE = {
     "50mm约2.5米平视": "landscape_gaze_space_50",
 }
 
+# Reuse approved preset atoms as complete random chains, with independent copies.
+# These atoms already have Chinese/English renderers and existing widget values.
+APPROVED_PRESET_POSE_IDS = {
+    "日系草地单车夏日柔光写真": "approved_bicycle_side_sit",
+    "夜间室内轻奢硬闪时尚写真": "approved_armchair_flash",
+    "海边夏日泳装写真": "approved_beach_side_recline",
+    "赛博都市夜景写真": "approved_cyber_ground_sit",
+    "落地窗瑜伽塑形写真": "approved_low_pigeon",
+    "旅馆窗边电影静帧": "approved_window_chair",
+}
+for _preset_name, _bundle_id in APPROVED_PRESET_POSE_IDS.items():
+    _approved_pose = {
+        **{field: PRESETS[_preset_name][field] for field in POSE_OUTPUT_FIELDS},
+        "id": _bundle_id,
+        "label": f"{PRESETS[_preset_name]['基础姿态']}完整动作链",
+        "tags": ("预设复用", PRESETS[_preset_name]["写真主题"]),
+    }
+    POSE_BUNDLES.append(_approved_pose)
+    POSE_BUNDLE_BY_ID[_bundle_id] = _approved_pose
+
+
 def _pose_bundles(*bundle_ids: str) -> list[Mapping[str, str]]:
     return [POSE_BUNDLE_BY_ID[bundle_id] for bundle_id in bundle_ids]
+
+
+SPECIALIST_THEME_POSE_IDS = {
+    "网球场阳光运动写真": ("tennis_ready",),
+    "健身房力量训练写真": ("fitness_dumbbell",),
+    "城市慢跑活力写真": ("running_ready",),
+    "室内泳池运动写真": ("pool_rest",),
+    "舞蹈排练动态写真": ("dance_barre",),
+    "拳击训练力量写真": ("boxing_guard",),
+    "羽毛球训练写真": ("badminton_ready",),
+    "室内攀岩运动写真": ("climbing_prepare",),
+    "滑雪运动写真": ("ski_rest",),
+    "冲浪运动写真": ("surf_board",),
+    "专业商务头像写真": ("business_portrait",),
+    "服装电商模特写真": ("ecommerce_front",),
+    "珠宝首饰广告写真": ("jewelry_earring",),
+    "香水商业广告写真": ("perfume_display",),
+    "腕表商业广告写真": ("watch_display",),
+    "眼镜商业广告写真": ("glasses_display",),
+    "手袋商业广告写真": ("bag_display",),
+    "食品饮料广告写真": ("drink_display",),
+}
+SPECIALIST_THEME_POSE_BUNDLES = {
+    theme: _pose_bundles(*ids) for theme, ids in SPECIALIST_THEME_POSE_IDS.items()
+}
 
 
 PROFILE_POSE_BUNDLES = {
@@ -2825,6 +2970,18 @@ PROFILE_POSE_BUNDLES.update({
     "旅馆窗边电影静帧": _pose_bundles("window_curtain_quiet", "cafe_cup_relaxed", "chair_elbow_thoughtful"),
 })
 
+for _preset_name, _bundle_id in APPROVED_PRESET_POSE_IDS.items():
+    PROFILE_POSE_BUNDLES[_preset_name] = [
+        POSE_BUNDLE_BY_ID[_bundle_id], *PROFILE_POSE_BUNDLES[_preset_name],
+    ]
+
+# Exact themes can reach their approved chains in cross-style mode too;
+# unrelated themes continue using the existing category/keyword pools.
+APPROVED_THEME_POSE_BUNDLES = {
+    PRESETS[preset]["写真主题"]: tuple(PROFILE_POSE_BUNDLES[preset])
+    for preset in APPROVED_PRESET_POSE_IDS
+}
+
 THEME_CATEGORY_POSE_BUNDLES = {
     "日常生活": _pose_bundles("cafe_booth_direct", "cafe_cup_relaxed", "cafe_table_candid", "window_curtain_quiet", "sofa_relaxed_side_gaze"),
     "时尚编辑": _pose_bundles("doorway_fan_flash", "wall_collar_fashion", "walking_turn_street", "fashion_pocket_standing", "side_hair_touch_beauty", "waist_hand_direct"),
@@ -2854,6 +3011,10 @@ THEME_POSE_KEYWORD_BUNDLES = [
 
 
 def _theme_directed_pose_bundles(theme: str) -> list[Mapping[str, str]]:
+    if theme in SPECIALIST_THEME_POSE_BUNDLES:
+        return list(SPECIALIST_THEME_POSE_BUNDLES[theme])
+    if theme in APPROVED_THEME_POSE_BUNDLES:
+        return list(APPROVED_THEME_POSE_BUNDLES[theme])
     for keywords, bundles in THEME_POSE_KEYWORD_BUNDLES:
         if any(keyword in theme for keyword in keywords):
             return bundles
@@ -3028,32 +3189,29 @@ THEME_CATEGORY_CAMERA_BUNDLES = {
     "幻想概念": _camera_bundles("beauty_face_105", "fashion_three_quarter_70", "doorway_three_quarter_65", "studio_full_70", "sport_dynamic_50", "low_angle_dynamic_35", "travel_environment_35", "interior_environment_28", "landscape_gaze_space_50", "telephoto_environment_135", "symmetry_gallery_40"),
 }
 
-SEATED_POSES = {
-    "椅子前缘坐姿",
-    "沙发前倾坐姿",
-    "沙发放松坐姿",
-    "卡座放松坐姿",
-    "高脚椅坐姿",
+POSE_CAMERA_TYPES = _COMBINATION_RULES["pose_camera_types"]
+POSE_CAMERA_TYPE_BY_LABEL = {
+    label: kind for kind, labels in POSE_CAMERA_TYPES.items() for label in labels
 }
+SEATED_POSES = set(POSE_CAMERA_TYPES["seated"])
 
 
 def _pose_compatible_camera_bundles(
     base_pose: str, bundles: Iterable[Mapping[str, str]]
 ) -> list[Mapping[str, str]]:
     bundles = list(bundles)
-    if base_pose in ("", EMPTY_CHOICE, FOLLOW_PRESET):
+    kind = POSE_CAMERA_TYPE_BY_LABEL.get(base_pose)
+    if kind is None:
+        # Blank/unknown poses do not silently become standing poses.
         return bundles
-    if base_pose in SEATED_POSES:
-        seated_or_close = [
-            bundle
-            for bundle in bundles
-            if bundle["景别"] not in {
-                "全身构图", "带环境全身", "动态全身"
-            }
-        ]
-        return seated_or_close or bundles
-    standing = [bundle for bundle in bundles if bundle["景别"] != "坐姿半身"]
-    return standing or bundles
+    excluded = set()
+    if kind != "seated":
+        excluded.add("坐姿半身")
+    if kind in ("seated", "crouching", "ground_extended"):
+        excluded.add("动态全身")
+    # Full-body and environmental framing also work for static seated poses.
+    return [bundle for bundle in bundles if bundle["景别"] not in excluded]
+
 
 THEME_CATEGORY_FIELD_POOLS = {
     "日常生活": {
@@ -3747,55 +3905,148 @@ def _compatible_headwear_options(
     return compatible
 
 
+def _clothing_recipe_values(recipe: Mapping, field_name: str):
+    """None means no curated pool; an empty pool deliberately omits the field."""
+    overrides = recipe.get("field_overrides", {})
+    if field_name in overrides:
+        return list(overrides[field_name])
+    library_field = _CLOTHING_RECIPE_FIELD_MAP.get(field_name)
+    pool = recipe.get("field_pool", {})
+    if library_field not in pool:
+        return None
+    return [CLOTHING_ID_TO_LABEL[field_name][option_id]
+            for option_id in pool[library_field]
+            if option_id in CLOTHING_ID_TO_LABEL[field_name]]
+
+
+def _resolved_theme_category(resolved: Mapping[str, str]) -> str:
+    theme = resolved.get("写真主题", "")
+    return next((category for category, themes in THEME_OPTIONS_BY_CATEGORY.items()
+                 if theme in themes), resolved.get("写真大类", ""))
+
+
+def _camera_bundle_candidates(preset, random_scope, resolved, random_fields):
+    """Select once: locks, pose, then orientation/theme preferences."""
+    theme_changed = resolved.get("写真主题") != PRESETS.get(preset, {}).get("写真主题")
+    if random_scope == RANDOM_SCOPES[2] or theme_changed:
+        preferred = THEME_CATEGORY_CAMERA_BUNDLES.get(
+            _resolved_theme_category(resolved), CAMERA_BUNDLES
+        )
+    else:
+        preferred = PROFILE_CAMERA_BUNDLES.get(preset, CAMERA_BUNDLES)
+
+    compatible = list(CAMERA_BUNDLES)
+    if "景别" in random_fields:
+        compatible = _pose_compatible_camera_bundles(resolved.get("基础姿态", ""), compatible)
+    medium = resolved.get("成像媒介", EMPTY_CHOICE)
+    lens_locked = "等效焦段" not in random_fields and resolved.get("等效焦段") == "手机主摄"
+    if medium not in (EMPTY_CHOICE, "手机计算摄影") and not lens_locked:
+        compatible = [b for b in compatible if b["等效焦段"] != "手机主摄"]
+
+    aspect = resolved.get("画面比例")
+    orientation = (LANDSCAPE_CAMERA_BUNDLES if aspect in LANDSCAPE_ASPECTS else
+                   PORTRAIT_CAMERA_BUNDLES if aspect in PORTRAIT_ASPECTS else compatible)
+    oriented = [b for b in compatible if b in orientation]
+    pools = [
+        [b for b in oriented if b in preferred], oriented,
+        [b for b in compatible if b in preferred], compatible,
+    ]
+    for pool in pools:
+        matches = _matching_bundles(pool, CAMERA_OUTPUT_FIELDS, resolved, random_fields)
+        if matches:
+            return matches
+
+    # When locks do not form a stock bundle, keep the shot-size companions
+    # coherent first. Remaining explicit values will still not be overwritten.
+    shot = resolved.get("景别", EMPTY_CHOICE)
+    if "景别" not in random_fields and shot != EMPTY_CHOICE:
+        shot_matches = [b for b in compatible if b["景别"] == shot]
+        if shot_matches:
+            compatible = shot_matches
+    locked = [f for f in CAMERA_OUTPUT_FIELDS if f not in random_fields
+              and resolved.get(f, EMPTY_CHOICE) != EMPTY_CHOICE]
+    score = lambda b: sum(b[f] == resolved[f] for f in locked)
+    best = max(map(score, compatible))
+    best_pool = [b for b in compatible if score(b) == best]
+    oriented_best = [b for b in best_pool if b in orientation]
+    return oriented_best or best_pool
+
+
 def _clothing_recipe_candidates(
     preset: str,
     random_scope: str,
     resolved: Mapping[str, str],
     random_fields: set[str],
 ) -> list[Mapping]:
-    if random_scope == RANDOM_SCOPES[2]:
+    theme = resolved.get("写真主题", "")
+    recipe_ids = _COMBINATION_RULES["theme_recipe_ids"].get(theme)
+    if not recipe_ids:
+        recipe_ids = _COMBINATION_RULES["category_recipe_ids"].get(
+            _resolved_theme_category(resolved)
+        )
+    if recipe_ids:
+        recipes = [CLOTHING_RECIPE_BY_ID[recipe_id] for recipe_id in recipe_ids]
+    elif random_scope == RANDOM_SCOPES[2]:
         recipes = list(CLOTHING_RECIPES)
     else:
-        recipes = [
-            CLOTHING_RECIPE_BY_ID[recipe_id]
-            for recipe_id in CLOTHING_PROFILE_RECIPE_IDS.get(preset, ())
-        ] or list(CLOTHING_RECIPES)
+        recipes = [CLOTHING_RECIPE_BY_ID[recipe_id] for recipe_id in
+                   CLOTHING_PROFILE_RECIPE_IDS.get(preset, ())] or list(CLOTHING_RECIPES)
 
-    locked_mode = (
-        resolved.get("穿搭结构")
-        if "穿搭结构" not in random_fields
-        else None
-    )
+    overrides = _COMBINATION_RULES["theme_field_overrides"].get(theme, {})
+    if overrides:
+        recipes = [{**recipe, "field_overrides": overrides} for recipe in recipes]
+
+    locked_mode = resolved.get("穿搭结构") if "穿搭结构" not in random_fields else None
+    locked_branches = {
+        f for f in CLOTHING_BRANCH_FIELDS if f not in random_fields
+        and resolved.get(f, EMPTY_CHOICE) != EMPTY_CHOICE
+    }
+    allowed_modes = None
     if locked_mode not in (None, EMPTY_CHOICE):
-        mode_id = CLOTHING_LABEL_TO_ID["穿搭结构"].get(locked_mode)
-        matching = [
-            recipe for recipe in recipes
-            if mode_id in recipe.get("field_pool", {}).get("clothing.mode", [])
-        ]
-        if not matching:
-            matching = [
-                recipe for recipe in CLOTHING_RECIPES
-                if mode_id in recipe.get("field_pool", {}).get("clothing.mode", [])
-            ]
-        if matching:
-            recipes = matching
+        allowed_modes = [locked_mode]
+    elif "穿搭结构" in random_fields and locked_branches:
+        allowed_modes = [mode for mode, fields in CLOTHING_MODE_FIELDS.items()
+                         if locked_branches.issubset(fields)]
 
-    # Respect explicit garment locks where a recipe offers the same dimension.
+    def accepts_mode(recipe):
+        return allowed_modes is None or bool(set(allowed_modes).intersection(
+            _clothing_recipe_values(recipe, "穿搭结构") or ()))
+
+    fallback = [r for r in CLOTHING_RECIPES if accepts_mode(r)]
+    if allowed_modes:
+        # A concrete garment also constrains a random structure. Theme pools
+        # must not silently erase it when they only contain another structure.
+        recipes = [r for r in recipes if accepts_mode(r)] or fallback
+
+    active_branches = (set(CLOTHING_MODE_FIELDS[locked_mode])
+                       if locked_mode in CLOTHING_MODE_FIELDS else set(CLOTHING_BRANCH_FIELDS))
+    locked_types = [f for f in locked_branches & active_branches if f.endswith("类型")]
+    if locked_types:
+        def accepts_types(recipe):
+            return all(resolved[f] in (_clothing_recipe_values(recipe, f) or ())
+                       for f in locked_types)
+        matching_types = ([r for r in recipes if accepts_types(r)]
+                          or [r for r in fallback if accepts_types(r)])
+        if not matching_types:
+            # Specialist garments such as yoga bodysuits live in theme
+            # overrides, not in the original core recipe IDs.
+            for theme_name, fields in _COMBINATION_RULES["theme_field_overrides"].items():
+                for recipe_id in _COMBINATION_RULES["theme_recipe_ids"].get(theme_name, ()):
+                    candidate = {**CLOTHING_RECIPE_BY_ID[recipe_id], "field_overrides": fields}
+                    if accepts_mode(candidate) and accepts_types(candidate):
+                        matching_types.append(candidate)
+        recipes = matching_types or recipes
+
     matched = []
     for recipe in recipes:
-        pool = recipe.get("field_pool", {})
         compatible = True
-        for field_name, library_field_id in _CLOTHING_RECIPE_FIELD_MAP.items():
+        for field_name in _CLOTHING_RECIPE_FIELD_MAP:
             if field_name in random_fields or field_name == "穿搭结构":
                 continue
             selected = resolved.get(field_name, EMPTY_CHOICE)
             if selected == EMPTY_CHOICE:
                 continue
-            if library_field_id not in pool:
-                compatible = False
-                break
-            selected_id = CLOTHING_LABEL_TO_ID[field_name].get(selected)
-            if selected_id not in pool[library_field_id]:
+            if selected not in (_clothing_recipe_values(recipe, field_name) or ()):
                 compatible = False
                 break
         if compatible:
@@ -3808,8 +4059,15 @@ def _random_clothing_value(
     field_name: str,
     recipe: Mapping,
 ) -> str:
+    curated = _clothing_recipe_values(recipe, field_name)
+    if curated is not None:
+        return rng.choice(curated) if curated else EMPTY_CHOICE
     if field_name == "服装配件":
-        return rng.choice(FIELD_OPTIONS[field_name])
+        # Manual options stay intact; both random single items and sets are curated.
+        choices = list(_COMBINATION_RULES["accessory_recipe_values"].get(recipe.get("id"), ()))
+        choices.extend(ACCESSORY_SET_LABELS[bundle_id] for bundle_id in
+                       ACCESSORY_SET_RECIPE_IDS.get(recipe.get("id"), ()))
+        return rng.choice(choices) if choices else EMPTY_CHOICE
     if field_name == "版型细节":
         return rng.choice(FIELD_OPTIONS[field_name])
     library_field_id = _CLOTHING_RECIPE_FIELD_MAP.get(field_name)
@@ -3847,29 +4105,31 @@ def _resolve_clothing_fields(
         preset, random_scope, resolved, random_fields
     )
     recipe = rng.choice(recipes)
+    locked_branch_fields = {
+        field_name for field_name in CLOTHING_BRANCH_FIELDS
+        if field_name not in random_fields
+        and resolved.get(field_name, EMPTY_CHOICE) != EMPTY_CHOICE
+    }
+    conflicting_branches = False
     if "穿搭结构" in active_random:
-        mode_ids = recipe.get("field_pool", {}).get("clothing.mode", [])
-        mode_choices = [
-            CLOTHING_ID_TO_LABEL["穿搭结构"][option_id]
-            for option_id in mode_ids
-            if option_id in CLOTHING_ID_TO_LABEL["穿搭结构"]
-        ] or FIELD_OPTIONS["穿搭结构"]
-        locked_branch_fields = {
-            field_name for field_name in CLOTHING_BRANCH_FIELDS
-            if field_name not in random_fields
-            and resolved.get(field_name, EMPTY_CHOICE) != EMPTY_CHOICE
-        }
+        mode_choices = (_clothing_recipe_values(recipe, "穿搭结构")
+                        or FIELD_OPTIONS["穿搭结构"])
         if locked_branch_fields:
-            compatible_modes = [
-                mode_name for mode_name in mode_choices
-                if locked_branch_fields.issubset(CLOTHING_MODE_FIELDS[mode_name])
-            ]
+            compatible_modes = [mode for mode, fields in CLOTHING_MODE_FIELDS.items()
+                                if locked_branch_fields.issubset(fields)]
             if compatible_modes:
-                mode_choices = compatible_modes
+                mode_choices = [mode for mode in mode_choices if mode in compatible_modes] or compatible_modes
+            else:
+                # No structure can contain every explicit branch. Keep those
+                # atoms and omit additional random garments instead of losing data.
+                conflicting_branches = True
+                mode_choices = [EMPTY_CHOICE]
         resolved["穿搭结构"] = rng.choice(mode_choices)
 
     mode = resolved.get("穿搭结构", EMPTY_CHOICE)
-    visible_fields = set(CLOTHING_MODE_FIELDS.get(mode, ()))
+    visible_fields = set(CLOTHING_MODE_FIELDS.get(mode, CLOTHING_BRANCH_FIELDS))
+    if conflicting_branches:
+        visible_fields = locked_branch_fields
     required_visible = {
         field for field in visible_fields
         if not field.endswith("图案")
@@ -4046,6 +4306,9 @@ def resolve_fields(
 
     # Resolve the controlling category before any dependent random fields.
     grouped_random_fields: set[str] = set()
+    if "画面比例" in random_fields:
+        resolved["画面比例"] = _choose_from_pool(rng, preset, random_scope, "画面比例")
+        grouped_random_fields.add("画面比例")
     if "写真大类" in random_fields:
         resolved["写真大类"] = _choose_from_pool(
             rng, preset, random_scope, "写真大类"
@@ -4134,9 +4397,6 @@ def resolve_fields(
                 )
             elif group_fields == CAMERA_OUTPUT_FIELDS:
                 bundles = THEME_CATEGORY_CAMERA_BUNDLES.get(category, global_bundles)
-                bundles = _pose_compatible_camera_bundles(
-                    resolved.get("基础姿态", ""), bundles
-                )
             elif group_fields == LIGHTING_OUTPUT_FIELDS:
                 bundles = THEME_CATEGORY_LIGHTING_PLANS.get(category, global_bundles)
             elif group_fields == (*COLOR_OUTPUT_FIELDS, *FINISH_OUTPUT_FIELDS):
@@ -4145,6 +4405,10 @@ def resolve_fields(
                 bundles = global_bundles
         else:
             bundles = profile_bundles.get(preset, global_bundles)
+            if group_fields == POSE_OUTPUT_FIELDS:
+                bundles = SPECIALIST_THEME_POSE_BUNDLES.get(
+                    resolved.get("写真主题", ""), bundles
+                )
             if group_fields == SCENE_GROUP_FIELDS:
                 theme = resolved.get("写真主题", "")
                 scene_theme_bundles = (
@@ -4256,6 +4520,8 @@ def resolve_fields(
                 candidates = [_neutral_scene_bundle_for_explicit_locks(
                     resolved.get("写真主题", ""), explicit_scene_locks
                 )]
+        elif group_fields == CAMERA_OUTPUT_FIELDS:
+            candidates = _camera_bundle_candidates(preset, random_scope, resolved, random_fields)
         else:
             candidates = _matching_bundles(
                 bundles, group_fields, resolved, random_fields
@@ -4398,39 +4664,7 @@ def resolve_fields(
             else ETHNICITY_BRANCH_GENERIC
         )
 
-    # A landscape canvas needs a camera plan with lateral space. Re-select only
-    # camera fields the user marked random; explicit locks always remain intact.
-    camera_fields = CAMERA_OUTPUT_FIELDS
-    active_oriented_camera = random_fields.intersection(camera_fields)
-    orientation_bundles = None
-    if resolved["画面比例"] in LANDSCAPE_ASPECTS:
-        orientation_bundles = LANDSCAPE_CAMERA_BUNDLES
-    elif resolved["画面比例"] in PORTRAIT_ASPECTS:
-        orientation_bundles = PORTRAIT_CAMERA_BUNDLES
-    if orientation_bundles and active_oriented_camera:
-        if random_scope == RANDOM_SCOPES[2]:
-            camera_pool = THEME_CATEGORY_CAMERA_BUNDLES.get(
-                resolved.get("写真大类", ""), CAMERA_BUNDLES
-            )
-        else:
-            camera_pool = PROFILE_CAMERA_BUNDLES.get(preset, CAMERA_BUNDLES)
-        compatible_orientation = [
-            bundle for bundle in orientation_bundles if bundle in camera_pool
-        ]
-        if compatible_orientation:
-            orientation_bundles = compatible_orientation
-        orientation_bundles = _pose_compatible_camera_bundles(
-            resolved.get("基础姿态", ""), orientation_bundles
-        )
-        candidates = _matching_bundles(
-            orientation_bundles,
-            camera_fields,
-            resolved,
-            random_fields,
-        ) or orientation_bundles
-        selected_bundle = rng.choice(candidates)
-        for field_name in active_oriented_camera:
-            resolved[field_name] = selected_bundle[field_name]
+    # Camera orientation, theme and pose were resolved together above.
 
     return resolved
 
@@ -4621,7 +4855,15 @@ def _garment_prompt_text(
     return "，".join(parts)
 
 
+def _visible_clothing_fields(fields: Mapping[str, str], density: str) -> Mapping[str, str]:
+    """Suppress clearly out-of-frame legwear without changing saved selections."""
+    if density != "详细" and fields.get("景别") in ("面部特写", "头肩近景", "胸部以上"):
+        return {**fields, "袜装": EMPTY_CHOICE, "鞋履": EMPTY_CHOICE}
+    return fields
+
+
 def _clothing_prompt_text(fields: Mapping[str, str], density: str) -> str:
+    fields = _visible_clothing_fields(fields, density)
     mode = fields.get("穿搭结构", EMPTY_CHOICE)
     garments = []
     if mode == "连衣裙":
@@ -4672,7 +4914,7 @@ def _clothing_prompt_text(fields: Mapping[str, str], density: str) -> str:
         rendered = (
             CLOTHING_VALUE_TEXT[field_name][value]
             if density == "详细"
-            else value
+            else ACCESSORY_SET_COMPACT_TEXT.get(value, value)
         )
         if density == "详细":
             lead = "脚穿" if field_name == "鞋履" else "搭配"
@@ -4720,7 +4962,7 @@ def _pose_prompt_text(fields: Mapping[str, str], density: str) -> str:
                     "门把手与折扇": "一手握门把，另一手举起折扇",
                 }.get(value, value)
             standard_parts.append(value)
-        return "，".join(standard_parts)
+        return "，".join(dict.fromkeys(standard_parts))
     return "，".join(
         POSE_VALUE_TEXT[field_name][selected[field_name]]
         for field_name in POSE_OUTPUT_FIELDS
@@ -5716,6 +5958,83 @@ def _humanize_english_id(field_name: str, option_id: str) -> str:
     return value
 
 
+# Explicit translations for new pose atoms and reused accessory sets.
+_ENGLISH_VALUE_OVERRIDES.update({
+    ("基础姿态", "泳池边坐姿"): "sitting upright on the pool edge",
+    ("腿部动作", "双脚分开微屈膝"): "feet shoulder-width apart with knees slightly bent",
+    ("腿部动作", "双脚垂入池水"): "legs hanging from the pool edge with both feet in the water",
+    ("腿部动作", "一脚侧伸点地"): "weight on the straight left leg, right leg extended sideways with toes touching the floor",
+    ("画面瞬间", "网球接球前准备"): "readying for a tennis return",
+    ("手部动作", "一手握网球拍一手扶拍颈"): "right hand holding a tennis racket handle, left hand supporting its throat at waist level",
+    ("画面瞬间", "力量训练组间休息"): "resting between strength-training sets",
+    ("手部动作", "双手各握一只哑铃垂于体侧"): "holding one dumbbell in each hand with arms resting at the sides",
+    ("画面瞬间", "慢跑起步前停顿"): "pausing before starting a jog",
+    ("手部动作", "双臂屈肘前后错开"): "elbows lightly bent, left arm forward and right arm back, hands relaxed",
+    ("画面瞬间", "游泳后池边休息"): "resting at the pool edge after a swim",
+    ("手部动作", "双手撑在池沿两侧"): "palms resting on the pool edge on either side of the body",
+    ("画面瞬间", "舞蹈排练中保持姿态"): "holding a pose during dance rehearsal",
+    ("手部动作", "一手扶把杆另一臂侧展"): "left hand lightly resting on a horizontal ballet barre, right arm extended sideways with a relaxed wrist",
+    ("画面瞬间", "拳击训练前保持防守姿态"): "holding a guard before boxing practice",
+    ("手部动作", "戴拳击手套双拳举至颊旁"): "wearing boxing gloves, fists raised beside the cheeks and elbows tucked in front of the torso",
+    ("画面瞬间", "羽毛球发球前停顿"): "pausing before a badminton serve",
+    ("手部动作", "一手持羽毛球拍一手拿球"): "right hand holding a badminton racket at the side, left hand holding a shuttlecock at waist level",
+    ("画面瞬间", "攀岩前整理双手"): "preparing hands before indoor climbing",
+    ("手部动作", "双手在腰前轻搓镁粉"): "gently rubbing chalk between the palms at waist level",
+    ("画面瞬间", "滑雪间歇短暂停留"): "pausing between ski runs",
+    ("手部动作", "双手各握一根直立雪杖"): "holding a ski pole in each hand with both tips resting in the snow beside the body",
+    ("画面瞬间", "冲浪前在岸边停留"): "pausing on shore before surfing",
+    ("手部动作", "一手扶住身侧直立冲浪板"): "right hand steadying the edge of an upright surfboard beside the body, tail resting on the sand, left arm relaxed",
+    ("画面瞬间", "商务肖像拍摄时停留"): "holding still for a business portrait",
+    ("手部动作", "双臂在胸前自然交叠"): "arms loosely folded across the chest, hands resting on upper arms, shoulders relaxed",
+    ("画面瞬间", "展示服装正面版型"): "presenting the front cut of an outfit",
+    ("手部动作", "双臂与腰线稍微分开"): "arms hanging slightly away from the waist with fingers relaxed",
+    ("画面瞬间", "转头展示耳饰"): "turning the head to display earrings",
+    ("手部动作", "一手将头发拢至耳后露出耳饰"): "left hand tucking hair behind the left ear to reveal an earring, right arm relaxed",
+    ("画面瞬间", "将香水瓶举至胸前展示"): "presenting a perfume bottle at chest level",
+    ("手部动作", "一手托香水瓶底一手扶瓶侧"): "left hand supporting the base of a perfume bottle, right hand steadying its side, bottle front facing the camera",
+    ("画面瞬间", "抬起手腕展示腕表"): "raising the wrist to display a watch",
+    ("手部动作", "一手托住另一只戴腕表的手腕"): "watch on the left wrist raised to chest level with its dial facing the camera, right hand supporting the wrist from below",
+    ("画面瞬间", "展示佩戴中的眼镜"): "presenting a pair of glasses while wearing them",
+    ("手部动作", "戴细框眼镜一手轻扶镜腿"): "wearing thin-frame glasses, right fingertips resting on the right temple arm, left arm relaxed",
+    ("画面瞬间", "在身前展示手袋"): "presenting a handbag in front of the body",
+    ("手部动作", "双手握提柄使手袋正面朝向镜头"): "holding the handbag handles with both hands above the thighs, front of the bag facing the camera",
+    ("画面瞬间", "举起饮料瓶展示"): "raising a drink bottle for a product portrait",
+    ("手部动作", "一手握饮料瓶下半部举至胸前"): "right hand holding the lower half of a drink bottle at chest level, bottle front facing the camera, left arm relaxed",
+})
+_ACCESSORY_SET_ENGLISH = {
+    "minimal_pearl": "pearl stud earrings, a single-pearl necklace, a fine gold bracelet and a plain band ring",
+    "office_gold": "geometric gold earrings, a fine gold necklace, a leather-strap watch, a small crystal ring, thin gold rectangular glasses and a structured handbag",
+    "office_silver": "rectangular drop earrings, a fine silver necklace, a metal watch, a plain band ring, thin silver rectangular glasses and a leather tote bag",
+    "cafe_soft": "small flower stud earrings, a small pendant necklace, a fine gold bracelet, an open ring and a short-strap shoulder bag",
+    "summer_straw": "fabric flower earrings, a single-pearl necklace, a colorful beaded bracelet, an open ring and a woven straw bag",
+    "french_gold": "small gold hoop earrings, layered fine necklaces, a fine gold bracelet, stacked thin rings and a chain-strap bag",
+    "evening_crystal": "crystal chandelier earrings, a crystal necklace, a wide metal cuff, a small crystal ring and a velvet evening bag",
+    "black_gold": "black enamel earrings, a rigid gold collar necklace, a gold bangle, a black gemstone ring and a clutch bag",
+    "new_chinese_jade": "jade drop earrings, a jade pendant, a jade bangle and a jade ring",
+    "retro_clip": "vintage clip-on earrings, a short pearl necklace, a leather-strap watch, a small signet ring and a miniature top-handle bag",
+    "urban_silver": "a metal ear cuff, a fine silver necklace, a chain bracelet, mixed rings, narrow sunglasses and a short-strap shoulder bag",
+    "street_black": "silver hoop earrings, a thin black choker, a wide metal cuff, a geometric ring, black sunglasses and a small crossbody bag",
+    "sweet_ribbon": "pearl drop earrings, a ribbon-bow neck accessory, a pearl bracelet, a pearl ring and a beaded handbag",
+    "gallery_geometric": "geometric gold earrings, a small pendant necklace, a gold bangle, a geometric ring, rimless glasses and a clutch bag",
+    "travel_practical": "small gold hoop earrings, a leather-strap watch, a plain band ring, brown sunglasses and a small crossbody bag",
+    "sport_active": "clear crystal stud earrings, a sports watch, sports sunglasses and a sports duffel bag",
+    "bookstore_intellectual": "pearl stud earrings, a fine silver necklace, a leather-strap watch, an open ring, tortoiseshell glasses and a leather tote bag",
+    "transparent_modern": "asymmetric earrings, a Y-shaped chain necklace, a chain bracelet, stacked thin rings, clear-frame glasses and a miniature top-handle bag",
+}
+_ENGLISH_VALUE_OVERRIDES.update({
+    ("服装配件", ACCESSORY_SET_LABELS[bundle_id]): text
+    for bundle_id, text in _ACCESSORY_SET_ENGLISH.items()
+})
+
+
+# Keep ID-based renderers in sync with the explicit public-option translations.
+for _field_name, _phrases in _ENGLISH_NATURAL_ID_PHRASES.items():
+    for _label, _option_id in _ENGLISH_OPTION_ID_MAPS[_field_name].items():
+        _translation = _ENGLISH_VALUE_OVERRIDES.get((_field_name, _label))
+        if _translation:
+            _phrases.setdefault(_option_id, _translation)
+
+
 def _english_option_id(field_name: str, value: str) -> str:
     return _ENGLISH_OPTION_ID_MAPS.get(field_name, {}).get(value, "")
 
@@ -5864,7 +6183,10 @@ def _english_garment_phrase(
 ) -> str:
     type_field = f"{prefix}类型"
     garment_type = _english_atomic_value(type_field, fields.get(type_field, EMPTY_CHOICE))
-    if not garment_type:
+    if not garment_type and not any(
+        fields.get(f"{prefix}{suffix}", EMPTY_CHOICE) != EMPTY_CHOICE
+        for suffix in ("颜色", "材质", "图案")
+    ):
         return ""
     garment_type = re.sub(r"^(?:a|an)\s+", "", garment_type, flags=re.IGNORECASE)
 
@@ -5874,7 +6196,7 @@ def _english_garment_phrase(
     color = _english_atomic_value(color_field, fields.get(color_field, EMPTY_CHOICE))
     material = ""
     pattern = ""
-    if density != "精简":
+    if density != "精简" or not garment_type:
         material = _english_atomic_value(
             material_field, fields.get(material_field, EMPTY_CHOICE)
         )
@@ -5883,9 +6205,13 @@ def _english_garment_phrase(
         )
         if _english_option_id(
             pattern_field, fields.get(pattern_field, EMPTY_CHOICE)
-        ) == "solid":
+        ) == "solid" and garment_type:
             pattern = ""
 
+    # The selected module supplies a generic noun, never an invented garment style.
+    garment_type = garment_type or {
+        "上装": "top", "下装": "bottoms", "连衣裙": "dress", "连体服": "jumpsuit",
+    }[prefix]
     plural_endings = (
         "jeans", "trousers", "pants", "shorts", "leggings", "bottoms", "culottes",
     )
@@ -5965,6 +6291,7 @@ def _english_clothing_prompt_text(
     fields: Mapping[str, str],
     density: str,
 ) -> str:
+    fields = _visible_clothing_fields(fields, density)
     mode = fields.get("穿搭结构", EMPTY_CHOICE)
     garment_prefixes = {
         "连衣裙": ("连衣裙",),
@@ -5973,20 +6300,21 @@ def _english_clothing_prompt_text(
         "西装套装": ("上装", "下装"),
         "叠穿造型": ("上装", "下装"),
     }.get(mode, ())
+    if mode == EMPTY_CHOICE:
+        garment_prefixes = ("连衣裙", "连体服", "上装", "下装")
     garments = [
         _english_garment_phrase(fields, prefix, density)
         for prefix in garment_prefixes
     ]
     garments = [garment for garment in garments if garment]
-    if not garments:
-        return ""
     if len(garments) == 2:
         outfit = f"{garments[0]} paired with {garments[1]}"
     else:
         outfit = _join_english_list(garments)
-    parts = [f"wearing {outfit}"]
+    parts = [f"wearing {outfit}"] if outfit else []
 
-    if density != "精简":
+    # Standalone details remain useful even when no garment was selected.
+    if density != "精简" or not garments:
         fit = _english_atomic_value("版型细节", fields.get("版型细节", EMPTY_CHOICE))
         if fit:
             parts.append(fit)
@@ -6136,12 +6464,24 @@ def _normalize_user_module_fragment(value: str) -> str:
     return value.strip().strip("，；。,. ;\t\r\n")
 
 
+def _module_paragraphs(parts: Iterable[str]) -> str:
+    """One positive-language paragraph per nonempty module, without labels."""
+    clean = (part.strip().rstrip("，；。,. ;") for part in parts)
+    return "\n\n".join(f"{part}。" for part in clean if part)
+
+
+def join_prompt_paragraphs(first: str, second: str) -> str:
+    """Keep user text intact; whitespace-only inputs do not add empty paragraphs."""
+    return "\n\n".join(part for part in (first, second) if part and part.strip())
+
+
 def compose_prompt_text(
     fields: Mapping[str, str],
     density: str = "标准",
     user_person_fragment: str = "",
     user_pose_fragment: str = "",
     user_module_fragments: Mapping[str, str] | None = None,
+    separate_modules: bool = False,
 ) -> str:
     """Compose a positive prompt at the requested information density."""
 
@@ -6225,6 +6565,23 @@ def compose_prompt_text(
         elif density == "标准":
             formatter = standard
         parts = []
+        grouped_parts = {name: [] for name in USER_MODULE_INPUTS}
+        field_modules = {
+            field: name for name, group in (
+                ("画面基础", base_output_fields),
+                ("人物", PERSON_OUTPUT_FIELDS),
+                ("发型", HAIR_OUTPUT_FIELDS),
+                ("服装", CLOTHING_OUTPUT_FIELDS),
+                ("姿态动作", POSE_OUTPUT_FIELDS),
+                ("场景", SCENE_OUTPUT_FIELDS),
+                ("摄影", CAMERA_OUTPUT_FIELDS),
+                ("视觉表现", VISUAL_OUTPUT_FIELDS),
+            ) for field in group
+        }
+
+        def append_part(text: str) -> None:
+            parts.append(text)
+            grouped_parts[field_modules.get(field, "自定义")].append(text)
 
         def group_text_or_atomic_fallback(
             group_text: str,
@@ -6257,19 +6614,19 @@ def compose_prompt_text(
         for field in output_fields:
             if field in base_output_fields and user_base_text:
                 if not base_added:
-                    parts.append(user_base_text)
+                    append_part(user_base_text)
                     base_added = True
                 continue
             if field in IDENTITY_FIELDS:
                 if not identity_added:
                     if user_person_text:
-                        parts.append(user_person_text)
+                        append_part(user_person_text)
                     else:
                         identity_text = group_text_or_atomic_fallback(
                             identity, IDENTITY_FIELDS
                         )
                         if identity_text:
-                            parts.append(identity_text)
+                            append_part(identity_text)
                     identity_added = True
                 continue
             if field in PERSON_DETAIL_OUTPUT_FIELDS:
@@ -6283,7 +6640,7 @@ def compose_prompt_text(
                         hidden_makeup_fields,
                     )
                     if rendered:
-                        parts.append(rendered)
+                        append_part(rendered)
                     person_detail_added = True
                 continue
             if field in BODY_OUTPUT_FIELDS:
@@ -6295,19 +6652,19 @@ def compose_prompt_text(
                         body_text, BODY_OUTPUT_FIELDS
                     )
                     if rendered:
-                        parts.append(rendered)
+                        append_part(rendered)
                     body_added = True
                 continue
             if field in POSE_OUTPUT_FIELDS:
                 if not pose_added:
                     if user_pose_text:
-                        parts.append(user_pose_text)
+                        append_part(user_pose_text)
                     else:
                         rendered = group_text_or_atomic_fallback(
                             pose_core_text, POSE_OUTPUT_FIELDS
                         )
                         if rendered:
-                            parts.append(rendered)
+                            append_part(rendered)
                     pose_added = True
                 continue
             if field in SCENE_OUTPUT_FIELDS:
@@ -6317,7 +6674,7 @@ def compose_prompt_text(
                         scene_text, SCENE_OUTPUT_FIELDS
                     )
                     if rendered:
-                        parts.append(rendered)
+                        append_part(rendered)
                     scene_added = True
                 continue
             if field in CAMERA_OUTPUT_FIELDS:
@@ -6327,7 +6684,7 @@ def compose_prompt_text(
                         camera_text, CAMERA_OUTPUT_FIELDS
                     )
                     if rendered:
-                        parts.append(rendered)
+                        append_part(rendered)
                     camera_added = True
                 continue
             if field in VISUAL_OUTPUT_FIELDS:
@@ -6337,7 +6694,7 @@ def compose_prompt_text(
                         visual_text, VISUAL_OUTPUT_FIELDS
                     )
                     if rendered:
-                        parts.append(rendered)
+                        append_part(rendered)
                     visual_added = True
                 continue
             if field in CLOTHING_OUTPUT_FIELDS:
@@ -6347,7 +6704,7 @@ def compose_prompt_text(
                         clothing_text, CLOTHING_OUTPUT_FIELDS
                     )
                     if rendered:
-                        parts.append(rendered)
+                        append_part(rendered)
                     clothing_added = True
                 continue
             if field in HAIR_OUTPUT_FIELDS:
@@ -6357,13 +6714,19 @@ def compose_prompt_text(
                         hair_text, HAIR_OUTPUT_FIELDS
                     )
                     if rendered:
-                        parts.append(rendered)
+                        append_part(rendered)
                     hair_added = True
                 continue
             if fields.get(field) != EMPTY_CHOICE:
-                parts.append(formatter(field).rstrip("，；。 "))
+                append_part(formatter(field).rstrip("，；。 "))
         if user_custom_text:
             parts.append(user_custom_text)
+        if separate_modules:
+            grouped_parts["自定义"] = [user_custom_text]
+            return _module_paragraphs(
+                "；".join(part for part in values if part)
+                for values in grouped_parts.values()
+            )
         prompt_body = "；".join(part for part in parts if part)
         return f"{prompt_body}。" if prompt_body else ""
 
@@ -6374,6 +6737,11 @@ def compose_prompt_text(
         scene_text = user_scene_text or _scene_prompt_text(fields, density)
         camera_text = user_camera_text or _camera_prompt_text(fields, density)
         visual_text = user_visual_text or _visual_prompt_text(fields, density)
+        if separate_modules:
+            return _module_paragraphs((
+                base_text, person_core_text, hair_text, clothing_text,
+                pose_core_text, scene_text, camera_text, visual_text, user_custom_text,
+            ))
         segments = [
             f"{base_text}；",
             f"{person_core_text}，{hair_text}，{clothing_text}；",
@@ -6393,6 +6761,11 @@ def compose_prompt_text(
         scene_text = user_scene_text or _scene_prompt_text(fields, density)
         camera_text = user_camera_text or _camera_prompt_text(fields, density)
         visual_text = user_visual_text or _visual_prompt_text(fields, density)
+        if separate_modules:
+            return _module_paragraphs((
+                base_text, person_core_text, hair_text, clothing_text,
+                pose_core_text, scene_text, camera_text, visual_text, user_custom_text,
+            ))
         segments = [
             f"{base_text}。{person_core_text}；",
             f"{hair_text}；{clothing_text}。",
@@ -6411,6 +6784,11 @@ def compose_prompt_text(
     scene_text = user_scene_text or _scene_prompt_text(fields, density)
     camera_text = user_camera_text or _camera_prompt_text(fields, density)
     visual_text = user_visual_text or _visual_prompt_text(fields, density)
+    if separate_modules:
+        return _module_paragraphs((
+            base_text, person_core_text, hair_text, clothing_text,
+            standard_pose_core_text, scene_text, camera_text, visual_text, user_custom_text,
+        ))
     segments = [
         f"{base_text}，{person_core_text}；",
         f"{hair_text}；{clothing_text}；",
@@ -6588,6 +6966,12 @@ class ZImageChinesePromptBuilder:
                  "tooltip": "由TXT模块词库启用的独立自定义描述，拼接在八个标准模块之后。"},
             ),
         }
+        # Append to preserve positional widget values in existing workflows.
+        optional["输出排版"] = (
+            ["按模块分段", "连续拼接"],
+            {"default": "按模块分段", "tooltip": "按模块分段用空行分隔各模块和自由提示词；连续拼接保留原有格式。"},
+        )
+        optional.update(RESOLUTION_INPUTS)
         return {"required": inputs, "optional": optional}
 
     def build_prompt(self, **kwargs):
@@ -6595,6 +6979,8 @@ class ZImageChinesePromptBuilder:
         density = kwargs.pop("提示词密度", "标准")
         free_prompt = kwargs.pop("自由提示词", "")
         join_position = kwargs.pop("拼接位置", PROMPT_JOIN_POSITIONS[0])
+        separate_modules = kwargs.pop("输出排版", "连续拼接") == "按模块分段"
+        resolution_options = {name: kwargs.pop(name) for name in RESOLUTION_INPUTS if name in kwargs}
         user_module_fragments = {
             module_name: kwargs.pop(input_name, "")
             for module_name, input_name in USER_MODULE_INPUTS.items()
@@ -6603,29 +6989,34 @@ class ZImageChinesePromptBuilder:
         seed = kwargs.pop("随机种子", 0)
         fields = resolve_fields(preset, random_scope, seed, kwargs)
         structured_prompt = compose_prompt_text(
-            fields, density, user_module_fragments=user_module_fragments
+            fields, density, user_module_fragments=user_module_fragments,
+            separate_modules=separate_modules,
         )
-        prompt = join_prompt_text(free_prompt, structured_prompt, join_position)
-        replaced_modules = {
-            module_name
-            for module_name, fragment in user_module_fragments.items()
-            if str(fragment).strip()
-        }
-        english_structured_prompt = compose_english_prompt_text(
-            fields, density, excluded_modules=replaced_modules
-        )
-        if join_position == "结构化模块在前":
-            english_prompt = join_english_prompt_text(
-                english_structured_prompt, free_prompt
+        if separate_modules:
+            first, second = (
+                (structured_prompt, free_prompt) if join_position == "结构化模块在前"
+                else (free_prompt, structured_prompt)
             )
+            prompt = join_prompt_paragraphs(first, second)
         else:
-            english_prompt = join_english_prompt_text(
-                free_prompt, english_structured_prompt
+            prompt = join_prompt_text(free_prompt, structured_prompt, join_position)
+        english_join = join_prompt_paragraphs if separate_modules else join_english_prompt_text
+        english_structured_prompt = ""
+        for module_name in (*_ENGLISH_MODULE_ORDER, "自定义"):
+            supplied = user_module_fragments.get(module_name, "")
+            fragment = supplied if isinstance(supplied, str) and supplied.strip() else (
+                render_english_module_fragment(module_name, fields, density)
+                if module_name != "自定义" else ""
             )
+            english_structured_prompt = english_join(english_structured_prompt, fragment)
+        if join_position == "结构化模块在前":
+            english_prompt = english_join(english_structured_prompt, free_prompt)
+        else:
+            english_prompt = english_join(free_prompt, english_structured_prompt)
         aspect = fields["画面比例"]
         if aspect not in ASPECT_RESOLUTIONS:
             aspect = _preset_values(preset)["画面比例"]
-        width, height = ASPECT_RESOLUTIONS[aspect]
+        width, height = resolution_from_options(aspect, resolution_options)
         return prompt, width, height, english_prompt
 
 

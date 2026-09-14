@@ -184,15 +184,21 @@ function normalizeModule(rawModule) {
 }
 
 function uniqueModuleTitles(entries) {
+  const keyOf = (module, title) => JSON.stringify([module, title]);
+  const reserved = new Set(entries.map(entry => keyOf(entry.module, entry.title)));
+  const used = new Set();
   const counts = new Map();
-  return entries.map((entry) => {
-    const key = `${entry.module}\u0000${entry.title}`;
-    const count = (counts.get(key) || 0) + 1;
+  return entries.map(entry => {
+    const key = keyOf(entry.module, entry.title);
+    let title = entry.title;
+    let count = counts.get(key) || 1;
+    if (used.has(key)) {
+      do { title = `${entry.title}（${++count}）`; }
+      while (used.has(keyOf(entry.module, title)) || reserved.has(keyOf(entry.module, title)));
+    }
     counts.set(key, count);
-    return {
-      ...entry,
-      title: count === 1 ? entry.title : `${entry.title}（${count}）`,
-    };
+    used.add(keyOf(entry.module, title));
+    return { ...entry, title };
   });
 }
 
@@ -274,7 +280,8 @@ function moduleEntries(node, moduleName = null) {
     && typeof entry.prompt === "string"
     && Array.isArray(entry.tags)
   ));
-  return moduleName ? valid.filter((entry) => entry.module === moduleName) : valid;
+  const unique = uniqueModuleTitles(valid);
+  return moduleName ? unique.filter((entry) => entry.module === moduleName) : unique;
 }
 
 function currentModule(node) {

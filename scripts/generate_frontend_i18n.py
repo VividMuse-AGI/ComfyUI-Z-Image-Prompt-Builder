@@ -191,7 +191,19 @@ WIDGET_LABELS_EN = {
     "control_after_generate": "Control After Generate",
     "当前编辑模块": "Module to Edit",
     "自由提示词": "Free Prompt",
+    "分辨率模式": "Resolution Mode",
+    "目标总像素": "Target Megapixels",
+    "目标总像素（万）": "Total Pixels (×10,000)",
+    "总像素（万）": "Total Pixels (×10,000)",
+    "百万像素（MP）": "Megapixels (MP)",
+    "尺寸整除倍数": "Divisible By",
+    "旧版总像素（MP）": "Legacy Megapixels",
+    "尺寸对齐倍数": "Resolution Alignment",
+    "尺寸模式": "Resolution Mode",
+    "总像素（MP）": "Megapixels",
+    "对齐倍数": "Alignment Multiple",
     "拼接位置": "Join Position",
+    "输出排版": "Output Layout",
     "前置提示词": "Previous Prompt",
     "前置英文提示词": "Previous English Prompt",
     "模块类型": "Module Type",
@@ -222,6 +234,8 @@ OUTPUT_LABELS_EN = {
 
 
 UI_LABELS_EN = {
+    "分辨率设置": "Resolution Settings",
+    "分辨率高级设置": "Advanced Resolution Settings",
     "仅启用当前模块": "Enable Only This Module",
     "🎲 生成随机组合": "🎲 Generate Random Combination",
     "清空结构化模块": "Clear Structured Modules",
@@ -242,6 +256,18 @@ UI_LABELS_EN = {
 
 
 TOOLTIPS_EN = {
+    "百万像素（MP）": "1 MP = 1,000,000 pixels. Enter 1, 2, 3 or 0.5; range 0.1–16 MP. The exact aspect ratio is preserved; divisible dimensions make the actual area approximate.",
+    "尺寸整除倍数": "Both width and height must be divisible by this number, e.g. 8, 16, 32 or 64. Default 8; supports multiples of 4 from 8 to 128. Larger values may increase pixel-area error. Editing this on a legacy fixed-size node enables pixel-budget calculation.",
+    "旧版总像素（MP）": "Compatibility only: the old MP formula uses 1024 x 1024 pixels per MP and rounds dimensions separately.",
+    "分辨率模式": "New nodes use a fixed aspect ratio and pixel budget. The other modes preserve legacy workflow sizes.",
+    "目标总像素": "Legacy MP calculation: 1 MP uses 1024 x 1024 pixels, not a 1K long edge.",
+    "目标总像素（万）": "Enter 100 / 200 / 300 for 1 / 2 / 3 million pixels. Keeps the exact aspect ratio; alignment makes the actual area approximate. Range: 10–1600.",
+    "总像素（万）": "Enter 100 / 200 / 300 for 1 / 2 / 3 million pixels. Keeps the exact aspect ratio; alignment makes the actual area approximate. Range: 10–1600.",
+    "尺寸对齐倍数": "Pixel-budget mode preserves the exact ratio and aligns both dimensions. Actual pixel area may differ from the target.",
+    "尺寸模式": "New nodes use a fixed aspect ratio and pixel budget. The other modes preserve legacy workflow sizes.",
+    "总像素（MP）": "Higher resolutions increase memory use. 1 MP uses 1024 x 1024 pixels.",
+    "对齐倍数": "Pixel-budget mode preserves the exact ratio and aligns both dimensions. Larger multiples can increase pixel-area error.",
+    "分辨率设置": "Preview actual dimensions and megapixels; expand for legacy compatibility modes. Editing Megapixels enables fixed-ratio calculation. Connect width and height to the latent node; Free Prompt and TXT ratios are not parsed.",
     "预设": "Provides compatible preset values and randomization pools.",
     "提示词密度": "Concise keeps essentials, Standard keeps primary photography details, and Detailed keeps all fields.",
     "随机范围": "Fine Tune changes a few details; Same Theme Reshoot keeps theme and person; Cross-style Mix can change every field.",
@@ -251,6 +277,7 @@ TOOLTIPS_EN = {
         "it verbatim and place it according to Join Position."
     ),
     "拼接位置": "Controls the order of the free/current prompt and the connected structured text.",
+    "输出排版": "Separate modules and free text with blank lines, or keep the original continuous format.",
     "前置提示词": "Connect the previous Chinese module output to continue the prompt chain.",
     "前置英文提示词": "Connect the previous English module output to continue the English chain.",
     "模块类型": "Declares which structured module this TXT fragment represents.",
@@ -327,6 +354,8 @@ OPTION_OVERRIDES = {
 
 
 CONTROL_OPTIONS_EN = {
+    "分辨率模式": {"原推荐尺寸": "Original Recommended Size", "按总像素计算": "Calculate from Megapixels", "固定比例总像素": "Fixed Ratio / Pixel Budget"},
+    "尺寸模式": {"原推荐尺寸": "Original Recommended Size", "按总像素计算": "Calculate from Megapixels", "固定比例总像素": "Fixed Ratio / Pixel Budget"},
     "预设": PRESET_LABELS_EN,
     "提示词密度": {
         "精简": "Concise",
@@ -344,6 +373,7 @@ CONTROL_OPTIONS_EN = {
         "前置提示词在前": "Previous Prompt First",
         "当前节点内容在前": "Current Node First",
     },
+    "输出排版": {"按模块分段": "Module Paragraphs", "连续拼接": "Continuous"},
     "当前编辑模块": MODULE_LABELS_EN,
     "模块类型": MODULE_LABELS_EN,
     "词库模块": MODULE_LABELS_EN,
@@ -374,11 +404,17 @@ def _option_catalog() -> dict[str, dict[str, str]]:
         nodes.RANDOM_CHOICE: "Random",
         nodes.EMPTY_CHOICE: "None",
     }
+    accessory_labels = {
+        label: f"Accessory set: {bundle_id.replace('_', ' ').title()}"
+        for bundle_id, label in nodes.ACCESSORY_SET_LABELS.items()
+    }
     for field_name in nodes.FIELD_ORDER:
         translations = dict(special)
         for value in nodes.FIELD_OPTIONS[field_name]:
             rendered = nodes._english_atomic_value(field_name, value)
             rendered = OPTION_OVERRIDES.get(field_name, {}).get(value, rendered)
+            if field_name == "服装配件":
+                rendered = accessory_labels.get(value, rendered)
             if not rendered:
                 raise RuntimeError(f"Missing frontend translation: {field_name} -> {value}")
             translations[value] = rendered[:1].upper() + rendered[1:]

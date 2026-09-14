@@ -19,6 +19,8 @@ const NODE_TITLES_ZH = {
 
 let selectedLanguage = "auto";
 const knownDefinitions = new Map();
+const knownNodeTypes = new Map();
+let libraryDefinitions = null;
 
 function comfySetting(id, fallback) {
   try {
@@ -131,13 +133,22 @@ function installOptionLabeler(widget) {
 function localizeWidget(widget, language) {
   if (!widget) return;
   remember(widget, "__vividMuseI18nOriginalTooltip", widget.tooltip);
-  widget.label = language === "en" ? englishWidgetLabel(widget) : widget.name;
+  widget.label = widget.__vividMuseDynamicLabel?.(language)
+    ?? (language === "en" ? englishWidgetLabel(widget) : widget.name);
   if (language === "en" && EN_CATALOG.tooltips[widget.name]) {
     widget.tooltip = EN_CATALOG.tooltips[widget.name];
   } else if (language === "zh") {
     widget.tooltip = widget.__vividMuseI18nOriginalTooltip;
   }
   installOptionLabeler(widget);
+  const inputEl = widget.inputEl;
+  if (inputEl && typeof inputEl.placeholder === "string") {
+    remember(inputEl, "__vividMuseI18nOriginalPlaceholder", inputEl.placeholder);
+    const original = inputEl.__vividMuseI18nOriginalPlaceholder;
+    // Translate built-in hints only, never user text or third-party custom hints.
+    const translated = EN_CATALOG.widgetLabels[original] || EN_CATALOG.uiLabels[original];
+    if (translated) inputEl.placeholder = language === "en" ? translated : original;
+  }
 }
 
 function refreshNode2Widgets(node) {
@@ -166,17 +177,27 @@ function localizeNode(node) {
   }
 
   for (const widget of node.widgets || []) localizeWidget(widget, language);
+  let slotsChanged = false;
   for (const input of node.inputs || []) {
-    input.label = language === "en"
+    const label = language === "en"
       ? EN_CATALOG.widgetLabels[input.name] || input.name
       : input.name;
+    slotsChanged ||= input.label !== label;
+    input.label = label;
   }
   for (const output of node.outputs || []) {
-    output.label = language === "en"
+    const label = language === "en"
       ? EN_CATALOG.outputLabels[output.name] || output.name
       : output.name;
+    slotsChanged ||= output.label !== label;
+    output.label = label;
   }
 
+  // Nodes 2.0 uses shallow slot arrays; its rename event refreshes their labels
+  // without replacing slot objects, changing indices, or touching connections.
+  if (slotsChanged && node.graph && node.id != null) {
+    node.graph.trigger?.("node:slot-label:changed", { nodeId: node.id });
+  }
   refreshNode2Widgets(node);
   node.setDirtyCanvas?.(true, true);
   app.graph?.setDirtyCanvas?.(true, true);
@@ -200,8 +221,22 @@ function allGraphNodes() {
 }
 
 function localizeAllNodes() {
-  for (const node of allGraphNodes()) localizeNode(node);
   for (const definition of knownDefinitions.values()) localizeDefinition(definition);
+  for (const [name, nodeType] of knownNodeTypes) {
+    const definition = knownDefinitions.get(name);
+    nodeType.title = definition.display_name;
+    nodeType.category = definition.category;
+  }
+  // The Vue library copies V1 definitions, so changing the registration-hook
+  // object alone cannot refresh search results. Keep all definitions (including
+  // other packs) and use the frontend's existing registry refresh when available.
+  // This method is version-dependent: never reload/re-register nodes as fallback.
+  if (libraryDefinitions && typeof app.updateVueAppNodeDefs === "function") {
+    app.updateVueAppNodeDefs(Object.fromEntries(
+      libraryDefinitions.map((definition) => [definition.name, definition]),
+    ));
+  }
+  for (const node of allGraphNodes()) localizeNode(node);
 }
 
 function inputSpecs(nodeData) {
@@ -311,10 +346,15 @@ app.registerExtension({
       });
     }
   },
-  beforeRegisterNodeDef(_nodeType, nodeData) {
+  beforeRegisterNodeDef(nodeType, nodeData) {
     if (!TARGET_CLASSES.has(nodeData?.name)) return;
     knownDefinitions.set(nodeData.name, nodeData);
+    knownNodeTypes.set(nodeData.name, nodeType);
     localizeDefinition(nodeData);
+  },
+  beforeRegisterVueAppNodeDefs(definitions) {
+    libraryDefinitions = definitions;
+    for (const definition of definitions) localizeDefinition(definition);
   },
   nodeCreated(node) {
     if (!isTargetNode(node)) return;

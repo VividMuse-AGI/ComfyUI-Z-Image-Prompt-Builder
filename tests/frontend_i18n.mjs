@@ -7,6 +7,18 @@ const sourcePath = new URL("../web/js/i18n.js", import.meta.url);
 let extension = null;
 let languageSetting = null;
 const graph = { _nodes: [], setDirtyCanvas() {} };
+const slotRefreshes = [];
+graph.trigger = (event, detail) => {
+  assert.equal(event, "node:slot-label:changed");
+  const changedNode = graph._nodes.find((item) => item.id === detail.nodeId);
+  slotRefreshes.push({
+    ...detail,
+    inputs: changedNode.inputs.map((slot) => slot.label),
+    outputs: changedNode.outputs.map((slot) => slot.label),
+  });
+};
+let libraryDefinitions = [];
+let libraryRefreshes = 0;
 globalThis.__i18nTestApp = {
   graph,
   ui: {
@@ -23,6 +35,13 @@ globalThis.__i18nTestApp = {
     },
   },
   registerExtension(value) { extension = value; },
+  updateVueAppNodeDefs(defs) {
+    const entries = Object.values(defs);
+    extension.beforeRegisterVueAppNodeDefs(entries);
+    // Vue's registry copies definitions: mutating the hook's raw object is not enough.
+    libraryDefinitions = entries.map((def) => ({ ...def }));
+    libraryRefreshes++;
+  },
 };
 
 const catalogSource = fs.readFileSync(catalogPath, "utf8").replace(
@@ -66,10 +85,13 @@ const nodeData = {
     optional: { "前置提示词": ["STRING", { forceInput: true }] },
   },
 };
-extension.beforeRegisterNodeDef({}, nodeData);
+const nodeType = {};
+extension.beforeRegisterNodeDef(nodeType, nodeData);
 assert.equal(nodeData.display_name, "Z-Image Person");
 assert.equal(nodeData.category, "VividMuse/Z-Image/Modules");
 assert.equal(nodeData.input.required["年龄阶段"][1].display_name, "Age Range");
+const foreignDefinition = { name: "ForeignNode", display_name: "Foreign Title", category: "Other" };
+const foreignSnapshot = JSON.stringify(foreignDefinition);
 
 const widgets = [
   {
@@ -90,8 +112,18 @@ const widgets = [
     value: null,
     options: {},
   },
+  {
+    name: "自由提示词", type: "customtext", value: "用户输入，必须保留。",
+    options: {}, inputEl: { placeholder: "自由提示词", value: "用户输入，必须保留。" },
+  },
+  {
+    name: "自由提示词", type: "customtext", value: "custom",
+    options: {}, inputEl: { placeholder: "User-defined hint", value: "custom" },
+  },
 ];
 const node = {
+  id: 42,
+  graph,
   comfyClass: "VividMuse_ZImagePersonModule",
   title: "Z-Image 人物",
   widgets,
@@ -114,6 +146,15 @@ assert.equal(node.inputs[0].label, "Previous Prompt");
 assert.equal(node.outputs[0].label, "Combined Prompt");
 assert.equal(node.outputs[1].label, "English Prompt");
 const englishOptionLabeler = widgets[1].options.getOptionLabel;
+assert.equal(widgets[3].inputEl.placeholder, "Free Prompt");
+assert.equal(widgets[4].inputEl.placeholder, "User-defined hint");
+assert.deepEqual(slotRefreshes.at(-1).outputs, ["Combined Prompt", "English Prompt"]);
+const originalInputs = [...node.inputs];
+const originalOutputs = [...node.outputs];
+node.inputs[0].link = 123;
+node.outputs[0].links = [456];
+const originalOutputLinks = node.outputs[0].links;
+globalThis.__i18nTestApp.updateVueAppNodeDefs({ [nodeData.name]: nodeData, ForeignNode: foreignDefinition });
 
 languageSetting.onChange("zh");
 assert.equal(node.title, "Z-Image 人物");
@@ -123,6 +164,13 @@ assert.equal(widgets[0].options.getOptionLabel(widgets[0].value), widgets[0].val
 assert.equal(widgets[1].value, "20–29岁");
 assert.equal(nodeData.display_name, "Z-Image 人物");
 assert.equal(nodeData.input.required["年龄阶段"][1].display_name, undefined);
+assert.equal(widgets[3].inputEl.placeholder, "自由提示词");
+assert.deepEqual(slotRefreshes.at(-1).inputs, ["前置提示词"]);
+assert.deepEqual(slotRefreshes.at(-1).outputs, ["组合提示词", "英文提示词"]);
+assert.equal(libraryDefinitions.find((def) => def.name === nodeData.name).display_name, "Z-Image 人物");
+assert.equal(libraryDefinitions.find((def) => def.name === nodeData.name).category, "VividMuse/Z-Image/模块");
+assert.equal(nodeType.title, "Z-Image 人物");
+assert.equal(nodeType.category, "VividMuse/Z-Image/模块");
 
 node.title = "My Portrait Node";
 languageSetting.onChange("en");
@@ -136,6 +184,25 @@ extension.nodeCreated(customTitleNode);
 assert.equal(customTitleNode.title, "Saved Custom Title");
 assert.equal(widgets[1].label, "Age Range");
 assert.equal(widgets[1].value, "20–29岁");
+assert.equal(widgets[3].inputEl.placeholder, "Free Prompt");
+assert.equal(widgets[3].value, "用户输入，必须保留。");
+assert.equal(widgets[3].inputEl.value, "用户输入，必须保留。");
+assert.equal(widgets[3].name, "自由提示词");
+assert.equal(node.inputs[0], originalInputs[0]);
+assert.equal(node.outputs[0], originalOutputs[0]);
+assert.equal(node.inputs[0].link, 123);
+assert.equal(node.outputs[0].links, originalOutputLinks);
+assert.deepEqual(originalOutputLinks, [456]);
+assert.equal(libraryDefinitions.find((def) => def.name === nodeData.name).display_name, "Z-Image Person");
+assert.equal(libraryDefinitions.find((def) => def.name === nodeData.name).category, "VividMuse/Z-Image/Modules");
+assert.equal(nodeType.title, "Z-Image Person");
+assert.equal(nodeType.category, "VividMuse/Z-Image/Modules");
+assert.equal(JSON.stringify(libraryDefinitions.find((def) => def.name === "ForeignNode")), foreignSnapshot);
+assert.equal(JSON.stringify(foreignDefinition), foreignSnapshot);
+assert.equal(libraryRefreshes, 3);
+const refreshCount = slotRefreshes.length;
+globalThis.__vividMuseZImageI18n.localizeNode(node);
+assert.equal(slotRefreshes.length, refreshCount, "Unchanged labels should not rebuild Nodes 2.0 slot data");
 assert.equal(
   globalThis.__vividMuseZImageI18n.translateMessage("条目“Lighting”没有提示词正文。"),
   "Entry 'Lighting' has no prompt body.",
@@ -163,5 +230,12 @@ graph._nodes.push({
 });
 languageSetting.onChange("en");
 assert.equal(deeplyNestedNode.title, "Z-Image Person");
+
+// Legacy frontends with neither registry-refresh nor graph-trigger API still localize safely.
+delete globalThis.__i18nTestApp.updateVueAppNodeDefs;
+delete graph.trigger;
+languageSetting.onChange("zh");
+assert.equal(node.outputs[0].label, "组合提示词");
+assert.equal(widgets[3].inputEl.placeholder, "自由提示词");
 
 console.log("frontend i18n ok");

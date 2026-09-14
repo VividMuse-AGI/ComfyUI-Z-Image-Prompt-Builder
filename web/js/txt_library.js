@@ -110,15 +110,21 @@ function setWidgetVisible(widget, visible) {
 }
 
 function uniqueTitles(entries) {
+  const baseTitle = entry => entry.title || "未命名提示词";
+  const reserved = new Set(entries.map(baseTitle));
+  const used = new Set();
   const counts = new Map();
-  return entries.map((entry) => {
-    const baseTitle = entry.title || "未命名提示词";
-    const count = (counts.get(baseTitle) || 0) + 1;
-    counts.set(baseTitle, count);
-    return {
-      ...entry,
-      title: count === 1 ? baseTitle : `${baseTitle}（${count}）`,
-    };
+  return entries.map(entry => {
+    const base = baseTitle(entry);
+    let title = base;
+    let count = counts.get(base) || 1;
+    if (used.has(title)) {
+      do { title = `${base}（${++count}）`; }
+      while (used.has(title) || reserved.has(title));
+    }
+    counts.set(base, count);
+    used.add(title);
+    return { ...entry, title };
   });
 }
 
@@ -193,12 +199,12 @@ function parseTxtPromptLibrary(text) {
 function libraryEntries(node) {
   const entries = node.properties?.[LIBRARY_PROPERTY]?.entries;
   if (!Array.isArray(entries)) return [];
-  return entries.filter((entry) => (
+  return uniqueTitles(entries.filter((entry) => (
     entry
     && typeof entry.title === "string"
     && typeof entry.prompt === "string"
     && Array.isArray(entry.tags)
-  ));
+  )));
 }
 
 function syncTxtLibraryControls(node, resize = true) {

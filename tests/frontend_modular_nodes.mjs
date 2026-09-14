@@ -208,4 +208,20 @@ assert.deepEqual(
 change(sceneNode, "场景大类", "城市生活");
 assert.equal(widget(sceneNode, "场景地点").value, "暖调咖啡馆");
 
+clothingNode.properties.vividMuseRandomLocks = ["鞋履"];
+widget(clothingNode, "鞋履").value = "白色运动鞋";
+widget(clothingNode, "🎲 生成本模块随机组合").callback();
+assert.equal(widget(clothingNode, "鞋履").value, "白色运动鞋");
+assert.equal(widget(clothingNode, "服装配件").value, "随机抽取");
+change(clothingNode, "穿搭结构", "不使用");
+for (const name of ["连衣裙类型", "连体服类型", "上装类型", "下装类型"])
+  assert.equal(widget(clothingNode, name).hidden, false, name + " remains editable in blank mode");
+clothingNode.properties.vividMuseRandomLocks = ["连衣裙类型", "连衣裙颜色"];
+widget(clothingNode, "连衣裙类型").value = "碎花吊带连衣裙";
+widget(clothingNode, "连衣裙颜色").value = "薄荷绿";
+widget(clothingNode, "🎲 生成本模块随机组合").callback();
+assert.equal(widget(clothingNode, "穿搭结构").value, "随机抽取");
+assert.equal(widget(clothingNode, "连衣裙类型").value, "碎花吊带连衣裙");
+assert.equal(widget(clothingNode, "连衣裙颜色").value, "薄荷绿");
+assert.equal(widget(clothingNode, "连衣裙类型").hidden, false);
 console.log("frontend modular nodes ok");

@@ -17,7 +17,7 @@ jobs:
           node-version: "22"
       - name: Compile Python and parse phrase libraries
         run: |
-          python -m py_compile nodes.py modular_nodes.py __init__.py
+          python -m py_compile nodes.py modular_nodes.py resolution.py __init__.py
           python -c "import glob,json; [json.load(open(path, encoding='utf-8')) for path in glob.glob('phrase_library/*.json')]"
       - name: Run Python regressions
         run: python -m unittest discover -s tests -p "test_*.py" -v
@@ -25,6 +25,10 @@ jobs:
         run: |
           python scripts/generate_frontend_i18n.py
           git diff --exit-code -- web/js/i18n_catalog.js
+      - name: Verify generated resolution catalog
+        run: |
+          python scripts/generate_resolution_catalog.py
+          git diff --exit-code -- web/js/resolution_catalog.js
       - name: Run frontend regressions
         run: |
           for source in web/js/*.js; do node --check "$source"; done

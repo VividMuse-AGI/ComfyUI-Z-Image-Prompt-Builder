@@ -104,6 +104,11 @@
           "id": "cycling_posture",
           "label": "骑行姿态",
           "value": "骑行时身体前倾的姿态"
+        },
+        {
+          "id": "sitting_pool_edge",
+          "label": "泳池边坐姿",
+          "value": "坐在泳池边缘，上身自然直立"
         }
       ]
     },
@@ -516,6 +521,96 @@
           "id": "phone_to_ear",
           "label": "举手机至耳畔",
           "value": "将手机举至耳畔"
+        },
+        {
+          "id": "tennis_ready_hands",
+          "label": "一手握网球拍一手扶拍颈",
+          "value": "右手握网球拍柄，左手轻扶拍颈，球拍置于腰前"
+        },
+        {
+          "id": "fitness_dumbbell_hands",
+          "label": "双手各握一只哑铃垂于体侧",
+          "value": "双手各握一只哑铃，手臂沿身体两侧自然垂下"
+        },
+        {
+          "id": "running_ready_hands",
+          "label": "双臂屈肘前后错开",
+          "value": "双臂轻屈，左臂在前、右臂在后，双手放松"
+        },
+        {
+          "id": "pool_rest_hands",
+          "label": "双手撑在池沿两侧",
+          "value": "双手掌心轻撑在身体两侧的池沿上"
+        },
+        {
+          "id": "dance_barre_hands",
+          "label": "一手扶把杆另一臂侧展",
+          "value": "左手轻扶水平舞蹈把杆，右臂向侧方舒展，手腕自然"
+        },
+        {
+          "id": "boxing_guard_hands",
+          "label": "戴拳击手套双拳举至颊旁",
+          "value": "双手戴拳击手套，双拳举至脸颊两侧，双肘收在躯干前方"
+        },
+        {
+          "id": "badminton_ready_hands",
+          "label": "一手持羽毛球拍一手拿球",
+          "value": "右手持羽毛球拍垂在身侧，左手在腰前拿一只羽毛球"
+        },
+        {
+          "id": "climbing_prepare_hands",
+          "label": "双手在腰前轻搓镁粉",
+          "value": "双手在腰前轻轻揉搓，掌心带少量白色镁粉"
+        },
+        {
+          "id": "ski_rest_hands",
+          "label": "双手各握一根直立雪杖",
+          "value": "双手各握一根雪杖，杖尖落在身体两侧的雪地上"
+        },
+        {
+          "id": "surf_board_hands",
+          "label": "一手扶住身侧直立冲浪板",
+          "value": "右手扶住身侧直立冲浪板的板沿，板尾接触沙地，左手自然垂落"
+        },
+        {
+          "id": "business_portrait_hands",
+          "label": "双臂在胸前自然交叠",
+          "value": "双臂自然交叠在胸前，双手轻搭上臂，肩膀放松"
+        },
+        {
+          "id": "ecommerce_front_hands",
+          "label": "双臂与腰线稍微分开",
+          "value": "双臂自然下垂并与腰部留出少量间隙，手指舒展"
+        },
+        {
+          "id": "jewelry_earring_hands",
+          "label": "一手将头发拢至耳后露出耳饰",
+          "value": "左手将左耳旁的头发轻拢至耳后，露出耳饰，右手自然垂落"
+        },
+        {
+          "id": "perfume_display_hands",
+          "label": "一手托香水瓶底一手扶瓶侧",
+          "value": "左手托住香水瓶底部，右手轻扶瓶身侧面，瓶身正面朝向镜头"
+        },
+        {
+          "id": "watch_display_hands",
+          "label": "一手托住另一只戴腕表的手腕",
+          "value": "左手腕戴腕表并抬至胸前，表盘朝向镜头，右手轻托左手腕下方"
+        },
+        {
+          "id": "glasses_display_hands",
+          "label": "戴细框眼镜一手轻扶镜腿",
+          "value": "佩戴细框眼镜，右手指尖轻扶右侧镜腿，左手自然垂落"
+        },
+        {
+          "id": "bag_display_hands",
+          "label": "双手握提柄使手袋正面朝向镜头",
+          "value": "双手轻握手袋提柄，将手袋置于身前大腿上方，包身正面朝向镜头"
+        },
+        {
+          "id": "drink_display_hands",
+          "label": "一手握饮料瓶下半部举至胸前",
+          "value": "右手握住饮料瓶下半部举至胸前，瓶身正面朝向镜头，左手自然垂落"
         }
       ]
     },
@@ -608,6 +703,21 @@
           "id": "pedaling",
           "label": "踩踏脚蹬",
           "value": "双腿交替踩踏脚蹬"
+        },
+        {
+          "id": "sport_ready",
+          "label": "双脚分开微屈膝",
+          "value": "双脚与肩同宽站稳，双膝轻微弯曲"
+        },
+        {
+          "id": "pool_feet_water",
+          "label": "双脚垂入池水",
+          "value": "双腿从池边自然垂下，双脚浸入池水"
+        },
+        {
+          "id": "dance_tendu",
+          "label": "一脚侧伸点地",
+          "value": "左腿直立承重，右腿向侧方伸出，脚尖轻点地面"
         }
       ]
     },
@@ -976,6 +1086,96 @@
           "id": "answering_phone",
           "label": "接听电话",
           "value": "举起手机接听电话"
+        },
+        {
+          "id": "tennis_ready_moment",
+          "label": "网球接球前准备",
+          "value": "网球接球前准备"
+        },
+        {
+          "id": "fitness_dumbbell_moment",
+          "label": "力量训练组间休息",
+          "value": "力量训练组间休息"
+        },
+        {
+          "id": "running_ready_moment",
+          "label": "慢跑起步前停顿",
+          "value": "慢跑起步前停顿"
+        },
+        {
+          "id": "pool_rest_moment",
+          "label": "游泳后池边休息",
+          "value": "游泳后池边休息"
+        },
+        {
+          "id": "dance_barre_moment",
+          "label": "舞蹈排练中保持姿态",
+          "value": "舞蹈排练中保持姿态"
+        },
+        {
+          "id": "boxing_guard_moment",
+          "label": "拳击训练前保持防守姿态",
+          "value": "拳击训练前保持防守姿态"
+        },
+        {
+          "id": "badminton_ready_moment",
+          "label": "羽毛球发球前停顿",
+          "value": "羽毛球发球前停顿"
+        },
+        {
+          "id": "climbing_prepare_moment",
+          "label": "攀岩前整理双手",
+          "value": "攀岩前整理双手"
+        },
+        {
+          "id": "ski_rest_moment",
+          "label": "滑雪间歇短暂停留",
+          "value": "滑雪间歇短暂停留"
+        },
+        {
+          "id": "surf_board_moment",
+          "label": "冲浪前在岸边停留",
+          "value": "冲浪前在岸边停留"
+        },
+        {
+          "id": "business_portrait_moment",
+          "label": "商务肖像拍摄时停留",
+          "value": "商务肖像拍摄时停留"
+        },
+        {
+          "id": "ecommerce_front_moment",
+          "label": "展示服装正面版型",
+          "value": "展示服装正面版型"
+        },
+        {
+          "id": "jewelry_earring_moment",
+          "label": "转头展示耳饰",
+          "value": "转头展示耳饰"
+        },
+        {
+          "id": "perfume_display_moment",
+          "label": "将香水瓶举至胸前展示",
+          "value": "将香水瓶举至胸前展示"
+        },
+        {
+          "id": "watch_display_moment",
+          "label": "抬起手腕展示腕表",
+          "value": "抬起手腕展示腕表"
+        },
+        {
+          "id": "glasses_display_moment",
+          "label": "展示佩戴中的眼镜",
+          "value": "展示佩戴中的眼镜"
+        },
+        {
+          "id": "bag_display_moment",
+          "label": "在身前展示手袋",
+          "value": "在身前展示手袋"
+        },
+        {
+          "id": "drink_display_moment",
+          "label": "举起饮料瓶展示",
+          "value": "举起饮料瓶展示"
         }
       ]
     }
@@ -1653,6 +1853,366 @@
           "赛博",
           "都市夜景",
           "行走"
+        ]
+      },
+      {
+        "id": "tennis_ready",
+        "label": "网球持拍准备站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "sport_ready",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "focused",
+          "pose.event": "tennis_ready_moment",
+          "pose.hand_action": "tennis_ready_hands"
+        },
+        "tags": [
+          "网球场阳光运动写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "fitness_dumbbell",
+        "label": "哑铃训练间歇站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "fitness_dumbbell_moment",
+          "pose.hand_action": "fitness_dumbbell_hands"
+        },
+        "tags": [
+          "健身房力量训练写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "running_ready",
+        "label": "慢跑起步姿态",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "one_foot_forward",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "running_ready_moment",
+          "pose.hand_action": "running_ready_hands"
+        },
+        "tags": [
+          "城市慢跑活力写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "pool_rest",
+        "label": "泳池边休息坐姿",
+        "fields": {
+          "pose.base": "sitting_pool_edge",
+          "pose.body_direction": "front",
+          "pose.weight": "centered_seated",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "pool_feet_water",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "pool_rest_moment",
+          "pose.hand_action": "pool_rest_hands"
+        },
+        "tags": [
+          "室内泳池运动写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "dance_barre",
+        "label": "扶把杆侧伸腿站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "left_leg",
+          "pose.shoulders": "open_chest",
+          "pose.leg_action": "dance_tendu",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "dance_barre_moment",
+          "pose.hand_action": "dance_barre_hands"
+        },
+        "tags": [
+          "舞蹈排练动态写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "boxing_guard",
+        "label": "拳击防守准备站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "sport_ready",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "focused",
+          "pose.event": "boxing_guard_moment",
+          "pose.hand_action": "boxing_guard_hands"
+        },
+        "tags": [
+          "拳击训练力量写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "badminton_ready",
+        "label": "羽毛球持拍等待站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "one_foot_forward",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "badminton_ready_moment",
+          "pose.hand_action": "badminton_ready_hands"
+        },
+        "tags": [
+          "羽毛球训练写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "climbing_prepare",
+        "label": "攀岩前擦镁粉站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "slight_lower",
+          "pose.gaze": "down_prop",
+          "pose.expression": "calm",
+          "pose.event": "climbing_prepare_moment",
+          "pose.hand_action": "climbing_prepare_hands"
+        },
+        "tags": [
+          "室内攀岩运动写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "ski_rest",
+        "label": "持雪杖雪地站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "ski_rest_moment",
+          "pose.hand_action": "ski_rest_hands"
+        },
+        "tags": [
+          "滑雪运动写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "surf_board",
+        "label": "海边扶冲浪板站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "left_leg",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "one_knee_bent",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "surf_board_moment",
+          "pose.hand_action": "surf_board_hands"
+        },
+        "tags": [
+          "冲浪运动写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "business_portrait",
+        "label": "商务交臂站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "left_quarter",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm_confident",
+          "pose.event": "business_portrait_moment",
+          "pose.hand_action": "business_portrait_hands"
+        },
+        "tags": [
+          "专业商务头像写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "ecommerce_front",
+        "label": "服装正面展示站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "ecommerce_front_moment",
+          "pose.hand_action": "ecommerce_front_hands"
+        },
+        "tags": [
+          "服装电商模特写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "jewelry_earring",
+        "label": "耳饰侧脸展示姿态",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "turn_right",
+          "pose.gaze": "right_near",
+          "pose.expression": "calm",
+          "pose.event": "jewelry_earring_moment",
+          "pose.hand_action": "jewelry_earring_hands"
+        },
+        "tags": [
+          "珠宝首饰广告写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "perfume_display",
+        "label": "香水瓶身展示姿态",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "perfume_display_moment",
+          "pose.hand_action": "perfume_display_hands"
+        },
+        "tags": [
+          "香水商业广告写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "watch_display",
+        "label": "腕表表盘展示姿态",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "watch_display_moment",
+          "pose.hand_action": "watch_display_hands"
+        },
+        "tags": [
+          "腕表商业广告写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "glasses_display",
+        "label": "眼镜镜框展示姿态",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "glasses_display_moment",
+          "pose.hand_action": "glasses_display_hands"
+        },
+        "tags": [
+          "眼镜商业广告写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "bag_display",
+        "label": "手袋正面展示站姿",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "calm",
+          "pose.event": "bag_display_moment",
+          "pose.hand_action": "bag_display_hands"
+        },
+        "tags": [
+          "手袋商业广告写真",
+          "专项动作"
+        ]
+      },
+      {
+        "id": "drink_display",
+        "label": "饮料瓶展示姿态",
+        "fields": {
+          "pose.base": "standing_relaxed",
+          "pose.body_direction": "front",
+          "pose.weight": "balanced_both_feet",
+          "pose.shoulders": "relaxed_level",
+          "pose.leg_action": "feet_parallel",
+          "pose.head_direction": "front",
+          "pose.gaze": "camera_direct",
+          "pose.expression": "bright_smile",
+          "pose.event": "drink_display_moment",
+          "pose.hand_action": "drink_display_hands"
+        },
+        "tags": [
+          "食品饮料广告写真",
+          "专项动作"
         ]
       }
     ]

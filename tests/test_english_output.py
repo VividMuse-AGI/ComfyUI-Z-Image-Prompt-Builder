@@ -105,7 +105,7 @@ class EnglishOutputTests(unittest.TestCase):
         self.assertIn("用户自己写的中文自由提示词", chinese)
         self.assertIn("用户自己写的中文场景片段", chinese)
         self.assertIn("用户自己写的中文自由提示词", english)
-        self.assertNotIn("用户自己写的中文场景片段", english)
+        self.assertIn("用户自己写的中文场景片段", english)
 
     def test_free_prompt_respects_join_position_in_english_output(self):
         free_prompt = "editorial emphasis"

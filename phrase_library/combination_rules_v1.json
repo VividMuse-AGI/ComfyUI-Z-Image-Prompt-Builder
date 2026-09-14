@@ -1,0 +1,1124 @@
+{
+  "schema_version": "1.0.0",
+  "accessory_recipe_values": {
+    "summer_forest_girl": [
+      "珍珠耳钉",
+      "纤细项链",
+      "小型肩背包",
+      "窄幅丝巾",
+      "发夹",
+      "发带",
+      "手链"
+    ],
+    "warm_cafe_portrait": [
+      "珍珠耳钉",
+      "珍珠耳坠",
+      "纤细项链",
+      "细框圆形眼镜",
+      "小型肩背包",
+      "金属腕表",
+      "发夹",
+      "手链"
+    ],
+    "office_luxury_seated": [
+      "珍珠耳钉",
+      "珍珠耳坠",
+      "纤细项链",
+      "细框矩形眼镜",
+      "细框圆形眼镜",
+      "细皮腰带",
+      "结构感手袋",
+      "窄幅丝巾",
+      "金属腕表",
+      "胸针"
+    ],
+    "doorway_flash_fashion": [
+      "金属流苏耳饰",
+      "金色耳圈",
+      "几何耳饰",
+      "纤细项链",
+      "结构感手袋",
+      "手链",
+      "披肩"
+    ],
+    "studio_beauty_closeup": [
+      "珍珠耳钉",
+      "珍珠耳坠",
+      "纤细项链",
+      "短珍珠项链",
+      "几何耳饰"
+    ],
+    "urban_neon_walk": [
+      "金色耳圈",
+      "几何耳饰",
+      "纤细项链",
+      "细皮腰带",
+      "小型肩背包",
+      "金属腕表",
+      "墨镜",
+      "皮质choker",
+      "手链"
+    ],
+    "new_chinese_tearoom": [
+      "珍珠耳钉",
+      "珍珠耳坠",
+      "纤细项链",
+      "胸针",
+      "手链",
+      "披肩"
+    ],
+    "retro_hongkong_diner": [
+      "金色耳圈",
+      "珍珠耳坠",
+      "短珍珠项链",
+      "窄幅丝巾",
+      "金属腕表",
+      "发夹",
+      "墨镜"
+    ],
+    "seaside_golden_vacation": [
+      "金色耳圈",
+      "纤细项链",
+      "小型肩背包",
+      "窄幅丝巾",
+      "墨镜",
+      "发带",
+      "手链"
+    ],
+    "tennis_active": [
+      "发带"
+    ],
+    "minimal_gallery_editorial": [
+      "几何耳饰",
+      "纤细项链",
+      "细皮腰带",
+      "结构感手袋",
+      "金属腕表",
+      "胸针"
+    ],
+    "bookstore_intellectual": [
+      "珍珠耳钉",
+      "纤细项链",
+      "细框矩形眼镜",
+      "细框圆形眼镜",
+      "小型肩背包",
+      "窄幅丝巾",
+      "金属腕表"
+    ],
+    "rainy_umbrella_city": [
+      "珍珠耳钉",
+      "纤细项链",
+      "细皮腰带",
+      "结构感手袋",
+      "小型肩背包",
+      "窄幅丝巾",
+      "金属腕表"
+    ],
+    "french_apartment_window": [
+      "珍珠耳坠",
+      "金色耳圈",
+      "纤细项链",
+      "短珍珠项链",
+      "窄幅丝巾",
+      "发夹",
+      "手链"
+    ],
+    "neutral_ecommerce_full": [
+      "珍珠耳钉",
+      "纤细项链",
+      "细皮腰带",
+      "金属腕表"
+    ],
+    "low_key_hotel_cinema": [
+      "金属流苏耳饰",
+      "金色耳圈",
+      "珍珠耳坠",
+      "纤细项链",
+      "短珍珠项链",
+      "手链",
+      "披肩"
+    ],
+    "flower_shop_ccd": [
+      "珍珠耳钉",
+      "纤细项链",
+      "小型肩背包",
+      "发夹",
+      "发带",
+      "手链"
+    ],
+    "hanfu_garden_portrait": [
+      "珍珠耳坠",
+      "发夹",
+      "手链",
+      "披肩"
+    ],
+    "cyber_neon_night": [
+      "几何耳饰",
+      "金属流苏耳饰",
+      "金属腕表",
+      "墨镜",
+      "皮质choker",
+      "手链"
+    ]
+  },
+  "theme_recipe_ids": {
+    "日系咖啡馆生活写真": [
+      "warm_cafe_portrait"
+    ],
+    "窗边奶油暖调生活写真": [
+      "french_apartment_window"
+    ],
+    "居家晨光松弛写真": [
+      "french_apartment_window"
+    ],
+    "花店日常清新写真": [
+      "flower_shop_ccd"
+    ],
+    "雨天室内安静写真": [
+      "warm_cafe_portrait",
+      "french_apartment_window",
+      "bookstore_intellectual"
+    ],
+    "书店周末阅读写真": [
+      "bookstore_intellectual"
+    ],
+    "厨房烘焙日常写真": [
+      "warm_cafe_portrait",
+      "french_apartment_window",
+      "bookstore_intellectual"
+    ],
+    "唱片店闲逛写真": [
+      "warm_cafe_portrait",
+      "french_apartment_window",
+      "bookstore_intellectual"
+    ],
+    "画室创作日常写真": [
+      "warm_cafe_portrait",
+      "french_apartment_window",
+      "bookstore_intellectual"
+    ],
+    "周末市集漫步写真": [
+      "warm_cafe_portrait",
+      "french_apartment_window",
+      "bookstore_intellectual"
+    ],
+    "阳台绿植晨间写真": [
+      "warm_cafe_portrait",
+      "french_apartment_window",
+      "bookstore_intellectual"
+    ],
+    "深夜书房独处写真": [
+      "bookstore_intellectual"
+    ],
+    "夜间室内轻奢时尚写真": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "高级杂志棚拍写真": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "极简黑白时尚写真": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "都市街头穿搭写真": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "金属未来感时尚写真": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "红毯礼服时尚写真": [
+      "low_key_hotel_cinema"
+    ],
+    "彩色几何棚拍写真": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "极简西装廓形写真": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "柔软针织质感写真": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "实验花艺时尚写真": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "复古胶片质感时尚写真": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "高定礼服后台写真": [
+      "low_key_hotel_cinema"
+    ],
+    "都市职场轻奢写真": [
+      "office_luxury_seated",
+      "minimal_gallery_editorial"
+    ],
+    "专业商务头像写真": [
+      "office_luxury_seated",
+      "minimal_gallery_editorial"
+    ],
+    "服装电商模特写真": [
+      "neutral_ecommerce_full"
+    ],
+    "珠宝首饰广告写真": [
+      "minimal_gallery_editorial",
+      "studio_beauty_closeup"
+    ],
+    "香水商业广告写真": [
+      "minimal_gallery_editorial",
+      "studio_beauty_closeup"
+    ],
+    "高级酒店品牌写真": [
+      "low_key_hotel_cinema",
+      "french_apartment_window"
+    ],
+    "腕表商业广告写真": [
+      "minimal_gallery_editorial",
+      "studio_beauty_closeup"
+    ],
+    "眼镜商业广告写真": [
+      "minimal_gallery_editorial",
+      "studio_beauty_closeup"
+    ],
+    "手袋商业广告写真": [
+      "minimal_gallery_editorial",
+      "studio_beauty_closeup"
+    ],
+    "婚纱礼服品牌写真": [
+      "low_key_hotel_cinema"
+    ],
+    "汽车商业广告写真": [
+      "neutral_ecommerce_full"
+    ],
+    "食品饮料广告写真": [
+      "neutral_ecommerce_full"
+    ],
+    "影棚水光妆美容特写": [
+      "studio_beauty_closeup"
+    ],
+    "自然真实肤质特写": [
+      "studio_beauty_closeup"
+    ],
+    "清透裸妆美容写真": [
+      "studio_beauty_closeup"
+    ],
+    "浓郁红唇妆面特写": [
+      "studio_beauty_closeup"
+    ],
+    "彩色眼妆创意特写": [
+      "studio_beauty_closeup"
+    ],
+    "护肤品清洁美容广告": [
+      "studio_beauty_closeup"
+    ],
+    "柔雾哑光妆面特写": [
+      "studio_beauty_closeup"
+    ],
+    "珠光眼妆创意特写": [
+      "studio_beauty_closeup"
+    ],
+    "清透腮红妆面写真": [
+      "studio_beauty_closeup"
+    ],
+    "护发造型美容广告": [
+      "studio_beauty_closeup"
+    ],
+    "美甲特写美容写真": [
+      "studio_beauty_closeup"
+    ],
+    "香氛喷雾美容广告": [
+      "studio_beauty_closeup"
+    ],
+    "都市夜行叙事写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "玻璃幕墙通勤写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "地铁站台都市写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "雨夜街头霓虹写真": [
+      "cyber_neon_night",
+      "urban_neon_walk"
+    ],
+    "天台蓝调时刻写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "旧城区巷道纪实写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "便利店夜间叙事写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "停车场冷调都市写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "街道路口纪实写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "城市天桥通勤写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "夜市烟火叙事写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "雨伞街头剪影写真": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "日系森系夏日写真": [
+      "summer_forest_girl"
+    ],
+    "春日花海清新写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "湖畔清风自然写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "草原旷野环境写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "秋日枫林氛围写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "冬日雪林清冷写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "竹林清幽自然写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "海岸悬崖环境写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "沙漠落日旷野写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "乡间小路生活写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "瀑布溪流清新写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "高原湖泊纯净写真": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "海边夏日度假写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "酒店阳台度假写真": [
+      "low_key_hotel_cinema",
+      "french_apartment_window"
+    ],
+    "山野徒步旅行写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "古镇漫步旅行写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "热带泳池假日写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "公路旅行随行写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "海岛小镇漫步写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "山间露营旅行写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "葡萄园庄园旅行写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "火车站候车旅行写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "和服京都之旅写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "温泉度假休闲写真": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "网球场阳光运动写真": [
+      "tennis_active"
+    ],
+    "健身房力量训练写真": [
+      "tennis_active"
+    ],
+    "瑜伽普拉提生活写真": [
+      "tennis_active"
+    ],
+    "城市慢跑活力写真": [
+      "tennis_active"
+    ],
+    "室内泳池运动写真": [
+      "tennis_active"
+    ],
+    "舞蹈排练动态写真": [
+      "tennis_active"
+    ],
+    "拳击训练力量写真": [
+      "tennis_active"
+    ],
+    "户外骑行活力写真": [
+      "tennis_active"
+    ],
+    "羽毛球训练写真": [
+      "tennis_active"
+    ],
+    "室内攀岩运动写真": [
+      "tennis_active"
+    ],
+    "滑雪运动写真": [
+      "tennis_active"
+    ],
+    "冲浪运动写真": [
+      "tennis_active"
+    ],
+    "新中式室内写真": [
+      "new_chinese_tearoom"
+    ],
+    "茶室竹影中式写真": [
+      "new_chinese_tearoom"
+    ],
+    "旗袍民国雅致写真": [
+      "new_chinese_tearoom"
+    ],
+    "宋韵素雅庭院写真": [
+      "hanfu_garden_portrait"
+    ],
+    "唐风华贵宫廷写真": [
+      "hanfu_garden_portrait"
+    ],
+    "水墨留白中式写真": [
+      "new_chinese_tearoom"
+    ],
+    "江南园林雨景写真": [
+      "new_chinese_tearoom",
+      "hanfu_garden_portrait"
+    ],
+    "敦煌壁画灵感写真": [
+      "hanfu_garden_portrait"
+    ],
+    "明制雅致庭院写真": [
+      "hanfu_garden_portrait"
+    ],
+    "传统书院文雅写真": [
+      "new_chinese_tearoom"
+    ],
+    "汉服襦裙写真": [
+      "hanfu_garden_portrait"
+    ],
+    "少数民族风情写真": [
+      "new_chinese_tearoom",
+      "hanfu_garden_portrait"
+    ],
+    "复古港风夜景写真": [
+      "retro_hongkong_diner"
+    ],
+    "九十年代家居写真": [
+      "french_apartment_window"
+    ],
+    "千禧复古派对写真": [
+      "retro_hongkong_diner",
+      "french_apartment_window"
+    ],
+    "美式复古汽车旅馆写真": [
+      "low_key_hotel_cinema",
+      "french_apartment_window"
+    ],
+    "法式旧公寓复古写真": [
+      "retro_hongkong_diner",
+      "french_apartment_window"
+    ],
+    "八十年代影楼复古写真": [
+      "retro_hongkong_diner",
+      "french_apartment_window"
+    ],
+    "七十年代暖调客厅写真": [
+      "retro_hongkong_diner",
+      "french_apartment_window"
+    ],
+    "复古迪斯科舞厅写真": [
+      "retro_hongkong_diner",
+      "french_apartment_window"
+    ],
+    "经典火车站旅人写真": [
+      "retro_hongkong_diner",
+      "french_apartment_window"
+    ],
+    "美式公路餐厅复古写真": [
+      "retro_hongkong_diner",
+      "french_apartment_window"
+    ],
+    "昭和和风复古写真": [
+      "retro_hongkong_diner",
+      "french_apartment_window"
+    ],
+    "上海滩十里洋场写真": [
+      "retro_hongkong_diner",
+      "french_apartment_window"
+    ],
+    "室内克制情绪电影写真": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "暖调室内电影叙事写真": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "蓝调城市电影静帧": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "悬疑走廊叙事写真": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "明亮梦境电影写真": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "黑白电影肖像": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "雨夜独行电影静帧": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "公寓独处剧情写真": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "旅馆窗边电影静帧": [
+      "low_key_hotel_cinema",
+      "french_apartment_window"
+    ],
+    "公路停靠电影叙事": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "剧院舞台电影静帧": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "海港码头电影静帧": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "月夜森林精灵概念写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ],
+    "哥特古堡暗黑写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ],
+    "未来都市赛博写真": [
+      "cyber_neon_night",
+      "urban_neon_walk"
+    ],
+    "蒸汽机械复古幻想写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ],
+    "梦境花园超现实写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ],
+    "星云神殿概念写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ],
+    "水下幻境概念写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ],
+    "冰雪宫殿幻想写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ],
+    "云雾仙境幻想写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ],
+    "花瓣风暴概念写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ],
+    "人鱼海岸概念写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ],
+    "天使羽翼概念写真": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ]
+  },
+  "category_recipe_ids": {
+    "日常生活": [
+      "warm_cafe_portrait",
+      "french_apartment_window",
+      "bookstore_intellectual"
+    ],
+    "时尚编辑": [
+      "minimal_gallery_editorial",
+      "doorway_flash_fashion",
+      "urban_neon_walk"
+    ],
+    "商业广告": [
+      "neutral_ecommerce_full",
+      "minimal_gallery_editorial"
+    ],
+    "美妆美容": [
+      "studio_beauty_closeup"
+    ],
+    "都市叙事": [
+      "urban_neon_walk",
+      "rainy_umbrella_city"
+    ],
+    "自然户外": [
+      "summer_forest_girl",
+      "seaside_golden_vacation"
+    ],
+    "旅行度假": [
+      "seaside_golden_vacation",
+      "flower_shop_ccd"
+    ],
+    "运动健康": [
+      "tennis_active"
+    ],
+    "中式美学": [
+      "new_chinese_tearoom",
+      "hanfu_garden_portrait"
+    ],
+    "复古年代": [
+      "retro_hongkong_diner",
+      "french_apartment_window"
+    ],
+    "电影叙事": [
+      "low_key_hotel_cinema",
+      "rainy_umbrella_city"
+    ],
+    "幻想概念": [
+      "cyber_neon_night",
+      "new_chinese_tearoom"
+    ]
+  },
+  "theme_field_overrides": {
+    "网球场阳光运动写真": {
+      "穿搭结构": [
+        "上装＋下装"
+      ],
+      "上装类型": [
+        "运动背心",
+        "Polo衫"
+      ],
+      "下装类型": [
+        "百褶半裙",
+        "运动紧身裤"
+      ],
+      "上装材质": [],
+      "下装材质": [],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [
+        "白色运动袜"
+      ],
+      "鞋履": [
+        "白色运动鞋",
+        "复古运动鞋"
+      ],
+      "服装配件": []
+    },
+    "健身房力量训练写真": {
+      "穿搭结构": [
+        "上装＋下装"
+      ],
+      "上装类型": [
+        "运动背心"
+      ],
+      "下装类型": [
+        "运动紧身裤",
+        "骑行短裤"
+      ],
+      "上装材质": [],
+      "下装材质": [],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [
+        "白色运动袜"
+      ],
+      "鞋履": [
+        "白色运动鞋",
+        "复古运动鞋"
+      ],
+      "服装配件": []
+    },
+    "瑜伽普拉提生活写真": {
+      "穿搭结构": [
+        "上装＋下装",
+        "连体服"
+      ],
+      "上装类型": [
+        "运动背心"
+      ],
+      "下装类型": [
+        "瑜伽裤",
+        "运动紧身裤"
+      ],
+      "上装材质": [],
+      "下装材质": [],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [],
+      "鞋履": [],
+      "服装配件": [],
+      "连体服类型": [
+        "无袖瑜伽连体衣"
+      ],
+      "连体服材质": [],
+      "连体服图案": []
+    },
+    "城市慢跑活力写真": {
+      "穿搭结构": [
+        "上装＋下装"
+      ],
+      "上装类型": [
+        "运动背心"
+      ],
+      "下装类型": [
+        "运动紧身裤",
+        "骑行短裤"
+      ],
+      "上装材质": [],
+      "下装材质": [],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [
+        "白色运动袜"
+      ],
+      "鞋履": [
+        "白色运动鞋",
+        "复古运动鞋"
+      ],
+      "服装配件": []
+    },
+    "室内泳池运动写真": {
+      "穿搭结构": [
+        "上装＋下装"
+      ],
+      "上装类型": [
+        "挂脖比基尼上装"
+      ],
+      "下装类型": [
+        "系带比基尼泳裤"
+      ],
+      "上装材质": [
+        "泳装弹力面料"
+      ],
+      "下装材质": [
+        "泳装弹力面料"
+      ],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [],
+      "鞋履": [],
+      "服装配件": []
+    },
+    "舞蹈排练动态写真": {
+      "穿搭结构": [
+        "上装＋下装",
+        "连体服"
+      ],
+      "上装类型": [
+        "运动背心"
+      ],
+      "下装类型": [
+        "瑜伽裤",
+        "运动紧身裤"
+      ],
+      "上装材质": [],
+      "下装材质": [],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [],
+      "鞋履": [],
+      "服装配件": [],
+      "连体服类型": [
+        "无袖瑜伽连体衣"
+      ],
+      "连体服材质": [],
+      "连体服图案": []
+    },
+    "拳击训练力量写真": {
+      "穿搭结构": [
+        "上装＋下装"
+      ],
+      "上装类型": [
+        "运动背心"
+      ],
+      "下装类型": [
+        "运动紧身裤",
+        "骑行短裤"
+      ],
+      "上装材质": [],
+      "下装材质": [],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [
+        "白色运动袜"
+      ],
+      "鞋履": [
+        "白色运动鞋",
+        "复古运动鞋"
+      ],
+      "服装配件": []
+    },
+    "户外骑行活力写真": {
+      "穿搭结构": [
+        "上装＋下装"
+      ],
+      "上装类型": [
+        "运动背心"
+      ],
+      "下装类型": [
+        "骑行短裤",
+        "运动紧身裤"
+      ],
+      "上装材质": [],
+      "下装材质": [],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [
+        "白色运动袜"
+      ],
+      "鞋履": [
+        "白色运动鞋",
+        "复古运动鞋"
+      ],
+      "服装配件": []
+    },
+    "羽毛球训练写真": {
+      "穿搭结构": [
+        "上装＋下装"
+      ],
+      "上装类型": [
+        "运动背心"
+      ],
+      "下装类型": [
+        "运动紧身裤",
+        "骑行短裤"
+      ],
+      "上装材质": [],
+      "下装材质": [],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [
+        "白色运动袜"
+      ],
+      "鞋履": [
+        "白色运动鞋",
+        "复古运动鞋"
+      ],
+      "服装配件": []
+    },
+    "室内攀岩运动写真": {
+      "穿搭结构": [
+        "上装＋下装"
+      ],
+      "上装类型": [
+        "运动背心",
+        "简洁短袖T恤"
+      ],
+      "下装类型": [
+        "运动紧身裤",
+        "骑行短裤"
+      ],
+      "上装材质": [],
+      "下装材质": [],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [
+        "白色运动袜"
+      ],
+      "鞋履": [],
+      "服装配件": []
+    },
+    "滑雪运动写真": {
+      "穿搭结构": [
+        "上装＋下装"
+      ],
+      "上装类型": [
+        "羽绒服"
+      ],
+      "下装类型": [],
+      "上装材质": [],
+      "下装材质": [],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [],
+      "鞋履": [],
+      "服装配件": [],
+      "下装颜色": []
+    },
+    "冲浪运动写真": {
+      "穿搭结构": [
+        "上装＋下装"
+      ],
+      "上装类型": [
+        "挂脖比基尼上装"
+      ],
+      "下装类型": [
+        "系带比基尼泳裤"
+      ],
+      "上装材质": [
+        "泳装弹力面料"
+      ],
+      "下装材质": [
+        "泳装弹力面料"
+      ],
+      "上装图案": [],
+      "下装图案": [],
+      "版型细节": [],
+      "袜装": [],
+      "鞋履": [],
+      "服装配件": []
+    },
+    "都市职场轻奢写真": {
+      "版型细节": []
+    },
+    "专业商务头像写真": {
+      "版型细节": []
+    },
+    "服装电商模特写真": {
+      "版型细节": []
+    },
+    "珠宝首饰广告写真": {
+      "版型细节": []
+    },
+    "香水商业广告写真": {
+      "版型细节": []
+    },
+    "高级酒店品牌写真": {
+      "版型细节": []
+    },
+    "腕表商业广告写真": {
+      "版型细节": []
+    },
+    "眼镜商业广告写真": {
+      "版型细节": []
+    },
+    "手袋商业广告写真": {
+      "版型细节": []
+    },
+    "婚纱礼服品牌写真": {
+      "版型细节": []
+    },
+    "汽车商业广告写真": {
+      "版型细节": []
+    },
+    "食品饮料广告写真": {
+      "版型细节": []
+    }
+  },
+  "pose_camera_types": {
+    "standing": [
+      "自然站立",
+      "侧身站立",
+      "门框间站立",
+      "墙边轻靠",
+      "叉腰站立",
+      "持剑站立"
+    ],
+    "moving": [
+      "行走中停步",
+      "骑行姿态"
+    ],
+    "seated": [
+      "椅子前缘坐姿",
+      "沙发前倾坐姿",
+      "沙发放松坐姿",
+      "卡座放松坐姿",
+      "高脚椅坐姿",
+      "跪坐",
+      "盘腿而坐",
+      "马背坐姿",
+      "泳池边坐姿",
+      "单车侧坐",
+      "复古扶手椅坐姿",
+      "地面侧坐",
+      "窗边座椅坐姿"
+    ],
+    "crouching": [
+      "运动式低位蹲姿",
+      "蹲姿"
+    ],
+    "ground_extended": [
+      "沙滩侧卧",
+      "低位鸽子式"
+    ]
+  }
+}

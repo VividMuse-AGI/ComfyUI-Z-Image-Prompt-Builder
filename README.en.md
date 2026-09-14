@@ -1,5 +1,9 @@
 # ComfyUI-Z-Image-Prompt-Builder
 
+All eight module nodes and both TXT nodes also offer **Output Layout**. Module Paragraphs inserts a blank line between upstream text and current content, skipping empty content and preserving internal TXT line breaks. Both language chains are supported by the eight modules; TXT nodes retain their single, untranslated text output. Enable this option on each joining node for a paragraph-based chain; previously concatenated upstream text is not re-split. New nodes default to paragraphs; legacy workflows keep continuous output.
+
+Development update: the full builder offers **Output Layout → Module Paragraphs / Continuous**. Paragraph mode separates each nonempty module, custom module, and free text with a blank line in both outputs, without adding headings. New nodes default to paragraphs; existing workflows keep continuous output.
+
 A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-language Chinese and English positive prompts through portrait presets, structured dropdown fields, and reproducible random combinations.
 
 > English documentation | [Chinese documentation](README.md)
@@ -17,12 +21,12 @@ A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-langua
 - Photo themes use a two-level structure: **12 theme categories × 144 specific themes**.
 - Hair is split into color, length, texture, style, bangs, and headwear, plus optional hair-tone and dye-pattern fields; random generation prefers 37 compatible hair structures.
 - Clothing is split into a structure field plus 20 sub-fields covering dresses, jumpsuits, tops, bottoms, colors, materials, patterns, fit, legwear, shoes, and accessories; mutually exclusive structure branches, with colors and materials scoped to specific garments.
-- Pose & action covers 10 dimensions (moment, base pose, body direction, weight, shoulders, hands, legs, head, gaze, expression); random picks from 32 complete action chains.
-- Scene covers category, location, time, weather, foreground, background, environment detail, surface material, and spatial depth; 12 space categories filter 102 unique locations; random picks from 71 complete scene compositions; indoor scenes automatically omit weather.
+- Pose & action covers 10 dimensions (moment, base pose, body direction, weight, shoulders, hands, legs, head, gaze, expression); random picks from 56 complete action chains, including six reused from approved presets: bicycle side-sitting, an armchair pose, beach side-reclining, ground side-sitting, low pigeon pose, and window-chair sitting.
+- Scene covers category, location, time, weather, foreground, background, environment detail, surface material, and spatial depth; 12 space categories filter 105 unique locations; random picks from 71 complete scene compositions; indoor scenes automatically omit weather.
 - Photography covers 7 fields (shot size, composition, focal length, distance, angle, depth of field, focus); random picks from 30 complete camera setups.
 - Visual covers 12 fields (key light, direction, quality, target, shadow, palette, temperature, contrast, capture style, texture, highlight, grain); random draws from 29 lighting plans and 30 visual profiles.
 - Random results are **seed-controlled and reproducible**; manually locked values always take priority.
-- Camera setups are filtered by aspect ratio, theme category, and seated/standing pose to avoid conflicting lens, distance, shot-size, and focus combinations.
+- Camera setups are selected once using pose, aspect ratio, and the current theme. All 25 base poses are classified; seated poses allow full-body framing. Explicit camera choices take priority, even when intentionally conflicting.
 - Outputs recommended **width and height** for setting the latent size. The English prompt is appended as a new final output, leaving the existing Chinese, width, and height output positions unchanged.
 - Frontend provides a "🎲 Generate random combination" button.
 - A "current editing module" switcher shows one module at a time without changing any field values.
@@ -47,7 +51,21 @@ A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-langua
 - Hotel Window Cinematic Still
 - Custom Combination
 
-Ten portrait presets are decomposed into editable person, styling, action, environment, lighting, composition, and imaging fields. Custom combination provides a minimal neutral starting point.
+Ten portrait presets are decomposed into editable person, styling, action, environment, lighting, composition, and imaging fields. Custom combination provides a minimal neutral starting point. Their fixed prompt output remains unchanged.
+
+- The 56 action chains include 10 new sports chains and 8 commercial display chains. Select a matching theme and set pose fields to Random. All three random scopes support these chains; explicit selections and None remain authoritative. Each new specialist theme currently has one dedicated chain, so repeated draws may keep the same pose.
+- Covered themes: tennis, strength training, jogging, pool rest, dance, boxing, badminton, climbing preparation, skiing, surfing; business headshots, clothing e-commerce, jewelry, perfume, watches, glasses, handbags, and food/drink advertising.
+- For standalone nodes, connect Canvas Basics to Pose & Action to pass the selected theme. Plain text alone is not parsed as structured theme metadata.
+- Accessories exposes 18 existing accessory sets in the current dropdown. Output expands each set into concrete items, and both random single accessories and sets are filtered by outfit recipe. Props and holding relationships belong to hand-action descriptions; no extra controls are added.
+- Scene choices use one backend-generated catalog: 12 categories and 105 locations. Valid saved legacy locations are retained until the user explicitly changes the category.
+
+New content has passed data-reference and bilingual-output checks, but has not yet been individually validated by generating images.
+
+All three random scopes now choose clothing using the current theme, with specific sports pools for garments, legwear, footwear, and accessories. Unsupported specialist items or materials are omitted during random generation; explicit selections remain available. Commercial random outfits no longer add unrelated neckline or sleeve details.
+
+Connect Canvas Basics → Clothing → Pose & Action → Photography to pass structured context through standalone nodes. Plain text is not parsed into theme or pose metadata. Empty modules remain empty.
+
+Updated rules can change the random combination associated with an old seed, while results remain deterministic within this version. The ten fixed presets are unchanged. The [acceptance TXT](examples/%E7%BB%84%E5%90%88%E5%85%BC%E5%AE%B9%E6%80%A7%E9%AA%8C%E6%94%B6.txt) contains six Chinese prompts generated by `python scripts/generate_combination_samples.py`: boxing, pool-edge sitting, yoga, a business headshot, perfume, and a handbag. Image-generation validation is pending.
 
 ## Installation
 
@@ -127,7 +145,18 @@ Canvas → Person → Hair → Clothing → Pose & Action → Scene → Photogra
 - Standalone nodes do not share editable widget state. In a direct chain, however, the combined string carries resolved upstream fields at runtime, so downstream random photography can remain compatible with the actual pose, scene, and other completed modules. The TXT prompt-library node preserves this context. When a TXT module fragment replaces a standard module, that module's stale structured fields are removed so downstream nodes do not keep filtering against an obsolete pose or scene. Arbitrary TXT fragments cannot be reliably parsed back into every widget field, so the replacement is treated as opaque user content.
 - A third-party text node that creates a new plain string may discard that runtime context. Use the full builder when one preset should centrally control all 92 fields.
 - **Z-Image TXT Prompt Library** inserts reusable full prompts; **Z-Image TXT Module Library** inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual Style, or Custom. To replace a standalone structured module, put the TXT module node in that module's position or bypass the original module with **Ctrl+B**; the TXT node does not remove module text that is already present in its incoming string.
-- The English interface renders built-in structured fields in English and inserts the free prompt verbatim according to **Join Position**; it never silently translates user text. Enter English in the free-prompt field or TXT user library when a fully English result is required. If a TXT module fragment replaces a standard module, that module is still omitted from the English output so stale built-in fields are not emitted.
+- The English interface renders built-in structured fields in English and inserts the free prompt verbatim according to **Join Position**. User TXT fragments replace their corresponding built-in modules in both outputs; Custom is appended after the eight standard modules. User text is never automatically translated. Supply English free text and TXT fragments for a fully English result.
+
+## User Presets, Random Locks and Checks
+
+Right-click the full builder or any standalone standard module and select **User Presets / Random Locks / Checks**. The separate panel does not increase node height.
+
+- Save fields, seed, free text, applied user fragments, active module and locks as a named preset in the node. Save the workflow to keep it, or export/import JSON across workflows. Imported library lists and external connections are not included. Imports must match the node type; replacing a saved name asks for confirmation.
+- Check fields and save locks to preserve them when using random buttons. Follow Preset becomes a concrete preset value; Random requires a concrete selection first. Dependent categories are locked together. Manual editing, preset application and clearing remain available.
+- Check Combination reports known conflicts within this node without changing values. It cannot interpret arbitrary user text or predict unresolved random choices.
+- Concise and Standard omit built-in shoes and legwear in face, head-and-shoulders and chest-up shots. Detailed retains them. Standard merges identical action entries. User text is unchanged.
+
+[Four runnable text workflows](examples/workflows/README.md) demonstrate the full builder, module chaining, English free text and TXT replacement. They require no image-generation models.
 
 ## TXT Libraries
 
@@ -293,6 +322,29 @@ Density controls the information level, not an official token limit.
 - **Fine Tune (pose, expression, color, texture)** — keeps the main person, clothing, scene, and composition; only varies action chains and visual details.
 - **Same Theme Reshoot (keep theme and person)** — keeps aspect ratio, theme, age stage, and ethnicity; varies the remaining fields.
 - **Cross-style Mix (all fields)** — all fields enter the global pool for the widest combinations.
+
+A random outfit structure now respects concrete garment selections, including standalone colors, fabrics, and patterns. A locked evening dress is not cleared just because the theme switches to sports. If selected garments span incompatible branches, their values are kept and additional random garments are omitted; the right-click combination checker flags this case. An explicitly chosen structure still determines which branches are included. Setting the structure to **None** leaves individual clothing fields editable in both the full builder and the standalone Clothing node.
+
+Single accessories and accessory sets both use recipe-specific random pools; all manual choices remain available. Optional fields without a suitable candidate are omitted, not expressed as negative instructions.
+
+## Resolution Selector
+
+In the full builder, switch **Module to Edit** to **Canvas**; the standalone **Canvas** node has the same controls. Set **Aspect Ratio**, **Megapixels (MP)** and **Divisible By** directly. The row below shows actual width, height, and pixel area:
+
+1. **Aspect Ratio** remains exactly as selected. Changing the pixel budget does not change the ratio or prompt.
+2. **Megapixels (MP)** defaults to **1.00** on new nodes. Enter **2 / 3** for about 2 / 3 million pixels. 1 MP = 1,000,000 pixels. The range is 0.1–16 MP, with fractional input such as 0.5 or 1.25 supported. Higher resolutions typically require more memory and time.
+3. **Divisible By** is directly below Megapixels and defaults to **8**. Use **8, 16, 32, 64** or another multiple of 4 from 8 to 128. Both width and height will be divisible by that number. The calculation preserves the exact aspect ratio and chooses the available size whose pixel area is closest to the target. Actual MP is therefore approximate; larger divisors can increase pixel-area error.
+4. Connect the existing **Recommended Width / Recommended Height** outputs to the actual generation node. Unconnected latent dimensions do not change automatically.
+
+For example, **4:5 + 2 MP + divisible by 8 → 1280 x 1600**, or **2.048 MP**, still exactly 4:5. A budget of 1 MP gives 896 x 1120; 3 MP gives 1536 x 1920.
+
+Resolution settings do not enter either prompt or participate in prompt randomization. Clear Everything / Clear This Module clears prompt fields but keeps resolution settings. All 11 aspect ratios, including 4:5 and 5:4, and the original output order remain available.
+
+**Legacy compatibility:** Older workflows and user presets retain their original fixed dimensions or MP calculation. Their preview is marked **legacy**, and the budget control shows the current actual pixel area. Editing **Megapixels (MP)** activates the new fixed-ratio calculation. Editing **Divisible By** on an old fixed-size node also enables calculation so that the divisor takes effect. A previously saved budget of 300 in ten-thousand-pixel units now displays as 3 MP, without changing dimensions. Internal workflow/API fields retain their old storage units for compatibility; the UI converts automatically. The previous modes remain available in the collapsed settings for compatibility. Legacy MP mode uses 1024 x 1024 pixels per MP and rounds width and height separately.
+
+A random aspect ratio displays a pending preview; connected inputs are not guessed. With Aspect Ratio set to None, the preview explicitly identifies the legacy preset fallback: the full builder uses the selected preset's aspect; standalone Canvas uses the default preset's aspect. Ratios written in Free Prompt or TXT are not parsed into dimension settings.
+
+Both classic nodes and Node 2.0 show Megapixels and Divisible By directly, with legacy modes in a compact expandable preview. Switching away from Canvas hides these controls.
 
 ## Outputs
 

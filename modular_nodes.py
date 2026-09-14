@@ -40,6 +40,10 @@ if set(_grouped_fields) != set(core.FIELD_ORDER) or len(_grouped_fields) != len(
 DEFAULT_MODULE_PRESET = core.PRESET_OPTIONS[0]
 TXT_MODULE_TYPES = (*MODULE_FIELD_GROUPS, "自定义")
 CHAIN_JOIN_POSITIONS = ("前置提示词在前", "当前节点内容在前")
+OUTPUT_LAYOUT_INPUT = (
+    ["按模块分段", "连续拼接"],
+    {"default": "按模块分段", "tooltip": "按模块分段用空行分隔前置提示词和当前内容，保留正文内部换行。"},
+)
 
 
 class PromptChainText(str):
@@ -57,14 +61,20 @@ def _finish_fragment(text: str) -> str:
     return f"{normalized}。" if normalized else ""
 
 
-def join_chain_text(prefix: str, current: str, position: str) -> str:
+def join_chain_text(prefix: str, current: str, position: str, separate_modules: bool = False) -> str:
     """Join one chainable node body without rewriting either fragment."""
 
     resolved_fields = getattr(prefix, "zimage_resolved_fields", None)
     opaque_modules = getattr(prefix, "zimage_opaque_modules", None)
     prefix_text = "" if prefix is None else str(prefix)
     current_text = "" if current is None else str(current)
-    if position == "当前节点内容在前":
+    if separate_modules:
+        first, second = (
+            (current_text, prefix_text) if position == "当前节点内容在前"
+            else (prefix_text, current_text)
+        )
+        joined = core.join_prompt_paragraphs(first, second)
+    elif position == "当前节点内容在前":
         joined = core.join_prompt_text(
             current_text,
             prefix_text,
@@ -198,6 +208,7 @@ class ZImageModuleNodeBase:
                         ),
                     },
                 ),
+                "输出排版": OUTPUT_LAYOUT_INPUT,
             },
         }
 
@@ -208,6 +219,7 @@ class ZImageModuleNodeBase:
         fields: Mapping[str, str],
         context_fields: Mapping[str, str],
         opaque_modules=(),
+        resolution_options=None,
     ):
         return (
             PromptChainText(prompt, context_fields, opaque_modules),
@@ -220,6 +232,8 @@ class ZImageModuleNodeBase:
         seed = kwargs.pop("随机种子", 0)
         prefix = kwargs.pop("前置提示词", "")
         english_prefix = kwargs.pop("前置英文提示词", "")
+        separate_modules = kwargs.pop("输出排版", "连续拼接") == "按模块分段"
+        resolution_options = {name: kwargs.pop(name) for name in core.RESOLUTION_INPUTS if name in kwargs}
         context_source = prefix
         if not hasattr(context_source, "zimage_resolved_fields"):
             context_source = english_prefix
@@ -260,12 +274,22 @@ class ZImageModuleNodeBase:
             }
         )
         upstream_opaque_modules.discard(self.MODULE_NAME)
-        fragment = render_module_fragment(self.MODULE_NAME, fields, density)
+        render_fields = fields
+        if self.MODULE_NAME == "服装":
+            # A clothing node exposes no framing control. Only explicit camera
+            # context may hide shoes/legwear, never its invisible preset default.
+            shot = (
+                upstream_context.get("景别", core.EMPTY_CHOICE)
+                if "摄影" not in upstream_opaque_modules else core.EMPTY_CHOICE
+            )
+            render_fields = {**fields, "景别": shot}
+        fragment = render_module_fragment(self.MODULE_NAME, render_fields, density)
         english_fragment = core.render_english_module_fragment(
-            self.MODULE_NAME, fields, density
+            self.MODULE_NAME, render_fields, density
         )
-        prompt = join_chain_text(prefix, fragment, CHAIN_JOIN_POSITIONS[0])
-        english_prompt = core.join_english_prompt_text(
+        prompt = join_chain_text(prefix, fragment, CHAIN_JOIN_POSITIONS[0], separate_modules)
+        english_join = core.join_prompt_paragraphs if separate_modules else core.join_english_prompt_text
+        english_prompt = english_join(
             english_prefix, english_fragment
         )
         return self._result(
@@ -274,6 +298,7 @@ class ZImageModuleNodeBase:
             fields,
             context_fields,
             upstream_opaque_modules,
+            resolution_options=resolution_options,
         )
 
 
@@ -283,6 +308,12 @@ class ZImageCanvasModule(ZImageModuleNodeBase):
     RETURN_NAMES = ("组合提示词", "推荐宽度", "推荐高度", "英文提示词")
     DESCRIPTION = "生成中英文画面基础提示词，并输出推荐画布尺寸。"
 
+    @classmethod
+    def INPUT_TYPES(cls):
+        schema = super().INPUT_TYPES()
+        schema["optional"].update(core.RESOLUTION_INPUTS)
+        return schema
+
     def _result(
         self,
         prompt: str,
@@ -290,11 +321,12 @@ class ZImageCanvasModule(ZImageModuleNodeBase):
         fields: Mapping[str, str],
         context_fields: Mapping[str, str],
         opaque_modules=(),
+        resolution_options=None,
     ):
         aspect = fields.get("画面比例", core.EMPTY_CHOICE)
         if aspect not in core.ASPECT_RESOLUTIONS:
             aspect = core.PRESETS[DEFAULT_MODULE_PRESET]["画面比例"]
-        width, height = core.ASPECT_RESOLUTIONS[aspect]
+        width, height = core.resolution_from_options(aspect, resolution_options or {})
         return (
             PromptChainText(prompt, context_fields, opaque_modules),
             width,
@@ -365,6 +397,7 @@ class ZImageTxtPromptLibrary:
             },
             "optional": {
                 "前置提示词": ("STRING", {"forceInput": True}),
+                "输出排版": OUTPUT_LAYOUT_INPUT,
             },
         }
 
@@ -374,6 +407,7 @@ class ZImageTxtPromptLibrary:
                 kwargs.get("前置提示词", ""),
                 kwargs.get("自由提示词", ""),
                 kwargs.get("拼接位置", CHAIN_JOIN_POSITIONS[0]),
+                kwargs.get("输出排版", "连续拼接") == "按模块分段",
             ),
         )
 
@@ -422,6 +456,7 @@ class ZImageTxtModuleLibrary:
             },
             "optional": {
                 "前置提示词": ("STRING", {"forceInput": True}),
+                "输出排版": OUTPUT_LAYOUT_INPUT,
             },
         }
 
@@ -432,6 +467,7 @@ class ZImageTxtModuleLibrary:
             prefix,
             module_text,
             kwargs.get("拼接位置", CHAIN_JOIN_POSITIONS[0]),
+            kwargs.get("输出排版", "连续拼接") == "按模块分段",
         )
         module_name = kwargs.get("模块类型", TXT_MODULE_TYPES[0])
         if module_name not in MODULE_FIELD_GROUPS or not str(module_text).strip():
