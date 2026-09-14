@@ -1,0 +1,48 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Build and verify installation archive
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python scripts/build_release.py "$RELEASE_TAG" --output-dir dist
+      - name: Publish release with verified assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum --check SHA256SUMS.txt
+          gh release create "$RELEASE_TAG" \
+            "ComfyUI-Z-Image-Prompt-Builder-${RELEASE_TAG}.zip" SHA256SUMS.txt \
+            --verify-tag --draft --title "$RELEASE_TAG" \
+            --notes-file "../docs/releases/${RELEASE_TAG}.md"
+          gh release edit "$RELEASE_TAG" --draft=false --latest

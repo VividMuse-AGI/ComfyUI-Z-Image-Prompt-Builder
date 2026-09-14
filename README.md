@@ -8,7 +8,7 @@
 
 八个独立模块节点与两个 TXT 节点也提供“输出排版”。选择“按模块分段”会在前置提示词与当前内容之间插入一个空行，空内容跳过，TXT 正文内部换行不变。八个模块的中英文链均支持；TXT 节点仍为一个原文输出，不自动翻译。整条链要分段时，请在每个参与拼接的节点选择此选项；不会重新拆分上游已经连续拼接的文本。新节点默认分段，旧工作流保持连续拼接。
 
-完整节点新增“输出排版”（当前开发版）：选择“按模块分段”后，八个标准模块、自定义模块及自由提示词分别成段，段落之间空一行，空模块自动跳过，不添加模块标题。中文与英文输出均支持；选择“连续拼接”可使用原格式。新建节点默认分段，旧工作流保留连续格式。
+完整节点支持“输出排版”：选择“按模块分段”后，八个标准模块、自定义模块及自由提示词分别成段，段落之间空一行，空模块自动跳过，不添加模块标题。中文与英文输出均支持；选择“连续拼接”可使用原格式。新建节点默认分段，旧工作流保留连续格式。
 
 - 同时输出中文与英文正向提示词，不生成负面提示词；英文由内置结构化字段离线确定性渲染，不调用在线翻译服务。
 - 节点前端支持“自动／中文／English”三种界面语言；自动模式跟随 ComfyUI 语言，界面翻译不会改变工作流保存的中文字段键和下拉值。
@@ -99,7 +99,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.4.2` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.4.2) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.4.2.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。
+推荐从 [`v0.5.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.5.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.5.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -431,7 +431,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.4.2`
+- 当前版本：`0.5.0`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上

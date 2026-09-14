@@ -1,8 +1,8 @@
 # 提示词工作流 / Prompt workflows
 
-将 JSON 拖入 ComfyUI 后点击运行。需要本节点的当前开发版本以及 ComfyUI 内置 PreviewAny（预览任意）节点；不需要模型、采样器或 GPU 生图。
+将 JSON 拖入 ComfyUI 后点击运行。需要本节点 v0.5.0 或更新版本以及 ComfyUI 内置 PreviewAny（预览任意）节点；不需要模型、采样器或 GPU 生图。
 
-Drag a JSON file into ComfyUI and run it. These examples require the current development version of this node pack and ComfyUI's built-in PreviewAny node. No generation model is required.
+Drag a JSON file into ComfyUI and run it. These examples require v0.5.0 or later of this node pack and ComfyUI's built-in PreviewAny node. No generation model is required.
 
 | 文件 / File | 用途 / Purpose |
 | --- | --- |
