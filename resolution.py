@@ -25,15 +25,15 @@ RESOLUTION_DEFAULTS = {
 RESOLUTION_INPUTS = {
     "分辨率模式": (
         ["原推荐尺寸", "按总像素计算", PIXEL_BUDGET_MODE],
-        {"default": PIXEL_BUDGET_MODE, "tooltip": "新节点按总像素计算并固定比例；另两种模式仅供旧工作流兼容。"},
+        {"default": PIXEL_BUDGET_MODE, "tooltip": "默认保持画面比例并接近目标总像素；已有工作流保留保存的尺寸计算方式。"},
     ),
     "目标总像素": (
         "FLOAT", {"default": 1.0, "min": 0.1, "max": 16.0, "step": 0.1,
-                  "tooltip": "MP 表示总像素；按官方计算口径，1 MP 为 1024×1024 像素，不是长边 1K。"},
+                  "tooltip": "用于按像素计算，每单位为 1024×1024 像素，不是长边 1K。宽高分别按整除倍数取整。"},
     ),
     "尺寸对齐倍数": (
         "INT", {"default": 8, "min": 8, "max": 128, "step": 4,
-                "tooltip": "新模式同时保持比例与尺寸对齐，选择最接近目标总像素的可用宽高。"},
+                "tooltip": "保持比例计算同时满足画面比例与尺寸整除要求，选择最接近目标总像素的可用宽高。"},
     ),
     "目标总像素（万）": (
         "FLOAT", {"default": 100.0, "min": 10.0, "max": 1600.0, "step": 10.0,

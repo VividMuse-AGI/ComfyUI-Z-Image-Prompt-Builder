@@ -530,9 +530,9 @@ export const EN_CATALOG = {
       "随机抽取": "Random"
     },
     "分辨率模式": {
-      "原推荐尺寸": "Original Recommended Size",
-      "固定比例总像素": "Fixed Ratio / Pixel Budget",
-      "按总像素计算": "Calculate from Megapixels"
+      "原推荐尺寸": "Use Saved Dimensions",
+      "固定比例总像素": "Preserve Aspect Ratio (Recommended)",
+      "按总像素计算": "Calculate from Pixels"
     },
     "刘海": {
       "不使用": "None",
@@ -1093,9 +1093,9 @@ export const EN_CATALOG = {
       "面部与上半身": "Focused on the upper body"
     },
     "尺寸模式": {
-      "原推荐尺寸": "Original Recommended Size",
-      "固定比例总像素": "Fixed Ratio / Pixel Budget",
-      "按总像素计算": "Calculate from Megapixels"
+      "使用已保存尺寸": "Use Saved Dimensions",
+      "保持比例计算（推荐）": "Preserve Aspect Ratio (Recommended)",
+      "按像素计算": "Calculate from Pixels"
     },
     "年龄阶段": {
       "20–29岁": "Around 20 years old",
@@ -2473,19 +2473,19 @@ export const EN_CATALOG = {
     "英文提示词": "English Prompt"
   },
   "tooltips": {
-    "分辨率模式": "New nodes use a fixed aspect ratio and pixel budget. The other modes preserve legacy workflow sizes.",
-    "分辨率设置": "Preview actual dimensions and megapixels; expand for legacy compatibility modes. Editing Megapixels enables fixed-ratio calculation. Connect width and height to the latent node; Free Prompt and TXT ratios are not parsed.",
+    "像素计算值": "For Calculate from Pixels: each unit is 1024 x 1024 pixels, with width and height rounded separately to the divisor. Use Preserve Aspect Ratio for an exact ratio.",
+    "分辨率模式": "Defaults to preserving the aspect ratio while approximating the pixel budget. Existing workflows retain their saved calculation settings.",
+    "分辨率设置": "Preview actual dimensions and megapixels; expand to choose a calculation method. Editing Megapixels enables Preserve Aspect Ratio. Connect width and height to the latent node; Free Prompt and TXT ratios are not parsed.",
     "前置提示词": "Connect the previous Chinese module output to continue the prompt chain.",
     "前置英文提示词": "Connect the previous English module output to continue the English chain.",
     "对齐倍数": "Pixel-budget mode preserves the exact ratio and aligns both dimensions. Larger multiples can increase pixel-area error.",
     "尺寸对齐倍数": "Pixel-budget mode preserves the exact ratio and aligns both dimensions. Actual pixel area may differ from the target.",
-    "尺寸整除倍数": "Both width and height must be divisible by this number, e.g. 8, 16, 32 or 64. Default 8; supports multiples of 4 from 8 to 128. Larger values may increase pixel-area error. Editing this on a legacy fixed-size node enables pixel-budget calculation.",
-    "尺寸模式": "New nodes use a fixed aspect ratio and pixel budget. The other modes preserve legacy workflow sizes.",
+    "尺寸整除倍数": "Both width and height must be divisible by this number, e.g. 8, 16, 32 or 64. Default 8; supports multiples of 4 from 8 to 128. Larger values may increase pixel-area error. Editing this when using saved fixed dimensions enables Preserve Aspect Ratio.",
+    "尺寸模式": "Preserve Aspect Ratio keeps the exact ratio and approximates the pixel budget. Calculate from Pixels rounds dimensions separately, which may slightly change the ratio. Saved fixed dimensions are retained but are not a selectable mode.",
     "总像素（MP）": "Higher resolutions increase memory use. 1 MP uses 1024 x 1024 pixels.",
     "总像素（万）": "Enter 100 / 200 / 300 for 1 / 2 / 3 million pixels. Keeps the exact aspect ratio; alignment makes the actual area approximate. Range: 10–1600.",
     "拼接位置": "Controls the order of the free/current prompt and the connected structured text.",
     "提示词密度": "Concise keeps essentials, Standard keeps primary photography details, and Detailed keeps all fields.",
-    "旧版总像素（MP）": "Compatibility only: the old MP formula uses 1024 x 1024 pixels per MP and rounds dimensions separately.",
     "模块提示词": "Filled by the TXT module library or edited manually.",
     "模块类型": "Declares which structured module this TXT fragment represents.",
     "用户人物片段": "Filled by the TXT module library; replaces the built-in Person module when non-empty.",
@@ -2497,8 +2497,8 @@ export const EN_CATALOG = {
     "用户画面基础片段": "Filled by the TXT module library; replaces the built-in Canvas module when non-empty.",
     "用户自定义片段": "Filled by the TXT module library; adds an independent Custom fragment after the eight standard modules.",
     "用户视觉表现片段": "Filled by the TXT module library; replaces the built-in Visual Style module when non-empty.",
-    "百万像素（MP）": "1 MP = 1,000,000 pixels. Enter 1, 2, 3 or 0.5; range 0.1–16 MP. The exact aspect ratio is preserved; divisible dimensions make the actual area approximate.",
-    "目标总像素": "Legacy MP calculation: 1 MP uses 1024 x 1024 pixels, not a 1K long edge.",
+    "百万像素（MP）": "1 MP = 1,000,000 pixels. Enter 1, 2, 3 or 0.5; range 0.1–16 MP. Editing this activates Preserve Aspect Ratio; divisible dimensions make the actual area approximate.",
+    "目标总像素": "For Calculate from Pixels: each unit is 1024 x 1024 pixels, not a 1K long edge. Dimensions are rounded separately to the divisor.",
     "目标总像素（万）": "Enter 100 / 200 / 300 for 1 / 2 / 3 million pixels. Keeps the exact aspect ratio; alignment makes the actual area approximate. Range: 10–1600.",
     "自由提示词": "Write your own positive prompt. Both Chinese and English outputs preserve it verbatim and place it according to Join Position.",
     "输出排版": "Separate modules and free text with blank lines, or keep the original continuous format.",
@@ -2539,6 +2539,7 @@ export const EN_CATALOG = {
     "下装颜色": "Bottom Color",
     "主光来源": "Key Light Source",
     "主配色": "Color Palette",
+    "像素计算值": "Pixel Calculation Value",
     "光线方向": "Light Direction",
     "光线质地": "Light Quality",
     "写真主题": "Photography Theme",
@@ -2583,7 +2584,6 @@ export const EN_CATALOG = {
     "提示词密度": "Prompt Density",
     "整体妆容预设": "Makeup Preset",
     "族裔大类": "Ethnicity Group",
-    "旧版总像素（MP）": "Legacy Megapixels",
     "时间切片": "Time of Day",
     "景别": "Shot Size",
     "景深": "Depth of Field",

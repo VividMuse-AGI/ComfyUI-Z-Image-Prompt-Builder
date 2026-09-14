@@ -95,7 +95,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.5.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.5.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.5.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
+For the recommended manual install, open the [`v0.5.1` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.5.1), download `ComfyUI-Z-Image-Prompt-Builder-v0.5.1.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -340,11 +340,16 @@ For example, **4:5 + 2 MP + divisible by 8 → 1280 x 1600**, or **2.048 MP**, s
 
 Resolution settings do not enter either prompt or participate in prompt randomization. Clear Everything / Clear This Module clears prompt fields but keeps resolution settings. All 11 aspect ratios, including 4:5 and 5:4, and the original output order remain available.
 
-**Legacy compatibility:** Older workflows and user presets retain their original fixed dimensions or MP calculation. Their preview is marked **legacy**, and the budget control shows the current actual pixel area. Editing **Megapixels (MP)** activates the new fixed-ratio calculation. Editing **Divisible By** on an old fixed-size node also enables calculation so that the divisor takes effect. A previously saved budget of 300 in ten-thousand-pixel units now displays as 3 MP, without changing dimensions. Internal workflow/API fields retain their old storage units for compatibility; the UI converts automatically. The previous modes remain available in the collapsed settings for compatibility. Legacy MP mode uses 1024 x 1024 pixels per MP and rounds width and height separately.
+Click the resolution preview to choose a calculation method:
+
+- **Preserve Aspect Ratio (Recommended)** is the default. It keeps the exact ratio, satisfies the dimension divisor, and approximates the target area. Use the always-visible **Megapixels (MP)** control; 1 MP = 1,000,000 pixels.
+- **Calculate from Pixels** uses the expanded **Pixel Calculation Value** control, where each unit is 1024 x 1024 pixels. Width and height are rounded separately, so the ratio may change slightly. The always-visible MP control shows the actual area; editing it activates **Preserve Aspect Ratio**.
+
+**Existing workflows:** Saved fixed dimensions remain unchanged when loading a workflow or switching languages, with a **saved dimensions** preview marker. Fixed dimensions are no longer a selectable mode. Choosing a calculation method or editing MP / Divisible By activates calculation. A saved budget of 300 in ten-thousand-pixel units displays as 3 MP without changing dimensions. Internal workflow/API fields and storage units remain compatible; the UI converts automatically.
 
 A random aspect ratio displays a pending preview; connected inputs are not guessed. With Aspect Ratio set to None, the preview explicitly identifies the legacy preset fallback: the full builder uses the selected preset's aspect; standalone Canvas uses the default preset's aspect. Ratios written in Free Prompt or TXT are not parsed into dimension settings.
 
-Both classic nodes and Node 2.0 show Megapixels and Divisible By directly, with legacy modes in a compact expandable preview. Switching away from Canvas hides these controls.
+Both classic nodes and Node 2.0 show Megapixels and Divisible By directly, with calculation methods in a compact expandable preview. Switching away from Canvas hides these controls.
 
 ## Outputs
 
@@ -386,7 +391,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.5.0`
+- Current version: `0.5.1`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

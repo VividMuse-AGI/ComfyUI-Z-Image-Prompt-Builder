@@ -99,7 +99,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.5.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.5.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.5.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
+推荐从 [`v0.5.1` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.5.1) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.5.1.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -344,11 +344,16 @@ git pull
 
 设置仅作用于尺寸，不进入中英文提示词，不参与提示词随机抽取；“全部清空／清空本模块”清空文本字段但保留尺寸设置。保持 11 种比例（含 4:5、5:4）及原输出端口顺序。
 
-**旧工作流兼容**：旧工作流和旧用户预设继续使用原推荐尺寸或原 MP 算法，不会自动改成新默认值；预览标注“旧”，输入框显示当前实际像素数。修改“百万像素（MP）”后启用固定比例计算；旧固定尺寸模式下修改整除倍数也会启用计算，保证整除选项实际生效。原先保存的 300 万现在显示为 3 MP，尺寸不变；为兼容旧工作流和 API，内部存储字段仍使用旧单位，界面自动换算。原两种尺寸模式保留在折叠设置中，仅用于兼容（旧 MP 算法按 1024×1024 像素计算 1 MP，且分别舍入宽高）。
+点击分辨率预览行，可选择两种计算方式：
+
+- **保持比例计算（推荐）**：默认方式，严格保持画面比例，同时满足尺寸整除要求，总像素尽量接近目标。使用常显的“百万像素（MP）”，1 MP = 100 万像素。
+- **按像素计算**：使用展开后显示的“像素计算值”，每单位按 1024×1024 像素计算，宽、高分别取整，因此比例可能略有偏差。常显的 MP 输入框展示实际总像素，修改它会切换为“保持比例计算”。
+
+**已有工作流**：保存的固定尺寸仍按原值读取，预览标注“已保存尺寸”，不会因打开工作流或切换界面语言而改变。固定尺寸不再作为菜单选项提供；明确选择计算方式，或修改 MP／整除倍数后，才按对应设置计算。原先保存的 300 万显示为 3 MP，尺寸不变；工作流和 API 的内部字段、单位保持兼容，界面自动换算。
 
 随机比例在运行前显示“运行后确定”；输入由连接提供时不猜测预览值。比例“不使用”时仍沿用原来的尺寸兜底规则，并在预览标注：完整节点使用所选预设的比例，独立画面基础节点使用默认预设比例。自由提示词、TXT 中的比例不会自动改变这些设置。
 
-普通画布和 Node 2.0 均直接显示 MP 与整除倍数，旧版兼容模式通过预览行按需展开；切换到其他编辑模块会隐藏整个尺寸区，不占用多余高度。
+普通画布和 Node 2.0 均直接显示 MP 与整除倍数，计算方式通过预览行按需展开；切换到其他编辑模块会隐藏整个尺寸区，不占用多余高度。
 
 ## 输出
 
@@ -431,7 +436,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.5.0`
+- 当前版本：`0.5.1`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上

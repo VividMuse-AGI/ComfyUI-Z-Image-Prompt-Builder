@@ -132,6 +132,10 @@ function installOptionLabeler(widget) {
 
 function localizeWidget(widget, language) {
   if (!widget) return;
+  // Some host dropdowns bypass getOptionLabel for a non-selectable saved value.
+  // Only non-serialized display helpers may localize the value itself.
+  if (widget.serialize === false && typeof widget.__vividMuseLocalizedValue === "function")
+    widget.value = widget.__vividMuseLocalizedValue(language);
   remember(widget, "__vividMuseI18nOriginalTooltip", widget.tooltip);
   widget.label = widget.__vividMuseDynamicLabel?.(language)
     ?? (language === "en" ? englishWidgetLabel(widget) : widget.name);

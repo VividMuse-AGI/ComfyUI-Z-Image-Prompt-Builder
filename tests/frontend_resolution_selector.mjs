@@ -111,6 +111,11 @@ for (const resolutionFirst of [false, true]) {
     assert.equal(state.proxies["目标总像素（万）"].value, 1);
     assert.equal(state.proxies["目标总像素（万）"].hidden, false);
     assert.equal(state.proxies["分辨率模式"].hidden, true);
+    assert.equal(state.proxies["分辨率模式"].value, "保持比例计算（推荐）");
+    assert.deepEqual(Array.from(state.proxies["分辨率模式"].options.values),
+      ["保持比例计算（推荐）", "按像素计算"]);
+    assert.deepEqual(Array.from(state.backing["分辨率模式"].options.values),
+      ["原推荐尺寸", "按总像素计算", "固定比例总像素"], "saved identifiers remain compatible");
     const budget = state.proxies["目标总像素（万）"];
     assert.equal(budget.options.min, 0.1);
     assert.equal(budget.options.max, 16);
@@ -164,7 +169,7 @@ for (const resolutionFirst of [false, true]) {
     assert.equal(state.proxies["分辨率模式"].computeSize, undefined);
     assert.equal(state.proxies["分辨率模式"].hidden, false);
     assert.equal(state.proxies["目标总像素"].hidden, true);
-    change(state.proxies["分辨率模式"], "按总像素计算");
+    change(state.proxies["分辨率模式"], "按像素计算");
     change(state.proxies["目标总像素"], 2);
     assert.equal(state.backing["目标总像素"].value, 2);
     assert.equal(state.proxies["目标总像素"].hidden, false);
@@ -191,18 +196,41 @@ for (const resolutionFirst of [false, true]) {
 
     const legacy = structuredClone(saved);
     for (const name of Object.keys(state.backing)) delete legacy.values[name];
+    app.languageSetting.onChange("zh");
     context.workflowTest.applyUserPreset(node, legacy);
     assert.equal(state.backing["分辨率模式"].value, "原推荐尺寸");
+    assert.equal(state.proxies["分辨率模式"].value, "使用已保存尺寸");
+    assert.deepEqual(Array.from(api.previewResolution(node).size), [896, 1120]);
+    assert.match(state.toggle.label, /已保存尺寸|saved dimensions/);
+    assert.doesNotMatch(state.toggle.label, /旧|legacy/);
+    assert.equal(state.proxies["分辨率模式"].options.values.includes("使用已保存尺寸"), false);
+    const savedDimensions = {widgets_values: node.widgets.map(w => w.value)};
+    node.onSerialize(savedDimensions);
+    node.onConfigure(savedDimensions);
+    assert.equal(state.backing["分辨率模式"].value, "原推荐尺寸");
+    assert.deepEqual(Array.from(api.previewResolution(node).size), [896, 1120]);
+    app.languageSetting.onChange("en");
+    assert.equal(state.proxies["分辨率模式"].options.getOptionLabel("使用已保存尺寸"), "Use Saved Dimensions");
+    assert.equal(state.proxies["分辨率模式"].value, "Use Saved Dimensions",
+      "Nodes 2.0 renders a non-selectable status verbatim instead of using getOptionLabel");
+    assert.equal(state.backing["分辨率模式"].value, "原推荐尺寸", "localization must not change persisted settings");
+    const englishSavedDimensions = {widgets_values: node.widgets.map(w => w.value)};
+    node.onSerialize(englishSavedDimensions);
+    assert.equal(englishSavedDimensions.widgets_values.at(-4), "原推荐尺寸");
+    assert.match(state.toggle.label, /saved dimensions/);
+    assert.doesNotMatch(state.toggle.label, /legacy/);
+    app.languageSetting.onChange("zh");
+    assert.equal(state.proxies["分辨率模式"].value, "使用已保存尺寸");
     assert.equal(budget.value, 896 * 1120 / 1000000);
     change(divisor, 64);
     assert.equal(state.backing["分辨率模式"].value, "固定比例总像素");
     assert.equal(state.backing["目标总像素（万）"].value, 896 * 1120 / 10000);
     assert.ok(api.previewResolution(node).size.every(side => side % 64 === 0));
-    change(state.proxies["分辨率模式"], "按总像素计算");
+    change(state.proxies["分辨率模式"], "按像素计算");
     node.onConfigure({widgets_values: serialized.widgets_values.slice(0, -4)});
     assert.equal(state.backing["分辨率模式"].value, "原推荐尺寸");
     // The immediately preceding version had three resolution fields: preserve its MP mode.
-    change(state.proxies["分辨率模式"], "按总像素计算");
+    change(state.proxies["分辨率模式"], "按像素计算");
     change(state.proxies["目标总像素"], 2);
     state.backing["目标总像素（万）"].value = 300;
     node.onConfigure({widgets_values: serialized.widgets_values.slice(0, -1)});
@@ -210,7 +238,7 @@ for (const resolutionFirst of [false, true]) {
     assert.equal(state.backing["目标总像素"].value, 2);
     assert.equal(state.backing["目标总像素（万）"].value, 100);
     // A current workflow keeps the explicit settings on configure/clone.
-    change(state.proxies["分辨率模式"], "按总像素计算");
+    change(state.proxies["分辨率模式"], "按像素计算");
     change(state.proxies["目标总像素"], 2);
     node.onConfigure({widgets_values: serialized.widgets_values});
     assert.equal(state.backing["分辨率模式"].value, "按总像素计算");
@@ -270,12 +298,27 @@ for (const resolutionFirst of [false, true]) {
     assert.equal(state.proxies["分辨率模式"].label, "Resolution Mode");
     assert.equal(state.proxies["目标总像素（万）"].label, "Megapixels (MP)");
     assert.equal(state.proxies["尺寸对齐倍数"].label, "Divisible By");
-    assert.equal(state.proxies["目标总像素"].label, "Legacy Megapixels");
-    assert.equal(state.proxies["分辨率模式"].options.getOptionLabel("固定比例总像素"), "Fixed Ratio / Pixel Budget");
+    assert.equal(state.proxies["目标总像素"].label, "Pixel Calculation Value");
+    assert.equal(state.proxies["分辨率模式"].options.getOptionLabel("保持比例计算（推荐）"), "Preserve Aspect Ratio (Recommended)");
     assert.match(state.toggle.label, /2.048 MP/);
-    assert.equal(state.proxies["分辨率模式"].options.getOptionLabel("按总像素计算"), "Calculate from Megapixels");
+    assert.equal(state.proxies["分辨率模式"].options.getOptionLabel("按像素计算"), "Calculate from Pixels");
+    assert.deepEqual(Array.from(state.proxies["分辨率模式"].options.values),
+      ["保持比例计算（推荐）", "按像素计算"]);
+    change(state.proxies["分辨率模式"], "按像素计算");
+    assert.equal(state.backing["分辨率模式"].value, "按总像素计算");
+    assert.equal(state.proxies["分辨率模式"].value, "按像素计算");
+    change(state.proxies["分辨率模式"], "保持比例计算（推荐）");
+    assert.equal(state.backing["分辨率模式"].value, "固定比例总像素");
+    change(state.proxies["分辨率模式"], "使用已保存尺寸");
+    assert.equal(state.backing["分辨率模式"].value, "固定比例总像素",
+      "a saved-size display must not reintroduce a selectable fixed-size mode");
+    assert.equal(state.proxies["分辨率模式"].value, "保持比例计算（推荐）");
+    for (const widget of [state.toggle, ...Object.values(state.proxies)])
+      assert.doesNotMatch(`${widget.label} ${widget.tooltip}`, /legacy|old|new nodes/i);
     app.languageSetting.onChange("zh");
     assert.match(state.toggle.label, /^分辨率:/);
+    for (const widget of [state.toggle, ...Object.values(state.proxies)])
+      assert.doesNotMatch(`${widget.name} ${widget.label} ${widget.tooltip}`, /旧版|旧模式|新模式|原推荐尺寸/);
     const beforeCount = node.widgets.length;
     for (const extension of extensions) extension.loadedGraphNode?.(node);
     flush();

@@ -197,7 +197,7 @@ WIDGET_LABELS_EN = {
     "总像素（万）": "Total Pixels (×10,000)",
     "百万像素（MP）": "Megapixels (MP)",
     "尺寸整除倍数": "Divisible By",
-    "旧版总像素（MP）": "Legacy Megapixels",
+    "像素计算值": "Pixel Calculation Value",
     "尺寸对齐倍数": "Resolution Alignment",
     "尺寸模式": "Resolution Mode",
     "总像素（MP）": "Megapixels",
@@ -256,18 +256,18 @@ UI_LABELS_EN = {
 
 
 TOOLTIPS_EN = {
-    "百万像素（MP）": "1 MP = 1,000,000 pixels. Enter 1, 2, 3 or 0.5; range 0.1–16 MP. The exact aspect ratio is preserved; divisible dimensions make the actual area approximate.",
-    "尺寸整除倍数": "Both width and height must be divisible by this number, e.g. 8, 16, 32 or 64. Default 8; supports multiples of 4 from 8 to 128. Larger values may increase pixel-area error. Editing this on a legacy fixed-size node enables pixel-budget calculation.",
-    "旧版总像素（MP）": "Compatibility only: the old MP formula uses 1024 x 1024 pixels per MP and rounds dimensions separately.",
-    "分辨率模式": "New nodes use a fixed aspect ratio and pixel budget. The other modes preserve legacy workflow sizes.",
-    "目标总像素": "Legacy MP calculation: 1 MP uses 1024 x 1024 pixels, not a 1K long edge.",
+    "百万像素（MP）": "1 MP = 1,000,000 pixels. Enter 1, 2, 3 or 0.5; range 0.1–16 MP. Editing this activates Preserve Aspect Ratio; divisible dimensions make the actual area approximate.",
+    "尺寸整除倍数": "Both width and height must be divisible by this number, e.g. 8, 16, 32 or 64. Default 8; supports multiples of 4 from 8 to 128. Larger values may increase pixel-area error. Editing this when using saved fixed dimensions enables Preserve Aspect Ratio.",
+    "像素计算值": "For Calculate from Pixels: each unit is 1024 x 1024 pixels, with width and height rounded separately to the divisor. Use Preserve Aspect Ratio for an exact ratio.",
+    "分辨率模式": "Defaults to preserving the aspect ratio while approximating the pixel budget. Existing workflows retain their saved calculation settings.",
+    "目标总像素": "For Calculate from Pixels: each unit is 1024 x 1024 pixels, not a 1K long edge. Dimensions are rounded separately to the divisor.",
     "目标总像素（万）": "Enter 100 / 200 / 300 for 1 / 2 / 3 million pixels. Keeps the exact aspect ratio; alignment makes the actual area approximate. Range: 10–1600.",
     "总像素（万）": "Enter 100 / 200 / 300 for 1 / 2 / 3 million pixels. Keeps the exact aspect ratio; alignment makes the actual area approximate. Range: 10–1600.",
     "尺寸对齐倍数": "Pixel-budget mode preserves the exact ratio and aligns both dimensions. Actual pixel area may differ from the target.",
-    "尺寸模式": "New nodes use a fixed aspect ratio and pixel budget. The other modes preserve legacy workflow sizes.",
+    "尺寸模式": "Preserve Aspect Ratio keeps the exact ratio and approximates the pixel budget. Calculate from Pixels rounds dimensions separately, which may slightly change the ratio. Saved fixed dimensions are retained but are not a selectable mode.",
     "总像素（MP）": "Higher resolutions increase memory use. 1 MP uses 1024 x 1024 pixels.",
     "对齐倍数": "Pixel-budget mode preserves the exact ratio and aligns both dimensions. Larger multiples can increase pixel-area error.",
-    "分辨率设置": "Preview actual dimensions and megapixels; expand for legacy compatibility modes. Editing Megapixels enables fixed-ratio calculation. Connect width and height to the latent node; Free Prompt and TXT ratios are not parsed.",
+    "分辨率设置": "Preview actual dimensions and megapixels; expand to choose a calculation method. Editing Megapixels enables Preserve Aspect Ratio. Connect width and height to the latent node; Free Prompt and TXT ratios are not parsed.",
     "预设": "Provides compatible preset values and randomization pools.",
     "提示词密度": "Concise keeps essentials, Standard keeps primary photography details, and Detailed keeps all fields.",
     "随机范围": "Fine Tune changes a few details; Same Theme Reshoot keeps theme and person; Cross-style Mix can change every field.",
@@ -354,8 +354,8 @@ OPTION_OVERRIDES = {
 
 
 CONTROL_OPTIONS_EN = {
-    "分辨率模式": {"原推荐尺寸": "Original Recommended Size", "按总像素计算": "Calculate from Megapixels", "固定比例总像素": "Fixed Ratio / Pixel Budget"},
-    "尺寸模式": {"原推荐尺寸": "Original Recommended Size", "按总像素计算": "Calculate from Megapixels", "固定比例总像素": "Fixed Ratio / Pixel Budget"},
+    "分辨率模式": {"原推荐尺寸": "Use Saved Dimensions", "按总像素计算": "Calculate from Pixels", "固定比例总像素": "Preserve Aspect Ratio (Recommended)"},
+    "尺寸模式": {"使用已保存尺寸": "Use Saved Dimensions", "按像素计算": "Calculate from Pixels", "保持比例计算（推荐）": "Preserve Aspect Ratio (Recommended)"},
     "预设": PRESET_LABELS_EN,
     "提示词密度": {
         "精简": "Concise",

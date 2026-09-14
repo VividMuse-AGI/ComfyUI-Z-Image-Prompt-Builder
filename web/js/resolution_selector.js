@@ -7,6 +7,14 @@ const EXPANDED = "vividMuseResolutionExpanded";
 const DEFAULTS = CATALOG.defaults;
 const PIXEL_MODE = CATALOG.pixelMode;
 const BUDGET_FIELD = "目标总像素（万）";
+// Display choices are independent of the persisted backend identifiers.
+// Fixed saved sizes remain readable but are no longer a selectable mode.
+const MODE_LABELS = {
+  "原推荐尺寸": "使用已保存尺寸",
+  "按总像素计算": "按像素计算",
+  [PIXEL_MODE]: "保持比例计算（推荐）",
+};
+const SELECTABLE_MODES = [PIXEL_MODE, "按总像素计算"];
 const byName = (node, name) => node.widgets?.find(w => w.name === name);
 const typeOf = node => node.comfyClass || node.constructor?.type;
 const language = () => globalThis.__vividMuseZImageI18n?.activeLanguage() || "zh";
@@ -69,7 +77,8 @@ export function previewResolution(node) {
     const size = mode === PIXEL_MODE
       ? calculatePixelResolution(aspect, value(BUDGET_FIELD), value("尺寸对齐倍数"))
       : calculateResolution(aspect, mode, value("目标总像素"), value("尺寸对齐倍数"));
-    return { status: "ready", fallback, size, legacy: mode !== PIXEL_MODE };
+    return { status: "ready", fallback, size, legacy: mode !== PIXEL_MODE,
+      savedSize: mode === "原推荐尺寸" };
   } catch { return { status: "invalid" }; }
 }
 
@@ -83,7 +92,7 @@ function previewLabel(node, lang) {
   const actual = preview.size[0] * preview.size[1] / 1000000;
   const pixelText = actual.toFixed(3) + " MP";
   return prefix + ": " + preview.size.join(" × ") + " · " + pixelText +
-    (preview.legacy ? text("（旧）", " (legacy)", lang) : "") +
+    (preview.savedSize ? text("（已保存尺寸）", " (saved dimensions)", lang) : "") +
     (preview.fallback ? text("（预设比例兜底）", " (preset fallback)", lang) : "") + suffix;
 }
 
@@ -136,7 +145,7 @@ export function refreshResolution(node, resize = true) {
     state.proxies[name].value = name === BUDGET_FIELD
       ? (mode !== PIXEL_MODE && preview.status === "ready"
         ? preview.size[0] * preview.size[1] / 1000000 : widget.value / 100)
-      : widget.value;
+      : name === "分辨率模式" ? state.proxies[name].__vividMuseLocalizedValue(language()) : widget.value;
   }
   for (const [widget, show] of [
     [state.proxies[BUDGET_FIELD], active], [state.proxies["尺寸对齐倍数"], active],
@@ -170,28 +179,43 @@ export function installResolution(node) {
     refreshResolution(node);
   });
   toggle.__vividMuseDynamicLabel = lang => previewLabel(node, lang);
-  toggle.tooltip = "显示实际宽高和百万像素；点击可查看旧版兼容模式。修改百万像素会启用固定比例计算。宽高需连接实际 latent，TXT 比例不自动解析。";
+  toggle.tooltip = "显示实际宽高和百万像素；点击可选择尺寸计算方式。修改百万像素会启用保持比例计算。宽高需连接实际 latent，TXT 比例不自动解析。";
   for (const [name, display, type] of [
     ["分辨率模式", "尺寸模式", "combo"],
-    ["目标总像素", "旧版总像素（MP）", "number"],
+    ["目标总像素", "像素计算值", "number"],
     ["尺寸对齐倍数", "尺寸整除倍数", "number"],
     [BUDGET_FIELD, "百万像素（MP）", "number"],
   ]) {
     const options = { ...backing[name].options };
     delete options.hidden;
-    if (name === BUDGET_FIELD) {
+    if (name === "分辨率模式") {
+      options.values = SELECTABLE_MODES.map(mode => MODE_LABELS[mode]);
+      options.default = MODE_LABELS[PIXEL_MODE];
+      options.tooltip = "保持比例计算：严格保持画面比例，总像素尽量接近目标。按像素计算：宽高分别取整，比例可能略有偏差。已保存尺寸仅保留当前结果，不作为可选模式。";
+    } else if (name === "目标总像素") {
+      options.tooltip = "用于按像素计算，每单位为 1024×1024 像素；宽高分别按整除倍数取整。需要严格保持比例时，请使用保持比例计算。";
+    } else if (name === BUDGET_FIELD) {
       // Scale both classic (step) and Node 2.0 (step2) number-widget options.
       for (const key of ["min", "max", "step", "step2", "default"]) {
         if (typeof options[key] === "number") options[key] /= 100;
       }
       options.precision = 2;
       options.round = 0.01;
-      options.tooltip = "1 MP = 100 万像素，输入 1、2、3 或 0.5。范围 0.1–16 MP；保持画面比例，整除后实际像素可能略有偏差。";
+      options.tooltip = "1 MP = 100 万像素，输入 1、2、3 或 0.5。范围 0.1–16 MP；修改此项使用保持比例计算，整除后实际像素可能略有偏差。";
     } else if (name === "尺寸对齐倍数") {
-      options.tooltip = "宽度和高度都能被此数整除，例如 8、16、32、64。默认 8，支持 8–128 内的 4 的倍数；倍数越大，总像素偏差可能越大。编辑旧固定尺寸的此项会启用固定比例计算。";
+      options.tooltip = "宽度和高度都能被此数整除，例如 8、16、32、64。默认 8，支持 8–128 内的 4 的倍数；倍数越大，总像素偏差可能越大。修改已保存尺寸的此项会启用保持比例计算。";
     }
     proxies[name] = helper(node, type, display,
-      name === BUDGET_FIELD ? backing[name].value / 100 : backing[name].value, value => {
+      name === BUDGET_FIELD ? backing[name].value / 100
+        : name === "分辨率模式" ? MODE_LABELS[backing[name].value] : backing[name].value, value => {
+      if (name === "分辨率模式") {
+        const mode = SELECTABLE_MODES.find(mode => MODE_LABELS[mode] === value);
+        if (!mode) { refreshResolution(node); return; }
+        backing[name].value = mode;
+        backing[name].callback?.(mode);
+        refreshResolution(node);
+        return;
+      }
       if (name === "尺寸对齐倍数" && backing["分辨率模式"].value === "原推荐尺寸") {
         // Editing a divisor must take effect even on legacy fixed-size workflows.
         const previous = previewResolution(node);
@@ -206,6 +230,13 @@ export function installResolution(node) {
       refreshResolution(node);
     }, options);
     proxies[name].tooltip = options.tooltip || backing[name].tooltip;
+    if (name === "分辨率模式") proxies[name].__vividMuseLocalizedValue = lang => {
+      const mode = backing[name].value;
+      // Nodes 2.0 renders unmatched values verbatim; the saved-size status is
+      // intentionally absent from the menu, so translate this helper value too.
+      return mode === "原推荐尺寸" ? text("使用已保存尺寸", "Use Saved Dimensions", lang)
+        : MODE_LABELS[mode] || mode;
+    };
   }
   node.__vividMuseResolution = { backing, proxies, toggle };
   // Only helpers move. Serialized inputs stay appended to preserve
