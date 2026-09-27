@@ -21,12 +21,12 @@ A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-langua
 - Photo themes use a two-level structure: **12 theme categories × 144 specific themes**.
 - Hair is split into color, length, texture, style, bangs, and headwear, plus optional hair-tone and dye-pattern fields; random generation prefers 37 compatible hair structures.
 - Clothing is split into a structure field plus 20 sub-fields covering dresses, jumpsuits, tops, bottoms, colors, materials, patterns, fit, legwear, shoes, and accessories; mutually exclusive structure branches, with colors and materials scoped to specific garments.
-- Pose & action covers 10 dimensions (moment, base pose, body direction, weight, shoulders, hands, legs, head, gaze, expression); random picks from 56 complete action chains, including six reused from approved presets: bicycle side-sitting, an armchair pose, beach side-reclining, ground side-sitting, low pigeon pose, and window-chair sitting.
+- Pose & action covers 10 dimensions (moment, base pose, body direction, weight, shoulders, hands, legs, head, gaze, expression). The 56 existing action chains are retained alongside 40 new indivisible reference-action combinations; six original chains reuse approved presets.
 - Scene covers category, location, time, weather, foreground, background, environment detail, surface material, and spatial depth; 12 space categories filter 105 unique locations; random picks from 71 complete scene compositions; indoor scenes automatically omit weather.
 - Photography covers 7 fields (shot size, composition, focal length, distance, angle, depth of field, focus); random picks from 30 complete camera setups.
 - Visual covers 12 fields (key light, direction, quality, target, shadow, palette, temperature, contrast, capture style, texture, highlight, grain); random draws from 29 lighting plans and 30 visual profiles.
 - Random results are **seed-controlled and reproducible**; manually locked values always take priority.
-- Camera setups are selected once using pose, aspect ratio, and the current theme. All 25 base poses are classified; seated poses allow full-body framing. Explicit camera choices take priority, even when intentionally conflicting.
+- Camera setups follow pose, aspect ratio, and the current theme. All 65 base-pose options are classified; reference actions additionally constrain automatic framing. Explicit camera choices take priority, even when intentionally conflicting.
 - Outputs recommended **width and height** for setting the latent size. The English prompt is appended as a new final output, leaving the existing Chinese, width, and height output positions unchanged.
 - Frontend provides a "🎲 Generate random combination" button.
 - A "current editing module" switcher shows one module at a time without changing any field values.
@@ -38,6 +38,19 @@ A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-langua
 - **No third-party Python dependencies, no model loading, no VRAM usage.**
 
 ## Built-in Presets
+
+### Reference phrase expansion
+
+The shared built-in library adds **69 visually reviewed, deduplicated entries**: 40 actions, 14 clothing descriptions, 6 headwear items, and 9 settings. No reference photos, personal identities, private paths, or watermarks are included.
+
+- Available in both the full builder and independent modules, without a TXT import. Complete reference actions appear under **Base Pose**, settings under **Background**, and other additions in their corresponding clothing/headwear dropdowns.
+- Each module with eligible candidates has a 25% chance of selecting an extension; otherwise it uses the existing pool. Identical inputs and seed remain reproducible, but random results can change across library versions.
+- Complete reference actions require all pose fields to be **Random**; complete settings similarly require all scene fields. Explicit values, disabled fields and inactive modules take priority. Specialist sports, product-advertising and yoga themes retain their dedicated combinations.
+- Selection checks theme, setting, clothing and framing dependencies. Shoe interactions require compatible footwear; a floating dress hem requires an underwater setting and a long tulle dress. Patterns belong to one garment, replacing rather than stacking with another pattern.
+- Manually choosing a complete reference action or setting suppresses inherited/random atoms in that module, preventing two compositions from being combined. Other explicit choices remain under user control.
+- Chinese output, English output and English dropdown labels are provided. Acceptance uses logical consistency and compatibility regressions; image generation is optional, not a guarantee of exact model adherence.
+
+### Preset list
 
 - Japanese Summer Bicycle Soft-light Portrait
 - Warm Japanese Cafe Close Portrait
@@ -65,7 +78,7 @@ All three random scopes now choose clothing using the current theme, with specif
 
 Connect Canvas Basics → Clothing → Pose & Action → Photography to pass structured context through standalone nodes. Plain text is not parsed into theme or pose metadata. Empty modules remain empty.
 
-Updated rules can change the random combination associated with an old seed, while results remain deterministic within this version. The ten fixed presets are unchanged. The [acceptance TXT](examples/%E7%BB%84%E5%90%88%E5%85%BC%E5%AE%B9%E6%80%A7%E9%AA%8C%E6%94%B6.txt) contains six Chinese prompts generated by `python scripts/generate_combination_samples.py`: boxing, pool-edge sitting, yoga, a business headshot, perfume, and a handbag. Image-generation validation is pending.
+Updated rules can change the random combination associated with an old seed, while results remain deterministic within this version. The ten fixed presets are unchanged. The [acceptance TXT](examples/%E7%BB%84%E5%90%88%E5%85%BC%E5%AE%B9%E6%80%A7%E9%AA%8C%E6%94%B6.txt) contains six Chinese prompts generated by `python scripts/generate_combination_samples.py`: boxing, pool-edge sitting, yoga, a business headshot, perfume, and a handbag. Image-generation experiments are optional.
 
 ## Installation
 
@@ -146,6 +159,22 @@ Canvas → Person → Hair → Clothing → Pose & Action → Scene → Photogra
 - A third-party text node that creates a new plain string may discard that runtime context. Use the full builder when one preset should centrally control all 92 fields.
 - **Z-Image TXT Prompt Library** inserts reusable full prompts; **Z-Image TXT Module Library** inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual Style, or Custom. To replace a standalone structured module, put the TXT module node in that module's position or bypass the original module with **Ctrl+B**; the TXT node does not remove module text that is already present in its incoming string.
 - The English interface renders built-in structured fields in English and inserts the free prompt verbatim according to **Join Position**. User TXT fragments replace their corresponding built-in modules in both outputs; Custom is appended after the eight standard modules. User text is never automatically translated. Supply English free text and TXT fragments for a fully English result.
+
+## Standalone TXT Random Selection (Unreleased)
+
+Both standalone TXT nodes now offer **Selection Mode**, defaulting to **Manual Selection** for existing workflows. **Random Selection** chooses one entry on the backend using the seed. The TXT panels inside the full builder are unchanged.
+
+- Import a library, then select random mode. The prompt library samples complete entries; the module library samples only the current module, including Custom, with no cross-module fallback.
+- The same library, order, module and seed are reproducible. Different seeds may select the same entry. Set Control After Generate to `randomize` for subsequent submissions; one downstream image batch shares one selection.
+- Manual text is preserved, hidden and excluded from random output; manual apply/clear controls are disabled. Returning to manual mode restores the previous manual module as well. Results never overwrite the draft.
+- **Last Random Result** opens read-only details with the actual execution seed, title and body. It is explicitly historical, not a preview of edited inputs, and is not saved in the workflow.
+- Clearing the library removes all candidates. An empty library or module scope passes through only the upstream text. Invalid API payloads raise an error instead of falling back to old text.
+- Editor seeds support `0–9007199254740991` to avoid JavaScript precision loss. The headless API accepts exact unsigned 64-bit integers through `18446744073709551615`; API clients must change subsequent seeds themselves.
+- Candidate text is sent as an execution input to your connected ComfyUI server and saved with the workflow, not uploaded to third-party services. Workflow files contain both the library property and execution payload; do not publicly share private libraries accidentally.
+
+The API retains canonical input identifiers regardless of interface language. Use the [API-format example](examples/txt-random-api.json) for the exact keys and module values, or export an API prompt from ComfyUI. The library payload is a JSON string shaped like `{"version":1,"kind":"prompt","entries":[{"title":"Example","tags":[],"prompt":"Window-lit portrait"}]}`. Module libraries use `kind:"module"` and include the canonical module value on each entry. Existing TXT limits remain 1 MiB, 500 entries and 20,000 UTF-16 units per body. JSON transport has a separate 8 MiB cap and 1,100,000 total text units, allowing generated titles and escaping overhead.
+
+Local automated tests, text-only execution and real Chinese/English UI checks in classic and Nodes 2.0 layouts have passed. The candidate code has been verified in a test installation but has not been formally released. See the [acceptance record](docs/testing/2026-09-27-txt-random-acceptance.md) for scope and limitations; this is not a compatibility guarantee for every ComfyUI version.
 
 ## User Presets, Random Locks and Checks
 
@@ -305,7 +334,7 @@ In short, a **clear** action usually removes content currently participating in 
 | Entries per library | Up to 500 |
 | Prompt body per entry | Up to 20,000 characters |
 
-The limits protect frontend responsiveness, node serialization, and workflow-save performance. Files are read locally in the browser and are not uploaded by this node. Imported entries are stored in the node properties inside the workflow, so sharing a workflow may also share the imported library text.
+The limits protect frontend responsiveness, serialization and workflow saves. Files are read in the browser; execution text and standalone library payloads are sent to your connected ComfyUI server, not third-party services. Imported libraries are saved with the workflow, so sharing it may also share the library text.
 
 UTF-8 is recommended. Write concise, affirmative natural language in the language expected by your target model; omit absent details instead of adding negative phrases such as “not wearing headwear.”
 

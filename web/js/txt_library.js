@@ -217,10 +217,12 @@ function syncTxtLibraryControls(node, resize = true) {
   if (!values.includes(entryWidget.value)) entryWidget.value = values[0];
 
   const fileName = node.properties?.[LIBRARY_PROPERTY]?.fileName;
-  node.__vividMuseTxtLibraryToggle.name = entries.length
+  // Keep the identity stable: Nodes 2.0 keys widget state by name.
+  node.__vividMuseTxtLibraryToggle.label = node.__vividMuseTxtLibraryToggle.__vividMuseDisplayText = entries.length
     ? `📚 TXT用户词库（${fileName || "未命名"} · ${entries.length}条）`
     : "📚 TXT用户词库";
   globalThis.__vividMuseZImageI18n?.localizeNode?.(node);
+  node.__vividMuseTxtSelectionRefresh?.();
   if (resize) resizeNode(node);
   markDirty(node);
 }
@@ -231,6 +233,7 @@ function setTxtLibraryExpanded(node, expanded, resize = true) {
   for (const widget of node.__vividMuseTxtLibraryControls || []) {
     setWidgetVisible(widget, Boolean(expanded));
   }
+  node.__vividMuseTxtSelectionRefresh?.();
   if (resize) resizeNode(node);
   markDirty(node);
 }
@@ -293,6 +296,7 @@ function joinFragments(left, right) {
 }
 
 function applySelectedTxtPrompt(node) {
+  if (isStandaloneNode(node) && widgetByName(node, "选择模式")?.value === "随机抽取") return false;
   const freePromptWidget = widgetByName(node, "自由提示词");
   const entryWidget = node.__vividMuseTxtLibraryEntryWidget;
   const modeWidget = node.__vividMuseTxtLibraryModeWidget;
@@ -322,6 +326,7 @@ function clearTxtPromptLibrary(node) {
 }
 
 function clearFreePrompt(node) {
+  if (isStandaloneNode(node) && widgetByName(node, "选择模式")?.value === "随机抽取") return false;
   const freePromptWidget = widgetByName(node, "自由提示词");
   if (!freePromptWidget) return false;
   freePromptWidget.value = "";
@@ -412,6 +417,7 @@ app.registerExtension({
   name: "VividMuse.ZImagePromptBuilder.TxtLibrary",
   nodeCreated(node) {
     if (!isTargetNode(node)) return;
+    if (isStandaloneNode(node)) node.__vividMuseTxtSelectionEntries = () => libraryEntries(node);
     if (isStandaloneNode(node)) installCompactWidgetSerialization(node);
     installTxtLibraryConfigure(node);
     installTxtLibraryWidgets(node);

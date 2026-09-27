@@ -160,10 +160,10 @@ NODE_DESCRIPTIONS_EN = {
         "Build lighting, palette, contrast, image style, texture, highlights, and grain."
     ),
     "VividMuse_ZImageTxtPromptLibrary": (
-        "Import and select complete TXT prompts for use in a modular text chain."
+        "Import complete TXT prompts; select manually or sample by seed for a modular text chain."
     ),
     "VividMuse_ZImageTxtModuleLibrary": (
-        "Import and select one structured TXT module fragment for a modular text chain."
+        "Import structured TXT fragments; select manually or sample the current module by seed."
     ),
 }
 
@@ -187,6 +187,8 @@ WIDGET_LABELS_EN = {
     "提示词密度": "Prompt Density",
     "随机范围": "Randomization Scope",
     "随机种子": "Random Seed",
+    "选择模式": "Selection Mode",
+    "词库数据": "Library Payload",
     "control after generate": "Control After Generate",
     "control_after_generate": "Control After Generate",
     "当前编辑模块": "Module to Edit",
@@ -234,6 +236,8 @@ OUTPUT_LABELS_EN = {
 
 
 UI_LABELS_EN = {
+    "上次随机结果（点击查看）": "Last Random Result (Click to View)",
+    "随机抽取：尚未执行": "Random Selection: Not Executed Yet",
     "分辨率设置": "Resolution Settings",
     "分辨率高级设置": "Advanced Resolution Settings",
     "仅启用当前模块": "Enable Only This Module",
@@ -256,6 +260,7 @@ UI_LABELS_EN = {
 
 
 TOOLTIPS_EN = {
+    "选择模式": "Manual uses your draft. Random samples the library by seed, preserving the draft and disabling manual apply. Different seeds may select the same entry.",
     "百万像素（MP）": "1 MP = 1,000,000 pixels. Enter 1, 2, 3 or 0.5; range 0.1–16 MP. Editing this activates Preserve Aspect Ratio; divisible dimensions make the actual area approximate.",
     "尺寸整除倍数": "Both width and height must be divisible by this number, e.g. 8, 16, 32 or 64. Default 8; supports multiples of 4 from 8 to 128. Larger values may increase pixel-area error. Editing this when using saved fixed dimensions enables Preserve Aspect Ratio.",
     "像素计算值": "For Calculate from Pixels: each unit is 1024 x 1024 pixels, with width and height rounded separately to the divisor. Use Preserve Aspect Ratio for an exact ratio.",
@@ -354,6 +359,7 @@ OPTION_OVERRIDES = {
 
 
 CONTROL_OPTIONS_EN = {
+    "选择模式": {"手动选择": "Manual Selection", "随机抽取": "Random Selection"},
     "分辨率模式": {"原推荐尺寸": "Use Saved Dimensions", "按总像素计算": "Calculate from Pixels", "固定比例总像素": "Preserve Aspect Ratio (Recommended)"},
     "尺寸模式": {"使用已保存尺寸": "Use Saved Dimensions", "按像素计算": "Calculate from Pixels", "保持比例计算（推荐）": "Preserve Aspect Ratio (Recommended)"},
     "预设": PRESET_LABELS_EN,

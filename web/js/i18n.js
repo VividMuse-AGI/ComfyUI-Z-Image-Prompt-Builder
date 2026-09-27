@@ -95,6 +95,10 @@ function englishDynamicWidgetLabel(name) {
 }
 
 function englishWidgetLabel(widget) {
+  if (widget.serialize === false && typeof widget.__vividMuseDisplayText === "string") {
+    const text = widget.__vividMuseDisplayText;
+    return EN_CATALOG.uiLabels[text] || englishDynamicWidgetLabel(text) || text;
+  }
   return EN_CATALOG.widgetLabels[widget.name]
     || EN_CATALOG.uiLabels[widget.name]
     || englishDynamicWidgetLabel(widget.name)
@@ -138,7 +142,8 @@ function localizeWidget(widget, language) {
     widget.value = widget.__vividMuseLocalizedValue(language);
   remember(widget, "__vividMuseI18nOriginalTooltip", widget.tooltip);
   widget.label = widget.__vividMuseDynamicLabel?.(language)
-    ?? (language === "en" ? englishWidgetLabel(widget) : widget.name);
+    ?? (language === "en" ? englishWidgetLabel(widget)
+      : (widget.serialize === false ? widget.__vividMuseDisplayText : undefined) ?? widget.name);
   if (language === "en" && EN_CATALOG.tooltips[widget.name]) {
     widget.tooltip = EN_CATALOG.tooltips[widget.name];
   } else if (language === "zh") {
@@ -287,7 +292,15 @@ function localizeDefinition(nodeData) {
 function translateMessage(message) {
   if (activeLanguage() !== "en") return String(message);
   const text = String(message);
+  const catalogLabel = EN_CATALOG.widgetLabels[text] || EN_CATALOG.uiLabels[text]
+    || EN_CATALOG.moduleLabels[text];
+  if (catalogLabel) return catalogLabel;
   const exact = {
+    "当前范围没有候选": "No candidates in the current scope",
+    "已抽取": "Selected",
+    "候选数量": "Candidate Count",
+    "关闭": "Close",
+    "界面种子须为0至9007199254740991的整数；更大整数请使用API。": "Editor seeds must be integers from 0 to 9007199254740991; use the API for larger integers.",
     "当前环境不支持文件选择器。": "The current environment does not support a file picker.",
     "只支持导入.txt文本文件。": "Only .txt prompt-library files are supported.",
     "TXT词库文件不能超过1MB。": "The TXT prompt library cannot exceed 1 MB.",

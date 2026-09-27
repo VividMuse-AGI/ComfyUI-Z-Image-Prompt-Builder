@@ -12,6 +12,8 @@ import zipfile
 PACKAGE = "ComfyUI-Z-Image-Prompt-Builder"
 REQUIRED = {
     "__init__.py", "nodes.py", "modular_nodes.py", "resolution.py",
+    "reference_pool.py", "txt_selection.py", "web/js/txt_selection.js",
+    "phrase_library/reference_expansion_v1.json",
     "pyproject.toml", "LICENSE", "README.md", "README.en.md",
     "phrase_library/core_v1.json", "web/js/preset_sync.js",
     "web/js/i18n_catalog.js", "web/js/resolution_catalog.js",

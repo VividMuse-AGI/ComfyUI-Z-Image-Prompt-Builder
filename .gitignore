@@ -14,3 +14,18 @@ venv/
 /findings.md
 /progress.md
 /dist/
+
+# Local acceptance history and external candidates are not part of this release.
+# Keep the candidate tools/tests with their private fixtures; do not publish half a set.
+/docs/pending.md
+/docs/plans/2026-09-27-current-progress-and-ui-acceptance.md
+/docs/plans/2026-09-27-txt-library-seeded-selection.md
+/docs/plans/2026-09-27-external-prompt-dataset-evaluation.md
+/docs/plans/2026-09-27-progress-and-logical-acceptance.md
+/docs/evaluations/2026-09-27-txt-seeded-selection.md
+/docs/evaluations/2026-09-27-external-dataset/
+/scripts/audit_external_dataset.py
+/scripts/validate_external_pack_live.py
+/tests/test_external_dataset_audit.py
+/tests/test_external_dataset_pack.py
+/tests/frontend_external_dataset_pack.mjs

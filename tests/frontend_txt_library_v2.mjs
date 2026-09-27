@@ -108,7 +108,7 @@ await api.importTxtPromptFile(node, {
 });
 assert.equal(node.properties.vividMuseTxtPromptLibrary.entries.length, 2);
 assert.deepEqual(widget(node, "词库条目").options.values, ["第一条完整中文提示词", "第二条完整中文提示词"]);
-assert.match(node.__vividMuseTxtLibraryToggle.name, /2条/);
+assert.match(node.__vividMuseTxtLibraryToggle.label, /2条/);
 api.setTxtLibraryExpanded(node, true);
 assert.equal(widget(node, "导入TXT词库").hidden, false);
 

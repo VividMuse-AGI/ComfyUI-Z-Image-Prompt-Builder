@@ -19,8 +19,20 @@ class ApprovedPoseBundleTests(unittest.TestCase):
                 self.assertIn(bundle[field], n.FIELD_OPTIONS[field])
             self.assertIn(bundle, n.PROFILE_POSE_BUNDLES[preset])
 
-    def test_existing_ten_fixed_presets_remain_byte_identical(self):
-        rows = [(p, d, n.ZImageChinesePromptBuilder().build_prompt(预设=p, 提示词密度=d))
+    def test_fixed_presets_unchanged_except_reviewed_wording_corrections(self):
+        def normalize(value):
+            if not isinstance(value, str):
+                return value
+            # Intentional wording fixes are asserted separately in the review
+            # regressions. Retain the original full-output snapshot otherwise.
+            for details in n._ENGLISH_MAKEUP_DETAILS.values():
+                value = value.replace(", " + details, "")
+            return (value.replace("full, straight-across bangs", "curtain bangs full bangs")
+                    .replace("前景干净通透", "无明显前景")
+                    .replace("干枯玫瑰色高开衩缎面长裙", "干枯玫瑰色缎面高开衩缎面长裙"))
+
+        rows = [(p, d, tuple(normalize(v) for v in
+                            n.ZImageChinesePromptBuilder().build_prompt(预设=p, 提示词密度=d)))
                 for p in n.PRESET_OPTIONS[:-1] for d in n.PROMPT_DENSITIES]
         digest = hashlib.sha256(json.dumps(rows, ensure_ascii=False).encode()).hexdigest()
         self.assertEqual(digest, "cc6ef48749f8e588c13e90105cba38604465724b433b9d02bff8a91a9554890e")
@@ -35,6 +47,10 @@ class ApprovedPoseBundleTests(unittest.TestCase):
                 pool = (n._theme_directed_pose_bundles(n.PRESETS[preset]["写真主题"])
                         if scope == n.RANDOM_SCOPES[2] else n.PROFILE_POSE_BUNDLES[preset])
                 allowed = {tuple(b[f] for f in n.POSE_OUTPUT_FIELDS) for b in pool}
+                # Reviewed extensions are complete, separately constrained atoms.
+                allowed.update(tuple(e["label"] if f == "基础姿态" else n.EMPTY_CHOICE
+                                     for f in n.POSE_OUTPUT_FIELDS)
+                               for e in n.REFERENCE_POOL.entries if e["module"] == "姿态动作")
                 seen = set()
                 for seed in range(100):
                     result = n.resolve_fields(preset, scope, seed, requested)

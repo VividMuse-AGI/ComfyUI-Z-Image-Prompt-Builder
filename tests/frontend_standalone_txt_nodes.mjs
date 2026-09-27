@@ -151,7 +151,7 @@ assert.equal(
   moduleNode.properties.vividMuseTxtModuleAppliedTitles?.["人物"],
   undefined,
 );
-assert.match(moduleNode.__vividMuseTxtModuleApplyButton.name, /已有内容/u);
+assert.match(moduleNode.__vividMuseTxtModuleApplyButton.label, /已有内容/u);
 
 const moduleType = widget(moduleNode, "模块类型");
 moduleType.value = "姿态动作";

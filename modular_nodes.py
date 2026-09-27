@@ -11,8 +11,10 @@ from typing import Mapping
 
 try:  # Package import inside ComfyUI.
     from . import nodes as core
+    from .txt_selection import SELECTION_MODES, select_txt
 except ImportError:  # Direct import used by the repository tests.
     import nodes as core
+    from txt_selection import SELECTION_MODES, select_txt
 
 
 MODULE_FIELD_GROUPS: Mapping[str, tuple[str, ...]] = {
@@ -44,6 +46,23 @@ OUTPUT_LAYOUT_INPUT = (
     ["按模块分段", "连续拼接"],
     {"default": "按模块分段", "tooltip": "按模块分段用空行分隔前置提示词和当前内容，保留正文内部换行。"},
 )
+
+
+def txt_selection_inputs():
+    # Append to optional inputs: old positional workflow widgets stay in place.
+    return {
+        "选择模式": (SELECTION_MODES, {"default": "手动选择", "tooltip":
+            "手动模式使用原正文；随机模式按种子抽取词库，保留草稿并禁用手动应用。不同种子可抽到同一条。"}),
+        "随机种子": ("INT", {"default": 0, "min": 0, "max": core.MAX_SEED,
+                            "control_after_generate": True}),
+        "词库数据": ("STRING", {"default": "", "multiline": False, "dynamicPrompts": False}),
+    }
+
+
+def txt_execution_result(prompt, selection):
+    if selection is None:
+        return (prompt,)
+    return {"result": (prompt,), "ui": {"vividmuse_txt_selection": [selection[1]]}}
 
 
 class PromptChainText(str):
@@ -123,7 +142,8 @@ def render_module_fragment(
             core._person_detail_prompt_text(fields, density),
             core._body_prompt_text(fields, density),
         )
-        return _finish_fragment("，".join(part for part in parts if part))
+        rendered = "，".join(part for part in parts if part)
+        return _finish_fragment(rendered or core.module_atomic_fallback(module_name, fields, density))
 
     renderers = {
         "发型": core._hair_prompt_text,
@@ -134,6 +154,8 @@ def render_module_fragment(
         "视觉表现": core._visual_prompt_text,
     }
     rendered = renderers[module_name](fields, density)
+    if not rendered:
+        rendered = core.module_atomic_fallback(module_name, fields, density)
     if module_name == "姿态动作" and rendered and not rendered.startswith("人物"):
         rendered = f"人物{rendered}"
     return _finish_fragment(rendered)
@@ -370,12 +392,13 @@ class ZImageVisualModule(ZImageModuleNodeBase):
 
 
 class ZImageTxtPromptLibrary:
+    HAS_INTERMEDIATE_OUTPUT = True
     CATEGORY = "VividMuse/Z-Image/TXT词库"
     FUNCTION = "build_prompt"
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("组合提示词",)
     OUTPUT_NODE = False
-    DESCRIPTION = "导入并选择完整 TXT 提示词，可接入模块化文本链。"
+    DESCRIPTION = "导入完整 TXT 提示词，手动选择或按种子随机抽取，可接入模块化文本链。"
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -398,28 +421,31 @@ class ZImageTxtPromptLibrary:
             "optional": {
                 "前置提示词": ("STRING", {"forceInput": True}),
                 "输出排版": OUTPUT_LAYOUT_INPUT,
+                **txt_selection_inputs(),
             },
         }
 
     def build_prompt(self, **kwargs):
-        return (
+        selection = select_txt(kwargs, kind="prompt", modules=TXT_MODULE_TYPES, max_seed=core.MAX_SEED)
+        return txt_execution_result(
             join_chain_text(
                 kwargs.get("前置提示词", ""),
-                kwargs.get("自由提示词", ""),
+                selection[0] if selection is not None else kwargs.get("自由提示词", ""),
                 kwargs.get("拼接位置", CHAIN_JOIN_POSITIONS[0]),
                 kwargs.get("输出排版", "连续拼接") == "按模块分段",
-            ),
+            ), selection,
         )
 
 
 class ZImageTxtModuleLibrary:
+    HAS_INTERMEDIATE_OUTPUT = True
     CATEGORY = "VividMuse/Z-Image/TXT词库"
     FUNCTION = "build_prompt"
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("组合提示词",)
     OUTPUT_NODE = False
     DESCRIPTION = (
-        "导入并选择一个结构化 TXT 模块片段；要替代某个独立模块，"
+        "导入结构化 TXT 模块片段，手动选择或按种子抽取当前模块；要替代某个独立模块，"
         "请在链中使用本节点代替该模块，或将同类型模块旁路。"
     )
 
@@ -457,12 +483,14 @@ class ZImageTxtModuleLibrary:
             "optional": {
                 "前置提示词": ("STRING", {"forceInput": True}),
                 "输出排版": OUTPUT_LAYOUT_INPUT,
+                **txt_selection_inputs(),
             },
         }
 
     def build_prompt(self, **kwargs):
         prefix = kwargs.get("前置提示词", "")
-        module_text = kwargs.get("模块提示词", "")
+        selection = select_txt(kwargs, kind="module", modules=TXT_MODULE_TYPES, max_seed=core.MAX_SEED)
+        module_text = selection[0] if selection is not None else kwargs.get("模块提示词", "")
         prompt = join_chain_text(
             prefix,
             module_text,
@@ -471,7 +499,7 @@ class ZImageTxtModuleLibrary:
         )
         module_name = kwargs.get("模块类型", TXT_MODULE_TYPES[0])
         if module_name not in MODULE_FIELD_GROUPS or not str(module_text).strip():
-            return (prompt,)
+            return txt_execution_result(prompt, selection)
 
         context_fields = dict(
             getattr(prefix, "zimage_resolved_fields", {}) or {}
@@ -482,7 +510,7 @@ class ZImageTxtModuleLibrary:
             getattr(prefix, "zimage_opaque_modules", ()) or ()
         )
         opaque_modules.add(module_name)
-        return (PromptChainText(prompt, context_fields, opaque_modules),)
+        return txt_execution_result(PromptChainText(prompt, context_fields, opaque_modules), selection)
 
 
 NODE_CLASS_MAPPINGS = {

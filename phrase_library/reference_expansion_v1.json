@@ -1,0 +1,1961 @@
+{
+  "schema_version": 1,
+  "validation": {
+    "text_tests": "required",
+    "model_image_tests": "pending"
+  },
+  "entries": [
+    {
+      "id": "C03",
+      "module": "姿态动作",
+      "text": "人物站在桌前，上半身轻微前倾，双手分开放在台面上，掌心轻撑桌面",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "咖啡",
+        "室内",
+        "居家",
+        "厨房",
+        "书房",
+        "食品",
+        "花店",
+        "职场",
+        "酒店",
+        "生活",
+        "肖像"
+      ],
+      "requires_note": "身体前方有接近腰部高度的桌面；站姿",
+      "conflicts_note": "持杯、拿文件夹或双臂抱胸；坐姿、俯卧；场景缺少桌面",
+      "label": "站姿双手轻撑桌面",
+      "english": "standing at a table, leaning slightly forward with both palms resting apart on the tabletop",
+      "scene": [
+        "室内",
+        "室",
+        "厅",
+        "咖啡",
+        "餐",
+        "书房",
+        "客厅",
+        "厨房",
+        "花店",
+        "公寓",
+        "影棚",
+        "桌",
+        "茶",
+        "客房"
+      ]
+    },
+    {
+      "id": "C05",
+      "module": "服装",
+      "text": "服装面料带有轮廓清晰、大小错落的蝴蝶印花",
+      "fields": [
+        "上装图案",
+        "下装图案",
+        "连衣裙图案",
+        "连体服图案"
+      ],
+      "themes": [
+        "时尚",
+        "日常",
+        "生活",
+        "居家",
+        "街头",
+        "复古",
+        "棚拍",
+        "礼服"
+      ],
+      "requires_note": "有明确承载图案的衣服",
+      "conflicts_note": "同一件衣服已选择另一种主要图案",
+      "label": "蝴蝶印花",
+      "english": "clearly outlined butterfly prints in varied sizes"
+    },
+    {
+      "id": "C06a",
+      "module": "姿态动作",
+      "text": "人物坐在座椅前缘，一只手掌轻撑身侧略靠后的座面，另一只手自然放在大腿上",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "居家",
+        "窗边",
+        "室内",
+        "酒店",
+        "生活",
+        "肖像",
+        "旅馆",
+        "复古",
+        "礼服"
+      ],
+      "requires_note": "坐姿；身侧后方有足够的座面",
+      "conflicts_note": "站姿；同一只手同时托腮、持物；窄小座面或强制双臂抱胸",
+      "label": "坐姿单手轻撑座面",
+      "english": "sitting on the front edge of a seat, one palm supporting her on the seat slightly behind her hip, the other hand resting on her thigh",
+      "scene": [
+        "沙发",
+        "室内",
+        "公寓",
+        "客厅",
+        "客房",
+        "休息",
+        "影棚",
+        "会所",
+        "后排"
+      ],
+      "camera_type": "seated"
+    },
+    {
+      "id": "C06b",
+      "module": "姿态动作",
+      "text": "人物坐在座椅前缘，双手分开放在身体两侧略靠后的座面上，上半身轻微后倾，双脚落在地面上",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "居家",
+        "窗边",
+        "室内",
+        "酒店",
+        "生活",
+        "肖像",
+        "旅馆",
+        "复古",
+        "礼服"
+      ],
+      "requires_note": "坐姿；身侧后方有足够的座面",
+      "conflicts_note": "站姿；同一只手同时托腮、持物；窄小座面或强制双臂抱胸",
+      "label": "坐姿双手向后撑座面",
+      "english": "sitting on the front edge of a seat, both palms resting apart on the seat slightly behind her, torso leaning back gently and both feet on the floor",
+      "scene": [
+        "沙发",
+        "室内",
+        "公寓",
+        "客厅",
+        "客房",
+        "休息",
+        "影棚",
+        "会所",
+        "后排"
+      ],
+      "camera_type": "seated"
+    },
+    {
+      "id": "C07",
+      "module": "姿态动作",
+      "text": "人物坐在沙发上，一侧手肘搭在靠背上沿，同侧手停在脸旁，另一只手自然放在大腿上",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "居家",
+        "窗边",
+        "室内",
+        "酒店",
+        "生活",
+        "肖像",
+        "旅馆",
+        "复古",
+        "礼服"
+      ],
+      "requires_note": "有高度合适的沙发靠背；坐姿",
+      "conflicts_note": "无靠背座椅；双手同时持物；站姿",
+      "label": "沙发坐姿支肘搭靠背",
+      "english": "sitting on a sofa with one elbow on top of its backrest, that hand beside her face and the other hand on her thigh",
+      "scene": [
+        "沙发",
+        "室内",
+        "公寓",
+        "客厅",
+        "客房",
+        "休息",
+        "影棚",
+        "会所"
+      ],
+      "camera_type": "seated"
+    },
+    {
+      "id": "C09",
+      "module": "姿态动作",
+      "text": "人物站在桌边，上半身轻微前倾，一侧手肘支在台面上，同侧手轻托下巴，另一只手自然放在桌面上",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "咖啡",
+        "室内",
+        "居家",
+        "厨房",
+        "书房",
+        "食品",
+        "花店",
+        "职场",
+        "酒店",
+        "生活",
+        "肖像"
+      ],
+      "requires_note": "桌面高度适合站姿轻微前倾支肘",
+      "conflicts_note": "坐姿膝上支肘；双手持物；无桌场景",
+      "label": "站姿台面支肘托腮",
+      "english": "standing beside a table and leaning forward, one elbow on the tabletop with that hand supporting her chin, the other hand resting on the table",
+      "scene": [
+        "室内",
+        "室",
+        "厅",
+        "咖啡",
+        "餐",
+        "书房",
+        "客厅",
+        "厨房",
+        "花店",
+        "公寓",
+        "影棚",
+        "桌",
+        "茶",
+        "客房"
+      ]
+    },
+    {
+      "id": "C11",
+      "module": "服装",
+      "text": "衣服外搭一件系带围裙，围裙前片覆盖身前，边缘饰有细窄荷叶边",
+      "fields": [
+        "服装配件"
+      ],
+      "themes": [
+        "厨房",
+        "烘焙",
+        "居家"
+      ],
+      "requires_note": "已有上装或连衣裙作为内层",
+      "conflicts_note": "把围裙替代全部基础衣服；与强调同一区域轮廓的外套同时随机",
+      "label": "荷叶边系带围裙",
+      "english": "a tie-back apron worn over the clothing, its front panel edged with narrow ruffles",
+      "require": {
+        "穿搭结构": [
+          "连衣裙",
+          "上装＋下装"
+        ]
+      },
+      "avoid": [
+        "外套",
+        "大衣",
+        "夹克",
+        "羽绒",
+        "比基尼",
+        "泳衣"
+      ]
+    },
+    {
+      "id": "C12",
+      "module": "发型",
+      "text": "头发上佩戴猫耳形发箍，发箍顶部带有两个小巧的三角形耳饰",
+      "fields": [
+        "头部配饰"
+      ],
+      "themes": [
+        "幻想",
+        "梦境",
+        "创意",
+        "角色",
+        "节日",
+        "居家"
+      ],
+      "requires_note": "头部在构图中可见",
+      "conflicts_note": "同位置的帽子或另一副发箍",
+      "label": "猫耳形发箍",
+      "english": "wearing a headband with two small triangular cat-ear ornaments",
+      "styles": [
+        "自然披散",
+        "松弛低马尾",
+        "单侧披发",
+        "半扎发",
+        "利落短发轮廓"
+      ]
+    },
+    {
+      "id": "C13",
+      "module": "姿态动作",
+      "text": "人物俯卧在沙发上，一侧前臂搭在身前的抱枕上，上半身略微抬起，双腿向后自然屈膝",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "居家",
+        "窗边",
+        "室内",
+        "酒店",
+        "生活",
+        "肖像",
+        "旅馆",
+        "复古",
+        "礼服"
+      ],
+      "requires_note": "足够长度的沙发座面；身前有抱枕",
+      "conflicts_note": "站姿、坐姿、跪姿或侧卧；身体直立；同侧支撑手持物",
+      "label": "沙发俯卧前臂搭抱枕",
+      "english": "lying face down on a sofa with one forearm on a cushion in front, upper body slightly raised and knees naturally bent behind her",
+      "scene": [
+        "沙发",
+        "室内",
+        "公寓",
+        "客厅",
+        "客房",
+        "休息",
+        "影棚",
+        "会所"
+      ],
+      "camera_type": "ground_extended"
+    },
+    {
+      "id": "C14",
+      "module": "姿态动作",
+      "text": "人物双臂举至头顶上方，手腕轻轻交叠，手指自然舒展",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "时尚",
+        "创意",
+        "写真",
+        "生活",
+        "肖像"
+      ],
+      "requires_note": "双臂空闲；构图在头顶保留手臂空间",
+      "conflicts_note": "手持道具或双手支撑；紧贴头顶的裁切",
+      "label": "头顶举臂手腕交叠",
+      "english": "both arms raised above her head, wrists gently crossed and fingers relaxed",
+      "shots": [
+        "腰部以上",
+        "三分之二身",
+        "全身构图",
+        "带环境全身",
+        "环境人像"
+      ]
+    },
+    {
+      "id": "C15",
+      "module": "发型",
+      "text": "头发上佩戴兔耳形发箍，发箍顶部竖起两只细长的布艺耳朵",
+      "fields": [
+        "头部配饰"
+      ],
+      "themes": [
+        "幻想",
+        "梦境",
+        "创意",
+        "角色",
+        "节日",
+        "居家"
+      ],
+      "requires_note": "头顶在构图中可见",
+      "conflicts_note": "帽子、猫耳形发箍等同位置头饰",
+      "label": "兔耳形发箍",
+      "english": "wearing a headband with two upright elongated fabric rabbit ears",
+      "styles": [
+        "自然披散",
+        "松弛低马尾",
+        "单侧披发",
+        "半扎发",
+        "利落短发轮廓"
+      ]
+    },
+    {
+      "id": "C17",
+      "module": "服装",
+      "text": "穿吊带连体泳衣，上身与裤身连为一体，腰侧形成细密自然褶皱",
+      "fields": [
+        "连体服类型"
+      ],
+      "themes": [
+        "泳",
+        "海边",
+        "海岛"
+      ],
+      "requires_note": "连体服结构；用于泳池、海边或泳装棚拍",
+      "conflicts_note": "同时选择独立上装下装、连衣裙；裤腿、裙摆等不属于该服装的结构细节",
+      "label": "吊带连体泳衣",
+      "english": "a thin-strap one-piece swimsuit with fine natural gathers at the sides of the waist",
+      "require": {
+        "穿搭结构": [
+          "连体服"
+        ]
+      },
+      "set": {
+        "连体服材质": "泳装弹力面料",
+        "版型细节": "不使用"
+      }
+    },
+    {
+      "id": "C18",
+      "module": "姿态动作",
+      "text": "人物跪在沙发坐垫上，身体面向靠背，双肘与前臂搭在靠背上沿，上半身轻微前倾",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "居家",
+        "窗边",
+        "室内",
+        "酒店",
+        "生活",
+        "肖像",
+        "旅馆",
+        "复古",
+        "礼服"
+      ],
+      "requires_note": "膝部和小腿有足够坐垫承托；靠背高度适合前臂搭靠",
+      "conflicts_note": "站姿或臀部落脚跟的跪坐；无靠背凳子；双手另持物",
+      "label": "沙发跪姿前臂搭靠背",
+      "english": "kneeling on the sofa cushions facing the backrest, elbows and forearms resting along its top, torso leaning slightly forward",
+      "scene": [
+        "沙发",
+        "室内",
+        "公寓",
+        "客厅",
+        "客房",
+        "休息",
+        "影棚",
+        "会所"
+      ],
+      "camera_type": "crouching"
+    },
+    {
+      "id": "C19",
+      "module": "场景",
+      "text": "场景位于汽车后排，身旁为座椅、车门内饰和侧窗，前排座椅靠背形成近处的空间层次",
+      "fields": [
+        "背景环境"
+      ],
+      "themes": [
+        "汽车"
+      ],
+      "requires_note": "人物在车辆内部",
+      "conflicts_note": "人物站在开阔室外；全身直立或大幅展臂等超出车厢尺度的姿态",
+      "label": "汽车后排座舱",
+      "english": "inside the rear passenger compartment of a car, with seats, door trim and a side window, the front seat backs adding foreground depth",
+      "set": {
+        "场景大类": "交通空间"
+      },
+      "pose": [
+        "后排"
+      ]
+    },
+    {
+      "id": "C20",
+      "module": "姿态动作",
+      "text": "人物在镜前单手举起手机，手机背部朝向镜面，镜中显出人物与手机的倒影",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "美容",
+        "妆",
+        "居家",
+        "室内",
+        "酒店",
+        "护肤"
+      ],
+      "requires_note": "有镜面；一只手持手机",
+      "conflicts_note": "同只手同时持其他道具；强制手机位于耳畔；强制面部完全无遮挡",
+      "label": "镜前持手机自拍",
+      "english": "holding up a phone with one hand in front of a mirror, its back facing the mirror, with the person and phone reflected together",
+      "scene": [
+        "室内",
+        "室",
+        "房",
+        "影棚",
+        "公寓",
+        "客厅"
+      ]
+    },
+    {
+      "id": "C21",
+      "module": "服装",
+      "text": "服装面料以白色为底，分布大小不一、轮廓不规则的黑色牛斑纹",
+      "fields": [
+        "上装图案",
+        "下装图案",
+        "连衣裙图案",
+        "连体服图案"
+      ],
+      "themes": [
+        "时尚",
+        "日常",
+        "生活",
+        "居家",
+        "街头",
+        "复古",
+        "棚拍",
+        "礼服"
+      ],
+      "requires_note": "有明确承载图案的衣服；黑白配色",
+      "conflicts_note": "同一服装的其他图案；与白底黑斑不一致的配色",
+      "label": "黑白牛斑纹",
+      "english": "irregular black cow spots of varied sizes on a white base",
+      "white_base": true
+    },
+    {
+      "id": "C23",
+      "module": "姿态动作",
+      "text": "一只手握住茶壶提柄，将茶壶提在身前，另一只手托住一只小茶杯",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "茶",
+        "餐",
+        "咖啡",
+        "食品",
+        "厨房",
+        "日常",
+        "生活",
+        "中式",
+        "古风",
+        "汉服"
+      ],
+      "requires_note": "茶壶带可握提柄；双手空闲且在画面中可见",
+      "conflicts_note": "双手捧同一只杯；另一只手撑桌或持其他物品",
+      "label": "一手提茶壶一手托茶杯",
+      "english": "one hand holding a teapot by its handle in front of her, the other palm supporting a small teacup"
+    },
+    {
+      "id": "C27",
+      "module": "姿态动作",
+      "text": "双肘支在身前的承托面上，双手掌心轻托两侧脸颊，手指沿面颊自然舒展",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "咖啡",
+        "室内",
+        "居家",
+        "厨房",
+        "书房",
+        "食品",
+        "花店",
+        "职场",
+        "酒店",
+        "生活",
+        "肖像"
+      ],
+      "requires_note": "身前有高度合适的承托面；双手空闲；身体前倾幅度与承托高度一致",
+      "conflicts_note": "双手持物；双臂抱胸；缺少支肘位置",
+      "label": "双肘承托双手捧脸",
+      "english": "both elbows resting on a support surface in front, palms gently cradling the cheeks and fingers relaxed along the face",
+      "scene": [
+        "室内",
+        "室",
+        "厅",
+        "咖啡",
+        "餐",
+        "书房",
+        "客厅",
+        "厨房",
+        "花店",
+        "公寓",
+        "影棚",
+        "桌",
+        "茶",
+        "客房"
+      ]
+    },
+    {
+      "id": "C28",
+      "module": "服装",
+      "text": "衣身沿前中线收拢抽褶，细密褶皱从中线向两侧展开",
+      "fields": [
+        "版型细节"
+      ],
+      "themes": [
+        "时尚",
+        "日常",
+        "生活",
+        "居家",
+        "街头",
+        "复古",
+        "棚拍",
+        "礼服"
+      ],
+      "requires_note": "有明确的上装或连衣裙承载此细节；面料具有适合抽褶的柔韧性",
+      "conflicts_note": "同一位置平整挺括；同一位置已指定其他主要褶裥结构",
+      "label": "前中线集中抽褶",
+      "english": "fine gathers concentrated along the center front of the bodice and spreading toward both sides",
+      "require": {
+        "穿搭结构": [
+          "连衣裙",
+          "上装＋下装"
+        ]
+      },
+      "avoid": [
+        "西装",
+        "挺括",
+        "牛仔",
+        "羽绒",
+        "皮夹克",
+        "风衣",
+        "大衣"
+      ]
+    },
+    {
+      "id": "C29",
+      "module": "姿态动作",
+      "text": "一只手握住鱼竿握柄，另一只手轻握安装在竿柄下方的绕线轮摇柄，鱼竿斜向前上方延伸",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "湖",
+        "河",
+        "海",
+        "码头",
+        "户外",
+        "露营"
+      ],
+      "requires_note": "带绕线轮的鱼竿；双手空闲；构图给鱼竿留出延伸空间",
+      "conflicts_note": "另一只手提箱或持其他道具；无绕线轮的手竿；双手同时支撑身体",
+      "label": "持鱼竿并扶绕线轮摇柄",
+      "english": "one hand holding a fishing rod grip, the other holding the reel crank below it, the rod extending diagonally upward in front",
+      "scene": [
+        "湖",
+        "河",
+        "海",
+        "码头"
+      ],
+      "shots": [
+        "全身构图",
+        "带环境全身",
+        "环境人像"
+      ]
+    },
+    {
+      "id": "C30",
+      "module": "发型",
+      "text": "佩戴空顶遮阳帽，帽带环绕头部，帽檐向前伸出，头顶发丝露在帽带上方",
+      "fields": [
+        "头部配饰"
+      ],
+      "themes": [
+        "夏",
+        "海边",
+        "旅行",
+        "度假",
+        "运动",
+        "阳光",
+        "网球",
+        "户外"
+      ],
+      "requires_note": "头顶与帽檐在构图中可见",
+      "conflicts_note": "另一顶帽子或同位置大型头饰；覆盖头顶的封闭帽冠",
+      "label": "空顶遮阳帽",
+      "english": "wearing an open-top sun visor, its band around the head and brim projecting forward with hair visible above",
+      "styles": [
+        "自然披散",
+        "松弛低马尾",
+        "单侧披发",
+        "半扎发",
+        "利落短发轮廓"
+      ]
+    },
+    {
+      "id": "C31",
+      "module": "服装",
+      "text": "双手戴半指手套，手套包覆掌部与指根，指尖自然露出，腕部以搭带固定",
+      "fields": [
+        "服装配件"
+      ],
+      "themes": [
+        "机车",
+        "都市",
+        "街头",
+        "运动",
+        "金属",
+        "赛博"
+      ],
+      "requires_note": "手部可见",
+      "conflicts_note": "拳击手套或完整包指手套；强调裸手掌部皮肤",
+      "label": "半指手套",
+      "english": "fingerless gloves covering the palms and finger bases, fingertips exposed and wrist straps fastened",
+      "avoid": [
+        "拳击",
+        "手套"
+      ]
+    },
+    {
+      "id": "C32",
+      "module": "场景",
+      "text": "场景位于汽车车尾旁，后备箱敞开，箱盖向上打开，近处可见后备箱内衬与车尾轮廓",
+      "fields": [
+        "背景环境"
+      ],
+      "themes": [
+        "汽车",
+        "公路",
+        "旅"
+      ],
+      "requires_note": "人物位于车外；车辆后备箱打开",
+      "conflicts_note": "人物位于后排座舱内部；后备箱关闭；同一位置被另一室内背景替代",
+      "label": "敞开的汽车后备箱旁",
+      "english": "beside the rear of a car with its trunk open upward, trunk lining and rear bodywork visible nearby",
+      "set": {
+        "场景大类": "交通空间"
+      },
+      "pose": [
+        "车尾",
+        "后备箱"
+      ]
+    },
+    {
+      "id": "C33",
+      "module": "姿态动作",
+      "text": "人物坐在餐桌前，一只手持一双筷子，筷尖伸向桌上的餐碗，另一侧前臂轻搭桌面",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "茶",
+        "餐",
+        "咖啡",
+        "食品",
+        "厨房",
+        "日常",
+        "生活",
+        "中式",
+        "古风",
+        "汉服"
+      ],
+      "requires_note": "餐桌上有餐碗；人物为坐姿，手部及桌面可见",
+      "conflicts_note": "双手同时捧杯或持其他道具；站姿或没有餐桌；另一只手悬空举起",
+      "label": "餐桌持筷",
+      "english": "sitting at a dining table, one hand holding chopsticks toward a bowl, the other forearm resting on the tabletop",
+      "scene": [
+        "餐",
+        "厨房",
+        "咖啡",
+        "室内",
+        "客厅"
+      ],
+      "camera_type": "seated"
+    },
+    {
+      "id": "C34",
+      "module": "姿态动作",
+      "text": "一只手将展开的折扇竖举在面前，扇面遮住一侧眼睛与面颊，另一侧眼睛和面部轮廓清晰可见",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "汉服",
+        "古风",
+        "中式",
+        "旗袍",
+        "东方",
+        "复古"
+      ],
+      "requires_note": "折扇展开；手部、扇面和面部均在画面中",
+      "conflicts_note": "要求双眼及整张脸完全无遮挡；同一只手持另一件物品；双手持团扇或折扇放在肩旁",
+      "label": "折扇遮住半侧面部",
+      "english": "holding an open folding fan upright in front of her face, covering one eye and cheek while leaving the other side visible"
+    },
+    {
+      "id": "C35",
+      "module": "服装",
+      "text": "肩上披着一件毛绒外套，衣襟敞开并露出内层服装，表面绒毛蓬松，衣缘轮廓柔软",
+      "fields": [
+        "服装配件"
+      ],
+      "themes": [
+        "冬",
+        "礼服",
+        "夜间",
+        "复古"
+      ],
+      "requires_note": "有内层服装；构图能看见肩部与外套衣襟",
+      "conflicts_note": "外套衣襟紧闭；同位置另披一件外搭；把表面绒毛指定为平滑面料",
+      "label": "肩披毛绒外套",
+      "english": "a fluffy coat draped over the shoulders, open at the front to reveal the inner clothing, with soft furry edges",
+      "require": {
+        "穿搭结构": [
+          "连衣裙"
+        ]
+      }
+    },
+    {
+      "id": "C36",
+      "module": "服装",
+      "text": "长袖上衣的袖口宽大，开口边缘向外展开，露出手腕",
+      "fields": [
+        "版型细节"
+      ],
+      "themes": [
+        "时尚",
+        "日常",
+        "生活",
+        "居家",
+        "街头",
+        "复古",
+        "棚拍",
+        "礼服"
+      ],
+      "requires_note": "长袖上衣；手腕及袖口可见",
+      "conflicts_note": "短袖或无袖服装；同一袖口收紧束口；袖管卷到手肘",
+      "label": "宽幅外展袖口",
+      "english": "long sleeves with broad cuffs flaring outward to reveal the wrists",
+      "require": {
+        "上装类型": [
+          "垂坠衬衫",
+          "修身高领上衣",
+          "灯笼袖上衣",
+          "薄针织开衫"
+        ],
+        "穿搭结构": [
+          "上装＋下装"
+        ]
+      }
+    },
+    {
+      "id": "C37",
+      "module": "场景",
+      "text": "场景中有白色曲面墙体与宽大的圆弧形开口，开口边缘厚实，弧线围出清晰的框景",
+      "fields": [
+        "背景环境"
+      ],
+      "themes": [
+        "建筑",
+        "时尚",
+        "极简",
+        "旅",
+        "度假"
+      ],
+      "requires_note": "建筑环境中可见墙体和开口；构图留出足够空间展示弧线",
+      "conflicts_note": "同一位置为完整无开口平墙；将同一开口指定为方形或尖拱；极近面部特写导致背景结构不可见",
+      "label": "白色曲面墙与圆弧开口",
+      "english": "white curved walls and a broad round-arched opening, its thick edges creating a clear architectural frame",
+      "set": {
+        "场景大类": "都市户外"
+      }
+    },
+    {
+      "id": "C39",
+      "module": "姿态动作",
+      "text": "一只手握住打开的口红管，将露出的膏体朝上举在脸侧，手指轻握管身",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "唇",
+        "妆",
+        "美容",
+        "美甲"
+      ],
+      "requires_note": "口红管已打开并露出膏体；持物手与面部可见",
+      "conflicts_note": "口红盖着盖子；同一只手撑桌或握其他道具；要求膏体贴唇涂抹",
+      "label": "单手举起打开的口红",
+      "english": "holding an open lipstick tube beside her face, the exposed lipstick pointing upward and fingers gently around the tube",
+      "shots": [
+        "面部特写",
+        "头肩近景",
+        "胸部以上",
+        "腰部以上",
+        "三分之二身"
+      ]
+    },
+    {
+      "id": "B004Q1",
+      "module": "姿态动作",
+      "text": "一手伸向书架上层并轻触书本，另一手搭在下层书册旁",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "书",
+        "阅读"
+      ],
+      "requires_note": "书架及上下两层书册可见，手可够到。",
+      "conflicts_note": "与双手捧书、手持其他物件互斥；不固定蹲姿。",
+      "label": "书架前轻触书本",
+      "english": "one hand reaching toward books on an upper shelf, the other resting beside books on a lower shelf",
+      "scene": [
+        "书",
+        "阅览"
+      ]
+    },
+    {
+      "id": "B004Q3",
+      "module": "姿态动作",
+      "text": "双手在脸前比出心形，一侧眼睛从心形空隙中看向镜头",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "时尚",
+        "创意",
+        "写真",
+        "生活",
+        "肖像"
+      ],
+      "requires_note": "双手与眼睛在画面内。",
+      "conflicts_note": "与持物、双手托腮及完整无遮挡面部要求互斥。",
+      "label": "脸前双手比心",
+      "english": "both hands forming a heart in front of her face, one eye looking at the camera through the opening",
+      "shots": [
+        "面部特写",
+        "头肩近景",
+        "胸部以上",
+        "腰部以上",
+        "三分之二身"
+      ]
+    },
+    {
+      "id": "B004Q5",
+      "module": "姿态动作",
+      "text": "一手搭在台面上，另一手抬起，指尖轻触盆栽伸出的花枝",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "咖啡",
+        "室内",
+        "居家",
+        "厨房",
+        "书房",
+        "食品",
+        "花店",
+        "职场",
+        "酒店",
+        "生活",
+        "肖像"
+      ],
+      "requires_note": "台面旁有伸到手边的盆栽花枝。",
+      "conflicts_note": "与抱花束、双手扶桌及手持其他物件互斥。",
+      "label": "扶台轻触花枝",
+      "english": "one hand resting on a counter, the other raised to touch a flowering branch extending from a potted plant",
+      "scene": [
+        "室内",
+        "室",
+        "厅",
+        "咖啡",
+        "餐",
+        "书房",
+        "客厅",
+        "厨房",
+        "花店",
+        "公寓",
+        "影棚",
+        "桌",
+        "茶",
+        "客房"
+      ]
+    },
+    {
+      "id": "B004Q4",
+      "module": "姿态动作",
+      "text": "双手扶住身前收拢长柄伞的弯柄，伞身竖直，伞尖落在地面上",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "雨",
+        "都市",
+        "复古",
+        "时尚",
+        "旅"
+      ],
+      "requires_note": "站姿，伞为长柄伞，有可落地的完整伞身。",
+      "conflicts_note": "与撑开的雨伞、短折叠伞及其他占手动作互斥。",
+      "label": "双手扶收拢长柄伞",
+      "english": "standing with both hands on the curved handle of a closed long umbrella in front, the shaft vertical and its tip on the ground",
+      "scene": [
+        "街",
+        "路",
+        "公园",
+        "庭",
+        "影棚",
+        "走廊",
+        "门廊"
+      ],
+      "shots": [
+        "全身构图",
+        "带环境全身",
+        "环境人像"
+      ]
+    },
+    {
+      "id": "B004Q7",
+      "module": "姿态动作",
+      "text": "一手扶住竖立在身侧的发光灯管，灯管下端落在地面上",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "赛博",
+        "霓虹",
+        "金属",
+        "棚拍"
+      ],
+      "requires_note": "身侧可容纳长条灯管，手与灯管同处画面内。",
+      "conflicts_note": "与同手持其他道具互斥；色光另由摄影模块指定。",
+      "label": "单手扶发光灯管",
+      "english": "one hand steadying a glowing tube light upright beside her, its lower end resting on the floor",
+      "scene": [
+        "影棚",
+        "赛博",
+        "工业",
+        "机械",
+        "科技"
+      ]
+    },
+    {
+      "id": "B004Q9",
+      "module": "服装",
+      "text": "细颈带贴合颈部，颈前点缀一朵立体布艺花饰",
+      "fields": [
+        "服装配件"
+      ],
+      "themes": [
+        "时尚",
+        "日常",
+        "生活",
+        "居家",
+        "街头",
+        "复古",
+        "棚拍",
+        "礼服"
+      ],
+      "requires_note": "颈部在画面内。",
+      "conflicts_note": "与厚围巾、高领遮颈和其他占据同位置的大型颈饰冲突。",
+      "label": "立体花朵颈饰",
+      "english": "a narrow choker fitted around the neck with a three-dimensional fabric flower at the front",
+      "avoid": [
+        "高领",
+        "围巾",
+        "颈圈"
+      ]
+    },
+    {
+      "id": "B004Q11",
+      "module": "服装",
+      "text": "轻薄长裙的裙摆在身周水中展开，边缘形成柔软褶皱",
+      "fields": [
+        "版型细节"
+      ],
+      "themes": [
+        "水下"
+      ],
+      "requires_note": "人物在水中，穿有足够长度和宽度的轻薄长裙。",
+      "conflicts_note": "与短裙、裤装、单独泳装及完全干燥衣料要求互斥。",
+      "label": "轻薄裙摆水中展开",
+      "english": "the hem of a lightweight long dress spreading through the water around her, its edges forming soft folds",
+      "require": {
+        "穿搭结构": [
+          "连衣裙"
+        ],
+        "连衣裙类型": [
+          "多层纱裙"
+        ],
+        "场景地点": [
+          "水下幻境"
+        ]
+      },
+      "avoid": [
+        "站立",
+        "坐姿"
+      ]
+    },
+    {
+      "id": "B004Q10",
+      "module": "场景",
+      "text": "室外步道沿弧线转折延伸，连续的实体矮墙勾勒出层叠曲线",
+      "fields": [
+        "背景环境"
+      ],
+      "themes": [
+        "公园",
+        "园林",
+        "旅",
+        "度假",
+        "建筑"
+      ],
+      "requires_note": "适合带环境的中远景。",
+      "conflicts_note": "与狭小室内、平整摄影棚背景或特写为主的构图不直接搭配。",
+      "label": "弧形步道与实体矮墙",
+      "english": "an outdoor walkway bending through curves, continuous solid low walls outlining layered sweeping lines",
+      "set": {
+        "场景大类": "都市户外"
+      }
+    },
+    {
+      "id": "B004Q12",
+      "module": "姿态动作",
+      "text": "双手提住身前藤编花篮的把手，花朵与绿叶从篮口自然露出",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "花",
+        "园",
+        "田园",
+        "郊",
+        "日系"
+      ],
+      "requires_note": "花篮与双手可见。",
+      "conflicts_note": "与双手持杯、抱花束及其他占用双手的动作互斥。",
+      "label": "双手提花篮",
+      "english": "both hands holding the handle of a wicker flower basket in front, flowers and green leaves emerging naturally from its opening",
+      "scene": [
+        "花",
+        "园",
+        "林",
+        "草",
+        "乡",
+        "影棚"
+      ]
+    },
+    {
+      "id": "B004Q13",
+      "module": "姿态动作",
+      "text": "一手轻轻拎起一串葡萄，另一手平搭在桌面上",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "咖啡",
+        "室内",
+        "居家",
+        "厨房",
+        "书房",
+        "食品",
+        "花店",
+        "职场",
+        "酒店",
+        "生活",
+        "肖像"
+      ],
+      "requires_note": "桌面在手边，葡萄串在画面内。",
+      "conflicts_note": "与同手持餐具、杯子或其他物品互斥。",
+      "label": "桌边提葡萄",
+      "english": "one hand gently lifting a bunch of grapes, the other resting flat on a table",
+      "scene": [
+        "室内",
+        "室",
+        "厅",
+        "咖啡",
+        "餐",
+        "书房",
+        "客厅",
+        "厨房",
+        "花店",
+        "公寓",
+        "影棚",
+        "桌",
+        "茶",
+        "客房"
+      ]
+    },
+    {
+      "id": "B005Q1",
+      "module": "姿态动作",
+      "text": "一腿向后屈膝抬起，一手扶住这只脚所穿鞋子的后跟",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "运动",
+        "休闲",
+        "日常",
+        "生活"
+      ],
+      "requires_note": "站姿，另一腿承重，抬起脚所穿鞋的后跟可触及，手与鞋在画面内。",
+      "conflicts_note": "与该手持其他道具、双脚落地、坐姿或正在脱下鞋子的动作互斥；不自动叠加腿部动作。",
+      "label": "站姿屈膝扶鞋跟",
+      "english": "standing on one leg, the other knee bent backward with one hand holding the heel of the shoe worn on the raised foot",
+      "require": {
+        "鞋履": [
+          "白色运动鞋",
+          "复古运动鞋",
+          "帆布鞋",
+          "芭蕾平底鞋"
+        ]
+      },
+      "shots": [
+        "全身构图",
+        "带环境全身",
+        "环境人像"
+      ]
+    },
+    {
+      "id": "B005Q3",
+      "module": "服装",
+      "text": "束身式上衣，前中饰有交叉系带，腰身采用纵向分片结构",
+      "fields": [
+        "上装类型"
+      ],
+      "themes": [
+        "时尚",
+        "日常",
+        "生活",
+        "居家",
+        "街头",
+        "复古",
+        "棚拍",
+        "礼服"
+      ],
+      "requires_note": "上装与下装分开设置，衣身前侧可见；作为上装类型及结构的候选，不固定颜色和外搭。",
+      "conflicts_note": "不与另一主上装类型或整身连衣裙同时叠加；材质独立选择，不自动附加蕾丝袖。",
+      "label": "交叉系带束身式上衣",
+      "english": "a corset-style top with crisscross front lacing and vertical waist panels",
+      "require": {
+        "穿搭结构": [
+          "上装＋下装"
+        ]
+      },
+      "set": {
+        "版型细节": "不使用"
+      },
+      "avoid": [
+        "针织",
+        "羽绒",
+        "牛仔",
+        "羊毛"
+      ]
+    },
+    {
+      "id": "B005Q4",
+      "module": "服装",
+      "text": "下装为修身短裤，裤脚利落贴合",
+      "fields": [
+        "下装类型"
+      ],
+      "themes": [
+        "时尚",
+        "日常",
+        "生活",
+        "居家",
+        "街头",
+        "复古",
+        "棚拍",
+        "礼服"
+      ],
+      "requires_note": "穿搭结构为上装加下装，裤腿区域可见；颜色与材质另选。",
+      "conflicts_note": "与其他下装、连体服和连衣裙互斥；不同时输出牛仔短裤或骑行短裤作为第二下装。",
+      "label": "修身短裤",
+      "english": "fitted shorts with neat, close-fitting leg openings",
+      "require": {
+        "穿搭结构": [
+          "上装＋下装"
+        ]
+      }
+    },
+    {
+      "id": "B005Q5",
+      "module": "姿态动作",
+      "text": "身前放着靠垫，一手轻搭靠垫上缘，另一手扶住侧边",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "居家",
+        "窗边",
+        "室内",
+        "酒店",
+        "生活",
+        "肖像",
+        "旅馆",
+        "复古",
+        "礼服"
+      ],
+      "requires_note": "身前有可触及的靠垫，适用于座椅、沙发等有承托的坐靠姿态。",
+      "conflicts_note": "与双手持其他道具、双手后撑或前臂承托整个身体的动作互斥；不强制套用俯卧。",
+      "label": "身前扶靠垫",
+      "english": "a cushion supported in front of her, one hand resting on its top edge and the other holding its side",
+      "scene": [
+        "沙发",
+        "室内",
+        "公寓",
+        "客厅",
+        "客房",
+        "休息",
+        "影棚",
+        "会所"
+      ],
+      "camera_type": "seated"
+    },
+    {
+      "id": "B005Q7",
+      "module": "姿态动作",
+      "text": "坐在驾驶座上，车窗玻璃降下，一手扶方向盘，另一侧前臂搭在窗沿",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "汽车"
+      ],
+      "requires_note": "驾驶座、方向盘和同侧车窗同时存在，适合窗外侧拍的汽车人像场景。",
+      "conflicts_note": "与后排乘坐、站在车外、双手持道具、关闭车窗玻璃的设置互斥；不能把这一动作套入自行车。",
+      "label": "驾驶座扶方向盘搭窗沿",
+      "english": "sitting in the driver seat with the side window lowered, one hand on the steering wheel and the other forearm along the window sill",
+      "scene": [
+        "车",
+        "停车"
+      ],
+      "camera_type": "seated",
+      "avoid": [
+        "后排",
+        "后备箱",
+        "车尾"
+      ]
+    },
+    {
+      "id": "B005Q8",
+      "module": "场景",
+      "text": "室内摆放一把高靠背木质摇椅，底部为弧形摇脚，座面与靠背配有软垫",
+      "fields": [
+        "背景环境"
+      ],
+      "themes": [
+        "居家",
+        "窗边",
+        "室内",
+        "圣诞"
+      ],
+      "requires_note": "室内或有遮蔽的休闲空间；如需强调摇椅结构，画面应保留座椅底部。",
+      "conflicts_note": "同一座位不再同时指定办公转椅、沙发或高脚凳；动作另选，不默认摇晃或悬空双脚。",
+      "label": "高靠背木质摇椅",
+      "english": "a high-backed wooden rocking chair indoors, with curved runners and padded seat and backrest",
+      "set": {
+        "场景大类": "居住空间"
+      }
+    },
+    {
+      "id": "B006Q1",
+      "module": "服装",
+      "text": "带后缝线的丝袜，腿部后侧有清晰的纵向细线",
+      "fields": [
+        "袜装"
+      ],
+      "themes": [
+        "复古",
+        "时尚",
+        "礼服"
+      ],
+      "requires_note": "袜面及腿部后侧在画面中可见，适合背面或侧后方机位；袜装类型与其他服装分开处理。",
+      "conflicts_note": "不与第二套袜装或裸腿描述叠加；正面近景不能保证展示后缝线，不把纵线解释为身体纹身或腿部划痕。",
+      "label": "后缝线丝袜",
+      "english": "stockings with clearly defined fine vertical seams along the backs of the legs",
+      "require": {
+        "身体方向": [
+          "背身向左回转",
+          "背身向右回转",
+          "四分之三背身"
+        ]
+      },
+      "avoid": [
+        "特写",
+        "近景"
+      ]
+    },
+    {
+      "id": "B006Q2",
+      "module": "姿态动作",
+      "text": "一手将团扇拿在身后，扇面朝外垂在腰后",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "汉服",
+        "古风",
+        "中式",
+        "旗袍",
+        "东方",
+        "复古"
+      ],
+      "requires_note": "手臂能伸到身后，团扇与该手可见，适合背面或侧后方构图。",
+      "conflicts_note": "该手不同时持其他道具、前撑或扶脸；不叠加现有身前双手持扇动作，不要求扇柄必须被镜头看见。",
+      "label": "身后持团扇",
+      "english": "one hand holding a round fan behind her, its face pointing outward at the back of her waist"
+    },
+    {
+      "id": "B006Q3",
+      "module": "姿态动作",
+      "text": "坐在平放于湿沙上的冲浪板上，一腿屈膝收在身侧，另一腿伸向板外沙面，一手搭在板面上",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "海",
+        "沙滩",
+        "冲浪"
+      ],
+      "requires_note": "海边湿沙，板面朝上平放，板面能承托坐姿，画面保留腿、板及接触点。",
+      "conflicts_note": "与直立冲浪板、站姿扶板、冲浪中、双手后撑等不同姿态互斥；不强制附加另一只手或被遮挡脚部动作。",
+      "label": "湿沙冲浪板坐姿",
+      "english": "sitting on a surfboard lying flat on wet sand, one leg folded beside her and the other extending onto the sand, one hand on the board",
+      "scene": [
+        "海",
+        "沙滩"
+      ],
+      "camera_type": "ground_extended",
+      "shots": [
+        "全身构图",
+        "带环境全身",
+        "环境人像"
+      ]
+    },
+    {
+      "id": "B007Q1",
+      "module": "姿态动作",
+      "text": "坐在地面横放的汽车轮胎边缘，双腿屈膝，双脚落地",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "汽车",
+        "工业",
+        "机车",
+        "都市"
+      ],
+      "requires_note": "地面有横放且能承托人物的轮胎，低位坐姿，画面保留轮胎和腿脚。",
+      "conflicts_note": "与站姿、跪姿、轮胎竖立或同时坐在椅子上的描述互斥；手部另选，不强制添加护栏。",
+      "label": "横放轮胎边缘坐姿",
+      "english": "sitting on the edge of a car tire lying flat on the ground, knees bent and both feet on the ground",
+      "scene": [
+        "车",
+        "工业",
+        "仓库",
+        "工厂"
+      ],
+      "camera_type": "seated"
+    },
+    {
+      "id": "B007Q2",
+      "module": "服装",
+      "text": "衣身采用重复排列的花瓣形镂空，开口之间由窄幅布料连接",
+      "fields": [
+        "版型细节"
+      ],
+      "themes": [
+        "时尚",
+        "日常",
+        "生活",
+        "居家",
+        "街头",
+        "复古",
+        "棚拍",
+        "礼服"
+      ],
+      "requires_note": "作为单件衣服的版型细节使用，衣身在画面内；衣服类型、颜色和材质另选。",
+      "conflicts_note": "不与同一部位完全封闭、密不透风的衣身结构叠加；不能把镂空当作可任意替换所有面料的材质。",
+      "label": "花瓣形重复镂空",
+      "english": "repeated petal-shaped cutouts on the bodice, connected by narrow strips of fabric",
+      "require": {
+        "穿搭结构": [
+          "连衣裙",
+          "上装＋下装"
+        ]
+      },
+      "avoid": [
+        "大衣",
+        "西装",
+        "羽绒",
+        "厚",
+        "牛仔",
+        "比基尼"
+      ]
+    },
+    {
+      "id": "B007Q3",
+      "module": "姿态动作",
+      "text": "一手握住外带饮料杯，另一手轻扶吸管，吸管上端贴近嘴唇",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "茶",
+        "餐",
+        "咖啡",
+        "食品",
+        "厨房",
+        "日常",
+        "生活",
+        "中式",
+        "古风",
+        "汉服"
+      ],
+      "requires_note": "杯中有吸管，双手空闲，杯与面部同框；复用现有外带饮料杯道具。",
+      "conflicts_note": "与双手托杯底、扶桌、持其他道具或张口大笑互斥；不同时指定吸管远离面部。",
+      "label": "持外带杯轻扶吸管",
+      "english": "one hand holding a takeaway drink cup, the other lightly steadying the straw with its upper end near her lips"
+    },
+    {
+      "id": "B007Q4",
+      "module": "发型",
+      "text": "头顶两侧佩戴小巧的分叉鹿角形发饰，底部点缀小铃铛",
+      "fields": [
+        "头部配饰"
+      ],
+      "themes": [
+        "圣诞",
+        "节日",
+        "幻想",
+        "童话",
+        "梦境"
+      ],
+      "requires_note": "头顶与头发可见，作为头部配饰使用；颜色可另行补充。",
+      "conflicts_note": "不默认叠加遮住头顶的帽子或第二副动物耳饰；不写成人物长出真实鹿角。",
+      "label": "鹿角形铃铛发饰",
+      "english": "wearing small branching antler-shaped hair ornaments on both sides of the crown, with tiny bells at their bases",
+      "styles": [
+        "自然披散",
+        "松弛低马尾",
+        "单侧披发",
+        "半扎发",
+        "利落短发轮廓"
+      ]
+    },
+    {
+      "id": "B007Q6",
+      "module": "场景",
+      "text": "窗边摆放装饰彩球和丝带的圣诞树，树下散放系着蝴蝶结的礼盒",
+      "fields": [
+        "背景环境"
+      ],
+      "themes": [
+        "居家",
+        "窗边",
+        "室内",
+        "圣诞"
+      ],
+      "requires_note": "室内窗边场景，树及树下区域至少部分入镜。",
+      "conflicts_note": "不与另一主背景强行叠加；不自动指定人物穿着、节日文字、天气或持礼盒动作。",
+      "label": "窗边圣诞树礼盒布景",
+      "english": "a Christmas tree by an indoor window decorated with baubles and ribbons, with bow-tied gift boxes beneath it",
+      "set": {
+        "场景大类": "居住空间"
+      }
+    },
+    {
+      "id": "B007Q7",
+      "module": "发型",
+      "text": "双耳佩戴毛绒耳罩，两侧圆形护耳垫厚实蓬松",
+      "fields": [
+        "头部配饰"
+      ],
+      "themes": [
+        "冬",
+        "雪",
+        "圣诞"
+      ],
+      "requires_note": "按头部配饰或手持配饰使用时明确位置；参考图为颈间持物，不自动推断正在听音乐。",
+      "conflicts_note": "不同时指定耳罩戴在双耳和拿在手中；与头戴耳机默认互斥，头部遮挡由后续组合规则处理。",
+      "label": "毛绒耳罩",
+      "english": "wearing fluffy earmuffs with thick round pads covering both ears",
+      "styles": [
+        "自然披散",
+        "松弛低马尾",
+        "单侧披发",
+        "半扎发",
+        "利落短发轮廓"
+      ]
+    },
+    {
+      "id": "B007Q8",
+      "module": "场景",
+      "text": "座椅具有高大的叶片形镂空靠背，白色细杆交错形成叶脉般的结构，座面铺有软垫",
+      "fields": [
+        "背景环境"
+      ],
+      "themes": [
+        "花",
+        "室内",
+        "时尚",
+        "礼服"
+      ],
+      "requires_note": "座椅靠背入镜，作为单个场景家具使用。",
+      "conflicts_note": "不同时把同一家具写成木质摇椅、悬挂吊椅或独立屏风；人物坐姿与手部动作另选。",
+      "label": "叶片形镂空高靠背座椅",
+      "english": "a chair with a tall leaf-shaped openwork backrest, thin white rods forming vein-like patterns and a padded seat",
+      "set": {
+        "场景大类": "居住空间"
+      }
+    },
+    {
+      "id": "B007Q9",
+      "module": "姿态动作",
+      "text": "双手轻扶高跟鞋的细带和搭扣，手指停在脚踝旁",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "时尚",
+        "礼服",
+        "服装",
+        "居家"
+      ],
+      "requires_note": "高跟鞋带有可触及的细带搭扣，双手空闲，手、脚踝及鞋在画面内。",
+      "conflicts_note": "与无带穆勒鞋、单手持其他道具、双手后撑或脱下鞋子互斥；不绑定站姿单腿后勾。",
+      "label": "轻扶高跟鞋细带搭扣",
+      "english": "both hands lightly touching the thin strap and buckle of a high-heeled shoe, fingers beside the ankle",
+      "require": {
+        "鞋履": [
+          "高跟凉鞋"
+        ]
+      },
+      "camera_type": "seated",
+      "shots": [
+        "全身构图",
+        "带环境全身",
+        "环境人像"
+      ],
+      "scene": [
+        "室内",
+        "公寓",
+        "客房",
+        "影棚",
+        "客厅",
+        "沙发"
+      ]
+    },
+    {
+      "id": "B008Q1",
+      "module": "姿态动作",
+      "text": "面对镜子，一手拿着化妆刷，刷头轻触一侧脸颊",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "美容",
+        "妆",
+        "居家",
+        "室内",
+        "酒店",
+        "护肤"
+      ],
+      "requires_note": "镜面、面部与持刷手可见，适用于梳妆台或洗手台前；不强制另一只手的动作。",
+      "conflicts_note": "不与同一只手同时扶桌、托杯或拿其他道具组合；刷头接触点不同时写成嘴唇、眼睛或远离面部。",
+      "label": "镜前持刷轻触脸颊",
+      "english": "facing a mirror, holding a makeup brush in one hand with its bristles lightly touching one cheek",
+      "scene": [
+        "室内",
+        "室",
+        "房",
+        "影棚",
+        "公寓",
+        "客厅"
+      ]
+    },
+    {
+      "id": "B008Q2",
+      "module": "姿态动作",
+      "text": "坐在汽车后备箱开口边缘，一臂向上伸展，手扶上掀尾门内侧",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "汽车",
+        "公路",
+        "旅行"
+      ],
+      "requires_note": "停放中的车辆，后备箱开放且尾门向上掀起，开口边缘能承托坐姿，手臂可触及尾门；建议保留车尾与上举手。",
+      "conflicts_note": "与关闭尾门、人物坐在车内座椅或站在车旁的姿态互斥；上举手不能同时持其他道具；不推断按下电动关闭按钮。",
+      "label": "车尾坐姿上举扶尾门",
+      "english": "sitting on the edge of an open car trunk, one arm reaching upward to rest a hand against the inside of the raised tailgate",
+      "scene": [
+        "车尾",
+        "后备箱",
+        "停车"
+      ],
+      "camera_type": "seated",
+      "shots": [
+        "全身构图",
+        "带环境全身",
+        "环境人像"
+      ]
+    },
+    {
+      "id": "B008Q3",
+      "module": "姿态动作",
+      "text": "一手拿着细颈小瓶，瓶身略微倾斜，瓶口靠近嘴唇",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "茶",
+        "餐",
+        "咖啡",
+        "食品",
+        "厨房",
+        "日常",
+        "生活",
+        "中式",
+        "古风",
+        "汉服"
+      ],
+      "requires_note": "小型细颈瓶与面部同框，一只手用于持瓶，瓶口保持可见；另一只手、身体姿态和背景另选。",
+      "conflicts_note": "不同时安排同一只手持杯或拿其他道具；不与瓶口远离面部、盖住嘴唇的面罩或张口大笑叠加；不默认写饮酒。",
+      "label": "单手举细颈小瓶",
+      "english": "holding a small narrow-necked bottle in one hand, slightly tilted with its opening near her lips"
+    },
+    {
+      "id": "B009Q1",
+      "module": "姿态动作",
+      "text": "一手拎着一只高跟鞋，鞋子离开脚部，鞋尖自然朝下",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "时尚",
+        "礼服",
+        "居家"
+      ],
+      "requires_note": "单只高跟鞋与持鞋手可见，鞋和脚分开；可另选站姿或坐姿，另一手不限定。",
+      "conflicts_note": "持鞋手不能同时撑座面或拿其他物品；不同时描述这只鞋已经穿在脚上；不自动追加脱鞋过程。",
+      "label": "单手拎起一只高跟鞋",
+      "english": "one hand carrying a single high-heeled shoe separate from her feet, its toe pointing naturally downward",
+      "require": {
+        "鞋履": [
+          "不使用"
+        ]
+      }
+    },
+    {
+      "id": "B009Q3",
+      "module": "姿态动作",
+      "text": "一手握住木盒上方的横向提梁，长方形浅盒悬在身前",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "茶",
+        "餐",
+        "咖啡",
+        "食品",
+        "厨房",
+        "日常",
+        "生活",
+        "中式",
+        "古风",
+        "汉服"
+      ],
+      "requires_note": "带高提梁的长方形浅木盒；手握横梁且盒体保持可见，可用于静物道具式展示。",
+      "conflicts_note": "不与同手托盒底、提软袋或将盒体固定在桌面同时使用；不无据增加多层食盒或内部隔板。",
+      "label": "单手提长方形浅木盒",
+      "english": "one hand gripping the horizontal handle above a shallow rectangular wooden box suspended in front of her"
+    },
+    {
+      "id": "B009Q2",
+      "module": "姿态动作",
+      "text": "一手掌心向上，托着一块圆形糕点，糕点表面有清晰的压花纹样",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "茶",
+        "餐",
+        "咖啡",
+        "食品",
+        "厨房",
+        "日常",
+        "生活",
+        "中式",
+        "古风",
+        "汉服"
+      ],
+      "requires_note": "小型糕点置于手掌上，掌面与糕点清楚可见；近景或半身画面更易体现纹样。",
+      "conflicts_note": "同手不能同时握拳、持筷或拿餐盘；不把展示动作写成咬食或递入口中。",
+      "label": "掌心托圆形压花糕点",
+      "english": "one upturned palm supporting a round pastry with a clearly embossed pattern on its surface"
+    },
+    {
+      "id": "B009Q4",
+      "module": "发型",
+      "text": "佩戴小巧的无檐制服帽，帽缘饰有细窄滚边",
+      "fields": [
+        "头部配饰"
+      ],
+      "themes": [
+        "制服",
+        "复古",
+        "角色"
+      ],
+      "requires_note": "头顶与帽缘可见；用作制服风配饰，发型需能容纳帽体。",
+      "conflicts_note": "不同时叠加草帽、贝雷帽或夸张高发髻；围巾与服装独立选择，不自动生成徽章品牌。",
+      "label": "滚边无檐制服帽",
+      "english": "wearing a small brimless uniform-style hat with narrow piping along its edge",
+      "styles": [
+        "自然披散",
+        "松弛低马尾",
+        "单侧披发",
+        "半扎发",
+        "利落短发轮廓"
+      ]
+    },
+    {
+      "id": "B010Q1",
+      "module": "姿态动作",
+      "text": "易拉罐竖放在桌面上，一手扶住罐身，另一手的指尖轻搭罐顶",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "咖啡",
+        "室内",
+        "居家",
+        "厨房",
+        "书房",
+        "食品",
+        "花店",
+        "职场",
+        "酒店",
+        "生活",
+        "肖像"
+      ],
+      "requires_note": "桌面、罐身及双手可见，罐底与桌面接触；不把罐顶裁掉。",
+      "conflicts_note": "双手均已用于罐体，不同时扶脸、撑桌或拿其他道具；不写罐身悬空、举至嘴边或已拉开拉环。",
+      "label": "扶易拉罐并轻搭罐顶",
+      "english": "a drink can standing on a table, one hand steadying its body and the fingertips of the other resting on its top",
+      "scene": [
+        "室内",
+        "室",
+        "厅",
+        "咖啡",
+        "餐",
+        "书房",
+        "客厅",
+        "厨房",
+        "花店",
+        "公寓",
+        "影棚",
+        "桌",
+        "茶",
+        "客房"
+      ]
+    },
+    {
+      "id": "B011Q1",
+      "module": "场景",
+      "text": "室内由几何面板、外露电路板和多块显示屏组成，细长发光灯管勾勒出设备与门框的轮廓",
+      "fields": [
+        "背景环境"
+      ],
+      "themes": [
+        "赛博",
+        "科技",
+        "金属",
+        "未来"
+      ],
+      "requires_note": "室内背景保留足够面积；多屏幕、面板与灯管组合使用，不推断设备具有真实工作功能。",
+      "conflicts_note": "不与户外湿路街区、自然庭院或普通会议室混写；灯管的色彩与光线方案协调，不强制锁定照片的配色。",
+      "label": "多屏幕电路板科技室内",
+      "english": "an interior of geometric panels, exposed circuit boards and multiple screens, with slim glowing tubes tracing equipment and doorframe edges",
+      "set": {
+        "场景大类": "专业特色"
+      }
+    },
+    {
+      "id": "B011Q2",
+      "module": "姿态动作",
+      "text": "一手握着电话听筒贴近耳侧，卷曲电话线连接到身旁台面上的座机",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "室内",
+        "复古",
+        "职场",
+        "酒店",
+        "书房"
+      ],
+      "requires_note": "听筒、卷线与身旁台面座机可见，电话线留有自然余量；适用于室内座机环境。",
+      "conflicts_note": "持听筒手不同时持手机或扶脸；不写无线手机、用电话线承重或穿过身体，不自动与户外行走动作组合。",
+      "label": "单手持有线电话听筒",
+      "english": "one hand holding a telephone receiver near her ear, its coiled cord connected to a landline telephone on a nearby table",
+      "scene": [
+        "室内",
+        "室",
+        "厅",
+        "房",
+        "公寓",
+        "影棚"
+      ]
+    },
+    {
+      "id": "B014Q1",
+      "module": "姿态动作",
+      "text": "坐在椅子上，一腿屈膝抬起，一手扶住长靴筒口，另一手捏住靴侧的拉链头",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "时尚",
+        "服装",
+        "机车"
+      ],
+      "requires_note": "侧面带拉链的长靴、坐具和双手均可见，抬起的小腿与鞋靴连续，构图留出靴筒和拉链位置。",
+      "conflicts_note": "不用于无拉链靴、系带鞋或已离脚鞋靴；双手不同时持其他道具，不写拉链已闭合或靴子完全脱下。",
+      "label": "坐姿扶靴筒并捏拉链头",
+      "english": "sitting on a chair with one knee raised, one hand holding the top of a tall boot and the other pinching its side zipper pull",
+      "require": {
+        "鞋履": [
+          "及膝长靴",
+          "过膝长靴"
+        ]
+      },
+      "camera_type": "seated",
+      "shots": [
+        "全身构图",
+        "带环境全身",
+        "环境人像"
+      ],
+      "scene": [
+        "室内",
+        "室",
+        "影棚",
+        "客厅",
+        "客房"
+      ]
+    },
+    {
+      "id": "B017Q1",
+      "module": "场景",
+      "text": "方形深色展示框内，密集的玫瑰花朵排列成完整心形，透明面板显出轻微反光",
+      "fields": [
+        "背景环境"
+      ],
+      "themes": [
+        "花",
+        "礼服",
+        "婚纱",
+        "情人",
+        "室内"
+      ],
+      "requires_note": "场景留出完整展示框及心形花朵的可见区域；道具置于稳定表面，不必由人物持握。",
+      "conflicts_note": "不当作手持花束、可开合礼盒或花墙；不推断面板一定为玻璃或亚克力，不添加品牌文字。",
+      "label": "透明面板心形玫瑰陈列框",
+      "english": "a dark square display frame filled with roses arranged in a complete heart shape, a transparent front panel showing subtle reflections",
+      "set": {
+        "场景大类": "专业特色"
+      }
+    },
+    {
+      "id": "B018Q1",
+      "module": "姿态动作",
+      "text": "一手握住对讲机举至脸侧，细长天线竖直向上",
+      "fields": [
+        "基础姿态"
+      ],
+      "themes": [
+        "都市",
+        "街头",
+        "电影",
+        "科技",
+        "赛博",
+        "工业"
+      ],
+      "requires_note": "单只手持对讲机，手掌、机身及天线有可见空间；脸侧构图完整。",
+      "conflicts_note": "同一只手不同时持手机、听筒或其他道具；不写成贴耳接手机，不强制制服、职业、第二人物或通信状态。",
+      "label": "单手举对讲机至脸侧",
+      "english": "one hand holding a walkie-talkie beside her face, its slender antenna pointing vertically upward"
+    }
+  ]
+}

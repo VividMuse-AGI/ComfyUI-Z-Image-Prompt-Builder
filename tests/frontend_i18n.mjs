@@ -60,6 +60,16 @@ const catalog = globalThis.__i18nTestCatalog;
 const translatedOptionCount = Object.values(catalog.optionLabels)
   .reduce((total, values) => total + Object.keys(values).length, 0);
 assert.ok(translatedOptionCount > 1800);
+for (const [field, value, expected] of [
+  ["头发长度", "及臀长发", "Hip-length hair"],
+  ["刘海", "全幅齐刘海", "Full, straight-across bangs"],
+  ["上装类型", "运动背心", "Athletic tank top"],
+  ["眼线造型", "彩色眼线", "Colored eyeliner"],
+  ["写真主题", "黑白电影肖像", "Photorealistic black-and-white cinematic portrait"],
+]) {
+  assert.equal(catalog.optionLabels[field][value], expected);
+}
+assert.match(catalog.optionLabels["等效焦段"]["手机主摄"], /phone main camera.*24mm/i);
 for (const values of Object.values(catalog.optionLabels)) {
   for (const label of Object.values(values)) {
     assert.doesNotMatch(label, /[\u3400-\u9fff]/u);
@@ -188,6 +198,28 @@ assert.equal(widgets[3].inputEl.placeholder, "Free Prompt");
 assert.equal(widgets[3].value, "用户输入，必须保留。");
 assert.equal(widgets[3].inputEl.value, "用户输入，必须保留。");
 assert.equal(widgets[3].name, "自由提示词");
+
+// Dynamic helper labels must preserve the host's original widget identity.
+const helperCases = [
+  ["📚 TXT用户词库", "📚 TXT用户词库（中文文件.txt · 10条）", "📚 TXT Prompt Library (中文文件.txt · 10 entries)"],
+  ["🧩 TXT模块词库（全模块）", "🧩 TXT模块词库（模块.txt · 18条）", "🧩 TXT Module Library (模块.txt · 18 entries)"],
+  ["应用到画面基础模块（当前：未设置）", "应用到人物模块（当前：我的标题）", "Apply to Person Module (Current: 我的标题)"],
+  ["随机抽取：尚未执行", "上次随机结果（点击查看）", "Last Random Result (Click to View)"],
+];
+for (const [name, displayText, english] of helperCases) {
+  const helper = { name, type: "button", serialize: false, options: { disabled: true },
+    __vividMuseDisplayText: displayText };
+  widgets.push(helper);
+  languageSetting.onChange("en");
+  assert.equal(helper.label, english);
+  assert.equal(helper.name, name);
+  languageSetting.onChange("zh");
+  assert.equal(helper.label, displayText);
+  assert.equal(helper.name, name);
+  assert.equal(helper.options.disabled, true);
+  widgets.pop();
+}
+languageSetting.onChange("en");
 assert.equal(node.inputs[0], originalInputs[0]);
 assert.equal(node.outputs[0], originalOutputs[0]);
 assert.equal(node.inputs[0].link, 123);
@@ -199,7 +231,7 @@ assert.equal(nodeType.title, "Z-Image Person");
 assert.equal(nodeType.category, "VividMuse/Z-Image/Modules");
 assert.equal(JSON.stringify(libraryDefinitions.find((def) => def.name === "ForeignNode")), foreignSnapshot);
 assert.equal(JSON.stringify(foreignDefinition), foreignSnapshot);
-assert.equal(libraryRefreshes, 3);
+assert.equal(libraryRefreshes, 3 + helperCases.length * 2 + 1);
 const refreshCount = slotRefreshes.length;
 globalThis.__vividMuseZImageI18n.localizeNode(node);
 assert.equal(slotRefreshes.length, refreshCount, "Unchanged labels should not rebuild Nodes 2.0 slot data");
@@ -237,5 +269,20 @@ delete graph.trigger;
 languageSetting.onChange("zh");
 assert.equal(node.outputs[0].label, "组合提示词");
 assert.equal(widgets[3].inputEl.placeholder, "自由提示词");
+
+// TXT random selection labels change language, never stored values or user text.
+const selectionWidget = { name: "选择模式", type: "combo", value: "随机抽取",
+  options: { values: ["手动选择", "随机抽取"] } };
+const resultButton = { name: "上次随机结果（点击查看）", type: "button", options: {} };
+const txtRandomNode = { comfyClass: "VividMuse_ZImageTxtPromptLibrary", title: "Z-Image TXT提示词库",
+  widgets: [selectionWidget, resultButton], inputs: [], outputs: [], setDirtyCanvas() {} };
+for (const language of ["en", "zh", "en", "zh"]) {
+  languageSetting.onChange(language);
+  globalThis.__vividMuseZImageI18n.localizeNode(txtRandomNode);
+  assert.equal(selectionWidget.value, "随机抽取");
+  assert.equal(selectionWidget.options.getOptionLabel("随机抽取"), language === "en" ? "Random Selection" : "随机抽取");
+  assert.equal(globalThis.__vividMuseZImageI18n.translateMessage("当前范围没有候选"),
+    language === "en" ? "No candidates in the current scope" : "当前范围没有候选");
+}
 
 console.log("frontend i18n ok");

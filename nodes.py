@@ -1506,6 +1506,9 @@ for _category, _location in (
         SCENE_LOCATIONS_BY_CATEGORY[_category] += (_location,)
 
 FIELD_OPTIONS = {name: list(FIELD_TEXT[name]) for name in FIELD_ORDER}
+# Context-dependent reference additions are sampled by REFERENCE_POOL, never
+# by the unconstrained per-field fallback. Public dropdowns still expose both.
+RANDOM_FIELD_OPTIONS = {name: list(values) for name, values in FIELD_OPTIONS.items()}
 
 PRESETS: Dict[str, Dict[str, str]] = {
     "日系草地单车夏日柔光写真": {
@@ -2966,7 +2969,7 @@ PROFILE_POSE_BUNDLES.update({
     "海边夏日泳装写真": _pose_bundles("seaside_turn_smile", "sofa_relaxed_side_gaze"),
     "赛博都市夜景写真": _pose_bundles("sofa_relaxed_side_gaze", "cyber_walk_confident"),
     "影棚水光妆美容特写": _pose_bundles("side_hair_touch_beauty", "waist_hand_direct"),
-    "落地窗瑜伽塑形写真": _pose_bundles("sport_shoelace_crouch", "sofa_relaxed_side_gaze"),
+    "落地窗瑜伽塑形写真": [],
     "旅馆窗边电影静帧": _pose_bundles("window_curtain_quiet", "cafe_cup_relaxed", "chair_elbow_thoughtful"),
 })
 
@@ -3107,7 +3110,11 @@ THEME_SCENE_KEYWORD_BUNDLES = [
     (("职场", "商务", "办公室", "会议"), _scene_bundles("workplace_lounge", "glass_lobby_day", "executive_office_scene", "meeting_room_scene")),
     (("书店", "阅读", "书院", "书斋"), _scene_bundles("quiet_bookstore", "bookstore_scene", "library_scene", "traditional_study_scene")),
     (("花店", "花艺"), _scene_bundles("flower_shop_morning", "flower_shop_scene")),
-    (("网球", "健身", "瑜伽", "普拉提", "泳池", "舞蹈"), _scene_bundles("tennis_court_sun", "fitness_studio_day", "fitness_scene", "yoga_scene", "indoor_pool_scene", "dance_room_scene")),
+    (("网球",), _scene_bundles("tennis_court_sun")),
+    (("健身",), _scene_bundles("fitness_studio_day", "fitness_scene")),
+    (("瑜伽", "普拉提"), _scene_bundles("yoga_scene", "sunlit_living_room_scene")),
+    (("泳池",), _scene_bundles("indoor_pool_scene")),
+    (("舞蹈",), _scene_bundles("dance_room_scene")),
     (("地铁", "车站", "火车", "机场"), _scene_bundles("station_hall_scene", "subway_platform_scene", "airport_lounge_scene")),
     (("茶室", "新中式", "中式室内", "传统书院"), _scene_bundles("new_chinese_tearoom", "tearoom_scene", "traditional_study_scene")),
     (("海边", "海岸"), _scene_bundles("seaside_dusk", "hotel_balcony_golden_hour")),
@@ -3782,13 +3789,35 @@ def _scene_compatible_lighting_plans(scene_bundle: Mapping | None) -> list[Mappi
     if not scene_bundle:
         return []
     legacy_options = SCENE_BUNDLE_LIGHT_OPTIONS.get(
-        scene_bundle["id"],
-        SCENE_CATEGORY_LIGHT_OPTIONS.get(scene_bundle["场景大类"], ()),
+        scene_bundle.get("id"),
+        SCENE_CATEGORY_LIGHT_OPTIONS.get(scene_bundle.get("场景大类"), ()),
     )
     plan_ids = []
     for option in legacy_options:
         plan_ids.extend(_LEGACY_LIGHTING_PLAN_IDS.get(option, ()))
     return _lighting_plans(*dict.fromkeys(plan_ids)) if plan_ids else []
+
+
+def _lighting_matches_environment(plan, resolved, random_fields):
+    # A user-selected light source can intentionally simulate another time of day.
+    if "主光来源" not in random_fields and resolved.get("主光来源", EMPTY_CHOICE) != EMPTY_CHOICE:
+        return True
+    time = resolved.get("时间切片", "")
+    weather = resolved.get("天气状态", "")
+    source = plan["主光来源"]
+    if time in ("入夜不久", "夜间", "深夜", "月光之夜"):
+        return source not in ("叶隙阳光", "窗户日光", "阴天天光", "日落阳光", "直射阳光")
+    overcast = "阴天" in time or weather in ("阴天", "细雨", "大雨", "雷雨将至", "小雪")
+    if overcast:
+        if source in ("叶隙阳光", "日落阳光", "直射阳光"):
+            return False
+        if source == "窗户日光" and plan["光线质地"] == "清晰硬光":
+            return False
+    if source == "日落阳光" and time not in ("", EMPTY_CHOICE, "日落前金色时刻", "傍晚", "暮色黄昏"):
+        return False
+    if time == "蓝调时刻" and source in ("叶隙阳光", "直射阳光"):
+        return False
+    return True
 
 GROUP_BUNDLES = [
     (POSE_OUTPUT_FIELDS, POSE_BUNDLES, PROFILE_POSE_BUNDLES),
@@ -3854,9 +3883,9 @@ def _choose_from_pool(
     field_name: str,
 ) -> str:
     if random_scope == RANDOM_SCOPES[2]:
-        pool = FIELD_OPTIONS[field_name]
+        pool = RANDOM_FIELD_OPTIONS[field_name]
     else:
-        pool = PROFILE_POOLS.get(preset, {}).get(field_name, FIELD_OPTIONS[field_name])
+        pool = PROFILE_POOLS.get(preset, {}).get(field_name, RANDOM_FIELD_OPTIONS[field_name])
     return rng.choice(list(pool))
 
 
@@ -3888,7 +3917,8 @@ def _compatible_headwear_options(
         for headwear in candidates
         if hairstyle in HEADWEAR_STYLE_COMPATIBILITY.get(headwear, set())
     ]
-    compatible = compatible or candidates
+    if hairstyle in ("", EMPTY_CHOICE):
+        compatible = candidates
     required = POSE_HAND_HEADWEAR_REQUIREMENTS.get(hand_action)
     if required:
         required_compatible = [
@@ -3903,6 +3933,35 @@ def _compatible_headwear_options(
         if fallback:
             return fallback
     return compatible
+
+
+def _hair_fallback_bundles(resolved, random_fields):
+    """Handle unbundled length/style locks without sampling conflicting updos."""
+    def choices(field):
+        value = resolved.get(field, EMPTY_CHOICE)
+        return [value] if field not in random_fields and value != EMPTY_CHOICE else FIELD_OPTIONS[field]
+
+    bundles = []
+    headwear = resolved.get("头部配饰", EMPTY_CHOICE)
+    for length in choices("头发长度"):
+        for style in choices("发型造型"):
+            if length == "精灵短发" and style != "利落短发轮廓":
+                continue
+            if style == "利落短发轮廓" and length not in ("精灵短发", "齐下巴"):
+                continue
+            if length == "齐下巴" and style not in ("利落短发轮廓", "自然披散", "单侧披发", "半扎发", "高颅顶"):
+                continue
+            if ("头部配饰" not in random_fields and headwear in HEADWEAR_STYLE_COMPATIBILITY
+                    and style not in HEADWEAR_STYLE_COMPATIBILITY[headwear]):
+                continue
+            bundle = {"头发长度": length, "发型造型": style,
+                      "发质与卷度": "自然顺直", "刘海": "自然露额"}
+            for field in ("发质与卷度", "刘海"):
+                if field not in random_fields and resolved.get(field, EMPTY_CHOICE) != EMPTY_CHOICE:
+                    bundle[field] = resolved[field]
+            bundles.append(bundle)
+    # Mutually inconsistent literal locks remain untouched; omit random extras.
+    return bundles or [{field: EMPTY_CHOICE for field in HAIR_STRUCTURE_FIELDS}]
 
 
 def _clothing_recipe_values(recipe: Mapping, field_name: str):
@@ -3925,6 +3984,18 @@ def _resolved_theme_category(resolved: Mapping[str, str]) -> str:
                  if theme in themes), resolved.get("写真大类", ""))
 
 
+THEME_CAMERA_PURPOSE_IDS = {
+    "专业商务头像写真": ("headshot_85", "forest_chest_85", "cafe_chest_50"),
+    "服装电商模特写真": ("studio_full_70", "flash_full_65", "street_full_50"),
+    "珠宝首饰广告写真": ("beauty_face_105", "headshot_85", "forest_chest_85"),
+    "香水商业广告写真": ("forest_chest_85", "cafe_chest_50", "classic_waist_85", "hands_prop_85"),
+    "腕表商业广告写真": ("hands_prop_85", "classic_waist_85", "forest_chest_85"),
+    "眼镜商业广告写真": ("beauty_face_105", "headshot_85", "forest_chest_85"),
+    "手袋商业广告写真": ("fashion_three_quarter_70", "doorway_three_quarter_65", "studio_full_70"),
+    "食品饮料广告写真": ("forest_chest_85", "cafe_chest_50", "classic_waist_85", "hands_prop_85"),
+}
+
+
 def _camera_bundle_candidates(preset, random_scope, resolved, random_fields):
     """Select once: locks, pose, then orientation/theme preferences."""
     theme_changed = resolved.get("写真主题") != PRESETS.get(preset, {}).get("写真主题")
@@ -3937,7 +4008,12 @@ def _camera_bundle_candidates(preset, random_scope, resolved, random_fields):
 
     compatible = list(CAMERA_BUNDLES)
     if "景别" in random_fields:
+        compatible = REFERENCE_POOL.camera_candidates(resolved, compatible)
         compatible = _pose_compatible_camera_bundles(resolved.get("基础姿态", ""), compatible)
+        purpose_ids = THEME_CAMERA_PURPOSE_IDS.get(resolved.get("写真主题"))
+        if purpose_ids:
+            purpose_pool = [b for b in compatible if b["id"] in purpose_ids]
+            compatible = purpose_pool or compatible
     medium = resolved.get("成像媒介", EMPTY_CHOICE)
     lens_locked = "等效焦段" not in random_fields and resolved.get("等效焦段") == "手机主摄"
     if medium not in (EMPTY_CHOICE, "手机计算摄影") and not lens_locked:
@@ -4069,7 +4145,7 @@ def _random_clothing_value(
                        ACCESSORY_SET_RECIPE_IDS.get(recipe.get("id"), ()))
         return rng.choice(choices) if choices else EMPTY_CHOICE
     if field_name == "版型细节":
-        return rng.choice(FIELD_OPTIONS[field_name])
+        return rng.choice(RANDOM_FIELD_OPTIONS[field_name])
     library_field_id = _CLOTHING_RECIPE_FIELD_MAP.get(field_name)
     recipe_ids = recipe.get("field_pool", {}).get(library_field_id, [])
     labels = [
@@ -4081,7 +4157,80 @@ def _random_clothing_value(
         return rng.choice(labels)
     if field_name in CLOTHING_OPTIONAL_FIELDS:
         return EMPTY_CHOICE
-    return rng.choice(FIELD_OPTIONS[field_name])
+    return rng.choice(RANDOM_FIELD_OPTIONS[field_name])
+
+
+def _garment_property_limits(garment: str) -> dict[str, tuple[str, ...]]:
+    """Properties already stated in a garment name must not contradict it."""
+    limits = {}
+    for keyword, materials in (
+        ("细罗纹", ("细罗纹针织",)),
+        ("针织", ("细罗纹针织", "柔软针织", "羊毛针织")),
+        ("牛仔", ("牛仔",)), ("缎面", ("缎面",)),
+        ("蕾丝", ("蕾丝",)), ("棉麻", ("棉麻",)),
+        ("纱裙", ("薄纱", "欧根纱")),
+        ("皮", ("哑光皮革", "漆皮", "麂皮")),
+        ("亮片", ("亮片面料",)), ("比基尼", ("泳装弹力面料",)),
+    ):
+        if keyword in garment:
+            limits.setdefault("材质", materials)
+    if "白衬衫" in garment:
+        limits["颜色"] = ("奶油白", "象牙白")
+    if "小黑裙" in garment:
+        limits["颜色"] = ("玄黑色",)
+    if "碎花" in garment:
+        limits["图案"] = ("细小碎花",)
+    if "格纹" in garment:
+        limits["图案"] = ("细格纹", "大格纹")
+    return limits
+
+
+def _cohere_random_clothing(rng, recipe, resolved, automatic_fields):
+    """Constrain automatic choices only; literal choices and omissions win."""
+    for branch in ("连衣裙", "连体服", "上装", "下装"):
+        type_field = branch + "类型"
+        garment = resolved.get(type_field, EMPTY_CHOICE)
+        if garment == EMPTY_CHOICE:
+            continue
+        if type_field in automatic_fields:
+            def accepts_locks(candidate):
+                return all(
+                    branch + suffix in automatic_fields
+                    or resolved.get(branch + suffix, EMPTY_CHOICE) in (EMPTY_CHOICE, *allowed)
+                    for suffix, allowed in _garment_property_limits(candidate).items()
+                )
+            if not accepts_locks(garment):
+                choices = [v for v in (_clothing_recipe_values(recipe, type_field) or ())
+                           if accepts_locks(v)]
+                garment = rng.choice(choices) if choices else EMPTY_CHOICE
+                resolved[type_field] = garment
+        for suffix, allowed in _garment_property_limits(garment).items():
+            field = branch + suffix
+            if field not in automatic_fields or resolved.get(field) in (EMPTY_CHOICE, *allowed):
+                continue
+            choices = [v for v in (_clothing_recipe_values(recipe, field) or ()) if v in allowed]
+            choices = choices or [v for v in allowed if v in FIELD_OPTIONS[field]]
+            resolved[field] = rng.choice(choices) if choices else EMPTY_CHOICE
+
+    if "版型细节" not in automatic_fields or resolved.get("版型细节") == EMPTY_CHOICE:
+        return
+    # Unqualified neckline/sleeve details describe the upper garment, not trousers.
+    upper = next((resolved.get(f) for f in ("连衣裙类型", "连体服类型", "上装类型")
+                  if resolved.get(f, EMPTY_CHOICE) != EMPTY_CHOICE), "")
+    detail = resolved["版型细节"]
+    incompatible = (
+        (detail in ("泡泡袖", "灯笼袖") and any(k in upper for k in
+            ("吊带", "挂脖", "无袖", "背心", "抹胸", "马甲", "单肩")))
+        or (detail in ("深V领口", "方形领口", "船形领口", "抹胸设计")
+            and any(k in upper for k in ("高领", "挂脖", "船领")))
+        or (detail in ("高领结构", "抹胸设计")
+            and any(k in upper for k in ("吊带", "挂脖", "露肩", "一字肩", "单肩", "抹胸")))
+        or (detail == "侧开衩" and not any("裙" in resolved.get(f, "")
+            for f in ("连衣裙类型", "下装类型")))
+        or (detail == "露脐设计" and resolved.get("穿搭结构") in ("连衣裙", "连体服"))
+    )
+    if incompatible:
+        resolved["版型细节"] = EMPTY_CHOICE
 
 
 def _resolve_clothing_fields(
@@ -4135,6 +4284,7 @@ def _resolve_clothing_fields(
         if not field.endswith("图案")
     }
 
+    automatic_fields = set(active_random)
     for field_name in CLOTHING_BRANCH_FIELDS:
         if field_name not in visible_fields:
             resolved[field_name] = EMPTY_CHOICE
@@ -4147,6 +4297,7 @@ def _resolve_clothing_fields(
             and resolved.get(field_name, EMPTY_CHOICE) == EMPTY_CHOICE
         )
         if should_randomize or should_fill_new_branch:
+            automatic_fields.add(field_name)
             resolved[field_name] = _random_clothing_value(
                 rng, field_name, recipe
             )
@@ -4156,6 +4307,7 @@ def _resolve_clothing_fields(
             resolved[field_name] = _random_clothing_value(
                 rng, field_name, recipe
             )
+    _cohere_random_clothing(rng, recipe, resolved, automatic_fields)
     return active_random
 
 
@@ -4173,6 +4325,7 @@ def resolve_fields(
         random_scope = RANDOM_SCOPES[0]
 
     requested = dict(requested)
+    REFERENCE_POOL.prepare_request(requested)
     requested_age = requested.get("年龄阶段")
     if requested_age in LEGACY_AGE_STAGES:
         requested["年龄阶段"] = LEGACY_AGE_STAGES[requested_age]
@@ -4409,6 +4562,8 @@ def resolve_fields(
                 bundles = SPECIALIST_THEME_POSE_BUNDLES.get(
                     resolved.get("写真主题", ""), bundles
                 )
+                if resolved.get("写真主题") == "瑜伽普拉提生活写真":
+                    bundles = _pose_bundles("approved_low_pigeon")
             if group_fields == SCENE_GROUP_FIELDS:
                 theme = resolved.get("写真主题", "")
                 scene_theme_bundles = (
@@ -4427,7 +4582,9 @@ def resolve_fields(
                 )
 
         if group_fields == LIGHTING_OUTPUT_FIELDS:
-            scene_bundles = _scene_compatible_lighting_plans(selected_scene_bundle)
+            scene_context = {**(selected_scene_bundle or {}),
+                             **{f: resolved.get(f, EMPTY_CHOICE) for f in SCENE_GROUP_FIELDS}}
+            scene_bundles = _scene_compatible_lighting_plans(scene_context)
             if scene_bundles:
                 scene_ids = {bundle["id"] for bundle in scene_bundles}
                 compatible = [bundle for bundle in bundles if bundle["id"] in scene_ids]
@@ -4440,6 +4597,9 @@ def resolve_fields(
                 compatible = [bundle for bundle in bundles if bundle["id"] in medium_ids]
                 if compatible:
                     bundles = compatible
+            global_bundles = [b for b in global_bundles
+                              if _lighting_matches_environment(b, resolved, random_fields)]
+            bundles = [b for b in bundles if _lighting_matches_environment(b, resolved, random_fields)] or global_bundles
         elif group_fields == (*COLOR_OUTPUT_FIELDS, *FINISH_OUTPUT_FIELDS):
             medium_bundles = _visual_profile_candidates_for_medium_id(
                 capture_medium_id
@@ -4456,14 +4616,13 @@ def resolve_fields(
                 "头部配饰" not in random_fields
                 and headwear not in (EMPTY_CHOICE, FOLLOW_PRESET)
             )
-            if headwear_is_locked:
+            if headwear_is_locked and headwear in HEADWEAR_STYLE_COMPATIBILITY:
                 allowed_styles = HEADWEAR_STYLE_COMPATIBILITY.get(headwear, set())
                 compatible = [
                     bundle for bundle in bundles
                     if bundle["发型造型"] in allowed_styles
                 ]
-                if compatible:
-                    bundles = compatible
+                bundles = compatible
         elif group_fields == POSE_OUTPUT_FIELDS:
             headwear = resolved.get("头部配饰", EMPTY_CHOICE)
             headwear_locked = (
@@ -4522,6 +4681,15 @@ def resolve_fields(
                 )]
         elif group_fields == CAMERA_OUTPUT_FIELDS:
             candidates = _camera_bundle_candidates(preset, random_scope, resolved, random_fields)
+        elif group_fields == HAIR_STRUCTURE_FIELDS:
+            candidates = _matching_bundles(bundles, group_fields, resolved, random_fields)
+            if not candidates:
+                candidates = _matching_bundles(global_bundles, group_fields, resolved, random_fields)
+                headwear = resolved.get("头部配饰", EMPTY_CHOICE)
+                if "头部配饰" not in random_fields and headwear in HEADWEAR_STYLE_COMPATIBILITY:
+                    candidates = [b for b in candidates
+                                  if b["发型造型"] in HEADWEAR_STYLE_COMPATIBILITY[headwear]]
+            candidates = candidates or _hair_fallback_bundles(resolved, random_fields)
         else:
             candidates = _matching_bundles(
                 bundles, group_fields, resolved, random_fields
@@ -4573,10 +4741,10 @@ def resolve_fields(
                 resolved[field_name] = rng.choice(list(theme_pool))
             elif field_name == "头部配饰":
                 base_pool = (
-                    FIELD_OPTIONS[field_name]
+                    RANDOM_FIELD_OPTIONS[field_name]
                     if random_scope == RANDOM_SCOPES[2]
                     else PROFILE_POOLS.get(preset, {}).get(
-                        field_name, FIELD_OPTIONS[field_name]
+                        field_name, RANDOM_FIELD_OPTIONS[field_name]
                     )
                 )
                 compatible_pool = _compatible_headwear_options(
@@ -4584,7 +4752,7 @@ def resolve_fields(
                     base_pool,
                     resolved.get("手部动作", ""),
                 )
-                resolved[field_name] = rng.choice(compatible_pool)
+                resolved[field_name] = rng.choice(compatible_pool) if compatible_pool else EMPTY_CHOICE
             elif (
                 random_scope == RANDOM_SCOPES[2]
                 and field_name
@@ -4664,7 +4832,19 @@ def resolve_fields(
             else ETHNICITY_BRANCH_GENERIC
         )
 
-    # Camera orientation, theme and pose were resolved together above.
+    changed = REFERENCE_POOL.apply(seed, resolved, random_fields)
+    if changed.intersection(("姿态动作", "场景")) and random_fields.intersection(CAMERA_OUTPUT_FIELDS):
+        camera = rng.choice(_camera_bundle_candidates(preset, random_scope, resolved, random_fields))
+        for field in random_fields.intersection(CAMERA_OUTPUT_FIELDS):
+            resolved[field] = camera[field]
+    if "场景" in changed and random_fields.intersection(LIGHTING_OUTPUT_FIELDS):
+        plans = _scene_compatible_lighting_plans(resolved)
+        plans = [p for p in plans if _lighting_matches_environment(p, resolved, random_fields)]
+        compatible = _matching_bundles(plans, LIGHTING_OUTPUT_FIELDS, resolved, random_fields)
+        if compatible:
+            lighting = rng.choice(compatible)
+            for field in random_fields.intersection(LIGHTING_OUTPUT_FIELDS):
+                resolved[field] = lighting[field]
 
     return resolved
 
@@ -4715,17 +4895,56 @@ def _person_field_prompt_text(
     return FIELD_TEXT[field_name][fields[field_name]]
 
 
+def _active_makeup_fields(fields: Mapping[str, str]) -> tuple[str, ...]:
+    mode = fields.get("妆容模式", EMPTY_CHOICE)
+    if mode == "整体预设":
+        return ("整体妆容预设",)
+    if mode == "分项自定义":
+        return MAKEUP_CUSTOM_FIELDS
+    # Blank-canvas atoms remain useful without enabling a whole preset branch.
+    return ("整体妆容预设", *MAKEUP_CUSTOM_FIELDS)
+
+
+def module_atomic_fallback(module_name: str, fields: Mapping[str, str],
+                           density: str, *, english: bool = False) -> str:
+    """Keep selected atoms when density trimming would empty a whole module."""
+    if module_name == "服装":
+        fields = _visible_clothing_fields(fields, density)
+    groups = {
+        "画面基础": ("画面比例", "成像媒介", "写真主题"),
+        "人物": (*IDENTITY_FIELDS, *PERSON_FACE_FIELDS, *PERSON_EYE_FIELDS,
+               *PERSON_SKIN_FIELDS, *_active_makeup_fields(fields), *BODY_OUTPUT_FIELDS),
+        "发型": HAIR_OUTPUT_FIELDS,
+        "服装": (*CLOTHING_MODE_FIELDS.get(fields.get("穿搭结构"), CLOTHING_BRANCH_FIELDS),
+               "版型细节", "袜装", "鞋履", "服装配件"),
+        "姿态动作": POSE_OUTPUT_FIELDS, "场景": SCENE_OUTPUT_FIELDS,
+        "摄影": CAMERA_OUTPUT_FIELDS, "视觉表现": VISUAL_OUTPUT_FIELDS,
+    }
+    parts = []
+    for field in groups.get(module_name, ()):
+        value = fields.get(field, EMPTY_CHOICE)
+        if value not in FIELD_OPTIONS[field] or value in DEPENDENCY_PLACEHOLDER_VALUES.get(field, ()):
+            continue
+        if english:
+            text = _english_atomic_value(field, value)
+        elif density == "精简":
+            text = _brief_text(fields, field)
+        elif density == "标准":
+            text = _standard_text(fields, field)
+        else:
+            text = FIELD_TEXT[field][value]
+        if text:
+            parts.append(text.rstrip("，；。 "))
+    return (", " if english else "，").join(parts)
+
+
 def _person_detail_prompt_text(fields: Mapping[str, str], density: str) -> str:
     """Compose face, eyes, skin and exactly one selected makeup branch."""
 
     active_fields = [
         *PERSON_FACE_FIELDS, *PERSON_EYE_FIELDS, *PERSON_SKIN_FIELDS,
     ]
-    makeup_mode = fields.get("妆容模式", EMPTY_CHOICE)
-    if makeup_mode == "整体预设":
-        active_fields.append("整体妆容预设")
-    elif makeup_mode == "分项自定义":
-        active_fields.extend(MAKEUP_CUSTOM_FIELDS)
+    active_fields.extend(_active_makeup_fields(fields))
     return "，".join(filter(None, (
         _person_field_prompt_text(fields, field_name, density)
         for field_name in active_fields
@@ -4820,6 +5039,7 @@ def _garment_prompt_text(
         ("针织" in material and "针织" in garment_type)
         or ("西装" in material and "西装" in garment_type)
         or ("牛仔" in material and "牛仔" in garment_type)
+        or (material and material in garment_type)
     ):
         compact_material = ""
     compact = "".join(
@@ -4940,7 +5160,7 @@ def _pose_prompt_text(fields: Mapping[str, str], density: str) -> str:
     if density == "精简":
         compact_fields = ("基础姿态", "手部动作", "视线", "表情")
         return "，".join(
-            selected[field_name]
+            REFERENCE_POOL.text(field_name, selected[field_name])
             for field_name in compact_fields
             if field_name in selected
         )
@@ -4950,7 +5170,7 @@ def _pose_prompt_text(fields: Mapping[str, str], density: str) -> str:
             if field_name not in selected:
                 continue
             value = selected[field_name]
-            value = _PRESET_POSE_STANDARD_TEXT.get(value, value)
+            value = REFERENCE_POOL.text(field_name, _PRESET_POSE_STANDARD_TEXT.get(value, value))
             if field_name == "画面瞬间" and value.startswith((
                 "枝叶下", "墙边", "咖啡馆", "沙发上", "窗边", "阳台",
                 "电梯前", "棚拍间隙", "雨中"
@@ -4989,6 +5209,10 @@ def _scene_prompt_text(fields: Mapping[str, str], density: str) -> str:
     spatial = selected.get("空间层次", "")
 
     def with_suffix(value: str, suffix: str) -> str:
+        if ("背景环境", value) in REFERENCE_POOL.by_option:
+            return REFERENCE_POOL.text("背景环境", value)
+        if suffix == "前景" and value == "无明显前景":
+            return "前景干净通透"
         return value if value.endswith(suffix) else f"{value}{suffix}"
 
     if density == "精简":
@@ -6027,6 +6251,29 @@ _ENGLISH_VALUE_OVERRIDES.update({
 })
 
 
+_ENGLISH_VALUE_OVERRIDES.update({
+    ("头发长度", "及臀长发"): "hip-length hair",
+    ("刘海", "全幅齐刘海"): "full, straight-across bangs",
+    ("上装类型", "运动背心"): "athletic tank top",
+    ("等效焦段", "手机主摄"): "shot with a phone main camera at approximately 24mm full-frame-equivalent",
+    ("眼线造型", "彩色眼线"): "colored eyeliner",
+    ("写真主题", "黑白电影肖像"): "photorealistic black-and-white cinematic portrait",
+})
+
+_ENGLISH_MAKEUP_DETAILS = {
+    "自然裸妆": "a sheer natural base, soft brows and muted nude lips",
+    "清透裸粉妆": "a translucent base, pale pink blush and dewy nude-pink lips",
+    "蜜桃珊瑚妆": "a lightweight base, peach blush and soft coral lips",
+    "奶茶棕妆": "a soft-matte base, muted beige-brown eye makeup and beige-brown lips",
+    "豆沙柔雾妆": "a refined soft-matte base, subtle eye makeup and muted dusty-rose lips",
+    "清透水光妆": "a translucent dewy base, finely shimmering eye makeup and glossy translucent lips",
+    "明艳红唇妆": "a clean base, defined eyeliner and vivid red lips with crisp edges",
+    "浆果色妆容": "a refined base, deep-brown eye makeup and vivid berry lips",
+    "大地色妆容": "muted warm earth tones across the makeup",
+    "小烟熏妆": "softly blended, subtle smoky eye makeup",
+    "伪素颜妆": "a sheer, natural-looking no-makeup makeup finish",
+}
+
 # Keep ID-based renderers in sync with the explicit public-option translations.
 for _field_name, _phrases in _ENGLISH_NATURAL_ID_PHRASES.items():
     for _label, _option_id in _ENGLISH_OPTION_ID_MAPS[_field_name].items():
@@ -6347,11 +6594,7 @@ def _english_module_fields(module_name: str, fields: Mapping[str, str], density:
     if module_name == "画面基础":
         return ("画面比例", "成像媒介", "写真主题")
     if module_name == "人物":
-        makeup_fields = ()
-        if fields.get("妆容模式") == "整体预设":
-            makeup_fields = ("整体妆容预设",)
-        elif fields.get("妆容模式") == "分项自定义":
-            makeup_fields = MAKEUP_CUSTOM_FIELDS
+        makeup_fields = _active_makeup_fields(fields)
         detail_fields = (
             *PERSON_FACE_FIELDS, *PERSON_EYE_FIELDS, *PERSON_SKIN_FIELDS,
             *makeup_fields, *BODY_OUTPUT_FIELDS,
@@ -6415,10 +6658,13 @@ def render_english_module_fragment(
     for field_name in _english_module_fields(module_name, fields, density):
         value = fields.get(field_name, EMPTY_CHOICE)
         rendered = _english_atomic_value(field_name, value)
+        if density == "详细" and field_name == "整体妆容预设" and value in _ENGLISH_MAKEUP_DETAILS:
+            rendered += ", " + _ENGLISH_MAKEUP_DETAILS[value]
         if rendered:
             parts.append(rendered)
     if not parts:
-        return ""
+        fallback = module_atomic_fallback(module_name, fields, density, english=True)
+        return f"{fallback}." if fallback else ""
     return f"{', '.join(parts)}."
 
 
@@ -7027,3 +7273,10 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "VividMuse_ZImageChinesePromptBuilder": "Z-Image 中文提示词生成器",
 }
+
+try:
+    from .reference_pool import ReferencePool
+except ImportError:
+    from reference_pool import ReferencePool
+
+REFERENCE_POOL = ReferencePool(globals())

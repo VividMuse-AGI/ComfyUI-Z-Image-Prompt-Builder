@@ -1,0 +1,30 @@
+{
+  "1": {
+    "class_type": "VividMuse_ZImageTxtPromptLibrary",
+    "inputs": {
+      "自由提示词": "Manual draft preserved when using the editor.",
+      "拼接位置": "前置提示词在前",
+      "输出排版": "按模块分段",
+      "选择模式": "随机抽取",
+      "随机种子": 42,
+      "词库数据": "{\"version\":1,\"kind\":\"prompt\",\"entries\":[{\"title\":\"Window\",\"tags\":[],\"prompt\":\"A photographic portrait with soft window light.\"},{\"title\":\"Studio\",\"tags\":[],\"prompt\":\"A photographic portrait against a neutral studio backdrop.\"}]}"
+    }
+  },
+  "2": {
+    "class_type": "VividMuse_ZImageTxtModuleLibrary",
+    "inputs": {
+      "模块类型": "人物",
+      "模块提示词": "Manual module draft.",
+      "拼接位置": "前置提示词在前",
+      "输出排版": "按模块分段",
+      "前置提示词": ["1", 0],
+      "选择模式": "随机抽取",
+      "随机种子": 42,
+      "词库数据": "{\"version\":1,\"kind\":\"module\",\"entries\":[{\"title\":\"Person\",\"module\":\"人物\",\"tags\":[],\"prompt\":\"An adult woman around 30 years old, with natural makeup.\"},{\"title\":\"Pose\",\"module\":\"姿态动作\",\"tags\":[],\"prompt\":\"Standing with both arms relaxed at her sides.\"}]}"
+    }
+  },
+  "3": {
+    "class_type": "PreviewAny",
+    "inputs": { "source": ["2", 0] }
+  }
+}

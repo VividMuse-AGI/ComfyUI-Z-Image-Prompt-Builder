@@ -146,7 +146,7 @@ for (const moduleName of modules) {
   assert.deepEqual(widget(node, "模块词库条目").options.values, [`${moduleName}测试条目`]);
   api.applySelectedModuleEntry(node);
   assert.equal(widget(node, targets[moduleName]).value, `这是${moduleName}自定义内容。`);
-  assert.match(node.__vividMuseTxtModuleApplyButton.name, new RegExp(moduleName));
+  assert.match(node.__vividMuseTxtModuleApplyButton.label, new RegExp(moduleName));
 }
 
 moduleWidget.value = "摄影";

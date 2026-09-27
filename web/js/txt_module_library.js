@@ -302,7 +302,8 @@ function syncModuleLibraryControls(node, resize = true) {
 
   const allEntries = moduleEntries(node);
   const fileName = node.properties?.[LIBRARY_PROPERTY]?.fileName;
-  node.__vividMuseTxtModuleToggle.name = allEntries.length
+  // Dynamic text belongs in the label, not the host's widget-state key.
+  node.__vividMuseTxtModuleToggle.label = node.__vividMuseTxtModuleToggle.__vividMuseDisplayText = allEntries.length
     ? `🧩 TXT模块词库（${fileName || "未命名"} · ${allEntries.length}条）`
     : "🧩 TXT模块词库（全模块）";
 
@@ -310,8 +311,9 @@ function syncModuleLibraryControls(node, resize = true) {
   const targetValue = widgetByName(node, targetWidgetName(node, moduleName))?.value;
   const status = appliedTitle || (targetValue ? "已有内容" : "未设置");
   const action = moduleName === "自定义" ? "启用自定义模块" : "应用到" + moduleName + "模块";
-  node.__vividMuseTxtModuleApplyButton.name = action + "（当前：" + status.slice(0, 16) + "）";
+  node.__vividMuseTxtModuleApplyButton.label = node.__vividMuseTxtModuleApplyButton.__vividMuseDisplayText = action + "（当前：" + status.slice(0, 16) + "）";
   globalThis.__vividMuseZImageI18n?.localizeNode?.(node);
+  node.__vividMuseTxtSelectionRefresh?.();
   if (resize) resizeNode(node);
   markDirty(node);
 }
@@ -322,6 +324,7 @@ function setModuleLibraryExpanded(node, expanded, resize = true) {
   for (const widget of node.__vividMuseTxtModuleControls || []) {
     setWidgetVisible(widget, Boolean(expanded));
   }
+  node.__vividMuseTxtSelectionRefresh?.();
   if (resize) resizeNode(node);
   markDirty(node);
 }
@@ -375,6 +378,7 @@ function chooseTxtModuleFile(node) {
 }
 
 function applySelectedModuleEntry(node) {
+  if (isStandaloneNode(node) && widgetByName(node, "选择模式")?.value === "随机抽取") return false;
   const moduleName = currentModule(node);
   const entryWidget = node.__vividMuseTxtModuleEntryWidget;
   const selected = moduleEntries(node, moduleName)
@@ -419,6 +423,7 @@ function installStandaloneTargetEditTracking(node) {
 }
 
 function clearCurrentModule(node) {
+  if (isStandaloneNode(node) && widgetByName(node, "选择模式")?.value === "随机抽取") return false;
   const moduleName = currentModule(node);
   const targetWidget = widgetByName(node, targetWidgetName(node, moduleName));
   if (!targetWidget) return false;
@@ -552,7 +557,7 @@ function installModuleLibraryWidgets(node) {
     moduleWidget.callback = function (value) {
       const previous = node.properties?.[SELECTED_MODULE_PROPERTY];
       const result = originalCallback?.apply(this, arguments);
-      if (previous && previous !== value) {
+      if (previous && previous !== value && widgetByName(node, "选择模式")?.value !== "随机抽取") {
         const targetWidget = widgetByName(node, "模块提示词");
         if (targetWidget) {
           targetWidget.value = "";
@@ -623,6 +628,11 @@ app.registerExtension({
   name: "VividMuse.ZImagePromptBuilder.TxtModuleLibrary",
   nodeCreated(node) {
     if (!isTargetNode(node)) return;
+    if (isStandaloneNode(node)) node.__vividMuseTxtSelectionEntries = () => moduleEntries(node);
+    if (isStandaloneNode(node)) node.__vividMuseTxtSelectionRestoreControls = () => {
+      syncModuleLibraryControls(node, false);
+      setModuleLibraryExpanded(node, Boolean(node.properties?.[EXPANDED_PROPERTY]), false);
+    };
     if (isStandaloneNode(node)) installCompactWidgetSerialization(node);
     installConfigure(node);
     installModuleLibraryWidgets(node);
