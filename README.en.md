@@ -108,7 +108,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.5.1` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.5.1), download `ComfyUI-Z-Image-Prompt-Builder-v0.5.1.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
+For the recommended manual install, open the [`v0.6.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.6.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.6.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -160,7 +160,7 @@ Canvas → Person → Hair → Clothing → Pose & Action → Scene → Photogra
 - **Z-Image TXT Prompt Library** inserts reusable full prompts; **Z-Image TXT Module Library** inserts a fragment typed as Canvas, Person, Hair, Clothing, Pose & Action, Scene, Photography, Visual Style, or Custom. To replace a standalone structured module, put the TXT module node in that module's position or bypass the original module with **Ctrl+B**; the TXT node does not remove module text that is already present in its incoming string.
 - The English interface renders built-in structured fields in English and inserts the free prompt verbatim according to **Join Position**. User TXT fragments replace their corresponding built-in modules in both outputs; Custom is appended after the eight standard modules. User text is never automatically translated. Supply English free text and TXT fragments for a fully English result.
 
-## Standalone TXT Random Selection (Unreleased)
+## Standalone TXT Random Selection (v0.6.0)
 
 Both standalone TXT nodes now offer **Selection Mode**, defaulting to **Manual Selection** for existing workflows. **Random Selection** chooses one entry on the backend using the seed. The TXT panels inside the full builder are unchanged.
 
@@ -174,7 +174,7 @@ Both standalone TXT nodes now offer **Selection Mode**, defaulting to **Manual S
 
 The API retains canonical input identifiers regardless of interface language. Use the [API-format example](examples/txt-random-api.json) for the exact keys and module values, or export an API prompt from ComfyUI. The library payload is a JSON string shaped like `{"version":1,"kind":"prompt","entries":[{"title":"Example","tags":[],"prompt":"Window-lit portrait"}]}`. Module libraries use `kind:"module"` and include the canonical module value on each entry. Existing TXT limits remain 1 MiB, 500 entries and 20,000 UTF-16 units per body. JSON transport has a separate 8 MiB cap and 1,100,000 total text units, allowing generated titles and escaping overhead.
 
-Local automated tests, text-only execution and real Chinese/English UI checks in classic and Nodes 2.0 layouts have passed. The candidate code has been verified in a test installation but has not been formally released. See the [acceptance record](docs/testing/2026-09-27-txt-random-acceptance.md) for scope and limitations; this is not a compatibility guarantee for every ComfyUI version.
+Local automated tests, text-only execution and real Chinese/English UI checks in classic and Nodes 2.0 layouts have passed. See the [acceptance record](docs/testing/2026-09-27-txt-random-acceptance.md) for scope and limitations; this is not a compatibility guarantee for every ComfyUI version.
 
 ## User Presets, Random Locks and Checks
 
@@ -420,7 +420,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.5.1`
+- Current version: `0.6.0`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

@@ -110,7 +110,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.5.1` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.5.1) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.5.1.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
+推荐从 [`v0.6.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.6.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.6.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -162,7 +162,7 @@ git pull
 - “TXT提示词库”适合插入完整自由提示词；“TXT模块词库”适合按画面基础、人物、发型、服装、姿态动作、场景、摄影、视觉表现或自定义类型插入一个模块片段。若要替代某个独立结构化模块，请在链中用 TXT 模块节点占据该模块的位置，或将原同类型模块设为 `Ctrl+B` 旁路；TXT 节点不会删除已经进入上游字符串的旧模块文字。
 - 英文接口会把内置结构化字段渲染为英文，并将“自由提示词”按“拼接位置”原样加入英文输出，不做自动翻译。TXT 模块片段会在中英文输出中替代对应的内置模块，自定义片段放在八个标准模块之后。需要纯英文结果时，请提供英文自由文本及英文 TXT 片段。
 
-### 独立 TXT 节点随机抽取（未发布）
+### 独立 TXT 节点随机抽取（v0.6.0）
 
 两个独立 TXT 节点新增“选择模式”：默认“手动选择”，旧工作流保持原输出；切到“随机抽取”后，运行时由后端根据种子抽取一条。完整节点内的 TXT 面板不提供此功能。
 
@@ -176,7 +176,7 @@ git pull
 
 API 调用提供可选输入 `选择模式`、`随机种子`、`词库数据`；后者为 JSON 字符串，例如 `{"version":1,"kind":"prompt","entries":[{"title":"示例","tags":[],"prompt":"窗边自然光人像"}]}`。模块库使用 `kind:"module"`，每条增加中文规范模块值，例如 `module:"人物"`。输入键和值保持中文，界面语言不改变接口。TXT 原有 1 MiB、500 条、单条 20,000 字符限制不变；执行 JSON 独立上限为 8 MiB，总文本上限 1,100,000 个 UTF-16 单元，预留标题及 JSON 转义开销。
 
-本地自动化、纯文本执行器及中英文／经典／Nodes 2.0 实机验收已完成，候选代码已在测试安装中验证；尚未正式发布。验收范围与限制见[测试记录](docs/testing/2026-09-27-txt-random-acceptance.md)，不代表所有 ComfyUI 版本的兼容保证。
+本地自动化、纯文本执行器及中英文／经典／Nodes 2.0 实机验收已完成。验收范围与限制见[测试记录](docs/testing/2026-09-27-txt-random-acceptance.md)，不代表所有 ComfyUI 版本的兼容保证。
 
 ### 用户预设、随机锁定与组合检查
 
@@ -463,7 +463,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.5.1`
+- 当前版本：`0.6.0`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上

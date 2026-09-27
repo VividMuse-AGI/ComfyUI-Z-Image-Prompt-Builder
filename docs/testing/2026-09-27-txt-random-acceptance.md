@@ -1,8 +1,6 @@
-# Candidate acceptance / 候选版本验收
+# Candidate acceptance / 候选版本验收（历史记录）
 
-Date: 2026-09-27. Status: locally accepted, not formally released.
-The project version remains 0.5.1 until a new release is explicitly prepared.
-This document describes the unreleased working tree, not the existing v0.5.1 tag.
+Date: 2026-09-27. This is the pre-release acceptance snapshot, recorded while the candidate metadata was still 0.5.1; it does not describe the existing v0.5.1 tag. The accepted features are included in [v0.6.0](../releases/v0.6.0.md). File counts below refer to the 110-file candidate before adding the release notes. Statements about pending publication describe that earlier test stage.
 
 ## Included scope / 本次范围
 
