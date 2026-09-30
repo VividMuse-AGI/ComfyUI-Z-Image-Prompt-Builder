@@ -24,7 +24,8 @@ class ApprovedPoseBundleTests(unittest.TestCase):
             if not isinstance(value, str):
                 return value
             # Intentional wording fixes are asserted separately in the review
-            # regressions. Retain the original full-output snapshot otherwise.
+            # regressions. The snapshot below includes the 2026-09-30 reviewed
+            # English consistency fixes and detailed Chinese fabric deduplication.
             for details in n._ENGLISH_MAKEUP_DETAILS.values():
                 value = value.replace(", " + details, "")
             return (value.replace("full, straight-across bangs", "curtain bangs full bangs")
@@ -35,7 +36,7 @@ class ApprovedPoseBundleTests(unittest.TestCase):
                             n.ZImageChinesePromptBuilder().build_prompt(预设=p, 提示词密度=d)))
                 for p in n.PRESET_OPTIONS[:-1] for d in n.PROMPT_DENSITIES]
         digest = hashlib.sha256(json.dumps(rows, ensure_ascii=False).encode()).hexdigest()
-        self.assertEqual(digest, "cc6ef48749f8e588c13e90105cba38604465724b433b9d02bff8a91a9554890e")
+        self.assertEqual(digest, "c9ec4ae4dfc7d662fd316d25a2e92f83b9d5d9f1ac621ecf1fb2795ba485c6bf")
 
     def test_every_new_chain_is_reachable_in_all_random_scopes(self):
         for preset, bundle_id in n.APPROVED_PRESET_POSE_IDS.items():

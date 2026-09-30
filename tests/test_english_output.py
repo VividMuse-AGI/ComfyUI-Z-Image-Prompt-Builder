@@ -168,15 +168,15 @@ class EnglishOutputTests(unittest.TestCase):
         ):
             self.assertIn(fragment, prompt)
 
-    def test_concise_clothing_keeps_type_and_color_but_omits_material(self):
+    def test_concise_clothing_retains_the_same_properties_as_chinese(self):
         fields = nodes.PRESETS["日系草地单车夏日柔光写真"]
         concise = nodes.render_english_module_fragment("服装", fields, "精简")
         self.assertIn("clean short-sleeve T-shirt in cream white", concise)
         self.assertIn("straight jeans in navy", concise)
-        self.assertNotIn("cotton", concise)
-        self.assertNotIn("denim", concise)
-        self.assertNotIn("high-waisted", concise)
-        self.assertNotIn("wristwatch", concise)
+        self.assertIn("cotton", concise)
+        self.assertIn("denim", concise)
+        self.assertIn("high-waisted", concise)
+        self.assertIn("wristwatch", concise)
 
     def test_scene_english_output_is_stable_across_python_hash_seeds(self):
         code = (

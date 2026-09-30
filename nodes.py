@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import random
 import re
 from itertools import product
@@ -3869,6 +3870,10 @@ STANDARD_FIELD_TEXT: Dict[str, Dict[str, str]] = {
 
 def _preset_values(preset: str) -> Dict[str, str]:
     preset = LEGACY_PRESET_NAMES.get(preset, preset)
+    if preset not in PRESETS:
+        logging.getLogger(__name__).warning(
+            "Unknown Z-Image preset %r; using custom defaults", preset
+        )
     return dict(PRESETS.get(preset, CUSTOM_DEFAULTS))
 
 
@@ -3885,7 +3890,9 @@ def _choose_from_pool(
     if random_scope == RANDOM_SCOPES[2]:
         pool = RANDOM_FIELD_OPTIONS[field_name]
     else:
-        pool = PROFILE_POOLS.get(preset, {}).get(field_name, RANDOM_FIELD_OPTIONS[field_name])
+        profile_pool = PROFILE_POOLS.get(preset, {})
+        pool = (profile_pool[field_name] if field_name in profile_pool
+                else RANDOM_FIELD_OPTIONS[field_name])
     return rng.choice(list(pool))
 
 
@@ -4122,7 +4129,8 @@ def _clothing_recipe_candidates(
             selected = resolved.get(field_name, EMPTY_CHOICE)
             if selected == EMPTY_CHOICE:
                 continue
-            if selected not in (_clothing_recipe_values(recipe, field_name) or ()):
+            values = _clothing_recipe_values(recipe, field_name)
+            if values is not None and selected not in values:
                 compatible = False
                 break
         if compatible:
@@ -4526,6 +4534,7 @@ def resolve_fields(
 
         explicit_scene_locks: Dict[str, str] = {}
         scene_theme_bundles: Sequence[Mapping[str, str]] = ()
+        scene_profile_bundles: Sequence[Mapping[str, str]] = ()
         scene_category_or_profile_bundles: Sequence[Mapping[str, str]] = ()
         category = resolved.get("写真大类", "")
         if random_scope == RANDOM_SCOPES[2]:
@@ -4573,11 +4582,11 @@ def resolve_fields(
                 category_bundles = THEME_CATEGORY_SCENE_BUNDLES.get(
                     category, global_bundles
                 )
-                scene_category_or_profile_bundles = (
-                    *bundles, *category_bundles
-                )
+                scene_profile_bundles = bundles
+                scene_category_or_profile_bundles = category_bundles
                 bundles = (
                     scene_theme_bundles
+                    or scene_profile_bundles
                     or scene_category_or_profile_bundles
                 )
 
@@ -4654,12 +4663,18 @@ def resolve_fields(
                 return all(
                     bundle[field_name] == value
                     for field_name, value in explicit_scene_locks.items()
+                    if value != EMPTY_CHOICE
                 )
 
             candidates = [
                 bundle for bundle in scene_theme_bundles
                 if matches_explicit_scene_locks(bundle)
             ]
+            if not candidates:
+                candidates = [
+                    bundle for bundle in scene_profile_bundles
+                    if matches_explicit_scene_locks(bundle)
+                ]
             if not candidates:
                 candidates = [
                     bundle for bundle in scene_category_or_profile_bundles
@@ -4734,18 +4749,13 @@ def resolve_fields(
 
     for field_name in FIELD_ORDER:
         if field_name in random_fields and field_name not in grouped_random_fields:
-            if field_name == "写真主题":
-                theme_pool = THEME_OPTIONS_BY_CATEGORY.get(
-                    resolved.get("写真大类", ""), tuple(THEME_TEXT)
-                )
-                resolved[field_name] = rng.choice(list(theme_pool))
-            elif field_name == "头部配饰":
+            if field_name == "头部配饰":
+                profile_pool = PROFILE_POOLS.get(preset, {})
                 base_pool = (
                     RANDOM_FIELD_OPTIONS[field_name]
                     if random_scope == RANDOM_SCOPES[2]
-                    else PROFILE_POOLS.get(preset, {}).get(
-                        field_name, RANDOM_FIELD_OPTIONS[field_name]
-                    )
+                    else (profile_pool[field_name] if field_name in profile_pool
+                          else RANDOM_FIELD_OPTIONS[field_name])
                 )
                 compatible_pool = _compatible_headwear_options(
                     resolved.get("发型造型", ""),
@@ -4753,31 +4763,6 @@ def resolve_fields(
                     resolved.get("手部动作", ""),
                 )
                 resolved[field_name] = rng.choice(compatible_pool) if compatible_pool else EMPTY_CHOICE
-            elif (
-                random_scope == RANDOM_SCOPES[2]
-                and field_name
-                in THEME_SUBJECT_FIELD_POOLS.get(
-                    resolved.get("写真主题", ""), {}
-                )
-            ):
-                resolved[field_name] = rng.choice(
-                    THEME_SUBJECT_FIELD_POOLS[resolved["写真主题"]][field_name]
-                )
-            elif field_name == "地域族裔分支":
-                branch_pool = ETHNICITY_BRANCHES_BY_CATEGORY.get(
-                    resolved.get("族裔大类", ""), tuple(ETHNICITY_BRANCH_TEXT)
-                )
-                resolved[field_name] = rng.choice(list(branch_pool))
-            elif (
-                random_scope == RANDOM_SCOPES[2]
-                and field_name
-                in THEME_CATEGORY_FIELD_POOLS.get(
-                    resolved.get("写真大类", ""), {}
-                )
-            ):
-                resolved[field_name] = rng.choice(
-                    THEME_CATEGORY_FIELD_POOLS[resolved["写真大类"]][field_name]
-                )
             else:
                 resolved[field_name] = _choose_from_pool(
                     rng, preset, random_scope, field_name
@@ -5042,11 +5027,16 @@ def _garment_prompt_text(
         or (material and material in garment_type)
     ):
         compact_material = ""
+    if density == "详细" and garment_type:
+        # Keep the full fabric description once, in the dedicated detail clause.
+        compact_material = ""
     compact = "".join(
         part for part in (color, compact_material, garment_type) if part
     )
     if not compact:
         compact = pattern
+    if density == "详细" and material and not garment_type:
+        compact = color
 
     if density == "精简":
         return (
@@ -5060,7 +5050,7 @@ def _garment_prompt_text(
         if noun in ("连衣裙", "连体服")
         else (noun if density == "标准" else f"{noun}为")
     )
-    parts = [f"{prefix}{compact}"]
+    parts = [f"{prefix}{compact}"] if compact else []
     if density == "标准":
         if pattern:
             parts.append(f"带{pattern}图案")
@@ -5069,7 +5059,8 @@ def _garment_prompt_text(
     if garment_type:
         parts.append(_clothing_detail_tail(type_field, garment_type))
     if material:
-        parts.append(f"面料{CLOTHING_VALUE_TEXT[material_field][material]}")
+        material_prefix = "面料" if compact else f"{noun}面料"
+        parts.append(f"{material_prefix}{CLOTHING_VALUE_TEXT[material_field][material]}")
     if pattern:
         parts.append(CLOTHING_VALUE_TEXT[pattern_field][pattern])
     return "，".join(parts)
@@ -6258,6 +6249,43 @@ _ENGLISH_VALUE_OVERRIDES.update({
     ("等效焦段", "手机主摄"): "shot with a phone main camera at approximately 24mm full-frame-equivalent",
     ("眼线造型", "彩色眼线"): "colored eyeliner",
     ("写真主题", "黑白电影肖像"): "photorealistic black-and-white cinematic portrait",
+    ("成像媒介", "专业数码相机摄影"): "professional digital camera photography",
+    ("成像媒介", "全画幅微单摄影"): "full-frame mirrorless photography",
+    ("成像媒介", "半画幅微单摄影"): "APS-C mirrorless photography",
+    ("成像媒介", "数码单反摄影"): "DSLR photography",
+    ("成像媒介", "中画幅数码摄影"): "medium-format digital photography",
+    ("成像媒介", "手机计算摄影"): "computational smartphone photography",
+    ("成像媒介", "便携数码相机摄影"): "compact digital camera photography",
+    ("成像媒介", "早期CCD数码摄影"): "early CCD digital photography",
+    ("成像媒介", "35毫米胶片摄影"): "35mm film photography",
+    ("成像媒介", "中画幅胶片摄影"): "medium-format film photography",
+    ("成像媒介", "即时成像相纸摄影"): "instant-film photography",
+    ("成像媒介", "一次性胶片相机摄影"): "disposable film camera photography",
+})
+
+_ENGLISH_PATTERN_PHRASES = {
+    "细小碎花": "a tiny floral print",
+    "横向条纹": "horizontal stripes",
+    "纵向细条纹": "fine vertical stripes",
+    "细格纹": "a fine plaid pattern",
+    "小波点": "a polka-dot pattern",
+    "暗纹提花": "a subtle jacquard pattern",
+    "植物印花": "a botanical print",
+    "几何纹样": "a geometric pattern",
+    "花卉刺绣": "floral embroidery",
+    "纵向罗纹": "a ribbed texture",
+    "压褶纹理": "a pleated texture",
+    "拼色结构": "color-block panels",
+    "佩斯利纹": "a paisley pattern",
+    "千鸟格": "a houndstooth pattern",
+    "大格纹": "a large plaid pattern",
+    "豹纹": "a leopard print",
+    "波西米亚印花": "a bohemian print",
+}
+_ENGLISH_VALUE_OVERRIDES.update({
+    (prefix + "图案", label): phrase
+    for prefix in ("上装", "下装", "连衣裙", "连体服")
+    for label, phrase in _ENGLISH_PATTERN_PHRASES.items()
 })
 
 _ENGLISH_MAKEUP_DETAILS = {
@@ -6364,6 +6392,9 @@ def _english_atomic_value(field_name: str, value: str) -> str:
     if field_name == "版型细节" and option_id in _ENGLISH_FIT_PHRASES:
         return _ENGLISH_FIT_PHRASES[option_id]
     humanized = _humanize_english_id(field_name, option_id)
+    if field_name in ("族裔大类", "地域族裔分支"):
+        return (humanized.title().replace(" Descent", " descent")
+                .replace("Mixed", "mixed").replace(" Or ", " or "))
     if field_name == "主配色":
         article = "an" if humanized[:1].lower() in "aeiou" else "a"
         return f"with {article} {humanized} color palette"
@@ -6406,7 +6437,9 @@ def _english_person_identity_text(fields: Mapping[str, str]) -> str:
     if ethnicity:
         ethnicity = ethnicity.replace(" descent", "")
     if age and ethnicity:
-        return f"an {ethnicity} woman {age}"
+        article = ("an" if ethnicity[:1].lower() in "aeiou"
+                   and not ethnicity.lower().startswith("european") else "a")
+        return f"{article} {ethnicity} woman {age}"
     if ethnicity:
         return f"an adult {ethnicity} woman"
     if age:
@@ -6427,6 +6460,7 @@ def _english_garment_phrase(
     fields: Mapping[str, str],
     prefix: str,
     density: str,
+    retain_pattern: bool = False,
 ) -> str:
     type_field = f"{prefix}类型"
     garment_type = _english_atomic_value(type_field, fields.get(type_field, EMPTY_CHOICE))
@@ -6441,21 +6475,16 @@ def _english_garment_phrase(
     material_field = f"{prefix}材质"
     pattern_field = f"{prefix}图案"
     color = _english_atomic_value(color_field, fields.get(color_field, EMPTY_CHOICE))
-    material = ""
+    material = _english_atomic_value(
+        material_field, fields.get(material_field, EMPTY_CHOICE)
+    )
     pattern = ""
-    if density != "精简" or not garment_type:
-        material = _english_atomic_value(
-            material_field, fields.get(material_field, EMPTY_CHOICE)
-        )
+    if density != "精简" or not garment_type or retain_pattern:
         pattern = _english_atomic_value(
             pattern_field, fields.get(pattern_field, EMPTY_CHOICE)
         )
-        if _english_option_id(
-            pattern_field, fields.get(pattern_field, EMPTY_CHOICE)
-        ) == "solid" and garment_type:
-            pattern = ""
 
-    # The selected module supplies a generic noun, never an invented garment style.
+    # A known outfit structure supplies the noun when its type is unspecified.
     garment_type = garment_type or {
         "上装": "top", "下装": "bottoms", "连衣裙": "dress", "连体服": "jumpsuit",
     }[prefix]
@@ -6549,8 +6578,21 @@ def _english_clothing_prompt_text(
     }.get(mode, ())
     if mode == EMPTY_CHOICE:
         garment_prefixes = ("连衣裙", "连体服", "上装", "下装")
+    atomic_details = []
+    if mode == EMPTY_CHOICE:
+        # Blank-canvas properties do not imply that any garment was selected.
+        atomic_details = [
+            _english_atomic_value(prefix + suffix, fields.get(prefix + suffix, EMPTY_CHOICE))
+            for prefix in garment_prefixes
+            if fields.get(prefix + "类型", EMPTY_CHOICE) == EMPTY_CHOICE
+            for suffix in ("颜色", "材质", "图案")
+        ]
+        garment_prefixes = tuple(
+            prefix for prefix in garment_prefixes
+            if fields.get(prefix + "类型", EMPTY_CHOICE) != EMPTY_CHOICE
+        )
     garments = [
-        _english_garment_phrase(fields, prefix, density)
+        _english_garment_phrase(fields, prefix, density, retain_pattern=mode == EMPTY_CHOICE)
         for prefix in garment_prefixes
     ]
     garments = [garment for garment in garments if garment]
@@ -6559,33 +6601,33 @@ def _english_clothing_prompt_text(
     else:
         outfit = _join_english_list(garments)
     parts = [f"wearing {outfit}"] if outfit else []
+    parts.extend(detail for detail in atomic_details if detail)
 
-    # Standalone details remain useful even when no garment was selected.
-    if density != "精简" or not garments:
-        fit = _english_atomic_value("版型细节", fields.get("版型细节", EMPTY_CHOICE))
-        if fit:
-            parts.append(fit)
+    # These selected details are rendered at every density, matching Chinese.
+    fit = _english_atomic_value("版型细节", fields.get("版型细节", EMPTY_CHOICE))
+    if fit:
+        parts.append(fit)
 
-        legwear_value = fields.get("袜装", EMPTY_CHOICE)
-        legwear_id = _english_option_id("袜装", legwear_value)
-        legwear = _ENGLISH_LEGWEAR_PHRASES.get(
-            legwear_id, _english_atomic_value("袜装", legwear_value)
-        )
-        shoes_value = fields.get("鞋履", EMPTY_CHOICE)
-        shoes_id = _english_option_id("鞋履", shoes_value)
-        shoes = _ENGLISH_SHOE_PHRASES.get(
-            shoes_id, _english_atomic_value("鞋履", shoes_value)
-        )
-        if legwear or shoes:
-            parts.append(f"styled with {_join_english_list([legwear, shoes])}")
+    legwear_value = fields.get("袜装", EMPTY_CHOICE)
+    legwear_id = _english_option_id("袜装", legwear_value)
+    legwear = _ENGLISH_LEGWEAR_PHRASES.get(
+        legwear_id, _english_atomic_value("袜装", legwear_value)
+    )
+    shoes_value = fields.get("鞋履", EMPTY_CHOICE)
+    shoes_id = _english_option_id("鞋履", shoes_value)
+    shoes = _ENGLISH_SHOE_PHRASES.get(
+        shoes_id, _english_atomic_value("鞋履", shoes_value)
+    )
+    if legwear or shoes:
+        parts.append(f"styled with {_join_english_list([legwear, shoes])}")
 
-        accessory_value = fields.get("服装配件", EMPTY_CHOICE)
-        accessory_id = _english_option_id("服装配件", accessory_value)
-        accessory = _ENGLISH_ACCESSORY_PHRASES.get(
-            accessory_id, _english_atomic_value("服装配件", accessory_value)
-        )
-        if accessory:
-            parts.append(f"accessorized with {accessory}")
+    accessory_value = fields.get("服装配件", EMPTY_CHOICE)
+    accessory_id = _english_option_id("服装配件", accessory_value)
+    accessory = _ENGLISH_ACCESSORY_PHRASES.get(
+        accessory_id, _english_atomic_value("服装配件", accessory_value)
+    )
+    if accessory:
+        parts.append(f"accessorized with {accessory}")
 
     return ", ".join(parts)
 
@@ -6599,22 +6641,9 @@ def _english_module_fields(module_name: str, fields: Mapping[str, str], density:
             *PERSON_FACE_FIELDS, *PERSON_EYE_FIELDS, *PERSON_SKIN_FIELDS,
             *makeup_fields, *BODY_OUTPUT_FIELDS,
         )
-        if density == "精简":
-            return ("脸型", "眼型", "肤色", *makeup_fields[:1], "基础身形")
         return detail_fields
     if module_name == "发型":
-        if density == "精简":
-            return ("发色", "头发长度", "发型造型", "刘海")
         return HAIR_OUTPUT_FIELDS
-    if module_name == "服装":
-        active = tuple(CLOTHING_MODE_FIELDS.get(fields.get("穿搭结构"), ()))
-        fields_to_render = (*active, "版型细节", "袜装", "鞋履", "服装配件")
-        if density == "精简":
-            fields_to_render = tuple(
-                field_name for field_name in fields_to_render
-                if field_name.endswith("类型") or field_name.endswith("颜色") or field_name in ("鞋履",)
-            )
-        return fields_to_render
     if module_name == "姿态动作":
         if density == "精简":
             return ("基础姿态", "手部动作", "视线", "表情")
@@ -6626,15 +6655,21 @@ def _english_module_fields(module_name: str, fields: Mapping[str, str], density:
             return ("场景地点", "时间切片", "天气状态", "前景框景", "背景环境", "环境细节")
         return SCENE_OUTPUT_FIELDS
     if module_name == "摄影":
-        if density == "精简":
-            return ("景别", "等效焦段", "机位", "对焦位置")
-        if density == "标准":
+        if density != "详细":
             return tuple(field_name for field_name in CAMERA_OUTPUT_FIELDS if field_name != "拍摄距离")
         return CAMERA_OUTPUT_FIELDS
     if module_name == "视觉表现":
+        if density == "详细":
+            return VISUAL_OUTPUT_FIELDS
+        active = tuple(field for field in VISUAL_OUTPUT_FIELDS
+                       if fields.get(field, EMPTY_CHOICE) != EMPTY_CHOICE)
+        finish = tuple(field for field in ("细节质地", "高光处理", "颗粒质感") if field in active)
+        if not finish and "影像风格" in active:
+            finish = ("影像风格",)
+        color = tuple(field for field in COLOR_OUTPUT_FIELDS if field in active)
         if density == "精简":
-            return ("主光来源", "光线方向", "光线质地", "主配色", "影像风格")
-        return VISUAL_OUTPUT_FIELDS
+            color, finish = color[:2], finish[:2]
+        return (*LIGHTING_OUTPUT_FIELDS, *color, *finish)
     return ()
 
 
@@ -6699,8 +6734,9 @@ def join_english_prompt_text(first: str, second: str) -> str:
         return second_text
     if not second_text:
         return first_text
-    separator = " " if first_text.endswith((".", "!", "?", ";", ":", ",")) else ". "
+    separator = " " if first_text.endswith(tuple(".!?;:,。！？；：，、…")) else ". "
     return f"{first_text}{separator}{second_text}"
+
 
 def _normalize_user_module_fragment(value: str) -> str:
     """Trim only outer separators so imported Chinese prose joins cleanly."""
@@ -6710,10 +6746,18 @@ def _normalize_user_module_fragment(value: str) -> str:
     return value.strip().strip("，；。,. ;\t\r\n")
 
 
+def _terminate_chinese_prompt(text: str) -> str:
+    """End a generated section without stacking punctuation onto user prose."""
+    text = text.strip().rstrip("，；,; ")
+    if not text or text.endswith(tuple("。！？.!?…")):
+        return text
+    return f"{text}。"
+
+
 def _module_paragraphs(parts: Iterable[str]) -> str:
     """One positive-language paragraph per nonempty module, without labels."""
-    clean = (part.strip().rstrip("，；。,. ;") for part in parts)
-    return "\n\n".join(f"{part}。" for part in clean if part)
+    clean = (_terminate_chinese_prompt(part) for part in parts)
+    return "\n\n".join(part for part in clean if part)
 
 
 def join_prompt_paragraphs(first: str, second: str) -> str:
@@ -6974,7 +7018,7 @@ def compose_prompt_text(
                 for values in grouped_parts.values()
             )
         prompt_body = "；".join(part for part in parts if part)
-        return f"{prompt_body}。" if prompt_body else ""
+        return _terminate_chinese_prompt(prompt_body)
 
     if density == "精简":
         base_text = user_base_text or f"{brief('画面比例')}，{brief('成像媒介')}，{brief('写真主题')}"
@@ -6994,10 +7038,10 @@ def compose_prompt_text(
             f"{pose_core_text}；",
             f"{scene_text}；",
             f"{visual_text}；",
-            f"{camera_text}。",
+            _terminate_chinese_prompt(camera_text),
         ]
         if user_custom_text:
-            segments.append(f"{user_custom_text}。")
+            segments.append(_terminate_chinese_prompt(user_custom_text))
         return "".join(segments)
 
     if density == "标准":
@@ -7013,15 +7057,15 @@ def compose_prompt_text(
                 pose_core_text, scene_text, camera_text, visual_text, user_custom_text,
             ))
         segments = [
-            f"{base_text}。{person_core_text}；",
-            f"{hair_text}；{clothing_text}。",
-            f"{standard_pose_core_text}。",
-            f"{scene_text}。",
-            f"{visual_text}。",
-            f"{camera_text}。",
+            f"{_terminate_chinese_prompt(base_text)}{person_core_text}；",
+            f"{hair_text}；{_terminate_chinese_prompt(clothing_text)}",
+            _terminate_chinese_prompt(standard_pose_core_text),
+            _terminate_chinese_prompt(scene_text),
+            _terminate_chinese_prompt(visual_text),
+            _terminate_chinese_prompt(camera_text),
         ]
         if user_custom_text:
-            segments.append(f"{user_custom_text}。")
+            segments.append(_terminate_chinese_prompt(user_custom_text))
         return "".join(segments)
 
     base_text = user_base_text or f"{full('画面比例')}，{full('成像媒介')}，{full('写真主题')}"
@@ -7041,10 +7085,10 @@ def compose_prompt_text(
         f"{standard_pose_core_text}；",
         f"{scene_text}；",
         f"{visual_text}；",
-        f"{camera_text}。",
+        _terminate_chinese_prompt(camera_text),
     ]
     if user_custom_text:
-        segments.append(f"{user_custom_text}。")
+        segments.append(_terminate_chinese_prompt(user_custom_text))
     return "".join(segments)
 
 
@@ -7055,8 +7099,9 @@ def join_prompt_text(
 ) -> str:
     """Join free text and structured text without rewriting either body."""
 
-    free_text = "" if free_prompt is None else free_prompt
-    structured_text = "" if structured_prompt is None else structured_prompt
+    free_text = "" if free_prompt is None or not free_prompt.strip() else free_prompt
+    structured_text = ("" if structured_prompt is None or not structured_prompt.strip()
+                       else structured_prompt)
     if free_text == "":
         return structured_text
     if structured_text == "":
