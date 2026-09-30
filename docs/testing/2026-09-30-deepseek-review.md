@@ -2,7 +2,7 @@
 
 Date: 2026-09-30. Baseline: published v0.6.0, commit `2f82c6d70d7b9ca5d550f171e7998eddfaf7be09`.
 
-This record reconciles all 20 findings in the supplied DeepSeek review against the actual source and behavioral tests. It distinguishes reproduced discrepancies from compatibility rules, unproven concerns and maintenance suggestions. Verification was completed locally before the user authorized committing and pushing the fixes to GitHub. The version metadata remains 0.6.0; this is an unreleased source update, not a new versioned release. No image generation or installation update was performed.
+This record reconciles all 20 findings in the supplied DeepSeek review against the actual source and behavioral tests. It distinguishes reproduced discrepancies from compatibility rules, unproven concerns and maintenance suggestions. Verification was completed locally with candidate metadata still at 0.6.0, before the user authorized committing and pushing the fixes. The fixes are included in [v0.6.1](../releases/v0.6.1.md). Counts and publication-status statements below describe the earlier audit stage; the existing v0.6.0 tag is unchanged. No images were generated during this review.
 
 ## Scope / 审核范围
 
@@ -95,4 +95,4 @@ python scripts/generate_resolution_catalog.py
 
 ## Publication status / 发布状态
 
-审核和干净副本验证完成后，用户已授权提交并推送修复。后续操作范围为将本次修复并入 GitHub 的 main 分支；不修改 0.6.0 版本号，不创建新标签、Release 或正式安装包，也不更新本机已安装节点。托管 CI 的实际结果以对应提交的 GitHub Actions 记录为准。
+审核阶段的修复已通过提交 `df9d5eb` 推送至 main；对应 [GitHub CI](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/actions/runs/36655275658) 已成功。当时版本号保持 0.6.0，未创建标签／Release，也未更新本机节点。用户随后另行授权发布 v0.6.1 并同步本机；发布范围见 [v0.6.1 说明](../releases/v0.6.1.md)。此处保留审核阶段的历史验证数据，不把 113 个文件的候选副本与后续正式安装包混为一谈。
