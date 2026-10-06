@@ -95,7 +95,8 @@ function installCompactWidgetSerialization(node) {
   const originalOnSerialize = node.onSerialize;
   node.onSerialize = function (info) {
     const result = originalOnSerialize?.apply(this, arguments);
-    if (Array.isArray(info.widgets_values)) {
+    if (Array.isArray(info.widgets_values)
+        && info.widgets_values.length !== (node.widgets || []).filter(widget => widget.serialize !== false).length) {
       info.widgets_values = (node.widgets || []).flatMap((widget, index) => (
         widget.serialize === false ? [] : [info.widgets_values[index]]
       ));
@@ -106,6 +107,7 @@ function installCompactWidgetSerialization(node) {
 }
 
 function markDirty(node) {
+  globalThis.__vividMusePromptDiagnostics?.refresh(node);
   node.setDirtyCanvas?.(true, true);
   app.graph?.setDirtyCanvas?.(true, true);
 }

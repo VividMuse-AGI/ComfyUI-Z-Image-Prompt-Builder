@@ -174,7 +174,12 @@ function install(node) {
     refresh(node, kind);
     // LiteGraph may have copied values before onSerialize. Update that raw slot
     // before the existing helper compaction guard, in either extension order.
-    if (Array.isArray(info.widgets_values)) info.widgets_values[node.widgets.indexOf(data)] = data.value;
+    if (Array.isArray(info.widgets_values)) {
+      const serialized = node.widgets.filter(w => w.serialize !== false);
+      const index = info.widgets_values.length === serialized.length
+        ? serialized.indexOf(data) : node.widgets.indexOf(data);
+      info.widgets_values[index] = data.value;
+    }
     return oldSerialize?.apply(this, arguments);
   };
   const oldExecuted = node.onExecuted;

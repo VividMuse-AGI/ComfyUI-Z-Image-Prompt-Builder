@@ -4324,6 +4324,8 @@ def resolve_fields(
     random_scope: str,
     seed: int,
     requested: Mapping[str, str],
+    *,
+    request_trace: Dict[str, str] | None = None,
 ) -> Dict[str, str]:
     """Resolve presets, explicit locks and deterministic random fields."""
 
@@ -4455,6 +4457,8 @@ def resolve_fields(
     rng = random.Random(int(seed) & MAX_SEED)
     resolved = _preset_values(preset)
     random_fields: set[str] = set()
+    if request_trace is not None:
+        request_trace.update({name: requested.get(name, FOLLOW_PRESET) for name in FIELD_ORDER})
 
     for field_name in FIELD_ORDER:
         value = requested.get(field_name, FOLLOW_PRESET)
@@ -6772,11 +6776,18 @@ def compose_prompt_text(
     user_pose_fragment: str = "",
     user_module_fragments: Mapping[str, str] | None = None,
     separate_modules: bool = False,
+    module_fragments: Dict[str, str] | None = None,
 ) -> str:
     """Compose a positive prompt at the requested information density."""
 
     if density not in PROMPT_DENSITIES:
         density = "标准"
+
+    def record_fragments(values):
+        if module_fragments is not None:
+            module_fragments.update(zip(USER_MODULE_INPUTS, values))
+
+    record_fragments([""] * len(USER_MODULE_INPUTS))
 
     brief = lambda field: _brief_text(fields, field)
     full = lambda field: FIELD_TEXT[field][fields[field]]
@@ -7011,8 +7022,12 @@ def compose_prompt_text(
                 append_part(formatter(field).rstrip("，；。 "))
         if user_custom_text:
             parts.append(user_custom_text)
+        grouped_parts["自定义"] = [user_custom_text]
+        record_fragments([
+            "；".join(part for part in values if part)
+            for values in grouped_parts.values()
+        ])
         if separate_modules:
-            grouped_parts["自定义"] = [user_custom_text]
             return _module_paragraphs(
                 "；".join(part for part in values if part)
                 for values in grouped_parts.values()
@@ -7027,6 +7042,8 @@ def compose_prompt_text(
         scene_text = user_scene_text or _scene_prompt_text(fields, density)
         camera_text = user_camera_text or _camera_prompt_text(fields, density)
         visual_text = user_visual_text or _visual_prompt_text(fields, density)
+        record_fragments((base_text, person_core_text, hair_text, clothing_text,
+                          pose_core_text, scene_text, camera_text, visual_text, user_custom_text))
         if separate_modules:
             return _module_paragraphs((
                 base_text, person_core_text, hair_text, clothing_text,
@@ -7051,6 +7068,8 @@ def compose_prompt_text(
         scene_text = user_scene_text or _scene_prompt_text(fields, density)
         camera_text = user_camera_text or _camera_prompt_text(fields, density)
         visual_text = user_visual_text or _visual_prompt_text(fields, density)
+        record_fragments((base_text, person_core_text, hair_text, clothing_text,
+                          standard_pose_core_text, scene_text, camera_text, visual_text, user_custom_text))
         if separate_modules:
             return _module_paragraphs((
                 base_text, person_core_text, hair_text, clothing_text,
@@ -7074,6 +7093,8 @@ def compose_prompt_text(
     scene_text = user_scene_text or _scene_prompt_text(fields, density)
     camera_text = user_camera_text or _camera_prompt_text(fields, density)
     visual_text = user_visual_text or _visual_prompt_text(fields, density)
+    record_fragments((base_text, person_core_text, hair_text, clothing_text,
+                      standard_pose_core_text, scene_text, camera_text, visual_text, user_custom_text))
     if separate_modules:
         return _module_paragraphs((
             base_text, person_core_text, hair_text, clothing_text,
@@ -7145,6 +7166,7 @@ def build_prompt_text(
 class ZImageChinesePromptBuilder:
     """Build a structured Chinese positive prompt for adult portrait photography."""
 
+    HAS_INTERMEDIATE_OUTPUT = True
     CATEGORY = "VividMuse/Z-Image"
     FUNCTION = "build_prompt"
     RETURN_TYPES = ("STRING", "INT", "INT", "STRING")
@@ -7168,7 +7190,7 @@ class ZImageChinesePromptBuilder:
             "随机范围": (
                 RANDOM_SCOPES,
                 {
-                    "tooltip": "局部微调只动少量细节；同主题重拍保留主题和人物；跨风格混搭允许全部字段变化。",
+                    "tooltip": "控制生成随机组合按钮启用的字段范围，并影响随机候选池。局部微调只动少量细节，同主题重拍保留主题和人物，跨风格混搭允许全部字段变化。运行只抽取已设为随机抽取的字段，不会自动启用其他字段。",
                 },
             ),
             "随机种子": (
@@ -7178,7 +7200,7 @@ class ZImageChinesePromptBuilder:
                     "min": 0,
                     "max": MAX_SEED,
                     "control_after_generate": True,
-                    "tooltip": "相同选项和相同种子会生成相同提示词。",
+                    "tooltip": "相同选项和种子可复现。只有设为随机抽取的字段随种子变化；指定值、跟随预设和不使用保持固定。不同种子也可能抽到相同结果。",
                 },
             ),
         }
@@ -7263,9 +7285,11 @@ class ZImageChinesePromptBuilder:
             {"default": "按模块分段", "tooltip": "按模块分段用空行分隔各模块和自由提示词；连续拼接保留原有格式。"},
         )
         optional.update(RESOLUTION_INPUTS)
-        return {"required": inputs, "optional": optional}
+        return {"required": inputs, "optional": optional, "hidden": {"unique_id": "UNIQUE_ID"}}
 
     def build_prompt(self, **kwargs):
+        unique_id = kwargs.pop("unique_id", None)
+        submitted = dict(kwargs)
         preset = kwargs.pop("预设", PRESET_OPTIONS[0])
         density = kwargs.pop("提示词密度", "标准")
         free_prompt = kwargs.pop("自由提示词", "")
@@ -7278,10 +7302,12 @@ class ZImageChinesePromptBuilder:
         }
         random_scope = kwargs.pop("随机范围", RANDOM_SCOPES[0])
         seed = kwargs.pop("随机种子", 0)
-        fields = resolve_fields(preset, random_scope, seed, kwargs)
+        request_trace = {} if unique_id is not None else None
+        fields = resolve_fields(preset, random_scope, seed, kwargs, request_trace=request_trace)
+        fragments = {} if unique_id is not None else None
         structured_prompt = compose_prompt_text(
             fields, density, user_module_fragments=user_module_fragments,
-            separate_modules=separate_modules,
+            separate_modules=separate_modules, module_fragments=fragments,
         )
         if separate_modules:
             first, second = (
@@ -7293,6 +7319,7 @@ class ZImageChinesePromptBuilder:
             prompt = join_prompt_text(free_prompt, structured_prompt, join_position)
         english_join = join_prompt_paragraphs if separate_modules else join_english_prompt_text
         english_structured_prompt = ""
+        english_fragments = {}
         for module_name in (*_ENGLISH_MODULE_ORDER, "自定义"):
             supplied = user_module_fragments.get(module_name, "")
             fragment = supplied if isinstance(supplied, str) and supplied.strip() else (
@@ -7300,6 +7327,7 @@ class ZImageChinesePromptBuilder:
                 if module_name != "自定义" else ""
             )
             english_structured_prompt = english_join(english_structured_prompt, fragment)
+            english_fragments[module_name] = fragment
         if join_position == "结构化模块在前":
             english_prompt = english_join(english_structured_prompt, free_prompt)
         else:
@@ -7308,7 +7336,31 @@ class ZImageChinesePromptBuilder:
         if aspect not in ASPECT_RESOLUTIONS:
             aspect = _preset_values(preset)["画面比例"]
         width, height = resolution_from_options(aspect, resolution_options)
-        return prompt, width, height, english_prompt
+        result = (prompt, width, height, english_prompt)
+        if unique_id is None:
+            return result  # Preserve the direct Python API; ComfyUI supplies UNIQUE_ID.
+        try:
+            from .prompt_diagnostics import execution_result
+        except ImportError:
+            from prompt_diagnostics import execution_result
+
+        def render_pair(resolved):
+            zh = compose_prompt_text(resolved, density, user_module_fragments=user_module_fragments,
+                                     separate_modules=separate_modules)
+            en = ""
+            for name in (*_ENGLISH_MODULE_ORDER, "自定义"):
+                supplied = user_module_fragments.get(name, "")
+                part = supplied if isinstance(supplied, str) and supplied.strip() else (
+                    render_english_module_fragment(name, resolved, density) if name != "自定义" else "")
+                en = english_join(en, part)
+            return zh, en
+
+        # Passing the module object avoids duplicate imports and circular dependencies.
+        import sys
+        return execution_result(result, core=sys.modules[__name__], scope="全部模块", seed=seed,
+                                settings=submitted, fields=fields, fragments=fragments,
+                                english_fragments=english_fragments, render_pair=render_pair,
+                                replacements=user_module_fragments, request_trace=request_trace)
 
 
 NODE_CLASS_MAPPINGS = {

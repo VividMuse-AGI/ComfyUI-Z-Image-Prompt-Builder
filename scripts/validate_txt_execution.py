@@ -6,10 +6,20 @@ import argparse
 import asyncio
 import copy
 import importlib.util
+import inspect
 import json
 from pathlib import Path
 import sys
 from types import SimpleNamespace
+
+
+def create_executor(execution, server):
+    """Use only constructor options supported by the isolated host version."""
+    options = {"cache_type": execution.CacheType.CLASSIC,
+               "cache_args": {"ram": 0, "ram_inactive": 0}}
+    if "asset_manager" in inspect.signature(execution.PromptExecutor).parameters:
+        options["asset_manager"] = SimpleNamespace(enabled=False)
+    return execution.PromptExecutor(server, **options)
 
 
 def main():
@@ -48,8 +58,7 @@ def main():
     events = []
     server = SimpleNamespace(client_id=None, last_node_id=None,
                              send_sync=lambda event, data, *rest: events.append((event, data)))
-    executor = execution.PromptExecutor(server, cache_type=execution.CacheType.CLASSIC,
-        cache_args={"ram": 0, "ram_inactive": 0}, asset_manager=SimpleNamespace(enabled=False))
+    executor = create_executor(execution, server)
 
     def run(inputs, kind="prompt"):
         graph = {"1": {"class_type": "VividMuse_ZImageTxtPromptLibrary" if kind == "prompt"

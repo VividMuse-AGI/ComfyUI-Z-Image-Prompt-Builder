@@ -12,9 +12,11 @@ from typing import Mapping
 try:  # Package import inside ComfyUI.
     from . import nodes as core
     from .txt_selection import SELECTION_MODES, select_txt
+    from .prompt_diagnostics import execution_result
 except ImportError:  # Direct import used by the repository tests.
     import nodes as core
     from txt_selection import SELECTION_MODES, select_txt
+    from prompt_diagnostics import execution_result
 
 
 MODULE_FIELD_GROUPS: Mapping[str, tuple[str, ...]] = {
@@ -165,6 +167,7 @@ class ZImageModuleNodeBase:
     """Shared implementation for one chainable structured prompt module."""
 
     MODULE_NAME = ""
+    HAS_INTERMEDIATE_OUTPUT = True
     CATEGORY = "VividMuse/Z-Image/模块"
     FUNCTION = "build_module"
     RETURN_TYPES = ("STRING", "STRING")
@@ -196,7 +199,7 @@ class ZImageModuleNodeBase:
                     "min": 0,
                     "max": core.MAX_SEED,
                     "control_after_generate": True,
-                    "tooltip": "相同模块选项和种子会得到相同结果。",
+                    "tooltip": "相同选项和种子可复现。只有设为随机抽取的字段随种子变化；指定值、跟随预设和不使用保持固定。不同种子也可能抽到相同结果。",
                 },
             ),
         }
@@ -211,6 +214,7 @@ class ZImageModuleNodeBase:
             inputs[field_name] = (choices, {"default": core.FOLLOW_PRESET})
         return {
             "required": inputs,
+            "hidden": {"unique_id": "UNIQUE_ID"},
             "optional": {
                 "前置提示词": (
                     "STRING",
@@ -249,6 +253,8 @@ class ZImageModuleNodeBase:
         )
 
     def build_module(self, **kwargs):
+        unique_id = kwargs.pop("unique_id", None)
+        submitted = dict(kwargs)
         preset = kwargs.pop("预设", DEFAULT_MODULE_PRESET)
         density = kwargs.pop("提示词密度", "标准")
         seed = kwargs.pop("随机种子", 0)
@@ -279,11 +285,13 @@ class ZImageModuleNodeBase:
                 field_name,
                 core.FOLLOW_PRESET,
             )
+        request_trace = {} if unique_id is not None else None
         fields = core.resolve_fields(
             preset,
             core.RANDOM_SCOPES[1],
             seed,
             requested,
+            request_trace=request_trace,
         )
         context_fields = dict(upstream_context)
         for module_name in upstream_opaque_modules:
@@ -314,7 +322,7 @@ class ZImageModuleNodeBase:
         english_prompt = english_join(
             english_prefix, english_fragment
         )
-        return self._result(
+        result = self._result(
             prompt,
             english_prompt,
             fields,
@@ -322,6 +330,16 @@ class ZImageModuleNodeBase:
             upstream_opaque_modules,
             resolution_options=resolution_options,
         )
+        if unique_id is None:
+            return result
+        def render_pair(resolved):
+            return (render_module_fragment(self.MODULE_NAME, resolved, density),
+                    core.render_english_module_fragment(self.MODULE_NAME, resolved, density))
+        return execution_result(result, core=core, scope=self.MODULE_NAME, seed=seed,
+                                settings=submitted, fields=render_fields,
+                                fragments={self.MODULE_NAME: fragment},
+                                english_fragments={self.MODULE_NAME: english_fragment},
+                                render_pair=render_pair, context=upstream_context, request_trace=request_trace)
 
 
 class ZImageCanvasModule(ZImageModuleNodeBase):

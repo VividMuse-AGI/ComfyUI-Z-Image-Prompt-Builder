@@ -110,7 +110,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.6.1` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.6.1) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.6.1.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
+推荐从 [`v0.7.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.7.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.7.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -137,7 +137,7 @@ git pull
 1. 添加“Z-Image 中文提示词生成器”节点。
 2. 选择写真预设和提示词密度。
 3. 保留“跟随预设”，或在任意字段中指定内容。
-4. 需要变化的字段选择“随机抽取”，设置随机范围和随机种子。
+4. 需要变化的字段选择“随机抽取”，设置随机范围和随机种子；仅改变种子不会自动启用随机。
 5. 也可以点击“🎲 生成随机组合”。
 6. 在“当前编辑模块”中选择要编辑的分类；界面一次只显示该模块，切换模块只改变显示并保留每个字段值。需要改变启用状态时，点击“仅启用当前模块”；按需使用“清空结构化模块”保留手写内容，或使用“全部清空”清除两部分。
 7. 将“中文提示词”连接到 Z-Image 文本编码节点；如工作流需要英文描述，可改用末尾的“英文提示词”输出。
@@ -177,6 +177,19 @@ git pull
 API 调用提供可选输入 `选择模式`、`随机种子`、`词库数据`；后者为 JSON 字符串，例如 `{"version":1,"kind":"prompt","entries":[{"title":"示例","tags":[],"prompt":"窗边自然光人像"}]}`。模块库使用 `kind:"module"`，每条增加中文规范模块值，例如 `module:"人物"`。输入键和值保持中文，界面语言不改变接口。TXT 原有 1 MiB、500 条、单条 20,000 字符限制不变；执行 JSON 独立上限为 8 MiB，总文本上限 1,100,000 个 UTF-16 单元，预留标题及 JSON 转义开销。
 
 本地自动化、纯文本执行器及中英文／经典／Nodes 2.0 实机验收已完成。验收范围与限制见[测试记录](docs/testing/2026-09-27-txt-random-acceptance.md)，不代表所有 ComfyUI 版本的兼容保证。
+
+### 随机状态与执行结果
+
+完整节点和八个独立模块新增一个紧凑入口“随机状态与执行结果”，点击后查看只读详情，不增加常驻长面板。
+
+- 提示当前是否启用随机，区分指定值、跟随预设、随机和省略。随机范围既控制随机按钮启用的字段，也影响候选池；Run 不会自动开启其他字段。
+- 记录实际提交种子、中英文输出、解析字段及模块变化。输入框生成后显示的下一次种子不会覆盖记录；改动选项后提示历史结果仅供参考。
+- 说明用户模块替代、完整套组联动、当前为空及字段未影响文本等情况。移除单字段后的文本差异不代表候选数量或生图效果；不会编造总组合数。
+- 最近 5 次执行仅保存在内存，不写入工作流。缓存重放也可显示；首次记录或设置／上下文变化时不计算模块差异。
+- 结果关联本页面提交时的节点实例，切换工作流后不会写到同编号的其他节点。未知来源任务及多个实例共享同一内部节点对象的子图不显示诊断；提示词输出仍可正常使用。诊断关联记录最多保留 128 次提交。
+- 连接输入以执行值为准，面板不预判上游修改。详情是打开时的快照，运行或编辑后重新打开可查看最新状态。内存中的诊断不写入工作流，但 ComfyUI 自身的执行历史可能保存返回的 UI 数据。
+
+此功能从 v0.7.0 提供。自动化回归、隔离纯文本执行、中英文／经典／Nodes 2.0 代表界面、保存恢复和正常刷新已通过验收；另补齐真实删除／撤销、快速提交种子与诊断对应，以及 ComfyUI 0.31.1／前端 1.48.7 的基本兼容。缓存回显已在该旧版组合及 ComfyUI 0.39.0／前端 1.53.10 验证，具体范围见[验收记录](docs/testing/2026-10-07-focused-release-acceptance.md)。其他宿主版本和堆内存专项不包含在兼容承诺中。
 
 ### 用户预设、随机锁定与组合检查
 
@@ -463,7 +476,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.6.1`
+- 当前版本：`0.7.0`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上

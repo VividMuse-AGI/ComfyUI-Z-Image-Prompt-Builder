@@ -41,9 +41,10 @@ function make(kind, reverse = false) {
 const w = (node, name) => node.widgets.find(w => w.name === name);
 const set = (node, name, value) => { const item = w(node, name); item.value = value; item.callback?.(value); };
 const read = node => JSON.parse(w(node, "词库数据").serializeValue());
-function save(node) {
+function save(node, compact = false) {
   const info = { properties: structuredClone(node.properties), widgets_values: [] };
-  node.widgets.forEach((w, i) => { if (w.serialize !== false) info.widgets_values[i] = w.value; });
+  if (compact) info.widgets_values = node.widgets.filter(w => w.serialize !== false).map(w => w.value);
+  else node.widgets.forEach((w, i) => { if (w.serialize !== false) info.widgets_values[i] = w.value; });
   node.onSerialize?.(info);
   return JSON.parse(JSON.stringify(info));
 }
@@ -100,6 +101,7 @@ for (const reverse of [false, true]) {
     }
     const apiSnapshot = w(node, "词库数据").serializeValue();
     const saved = save(node);
+    assert.deepEqual(save(node, true), saved, "Compact and sparse host serialization must preserve the same TXT payload and draft");
     const copy = make(kind, reverse);
     restore(copy, saved);
     assert.equal(w(copy, "选择模式").value, "随机抽取");

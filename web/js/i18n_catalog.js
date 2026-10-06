@@ -2583,8 +2583,9 @@ export const EN_CATALOG = {
     "自由提示词": "Write your own positive prompt. Both Chinese and English outputs preserve it verbatim and place it according to Join Position.",
     "输出排版": "Separate modules and free text with blank lines, or keep the original continuous format.",
     "选择模式": "Manual uses your draft. Random samples the library by seed, preserving the draft and disabling manual apply. Different seeds may select the same entry.",
-    "随机种子": "The same selections and seed produce the same prompt.",
-    "随机范围": "Fine Tune changes a few details; Same Theme Reshoot keeps theme and person; Cross-style Mix can change every field.",
+    "随机状态与执行结果": "View random status and last actual output; inputs are not modified.",
+    "随机种子": "Same selections and seed are reproducible. Only Random fields vary by seed; Fixed, Follow Preset and Omit stay fixed. Different seeds may draw the same result.",
+    "随机范围": "Controls which fields the randomize button enables and affects random candidate pools. Fine Tune changes a few details, Same Theme Reshoot keeps theme/person, and Cross-style Mix allows all fields. Run samples only fields already set to Random; it does not enable other fields.",
     "预设": "Provides compatible preset values and randomization pools."
   },
   "uiLabels": {
@@ -2604,6 +2605,7 @@ export const EN_CATALOG = {
     "清除已导入词库": "Remove Imported Library",
     "清除模块词库": "Remove Module Library",
     "随机抽取：尚未执行": "Random Selection: Not Executed Yet",
+    "随机状态与执行结果": "Random Status and Execution Result",
     "🎲 生成本模块随机组合": "🎲 Randomize This Module",
     "🎲 生成随机组合": "🎲 Generate Random Combination",
     "📚 TXT用户词库": "📚 TXT Prompt Library",

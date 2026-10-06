@@ -108,7 +108,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.6.1` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.6.1), download `ComfyUI-Z-Image-Prompt-Builder-v0.6.1.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
+For the recommended manual install, open the [`v0.7.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.7.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.7.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -135,7 +135,7 @@ In ComfyUI Settings, search for **Z-Image Prompt Builder: Interface language** a
 1. Add the **Z-Image Prompt Builder** node.
 2. Pick a portrait preset and a prompt density.
 3. Leave fields as **Follow Preset**, or set specific values anywhere.
-4. Set fields you want varied to **Random**, then set a random scope and seed.
+4. Set fields you want varied to **Random**, then set a random scope and seed. Changing the seed alone does not enable randomization.
 5. Alternatively click **🎲 Generate Random Combination**.
 6. Use **Module to Edit** to edit one category at a time; switching modules only changes the display and preserves every field value. Use **Enable Only This Module** to change enabled state, **Clear Structured Modules** to keep free text, or **Clear Everything** to wipe both.
 7. Connect **Chinese Prompt** to a Z-Image text-encoding node, or use **English Prompt** for a workflow that expects English natural language.
@@ -175,6 +175,19 @@ Both standalone TXT nodes now offer **Selection Mode**, defaulting to **Manual S
 The API retains canonical input identifiers regardless of interface language. Use the [API-format example](examples/txt-random-api.json) for the exact keys and module values, or export an API prompt from ComfyUI. The library payload is a JSON string shaped like `{"version":1,"kind":"prompt","entries":[{"title":"Example","tags":[],"prompt":"Window-lit portrait"}]}`. Module libraries use `kind:"module"` and include the canonical module value on each entry. Existing TXT limits remain 1 MiB, 500 entries and 20,000 UTF-16 units per body. JSON transport has a separate 8 MiB cap and 1,100,000 total text units, allowing generated titles and escaping overhead.
 
 Local automated tests, text-only execution and real Chinese/English UI checks in classic and Nodes 2.0 layouts have passed. See the [acceptance record](docs/testing/2026-09-27-txt-random-acceptance.md) for scope and limitations; this is not a compatibility guarantee for every ComfyUI version.
+
+## Random Status and Execution Result
+
+The full builder and eight standalone modules gain one compact read-only details button, without a permanent tall panel.
+
+- Distinguishes Fixed, Follow Preset, Random and Omit. Random Scope controls which fields the randomize button enables and also affects candidate pools. Run does not enable other fields.
+- Records the actual submitted seed, Chinese/English outputs, resolved fields and module changes. The next seed displayed by the editor never replaces that record. Edited settings mark it as historical.
+- Explains user replacements, complete-combination rules, empty results and fields that did not affect the text. Rendering without one field measures text sensitivity, not candidate counts or image quality. No total combination count is invented.
+- Retains at most five executions in memory, not in the workflow. Cached results can replay; first records and different settings/context are not compared.
+- Results are bound to the node instances submitted from this page. Switching workflows cannot write them to another node with the same ID. Diagnostics are omitted for unassociated jobs and subgraphs whose multiple instances share one internal node object; prompt outputs remain usable. Submission associations retain at most 128 jobs.
+- Connected inputs use executed values; upstream edits are not predicted. The details panel is a snapshot: reopen it after running or editing. Diagnostics are not saved in the workflow, but ComfyUI's own execution history may store returned UI data.
+
+Available since v0.7.0. Automated regressions, isolated text execution, representative Chinese/English and Classic/Nodes 2.0 UI cases, saved-workflow restoration and normal reloads passed. Follow-up acceptance also covered actual deletion and undo, rapid seed submissions matched to diagnostics, and basic compatibility with ComfyUI 0.31.1 / frontend 1.48.7. Cache replay was verified in that older combination and ComfyUI 0.39.0 / frontend 1.53.10. See the [acceptance record](docs/testing/2026-10-07-focused-release-acceptance.md) for the exact scope. Other host versions and heap-memory analysis are outside these compatibility claims.
 
 ## User Presets, Random Locks and Checks
 
@@ -420,7 +433,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.6.1`
+- Current version: `0.7.0`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

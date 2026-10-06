@@ -236,6 +236,7 @@ OUTPUT_LABELS_EN = {
 
 
 UI_LABELS_EN = {
+    "随机状态与执行结果": "Random Status and Execution Result",
     "上次随机结果（点击查看）": "Last Random Result (Click to View)",
     "随机抽取：尚未执行": "Random Selection: Not Executed Yet",
     "分辨率设置": "Resolution Settings",
@@ -260,6 +261,7 @@ UI_LABELS_EN = {
 
 
 TOOLTIPS_EN = {
+    "随机状态与执行结果": "View random status and last actual output; inputs are not modified.",
     "选择模式": "Manual uses your draft. Random samples the library by seed, preserving the draft and disabling manual apply. Different seeds may select the same entry.",
     "百万像素（MP）": "1 MP = 1,000,000 pixels. Enter 1, 2, 3 or 0.5; range 0.1–16 MP. Editing this activates Preserve Aspect Ratio; divisible dimensions make the actual area approximate.",
     "尺寸整除倍数": "Both width and height must be divisible by this number, e.g. 8, 16, 32 or 64. Default 8; supports multiples of 4 from 8 to 128. Larger values may increase pixel-area error. Editing this when using saved fixed dimensions enables Preserve Aspect Ratio.",
@@ -275,8 +277,8 @@ TOOLTIPS_EN = {
     "分辨率设置": "Preview actual dimensions and megapixels; expand to choose a calculation method. Editing Megapixels enables Preserve Aspect Ratio. Connect width and height to the latent node; Free Prompt and TXT ratios are not parsed.",
     "预设": "Provides compatible preset values and randomization pools.",
     "提示词密度": "Concise keeps essentials, Standard keeps primary photography details, and Detailed keeps all fields.",
-    "随机范围": "Fine Tune changes a few details; Same Theme Reshoot keeps theme and person; Cross-style Mix can change every field.",
-    "随机种子": "The same selections and seed produce the same prompt.",
+    "随机范围": "Controls which fields the randomize button enables and affects random candidate pools. Fine Tune changes a few details, Same Theme Reshoot keeps theme/person, and Cross-style Mix allows all fields. Run samples only fields already set to Random; it does not enable other fields.",
+    "随机种子": "Same selections and seed are reproducible. Only Random fields vary by seed; Fixed, Follow Preset and Omit stay fixed. Different seeds may draw the same result.",
     "自由提示词": (
         "Write your own positive prompt. Both Chinese and English outputs preserve "
         "it verbatim and place it according to Join Position."
