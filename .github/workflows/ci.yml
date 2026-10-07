@@ -33,6 +33,10 @@ jobs:
         run: |
           python scripts/generate_resolution_catalog.py
           git diff --exit-code -- web/js/resolution_catalog.js
+      - name: Verify searchable library catalog
+        run: |
+          python scripts/generate_library_catalog.py
+          git diff --exit-code -- web/js/library_catalog.js
       - name: Run frontend regressions
         run: |
           for source in web/js/*.js; do node --check "$source"; done

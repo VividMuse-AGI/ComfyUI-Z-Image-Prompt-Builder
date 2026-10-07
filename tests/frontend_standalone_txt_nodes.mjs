@@ -89,6 +89,15 @@ globalThis.__standaloneTxtApi.applySelectedTxtPrompt(txtNode);
 assert.equal(widget(txtNode, "自由提示词").value, "第二条完整提示词");
 globalThis.__standaloneTxtApi.clearFreePrompt(txtNode);
 assert.equal(widget(txtNode, "自由提示词").value, "");
+const promptEntry = txtNode.__vividMusePromptDiscovery.entries()[1];
+assert.equal(txtNode.__vividMusePromptDiscovery.apply(promptEntry), true);
+assert.equal(widget(txtNode, "自由提示词").value, promptEntry.prompt);
+const mode = backendWidget("选择模式", "随机抽取"); txtNode.widgets.push(mode);
+const oldTitle = widget(txtNode, "词库条目").value;
+assert.equal(txtNode.__vividMusePromptDiscovery.apply(txtNode.__vividMusePromptDiscovery.entries()[0]), false);
+assert.equal(widget(txtNode, "词库条目").value, oldTitle);
+assert.equal(widget(txtNode, "自由提示词").value, promptEntry.prompt);
+mode.value = "手动选择";
 
 const moduleExtension = await loadScript(
   "txt_module_library.js",
@@ -169,6 +178,12 @@ assert.equal(
 );
 globalThis.__standaloneModuleApi.clearCurrentModule(moduleNode);
 assert.equal(widget(moduleNode, "模块提示词").value, "");
+const actionEntry = moduleNode.__vividMuseModuleDiscovery.entries().find(entry => entry.module === "姿态动作");
+assert.equal(moduleNode.__vividMuseModuleDiscovery.apply(actionEntry), true);
+assert.equal(widget(moduleNode, "模块提示词").value, actionEntry.prompt);
+moduleNode.widgets.push(backendWidget("选择模式", "随机抽取"));
+assert.equal(moduleNode.__vividMuseModuleDiscovery.apply(actionEntry), false);
+assert.equal(widget(moduleNode, "模块提示词").value, actionEntry.prompt);
 globalThis.__standaloneModuleApi.clearModuleLibrary(moduleNode);
 assert.equal(moduleNode.properties.vividMuseTxtModuleLibrary, undefined);
 

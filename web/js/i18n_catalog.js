@@ -2743,6 +2743,7 @@ export const EN_CATALOG = {
     "鞋履": "Footwear",
     "预设": "Preset",
     "颗粒质感": "Grain",
-    "高光处理": "Highlight Handling"
+    "高光处理": "Highlight Handling",
+    "🔎 素材搜索与收藏": "🔎 Search & Favorites"
   }
 };

@@ -367,13 +367,18 @@ function chooseTxtModuleFile(node) {
   input.type = "file";
   input.accept = ".txt,text/plain";
   input.multiple = false;
+  input.hidden = true;
+  globalThis.document.body?.append(input);
+  input.oncancel = () => input.remove?.();
   input.onchange = async () => {
     const file = input.files?.[0];
-    if (!file) return;
+    if (!file) { input.remove?.(); return; }
     try {
       await importTxtModuleFile(node, file);
     } catch (error) {
       notifyError(error);
+    } finally {
+      input.remove?.();
     }
   };
   input.click();
@@ -630,6 +635,21 @@ app.registerExtension({
   name: "VividMuse.ZImagePromptBuilder.TxtModuleLibrary",
   nodeCreated(node) {
     if (!isTargetNode(node)) return;
+    node.__vividMuseModuleDiscovery = {
+      entries: () => moduleEntries(node),
+      fileName: () => node.properties?.[LIBRARY_PROPERTY]?.fileName || "",
+      module: () => currentModule(node),
+      apply: entry => {
+        if (isStandaloneNode(node) && widgetByName(node, "选择模式")?.value === "随机抽取") return false;
+        if (!moduleEntries(node).some(item => item.module === entry.module && item.title === entry.title && item.prompt === entry.prompt)) return false;
+        const moduleWidget = node.__vividMuseTxtModuleModuleWidget;
+        moduleWidget.value = entry.module;
+        moduleWidget.callback?.(entry.module);
+        syncModuleLibraryControls(node, false);
+        node.__vividMuseTxtModuleEntryWidget.value = entry.title;
+        return applySelectedModuleEntry(node);
+      },
+    };
     if (isStandaloneNode(node)) node.__vividMuseTxtSelectionEntries = () => moduleEntries(node);
     if (isStandaloneNode(node)) node.__vividMuseTxtSelectionRestoreControls = () => {
       syncModuleLibraryControls(node, false);

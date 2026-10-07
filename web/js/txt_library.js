@@ -276,13 +276,18 @@ function chooseTxtPromptFile(node) {
   input.type = "file";
   input.accept = ".txt,text/plain";
   input.multiple = false;
+  input.hidden = true;
+  globalThis.document.body?.append(input);
+  input.oncancel = () => input.remove?.();
   input.onchange = async () => {
     const file = input.files?.[0];
-    if (!file) return;
+    if (!file) { input.remove?.(); return; }
     try {
       await importTxtPromptFile(node, file);
     } catch (error) {
       notifyError(error);
+    } finally {
+      input.remove?.();
     }
   };
   input.click();
@@ -419,6 +424,16 @@ app.registerExtension({
   name: "VividMuse.ZImagePromptBuilder.TxtLibrary",
   nodeCreated(node) {
     if (!isTargetNode(node)) return;
+    node.__vividMusePromptDiscovery = {
+      entries: () => libraryEntries(node),
+      fileName: () => node.properties?.[LIBRARY_PROPERTY]?.fileName || "",
+      apply: entry => {
+        if (isStandaloneNode(node) && widgetByName(node, "选择模式")?.value === "随机抽取") return false;
+        if (!libraryEntries(node).some(item => item.title === entry.title && item.prompt === entry.prompt)) return false;
+        node.__vividMuseTxtLibraryEntryWidget.value = entry.title;
+        return applySelectedTxtPrompt(node);
+      },
+    };
     if (isStandaloneNode(node)) node.__vividMuseTxtSelectionEntries = () => libraryEntries(node);
     if (isStandaloneNode(node)) installCompactWidgetSerialization(node);
     installTxtLibraryConfigure(node);

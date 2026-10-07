@@ -4,6 +4,18 @@
 
 由 VividMuse 开发的 ComfyUI 写真提示词节点。通过写真预设、结构化下拉字段和可复现的随机组合，同时生成中文与英文自然语言正向提示词。
 
+## 素材搜索与收藏
+
+从 v0.8.0 起提供以下功能；节点数量仍为 11 个。
+
+完整节点、八个独立模块和两个 TXT 节点提供“🔎 素材搜索与收藏”弹窗。完整节点默认搜索当前编辑模块，独立模块搜索本模块当前可用字段；TXT 内容需要先在原有词库面板中导入，再在弹窗切换素材来源。
+
+搜索支持中英文名称和实际短语，多个关键词需全部匹配，特殊字符按文字处理。TXT 标签可以多选，满足任一所选标签即可，再与关键词和模块条件共同筛选；“无标签”也可单独选择。选择条目只显示预览，点击“应用所选条目”才写入字段；关闭或没有结果均不改变原内容。TXT 独立节点在随机模式下需先切回手动选择才能应用。
+
+收藏与最近使用保存在当前浏览器、当前站点中；最近使用仅记录成功应用，去重保留 20 条。收藏可导出为 JSON 再导入，只包含条目标识，不含 TXT 正文；恢复 TXT 收藏需重新导入相同文件名及内容的词库。更换词库内容后，旧引用会被跳过，不能套到另一个同名条目。存储不可用时显示提示，选择和运行仍可继续。
+
+所有搜索、标签、收藏和最近使用条件都只影响列表，不限制随机抽取，不进入提示词或执行参数；工作流仍保存实际字段和已有 TXT 数据。无需在线服务或新增 Python 依赖。
+
 ## 功能
 
 八个独立模块节点与两个 TXT 节点也提供“输出排版”。选择“按模块分段”会在前置提示词与当前内容之间插入一个空行，空内容跳过，TXT 正文内部换行不变。八个模块的中英文链均支持；TXT 节点仍为一个原文输出，不自动翻译。整条链要分段时，请在每个参与拼接的节点选择此选项；不会重新拆分上游已经连续拼接的文本。新节点默认分段，旧工作流保持连续拼接。
@@ -110,7 +122,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.7.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.7.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.7.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
+推荐从 [`v0.8.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.8.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.8.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -254,7 +266,7 @@ API 调用提供可选输入 `选择模式`、`随机种子`、`词库数据`；
 格式规则：
 
 - `## 标题`：必需的条目名称；重复标题会自动附加序号。
-- `标签：`：可省略，也可写为英文 `Tags:` 或 `Tag:`；使用中文或英文逗号分隔。标签不会进入最终提示词；当前版本暂不提供标签筛选，它主要用于文件内整理和后续扩展。
+- `标签：`：可省略，也可写为英文 `Tags:` 或 `Tag:`；使用中文或英文逗号分隔。标签不会进入最终提示词，可在“素材搜索与收藏”弹窗中筛选。
 - 正文：标题和标签之后的所有内容，可以是一行或多行。
 - `---`：建议用于分隔条目；遇到下一个 `## 标题` 时也会自动结束上一条。
 - 说明性注释应放在第一个 `## 标题` 之前，并以 `#` 开头。
@@ -476,7 +488,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.7.0`
+- 当前版本：`0.8.0`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上

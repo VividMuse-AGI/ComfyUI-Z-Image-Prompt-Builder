@@ -18,6 +18,8 @@ REQUIRED = {
     "pyproject.toml", "LICENSE", "README.md", "README.en.md",
     "phrase_library/core_v1.json", "web/js/preset_sync.js",
     "web/js/i18n_catalog.js", "web/js/resolution_catalog.js",
+    "web/js/library_discovery.js", "web/js/library_discovery_core.js",
+    "web/js/library_catalog.js",
 }
 
 

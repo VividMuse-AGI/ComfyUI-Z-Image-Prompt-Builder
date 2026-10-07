@@ -8,6 +8,18 @@ A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-langua
 
 > English documentation | [Chinese documentation](README.md)
 
+## Search & Favorites
+
+Available since v0.8.0. The package still contains 11 nodes.
+
+The full builder, eight module nodes, and both TXT nodes offer a compact **🔎 Search & Favorites** dialog. The builder searches the module currently being edited; standalone modules search their available fields. Import TXT files through the existing library panels first, then select the corresponding source in the dialog.
+
+Search matches Chinese and English names and phrases, ignores English case, and requires all space-separated keywords. Special characters are literal. TXT tag filters match any selected tag, combined with the query and module restriction; **Untagged** is available too. Selecting a row previews it; only **Apply Selected Entry** changes inputs. Closing or finding no results leaves existing content unchanged. Standalone TXT nodes must use Manual Selection before a searched entry can be applied.
+
+Favorites and the last 20 distinct successfully applied entries are saved in the current browser for the current site. Favorites can be exported and imported as JSON containing references only, never TXT bodies. To restore TXT favorites, reimport the same filename and library content; changed libraries skip stale references rather than matching another entry by title. If preference storage is unavailable, selection and execution still work with a warning.
+
+Queries, tags, favorites, and recent views only filter the list. They do not limit random sampling, alter prompt output, or become execution inputs. Workflows still contain the actual selected values and existing TXT data. No online service or additional Python dependency is required.
+
 ## Features
 
 - Outputs both **Chinese and English positive prompts**; no negative prompts are generated. English is rendered deterministically from built-in structured fields without an online translation service.
@@ -108,7 +120,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.7.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.7.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.7.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
+For the recommended manual install, open the [`v0.8.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.8.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.8.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -235,7 +247,7 @@ Tags: portrait, night, cinematic
 Format rules:
 
 - `## Title` identifies an entry. Duplicate titles receive an automatic numeric suffix.
-- **Tags:** or **Tag:** is optional and accepts either English or Chinese commas. Tags are stored as metadata and never added to the prompt. Legacy Chinese keyword variants remain supported; see the compatibility reference below.
+- **Tags:** or **Tag:** is optional and accepts either English or Chinese commas. Tags can be filtered in **Search & Favorites** and are never added to the prompt. Legacy Chinese keyword variants remain supported; see the compatibility reference below.
 - Everything after the title and optional tags is the prompt body; it may span multiple lines.
 - A line containing only `---` is the recommended separator. A new `## Title` also closes the previous entry.
 - Put explanatory comments before the first entry and start them with `#`.
@@ -433,7 +445,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.7.0`
+- Current version: `0.8.0`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

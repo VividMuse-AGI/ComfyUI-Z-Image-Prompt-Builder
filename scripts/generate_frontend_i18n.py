@@ -183,6 +183,7 @@ MODULE_LABELS_EN = {
 
 WIDGET_LABELS_EN = {
     **FIELD_LABELS_EN,
+    "🔎 素材搜索与收藏": "🔎 Search & Favorites",
     "预设": "Preset",
     "提示词密度": "Prompt Density",
     "随机范围": "Randomization Scope",
