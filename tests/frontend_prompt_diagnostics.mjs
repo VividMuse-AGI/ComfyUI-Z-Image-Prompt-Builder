@@ -157,7 +157,11 @@ assert.equal(txt.widgets.length, 0);
 const elements = [];
 sandbox.document = {
   body: {append() {}}, createElement(tag) {
-    const el = {tag, style: {}, append() {}, close() {this.onclose?.();}, remove() {this.removed = true;}, showModal() {this.opened = true;}};
+    const el = {tag, style: {}, attrs: {}, children: [], events: {},
+      setAttribute(k,v) {this.attrs[k]=v;}, addEventListener(k,fn) {this.events[k]=fn;},
+      append(...children) {this.children.push(...children);}, click() {this.onclick?.();},
+      close() {this.onclose?.();}, remove() {this.removed = true;}, showModal() {this.opened = true;}};
+    Object.defineProperty(el, "innerHTML", {set() {throw Error("No HTML writes");}});
     elements.push(el); return el;
   },
 };
@@ -172,6 +176,79 @@ elements.find(el => el.tag === "button").onclick();
 assert.ok(elements.find(el => el.tag === "dialog").removed);
 assert.equal(node.__vividMusePromptDialog, null);
 assert.equal(w(node, "自由提示词").value, "修改草稿");
+
+// Selection, copy and JSON export must use the chosen execution, not editor values.
+await submit("result-old", "18446744073709551615", "历史中文\n分段", node);
+node.__vividMusePromptHistory.at(-1).data.framing={mode:"按景别适配",status:"applied",shot:"胸部以上",
+  omitted:[{field:"鞋履",module:"服装",value:"球鞋",reason:"outside_frame"}]};
+await submit("result-new", "12", "最新中文", node);
+set(node, "随机种子", 9999); set(node, "自由提示词", "当前改动");
+const serializedBefore = JSON.stringify(node.widgets.map(w=>w.value));
+const historyBefore = JSON.stringify(node.__vividMusePromptHistory);
+node.__vividMusePromptStatusButton.callback();
+const resultDialog = node.__vividMusePromptDialog;
+const all = root => [root,...root.children.flatMap(all)];
+const labeled = label => all(resultDialog).find(el=>el.attrs["aria-label"]===label);
+const action = label => all(resultDialog).find(el=>el.tag==="button" && el.textContent===label);
+const select = labeled("选择执行记录");
+select.value = "1"; select.onchange();
+assert.equal(labeled("中文结果正文").textContent, "历史中文\n分段");
+assert.equal(all(resultDialog).find(el=>el.tag==="details").open, undefined, "Verbose diagnostics start collapsed");
+let copied;
+sandbox.navigator = {clipboard:{async writeText(value){copied=value;}}};
+await action("复制中文").onclick(); assert.equal(copied,"历史中文\n分段");
+await action("复制英文").onclick(); assert.equal(copied,"black hair");
+sandbox.navigator.clipboard.writeText = async()=>{throw Error("denied");};
+await action("复制中文").onclick();
+assert.match(all(resultDialog).find(el=>el.attrs.role==="status").textContent,/复制失败/);
+assert.equal(labeled("中文结果正文").textContent,"历史中文\n分段");
+let exportedBlob, revoked;
+sandbox.Blob = Blob;
+sandbox.URL = {createObjectURL(blob){exportedBlob=blob;return "blob:test";},revokeObjectURL(url){revoked=url;}};
+action("导出此结果").onclick();
+const snapshot = JSON.parse(await exportedBlob.text());
+assert.equal(snapshot.kind,"vividmuse-prompt-result"); assert.equal(snapshot.version,1);
+assert.equal(snapshot.seed,"18446744073709551615"); assert.equal(snapshot.zh,"历史中文\n分段");
+assert.equal(snapshot.en,"black hair"); assert.equal(snapshot.source.prompt_id,"result-old");
+assert.deepEqual(snapshot.resolved,{发色:"黑色",鞋履:"不使用"});
+assert.equal(snapshot.limitations.executable_workflow,false);
+assert.equal(snapshot.limitations.includes_upstream_workflow,false);
+assert.equal(snapshot.framing.omitted[0].field,"鞋履");
+assert.match(all(resultDialog).find(el=>el.tag==="details").children[1].textContent,/按景别省略，原选择保留/);
+while(timers.length) timers.shift()(); assert.equal(revoked,"blob:test");
+assert.equal(JSON.stringify(node.widgets.map(w=>w.value)),serializedBefore);
+assert.equal(JSON.stringify(node.__vividMusePromptHistory),historyBefore);
+sandbox.URL.createObjectURL=()=>{throw Error("download unavailable");};
+action("导出此结果").onclick();
+assert.match(all(resultDialog).find(el=>el.attrs.role==="status").textContent,/无法导出/);
+// Later runs may evict history entries; an open panel must still show its snapshot.
+for(let i=0;i<6;i++) await submit(`panel-open-${i}`,i,"later",node);
+select.value="1";select.onchange();
+assert.equal(labeled("中文结果正文").textContent,"历史中文\n分段");
+sandbox.navigator.clipboard.writeText=async value=>{copied=value;};
+await action("复制中文").onclick();assert.equal(copied,"历史中文\n分段");
+for(const name of ["keyup","copy","cut","paste","wheel"]) {
+  let stopped=false; resultDialog.events[name]({stopPropagation(){stopped=true;}}); assert.ok(stopped);
+}
+resultDialog.events.keydown({key:"Escape",isComposing:true,stopPropagation(){},preventDefault(){throw Error("IME interrupted");}});
+assert.equal(resultDialog.removed,undefined);
+resultDialog.events.keydown({key:"Escape",stopPropagation(){},preventDefault(){}});
+assert.ok(resultDialog.removed);
+lang="en";
+node.__vividMusePromptStatusButton.callback();
+assert.ok(all(node.__vividMusePromptDialog).find(el=>el.textContent==="Copy English"));
+node.__vividMusePromptDialog.close(); lang="zh";
+for (const [index,kind] of kinds.entries()) {
+  const recordNode=make(kind,100+index);
+  recordNode.__vividMusePromptStatusButton.callback();
+  assert.ok(all(recordNode.__vividMusePromptDialog).some(el=>/暂无实际执行记录/.test(el.textContent)));
+  assert.ok(!all(recordNode.__vividMusePromptDialog).some(el=>el.textContent==="导出此结果"));
+  recordNode.__vividMusePromptDialog.close();
+  tools.acceptResult(recordNode,data(recordNode,"18446744073709551615",`${kind}正文`));
+  recordNode.__vividMusePromptStatusButton.callback();
+  assert.equal(all(recordNode.__vividMusePromptDialog).find(el=>el.attrs["aria-label"]==="中文结果正文").textContent,`${kind}正文`);
+  recordNode.__vividMusePromptDialog.close();nodes.delete(String(recordNode.id));
+}
 
 // Unknown/other-client executions never acquire ownership from execution_start.
 event("execution_start", {prompt_id: "other-client"});

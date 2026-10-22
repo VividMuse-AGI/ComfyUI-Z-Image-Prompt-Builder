@@ -12,8 +12,10 @@ from typing import Dict, Iterable, Mapping, Sequence
 
 try:
     from .resolution import ASPECT_RESOLUTIONS, RESOLUTION_INPUTS, resolution_from_options
+    from .framing import FRAMING_INPUT, FRAMING_MODES, framing_view
 except ImportError:
     from resolution import ASPECT_RESOLUTIONS, RESOLUTION_INPUTS, resolution_from_options
+    from framing import FRAMING_INPUT, FRAMING_MODES, framing_view
 
 
 FOLLOW_PRESET = "跟随预设"
@@ -7285,6 +7287,7 @@ class ZImageChinesePromptBuilder:
             {"default": "按模块分段", "tooltip": "按模块分段用空行分隔各模块和自由提示词；连续拼接保留原有格式。"},
         )
         optional.update(RESOLUTION_INPUTS)
+        optional["构图适配"] = FRAMING_INPUT
         return {"required": inputs, "optional": optional, "hidden": {"unique_id": "UNIQUE_ID"}}
 
     def build_prompt(self, **kwargs):
@@ -7295,6 +7298,7 @@ class ZImageChinesePromptBuilder:
         free_prompt = kwargs.pop("自由提示词", "")
         join_position = kwargs.pop("拼接位置", PROMPT_JOIN_POSITIONS[0])
         separate_modules = kwargs.pop("输出排版", "连续拼接") == "按模块分段"
+        framing_mode = kwargs.pop("构图适配", FRAMING_MODES[0])
         resolution_options = {name: kwargs.pop(name) for name in RESOLUTION_INPUTS if name in kwargs}
         user_module_fragments = {
             module_name: kwargs.pop(input_name, "")
@@ -7304,9 +7308,22 @@ class ZImageChinesePromptBuilder:
         seed = kwargs.pop("随机种子", 0)
         request_trace = {} if unique_id is not None else None
         fields = resolve_fields(preset, random_scope, seed, kwargs, request_trace=request_trace)
+        replacements = {name for name, value in user_module_fragments.items()
+                        if isinstance(value, str) and value.strip()}
+
+        def effective_view(resolved):
+            view, report = framing_view(resolved, framing_mode, shot=resolved.get("景别"),
+                                        replacements=replacements, camera_opaque="摄影" in replacements)
+            if report["status"] == "opaque_camera":
+                # No explicit framing survives the user camera replacement.
+                # Avoid falling back to the preset's close-shot density rule.
+                view["景别"] = EMPTY_CHOICE
+            return view, report
+
+        render_fields, framing_report = effective_view(fields)
         fragments = {} if unique_id is not None else None
         structured_prompt = compose_prompt_text(
-            fields, density, user_module_fragments=user_module_fragments,
+            render_fields, density, user_module_fragments=user_module_fragments,
             separate_modules=separate_modules, module_fragments=fragments,
         )
         if separate_modules:
@@ -7323,7 +7340,7 @@ class ZImageChinesePromptBuilder:
         for module_name in (*_ENGLISH_MODULE_ORDER, "自定义"):
             supplied = user_module_fragments.get(module_name, "")
             fragment = supplied if isinstance(supplied, str) and supplied.strip() else (
-                render_english_module_fragment(module_name, fields, density)
+                render_english_module_fragment(module_name, render_fields, density)
                 if module_name != "自定义" else ""
             )
             english_structured_prompt = english_join(english_structured_prompt, fragment)
@@ -7345,6 +7362,7 @@ class ZImageChinesePromptBuilder:
             from prompt_diagnostics import execution_result
 
         def render_pair(resolved):
+            resolved, _ = effective_view(resolved)
             zh = compose_prompt_text(resolved, density, user_module_fragments=user_module_fragments,
                                      separate_modules=separate_modules)
             en = ""
@@ -7360,7 +7378,8 @@ class ZImageChinesePromptBuilder:
         return execution_result(result, core=sys.modules[__name__], scope="全部模块", seed=seed,
                                 settings=submitted, fields=fields, fragments=fragments,
                                 english_fragments=english_fragments, render_pair=render_pair,
-                                replacements=user_module_fragments, request_trace=request_trace)
+                                replacements=user_module_fragments, request_trace=request_trace,
+                                framing=framing_report)
 
 
 NODE_CLASS_MAPPINGS = {

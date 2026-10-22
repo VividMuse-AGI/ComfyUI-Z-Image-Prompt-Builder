@@ -191,10 +191,9 @@ function summary(node, lang = language()) {
   return en ? `Random: ${countText} · Last result` : `随机 ${randomCount} 项 · 查看上次结果`;
 }
 
-function details(node) {
+function details(node, record = node.__vividMusePromptHistory?.at(-1), includeOutputs = true) {
   const state = currentState(node);
   const history = node.__vividMusePromptHistory || [];
-  const record = history.at(-1);
   const lines = [text("随机状态与实际执行结果", "Random Status and Actual Execution Result"), summary(node), "",
     text("此面板为打开时的快照；运行或修改后请关闭并重新打开。",
       "This panel is a snapshot. Close and reopen after running or editing."),
@@ -218,8 +217,8 @@ function details(node) {
     + (row.mode === "connected" ? "" : ` — ${displayValue(node, row.field, row.value)}`));
   if (!record) return lines.join("\n");
   const { data, changed } = record;
-  lines.push("", text("上次实际执行（不是实时预览）", "Last Actual Execution (Not a Live Preview)"));
-  if (stale(node, record)) lines.push(text("设置已修改，上次结果仅供参考。", "Settings changed; this historical result is for reference only."));
+  lines.push("", text("所选实际执行（不是实时预览）", "Selected Actual Execution (Not a Live Preview)"));
+  if (stale(node, record)) lines.push(text("当前设置与所选记录不同，历史结果仅供参考。", "Current settings differ from the selected record; this historical result is for reference only."));
   lines.push(`${tr("随机种子")}: ${data.seed}`, `${text("执行范围", "Execution Scope")}: ${data.scope === "全部模块" ? text("全部模块", "All Modules") : tr(data.scope)}`);
   if (record.promptId) lines.push(`${text("执行标识", "Execution ID")}: ${record.promptId}`);
   if (record.executionNode) lines.push(`${text("节点执行路径", "Node Execution Path")}: ${record.executionNode}`);
@@ -236,19 +235,32 @@ function details(node) {
       "Output is unchanged: identical inputs and seed are reproducible (including cached replay); different seeds can also draw the same result. This does not establish candidate counts."));
   }
   const statuses = {
+    framing_omitted: text("被构图适配省略（原选择保留）", "Omitted by framing adaptation (selection preserved)"),
     user_replaced: text("被用户模块文本替代", "Replaced by user module text"),
     not_randomized: text("完整套组优先等联动规则取消了此字段的随机", "Randomization removed by complete-combination/dependency rules"),
     empty: text("本次解析为空（受联动／候选规则影响；未测量候选数）", "Resolved to empty (dependency/candidate rules; count not measured)"),
     not_in_text: text("移除此字段不会改变当前文本（分支／密度／构图等）", "Removing this field does not change the current text (branch/density/framing, etc.)"),
     text_affecting: text("移除此字段会改变当前文本", "Removing this field changes the current text"),
   };
+  if (data.framing && data.framing.status !== "disabled") {
+    const reasons = {
+      applied: text("已按明确景别适配", "Adapted to explicit framing"),
+      no_context: text("没有明确摄影景别，未适配", "No explicit camera framing; not adapted"),
+      opaque_camera: text("摄影由用户文本替代，未推断景别", "Camera replaced by user text; framing was not inferred"),
+      unsupported_shot: text("此景别的可见范围不明确，保留原描述", "Visibility is ambiguous for this shot; original descriptions kept"),
+    };
+    lines.push("", text("构图适配", "Framing Adaptation"), reasons[data.framing.status] || data.framing.status);
+    for (const row of data.framing.omitted || []) lines.push(`${tr(row.module)} / ${tr(row.field)}: ${displayValue(node, row.field, row.value)} — `
+      + text("按景别省略，原选择保留", "omitted for framing; selection preserved"));
+    lines.push(text("仅过滤明确画外的独立字段；不拆分整套造型或复合动作，不改写自由文本与 TXT。", "Only clearly out-of-frame standalone fields are filtered. Compound outfits/poses, free text and TXT content are not rewritten."));
+  }
   lines.push("", text("已配置随机字段的解析与文本影响", "Resolved Random Fields and Text Effects"),
     text("文本影响通过移除单字段后重渲染检查；不等于候选数量或生图效果。", "Text effects are measured by rendering without one field, not candidate counts or image quality."));
   for (const row of data.random_fields) lines.push(`${tr(row.module)} / ${tr(row.field)}: ${displayValue(node, row.field, row.value)} — ${statuses[row.status] || row.status}`
     + (row.configured === false ? text("（由兼容映射启用）", " (enabled by compatibility mapping)") : ""));
   lines.push("", text("实际解析字段（未保证每项写入正文）", "Actual Resolved Fields (Not All Necessarily Rendered)"));
   for (const [field, value] of Object.entries(data.resolved)) lines.push(`${tr(field)}: ${displayValue(node, field, value)}`);
-  lines.push("", tr("中文提示词"), data.zh, "", tr("英文提示词"), data.en);
+  if (includeOutputs) lines.push("", tr("中文提示词"), data.zh, "", tr("英文提示词"), data.en);
   if (history.length > 1) {
     lines.push("", text("近期执行记录（仅保存在内存，最多 5 条）", "Recent Executions (Memory Only, Up to 5)"));
     for (const item of history) lines.push(`${item.data.seed} — ${item.promptId || "—"}`);
@@ -256,19 +268,122 @@ function details(node) {
   return lines.join("\n");
 }
 
+function resultSnapshot(node, record) {
+  // Content only: resolved fields are not an executable set of widget inputs.
+  return JSON.parse(JSON.stringify({
+    kind: "vividmuse-prompt-result", version: 1,
+    source: { node_type: node.comfyClass || node.constructor?.type,
+      prompt_id: record.promptId, execution_node: record.executionNode },
+    scope: record.data.scope, seed: String(record.data.seed),
+    zh: record.data.zh, en: record.data.en,
+    resolved: record.data.resolved, modules: record.data.modules,
+    framing: record.data.framing || null,
+    limitations: {
+      content_snapshot_only: true, executable_workflow: false,
+      includes_upstream_workflow: false, resolved_fields_may_not_appear_in_text: true,
+    },
+  }));
+}
+
 function showDetails(node) {
   const bodyText = details(node);
   if (!globalThis.document?.createElement) { globalThis.alert?.(bodyText); return; }
   node.__vividMusePromptDialog?.close();
+  // Freeze the panel at open time, including records evicted by a later run.
+  const records = JSON.parse(JSON.stringify(node.__vividMusePromptHistory || [])).reverse();
   const dialog = document.createElement("dialog");
-  const body = document.createElement("pre");
-  body.textContent = bodyText; // Untrusted user fragments must never be HTML.
-  body.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere;max-width:75vw;max-height:70vh;overflow:auto";
-  const close = document.createElement("button");
-  close.textContent = text("关闭", "Close");
-  close.onclick = () => dialog.close();
-  dialog.append(body, close);
-  dialog.onclose = () => { dialog.remove(); if (node.__vividMusePromptDialog === dialog) node.__vividMusePromptDialog = null; };
+  dialog.style.cssText = "width:min(760px,90vw);max-height:85vh;overflow:auto;padding:20px;background:var(--comfy-menu-bg,#252525);color:var(--input-text,#eee);border:1px solid #777;border-radius:10px";
+  const el = (tag, content = "") => {
+    const item = document.createElement(tag); item.textContent = content; return item;
+  };
+  const button = (zh, en, action) => {
+    const item = el("button", text(zh, en)); item.type = "button"; item.onclick = action; return item;
+  };
+  const title = el("h3", text("实际执行结果", "Actual Execution Results"));
+  dialog.setAttribute("aria-label", title.textContent);
+  const note = el("p", text("仅保留本次会话最近 5 条。此面板为打开时的快照；运行后请重新打开。导出只保存结果正文，不包含可执行或上游工作流。",
+    "The latest 5 records are kept in this session only. Reopen after running to refresh. Export saves result content, not an executable or upstream workflow."));
+  const close = button("关闭", "Close", () => dialog.close());
+  dialog.append(title, note, close);
+  const selector = el("select");
+  selector.setAttribute("aria-label", text("选择执行记录", "Select Execution Record"));
+  selector.style.cssText = "display:block;max-width:100%;margin:12px 0";
+  records.forEach((record, index) => {
+    const option = el("option", `${records.length - index} · ${text("实际种子", "Actual Seed")}: ${record.data.seed} · ${record.promptId || "—"}`);
+    option.value = String(index); selector.append(option);
+  });
+  selector.value = "0";
+  const info = el("p");
+  const status = el("p"); status.setAttribute("role", "status");
+  const zhBody = el("pre"), enBody = el("pre"), diagnosticBody = el("pre");
+  for (const body of [zhBody, enBody, diagnosticBody]) {
+    // textContent only: output may contain literal HTML or user fragments.
+    body.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere;max-height:32vh;overflow:auto;user-select:text";
+    body.tabIndex = 0;
+  }
+  zhBody.setAttribute("aria-label", text("中文结果正文", "Chinese Result Text"));
+  enBody.setAttribute("aria-label", text("英文结果正文", "English Result Text"));
+  const selected = () => records[Number(selector.value)];
+  let active = true;
+  const copy = async key => {
+    const record = selected();
+    if (!record) return;
+    try {
+      if (!globalThis.navigator?.clipboard?.writeText) throw Error("Clipboard unavailable");
+      await globalThis.navigator.clipboard.writeText(record.data[key] || "");
+      if (active && selected() === record) status.textContent = text("正文已复制。", "Result text copied.");
+    } catch {
+      if (active && selected() === record) status.textContent = text("复制失败，请选中下方正文手动复制。", "Copy failed. Select the result text below and copy it manually.");
+    }
+  };
+  const exportResult = () => {
+    const record = selected();
+    if (!record) return;
+    let url, link;
+    try {
+      const json = JSON.stringify(resultSnapshot(node, record), null, 2);
+      url = URL.createObjectURL(new Blob([json], {type: "application/json;charset=utf-8"}));
+      link = el("a"); link.href = url; link.download = "vividmuse-prompt-result.json";
+      dialog.append(link); link.click();
+      status.textContent = text("已请求下载结果快照；这不是工作流文件。", "Result snapshot download requested; this is not a workflow file.");
+    } catch {
+      status.textContent = text("无法导出，请检查浏览器下载权限；仍可复制正文。", "Export failed. Check browser download permissions; the result text can still be copied.");
+    } finally {
+      link?.remove();
+      if (url) globalThis.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  };
+  const actions = el("div"); actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+  actions.append(button("复制中文", "Copy Chinese", () => copy("zh")),
+    button("复制英文", "Copy English", () => copy("en")), button("导出此结果", "Export This Result", exportResult));
+  const diagnostic = el("details");
+  diagnostic.append(el("summary", text("字段与诊断详情", "Fields and Diagnostics")), diagnosticBody);
+  const render = () => {
+    const record = selected(); status.textContent = "";
+    if (!record) { diagnosticBody.textContent = bodyText; diagnostic.open = true; return; }
+    info.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n`
+      + (record.changed === null ? text("首次记录或设置／上下文不同，不比较变化。", "First record or different settings/context; changes are not comparable.")
+        : text(`相对前次可比较执行：${record.changed.length} 个模块变化`, `Compared with the previous comparable execution: ${record.changed.length} modules changed`)
+          + (record.changed.length ? ` (${record.changed.map(tr).join(", ")})` : ""))
+      + (stale(node, record) ? text("\n当前设置与此记录不同；这是历史结果。", "\nCurrent settings differ from this historical result.") : "");
+    info.style.whiteSpace = "pre-wrap";
+    if (record.data.framing?.status && record.data.framing.status !== "disabled") info.textContent += text(
+      `\n构图适配省略 ${record.data.framing.omitted.length} 项，原因见字段与诊断详情。`,
+      `\nFraming adaptation omitted ${record.data.framing.omitted.length} fields; see Fields and Diagnostics for reasons.`);
+    zhBody.textContent = record.data.zh || ""; enBody.textContent = record.data.en || "";
+    diagnosticBody.textContent = details(node, record, false);
+  };
+  selector.onchange = render;
+  if (records.length) dialog.append(selector, info, actions, status,
+    el("h4", text("中文提示词", "Chinese Prompt")), zhBody, el("h4", text("英文提示词", "English Prompt")), enBody);
+  else dialog.append(el("p", text("暂无实际执行记录，请先运行节点。", "No execution record yet. Run the node first.")));
+  dialog.append(diagnostic); render();
+  dialog.addEventListener("keydown", event => {
+    event.stopPropagation();
+    if (event.key === "Escape" && !event.isComposing && event.keyCode !== 229) { event.preventDefault(); dialog.close(); }
+  });
+  for (const name of ["keyup", "copy", "cut", "paste", "wheel"]) dialog.addEventListener(name, event => event.stopPropagation());
+  dialog.onclose = () => { active = false; dialog.remove(); if (node.__vividMusePromptDialog === dialog) node.__vividMusePromptDialog = null; };
   document.body.append(dialog);
   node.__vividMusePromptDialog = dialog;
   dialog.showModal();

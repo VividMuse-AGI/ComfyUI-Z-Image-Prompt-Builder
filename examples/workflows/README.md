@@ -22,3 +22,21 @@ Right-click a full builder or standard module to open User Presets, Random Locks
 示例只验证文本组合。生图时将预览前的字符串接入文本编码器，推荐宽高可接入对应尺寸输入。
 
 For image generation, connect the prompt string to your text encoder and use the recommended dimensions where applicable.
+
+## 查找条目并应用 / Find and apply an entry
+
+v0.9.0 示例：完整节点切换到“姿态动作”，打开“素材搜索与收藏”，输入“剪刀手”。选择“手部动作 · 比耶手势”查看预览，再点击“应用所选条目”。别名只帮助检索，保存的仍是原选项；切换到没有条目的 TXT 模块时显示空列表，不会改用其他模块。
+
+v0.9.0 example: select **Pose & Action** in the full builder, open **Search & Favorites**, and search for **victory sign**. Select the matching hand gesture, review its preview, then choose **Apply Selected Entry**. Aliases never replace canonical option values. A TXT module without entries stays empty instead of showing another module's content.
+
+## 保存一次实际结果 / Save an actual result
+
+当前开发版：将需要变化的字段设为“随机抽取”，运行两次纯文本工作流。打开“随机状态与执行结果”，在“选择执行记录”中切换两次结果，检查正文及实际种子；可复制中英文或“导出此结果”。即使当前种子已自动变化，导出仍对应所选执行。面板打开后再次运行，需要关闭重开以刷新。
+
+Development version: set the desired fields to **Random**, then run a text-only workflow twice. Open the execution-result panel, switch records with **Select Execution Record**, and check their actual text and seeds. Copy either language or choose **Export This Result**. Export uses the selected execution even if the editor has advanced to its next seed. Close and reopen the panel after another run.
+
+| 保存方式 / Save action | 保存什么 / Contents | 不是 / Does not contain |
+| --- | --- | --- |
+| 导出收藏 / Export Favorites | 条目引用 / Entry references | TXT 正文 / TXT bodies |
+| 导出此结果 / Export This Result | 本次实际正文、种子和解析信息 / Actual text, seed and resolved data | 可执行工作流、上游图 / Executable or upstream workflow |
+| 保存用户预设 / Save User Preset | 控件设置，随机字段仍为随机 / Widget settings, including Random selections | 已抽取结果的自动固定 / Automatically frozen random draws |

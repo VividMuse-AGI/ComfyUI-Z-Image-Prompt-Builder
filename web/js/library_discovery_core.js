@@ -105,7 +105,9 @@ export class LibraryPreferences {
     const imported = validateIds(data.favorites, MAX_FAVORITES);
     const merged = [...new Set([...this.favorites, ...imported])];
     if (merged.length > MAX_FAVORITES) throw new Error("Favorite limit reached");
+    const added = merged.length - this.favorites.length;
     this.favorites = merged;
     this.persist();
+    return {added, duplicates: data.favorites.length - added, ids: imported};
   }
 }

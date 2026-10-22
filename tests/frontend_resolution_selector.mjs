@@ -186,7 +186,8 @@ for (const resolutionFirst of [false, true]) {
     node.onSerialize(serialized);
     assert.deepEqual(node.widgets.filter(w => w.serialize !== false).map(w => w.name), originalNames);
     assert.equal(serialized.widgets_values.length, originalNames.length);
-    assert.deepEqual(serialized.widgets_values.slice(-4), ["按总像素计算", 2, 32, 100]);
+    const resolutionIndex = originalNames.indexOf("分辨率模式");
+    assert.deepEqual(serialized.widgets_values.slice(resolutionIndex, resolutionIndex + 4), ["按总像素计算", 2, 32, 100]);
     const saved = context.workflowTest.capturePreset(node, "resolution preset");
     change(state.proxies["目标总像素"], 4);
     context.workflowTest.applyUserPreset(node, saved);
@@ -216,7 +217,7 @@ for (const resolutionFirst of [false, true]) {
     assert.equal(state.backing["分辨率模式"].value, "原推荐尺寸", "localization must not change persisted settings");
     const englishSavedDimensions = {widgets_values: node.widgets.map(w => w.value)};
     node.onSerialize(englishSavedDimensions);
-    assert.equal(englishSavedDimensions.widgets_values.at(-4), "原推荐尺寸");
+    assert.equal(englishSavedDimensions.widgets_values[resolutionIndex], "原推荐尺寸");
     assert.match(state.toggle.label, /saved dimensions/);
     assert.doesNotMatch(state.toggle.label, /legacy/);
     app.languageSetting.onChange("zh");
@@ -227,13 +228,13 @@ for (const resolutionFirst of [false, true]) {
     assert.equal(state.backing["目标总像素（万）"].value, 896 * 1120 / 10000);
     assert.ok(api.previewResolution(node).size.every(side => side % 64 === 0));
     change(state.proxies["分辨率模式"], "按像素计算");
-    node.onConfigure({widgets_values: serialized.widgets_values.slice(0, -4)});
+    node.onConfigure({widgets_values: serialized.widgets_values.slice(0, resolutionIndex)});
     assert.equal(state.backing["分辨率模式"].value, "原推荐尺寸");
     // The immediately preceding version had three resolution fields: preserve its MP mode.
     change(state.proxies["分辨率模式"], "按像素计算");
     change(state.proxies["目标总像素"], 2);
     state.backing["目标总像素（万）"].value = 300;
-    node.onConfigure({widgets_values: serialized.widgets_values.slice(0, -1)});
+    node.onConfigure({widgets_values: serialized.widgets_values.slice(0, resolutionIndex + 3)});
     assert.equal(state.backing["分辨率模式"].value, "按总像素计算");
     assert.equal(state.backing["目标总像素"].value, 2);
     assert.equal(state.backing["目标总像素（万）"].value, 100);
@@ -278,7 +279,7 @@ for (const resolutionFirst of [false, true]) {
     assert.equal(state.backing["分辨率模式"].value, "固定比例总像素");
     const current = {widgets_values: node.widgets.map(w => w.value)};
     node.onSerialize(current);
-    assert.deepEqual(current.widgets_values.slice(-4), ["固定比例总像素", 2, 8, 200]);
+    assert.deepEqual(current.widgets_values.slice(resolutionIndex, resolutionIndex + 4), ["固定比例总像素", 2, 8, 200]);
     node.onConfigure(current);
     assert.equal(state.proxies["目标总像素（万）"].value, 2);
     for (const invalid of [9.9, 1600.1, "200", null])

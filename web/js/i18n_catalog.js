@@ -1463,6 +1463,10 @@ export const EN_CATALOG = {
       "随机抽取": "Random",
       "高位俯拍": "From a high angle"
     },
+    "构图适配": {
+      "保持当前规则": "Keep Current Rules",
+      "按景别适配": "Adapt to Framing"
+    },
     "染色方式": {
       "不使用": "None",
       "中分双色染": "Split center hair coloring",
@@ -2566,6 +2570,7 @@ export const EN_CATALOG = {
     "总像素（万）": "Enter 100 / 200 / 300 for 1 / 2 / 3 million pixels. Keeps the exact aspect ratio; alignment makes the actual area approximate. Range: 10–1600.",
     "拼接位置": "Controls the order of the free/current prompt and the connected structured text.",
     "提示词密度": "Concise keeps essentials, Standard keeps primary photography details, and Detailed keeps all fields.",
+    "构图适配": "Keep Current Rules preserves existing output. Adapt to Framing omits clearly out-of-frame built-in lower garments, legwear, shoes and leg actions, without changing selections or user text. Standalone modules require explicit upstream camera framing.",
     "模块提示词": "Filled by the TXT module library or edited manually.",
     "模块类型": "Declares which structured module this TXT fragment represents.",
     "用户人物片段": "Filled by the TXT module library; replaces the built-in Person module when non-empty.",
@@ -2674,6 +2679,7 @@ export const EN_CATALOG = {
     "景深": "Depth of Field",
     "服装配件": "Accessories",
     "机位": "Camera Angle",
+    "构图适配": "Framing Adaptation",
     "染色方式": "Coloring Technique",
     "模块提示词": "Module Prompt",
     "模块类型": "Module Type",

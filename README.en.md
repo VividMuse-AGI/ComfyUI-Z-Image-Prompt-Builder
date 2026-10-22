@@ -18,6 +18,8 @@ Search matches Chinese and English names and phrases, ignores English case, and 
 
 Favorites and the last 20 distinct successfully applied entries are saved in the current browser for the current site. Favorites can be exported and imported as JSON containing references only, never TXT bodies. To restore TXT favorites, reimport the same filename and library content; changed libraries skip stale references rather than matching another entry by title. If preference storage is unavailable, selection and execution still work with a warning.
 
+v0.9.0 adds 25 curated alias groups (for example, "hoodie", "top-down", and "victory sign"), match counts, and favorite import feedback. Counts distinguish query matches, entries in the selected scope, and total entries in the source. Empty libraries, empty modules, unmatched queries, and unmatched favorites have separate messages. Imports report added references, duplicates, and references matching the current scope; unmatched references are retained. Even adding or removing one TXT entry changes the library identity: restore the original filename and contents or favorite the entries again.
+
 Queries, tags, favorites, and recent views only filter the list. They do not limit random sampling, alter prompt output, or become execution inputs. Workflows still contain the actual selected values and existing TXT data. No online service or additional Python dependency is required.
 
 ## Features
@@ -120,7 +122,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.8.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.8.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.8.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
+For the recommended manual install, open the [`v0.9.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.9.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.9.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -199,7 +201,26 @@ The full builder and eight standalone modules gain one compact read-only details
 - Results are bound to the node instances submitted from this page. Switching workflows cannot write them to another node with the same ID. Diagnostics are omitted for unassociated jobs and subgraphs whose multiple instances share one internal node object; prompt outputs remain usable. Submission associations retain at most 128 jobs.
 - Connected inputs use executed values; upstream edits are not predicted. The details panel is a snapshot: reopen it after running or editing. Diagnostics are not saved in the workflow, but ComfyUI's own execution history may store returned UI data.
 
+v0.9.0 lets you select any of the last five executions. Actual text, submitted seed, and changed modules appear first; **Fields and Diagnostics** expands the technical details. **Copy Chinese** and **Copy English** preserve the actual text and line breaks; manual text selection remains available if clipboard access fails. **Export This Result** downloads JSON with a format version, actual seed as a string, Chinese/English text, resolved fields, modules, framing adaptation, and source information. This is a **content snapshot, not a workflow or user preset**. It excludes upstream workflows and cannot be imported to run or overwrite node settings. The editor's next seed and subsequent edits never replace the recorded text.
+
+To export, run the full builder or a standard module, click **Random: 0 fields · Last result** (the count varies), then select **Export This Result** in **Actual Execution Results**. Random sampling does not need to be enabled. **The two TXT nodes' Last Random Result dialogs do not offer this export.** See the [v0.9.0 acceptance record](docs/testing/2026-10-22-v0.9.0-acceptance.md) for the scope of verification.
+
 Available since v0.7.0. Automated regressions, isolated text execution, representative Chinese/English and Classic/Nodes 2.0 UI cases, saved-workflow restoration and normal reloads passed. Follow-up acceptance also covered actual deletion and undo, rapid seed submissions matched to diagnostics, and basic compatibility with ComfyUI 0.31.1 / frontend 1.48.7. Cache replay was verified in that older combination and ComfyUI 0.39.0 / frontend 1.53.10. See the [acceptance record](docs/testing/2026-10-07-focused-release-acceptance.md) for the exact scope. Other host versions and heap-memory analysis are outside these compatibility claims.
+
+## Framing Adaptation (v0.9.0)
+
+The full builder, Clothing module, and Pose module offer **Framing Adaptation**. **Keep Current Rules** is the default. Older workflows, older user presets, and API calls without this parameter retain existing behavior. **Adapt to Framing** uses the same visibility rules at all three prompt densities.
+
+| Explicit framing | Standalone built-in fields omitted |
+| --- | --- |
+| Face close-up, head-and-shoulders, chest-up, waist-up | Bottom garment type/color/material/pattern, legwear, shoes, and leg action |
+| Seated half portrait | Legwear and shoes; retains bottoms and leg actions because knees may be visible |
+| Full body, full body with environment, dynamic full body | No additional omissions |
+| Detail close-up, environmental portrait, two-thirds body, or no explicit framing | No visibility assumptions; original descriptions are retained |
+
+Selections and resolved random values are preserved. Switch back to restore the original rendering rules. Hand actions, dresses/bodysuits, compound poses, and fit details are not forcibly split: this is not a guarantee that every described detail appears in frame. Free text and TXT bodies remain unchanged. Camera text replacement disables framing inference. Diagnostics and exported result snapshots list the omitted fields and reasons.
+
+Standalone Clothing/Pose nodes require explicit upstream camera context from this node pack, for example **Camera → Clothing → Pose**. No adaptation is inferred from a hidden preset or a plain string that has lost its context. A later Camera node cannot rewrite previously generated text.
 
 ## User Presets, Random Locks and Checks
 
@@ -445,7 +466,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.8.0`
+- Current version: `0.9.0`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

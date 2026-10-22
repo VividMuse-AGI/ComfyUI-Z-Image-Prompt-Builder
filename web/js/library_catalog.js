@@ -2639,7 +2639,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "衬衫式连衣裙",
         "zh": "穿着衬衫式连衣裙，翻领、门襟和腰带完整",
-        "en": "shirt dress"
+        "en": "shirt dress",
+        "aliases": [
+          "衬衫裙",
+          "shirt dress"
+        ]
       },
       {
         "value": "裹身连衣裙",
@@ -3515,7 +3519,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "简洁连帽卫衣",
         "zh": "上装为简洁连帽卫衣，帽身和抽绳自然垂落",
-        "en": "hoodie"
+        "en": "hoodie",
+        "aliases": [
+          "帽衫",
+          "hoodie"
+        ]
       },
       {
         "value": "运动背心",
@@ -3555,7 +3563,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "宽松T恤",
         "zh": "上装为宽松的纯色T恤，落肩版型",
-        "en": "oversized tee"
+        "en": "oversized tee",
+        "aliases": [
+          "宽松短袖",
+          "oversized tee"
+        ]
       },
       {
         "value": "针织背心",
@@ -3585,7 +3597,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "飞行夹克",
         "zh": "上装为利落的飞行夹克",
-        "en": "flight jacket"
+        "en": "flight jacket",
+        "aliases": [
+          "飞行员夹克",
+          "bomber jacket"
+        ]
       },
       {
         "value": "风衣",
@@ -3605,7 +3621,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "简洁短袖T恤",
         "zh": "简洁短袖T恤",
-        "en": "a clean short-sleeve T-shirt"
+        "en": "a clean short-sleeve T-shirt",
+        "aliases": [
+          "短袖T",
+          "short-sleeve tee"
+        ]
       },
       {
         "value": "亮片吊带上衣",
@@ -3978,7 +3998,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "高腰阔腿裤",
         "zh": "下装为高腰阔腿长裤，裤线笔直，裤腿垂坠",
-        "en": "wide leg trousers"
+        "en": "wide leg trousers",
+        "aliases": [
+          "高腰宽腿裤",
+          "high-waisted wide-leg pants"
+        ]
       },
       {
         "value": "直筒西裤",
@@ -4003,7 +4027,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "运动紧身裤",
         "zh": "下装为高腰运动紧身长裤，面料平整，腿部线条完整",
-        "en": "sports leggings"
+        "en": "sports leggings",
+        "aliases": [
+          "运动打底裤",
+          "workout leggings"
+        ]
       },
       {
         "value": "棉麻长裤",
@@ -4585,7 +4613,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "后空高跟鞋",
         "zh": "脚穿尖头后空高跟鞋，后跟细带结构清楚",
-        "en": "slingback heels"
+        "en": "slingback heels",
+        "aliases": [
+          "后空鞋",
+          "slingbacks"
+        ]
       },
       {
         "value": "方头粗跟鞋",
@@ -4630,7 +4662,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "尖头穆勒鞋",
         "zh": "脚穿尖头穆勒鞋，鞋面简洁并露出后跟",
-        "en": "mules"
+        "en": "mules",
+        "aliases": [
+          "穆勒鞋",
+          "mules"
+        ]
       },
       {
         "value": "过膝长靴",
@@ -5156,7 +5192,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "墙边轻靠",
         "zh": "人物肩背轻靠简洁墙面站立",
-        "en": "leaning lightly against a wall"
+        "en": "leaning lightly against a wall",
+        "aliases": [
+          "靠墙站",
+          "wall lean"
+        ]
       },
       {
         "value": "行走中停步",
@@ -5206,7 +5246,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "盘腿而坐",
         "zh": "人物盘腿而坐",
-        "en": "sitting cross-legged"
+        "en": "sitting cross-legged",
+        "aliases": [
+          "盘坐",
+          "cross-legged sitting"
+        ]
       },
       {
         "value": "叉腰站立",
@@ -5709,17 +5753,29 @@ export const LIBRARY_CATALOG = {
       {
         "value": "双臂抱胸",
         "zh": "双臂抱在胸前",
-        "en": "with both arms crossed"
+        "en": "with both arms crossed",
+        "aliases": [
+          "抱臂",
+          "arms crossed"
+        ]
       },
       {
         "value": "一手托腮",
         "zh": "一手托腮",
-        "en": "resting the chin lightly on one hand"
+        "en": "resting the chin lightly on one hand",
+        "aliases": [
+          "单手托脸",
+          "cheek rest"
+        ]
       },
       {
         "value": "比耶手势",
         "zh": "举起比耶手势",
-        "en": "making a relaxed peace sign"
+        "en": "making a relaxed peace sign",
+        "aliases": [
+          "剪刀手",
+          "victory sign"
+        ]
       },
       {
         "value": "指向远方",
@@ -9363,7 +9419,12 @@ export const LIBRARY_CATALOG = {
       {
         "value": "面部特写",
         "zh": "采用面部特写构图",
-        "en": "face closeup framing"
+        "en": "face closeup framing",
+        "aliases": [
+          "大头照",
+          "脸部特写",
+          "beauty closeup"
+        ]
       },
       {
         "value": "头肩近景",
@@ -9378,7 +9439,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "腰部以上",
         "zh": "采用腰部以上半身构图",
-        "en": "waist up framing"
+        "en": "waist up framing",
+        "aliases": [
+          "腰上半身",
+          "waist-up portrait"
+        ]
       },
       {
         "value": "坐姿半身",
@@ -9393,7 +9458,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "全身构图",
         "zh": "采用从头部到脚部完整入画的全身构图",
-        "en": "full body framing"
+        "en": "full body framing",
+        "aliases": [
+          "全身照",
+          "full-length portrait"
+        ]
       },
       {
         "value": "带环境全身",
@@ -9435,12 +9504,20 @@ export const LIBRARY_CATALOG = {
       {
         "value": "左侧三分线",
         "zh": "人物位于画面左侧三分线附近",
-        "en": "with a left third composition"
+        "en": "with a left third composition",
+        "aliases": [
+          "三分法",
+          "rule of thirds"
+        ]
       },
       {
         "value": "右侧三分线",
         "zh": "人物位于画面右侧三分线附近",
-        "en": "with a right third composition"
+        "en": "with a right third composition",
+        "aliases": [
+          "三分法",
+          "rule of thirds"
+        ]
       },
       {
         "value": "下方居中",
@@ -9616,7 +9693,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "高位俯拍",
         "zh": "摄影机位于人物头部上方，形成明确俯拍角度",
-        "en": "from a high angle"
+        "en": "from a high angle",
+        "aliases": [
+          "俯视拍摄",
+          "high-angle shot"
+        ]
       },
       {
         "value": "略低机位",
@@ -9626,7 +9707,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "低位仰拍",
         "zh": "摄影机位于人物腰部以下高度，形成明确仰拍角度",
-        "en": "from a low angle"
+        "en": "from a low angle",
+        "aliases": [
+          "仰视拍摄",
+          "low-angle shot"
+        ]
       },
       {
         "value": "胸口高度",
@@ -9641,7 +9726,12 @@ export const LIBRARY_CATALOG = {
       {
         "value": "正上方俯拍",
         "zh": "摄影机位于人物正上方并垂直向下拍摄",
-        "en": "from directly overhead"
+        "en": "from directly overhead",
+        "aliases": [
+          "顶拍",
+          "overhead shot",
+          "top-down"
+        ]
       },
       {
         "value": "贴近地面",
@@ -9661,7 +9751,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "荷兰角",
         "zh": "摄影机位于带轻微倾斜的荷兰角位置",
-        "en": "with a Dutch angle"
+        "en": "with a Dutch angle",
+        "aliases": [
+          "倾斜机位",
+          "dutch tilt"
+        ]
       }
     ],
     "景深": [
@@ -9673,7 +9767,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "浅景深",
         "zh": "采用浅景深，人物清晰而背景明显虚化",
-        "en": "with shallow depth of field"
+        "en": "with shallow depth of field",
+        "aliases": [
+          "浅焦",
+          "shallow focus"
+        ]
       },
       {
         "value": "中浅景深",
@@ -9710,7 +9808,11 @@ export const LIBRARY_CATALOG = {
       {
         "value": "双眼与面部",
         "zh": "焦点锁定双眼与面部",
-        "en": "focused precisely on both eyes"
+        "en": "focused precisely on both eyes",
+        "aliases": [
+          "眼部对焦",
+          "eye focus"
+        ]
       },
       {
         "value": "近侧眼睛",

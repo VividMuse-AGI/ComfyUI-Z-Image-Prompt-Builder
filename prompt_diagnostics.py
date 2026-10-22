@@ -16,7 +16,7 @@ def module_groups(core):
 
 def execution_result(result, *, core, scope, seed, settings, fields, fragments,
                      english_fragments, render_pair, replacements=None, context=None,
-                     request_trace=None):
+                     request_trace=None, framing=None):
     """Measure text effects by rendering resolved fields, never resolving again.
 
     Removing one field is a text-sensitivity check, not a candidate-count estimate
@@ -29,6 +29,7 @@ def execution_result(result, *, core, scope, seed, settings, fields, fragments,
     baseline = None
     random_fields = []
     request_trace = request_trace or settings
+    framing_omitted = {row["field"] for row in (framing or {}).get("omitted", [])}
     for field, name in field_modules.items():
         configured = settings.get(field) == core.RANDOM_CHOICE
         normalized_random = request_trace.get(field) == core.RANDOM_CHOICE
@@ -41,6 +42,8 @@ def execution_result(result, *, core, scope, seed, settings, fields, fragments,
             status = "not_randomized"
         elif value == core.EMPTY_CHOICE:
             status = "empty"
+        elif field in framing_omitted:
+            status = "framing_omitted"
         else:
             if baseline is None:
                 baseline = render_pair(fields)
@@ -64,4 +67,6 @@ def execution_result(result, *, core, scope, seed, settings, fields, fragments,
                      "zh": fragments.get(name, ""), "en": english_fragments.get(name, "")}
                     for name in names],
     }
+    if framing is not None:
+        metadata["framing"] = framing
     return {"result": result, "ui": {"vividmuse_prompt_diagnostics": [metadata]}}

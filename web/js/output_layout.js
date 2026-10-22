@@ -1,7 +1,7 @@
 import { app } from "../../scripts/app.js";
 
 const TARGETS = new Set([
-  "CanvasModule", "PersonModule", "HairModule", "ClothingModule", "PoseModule",
+  "ChinesePromptBuilder", "CanvasModule", "PersonModule", "HairModule", "ClothingModule", "PoseModule",
   "SceneModule", "CameraModule", "VisualModule", "TxtPromptLibrary", "TxtModuleLibrary",
 ].map(name => "VividMuse_ZImage" + name));
 
@@ -11,6 +11,8 @@ function restoreLegacyLayout(node, info) {
     widget.serialize !== false && widget.options?.serialize !== false);
   const index = widgets.findIndex(widget => widget.name === "输出排版");
   if (index >= info.widgets_values.length) widgets[index].value = "连续拼接";
+  const framingIndex = widgets.findIndex(widget => widget.name === "构图适配");
+  if (framingIndex >= info.widgets_values.length) widgets[framingIndex].value = "保持当前规则";
 }
 
 app.registerExtension({

@@ -36,6 +36,7 @@ assert.deepEqual(asJson(records.map(r=>r.id).sort()),asJson((await makeTxtRecord
 assert.notEqual(records[0].id,(await makeTxtRecords("module","other.txt",entries))[0].id);
 assert.notEqual(records[0].id,(await makeTxtRecords("prompt","sample.txt",entries))[0].id);
 assert.notEqual(records[0].id,(await makeTxtRecords("module","sample.txt",[{...entries[0],prompt:"修改"},...entries.slice(1)]))[0].id);
+assert.notEqual(records[0].id,(await makeTxtRecords("module","sample.txt",[...entries,{title:"新增",prompt:"正文"}]))[0].id);
 assert.equal(new Set((await makeTxtRecords("prompt","same.txt",[entries[0],entries[0]])).map(r=>r.id)).size,2);
 
 const storage = {getItem() {return this.value},setItem(key,value) {assert.equal(key,PREFERENCE_KEY); this.value=value}};
@@ -53,6 +54,8 @@ const exported = p.exportFavorites();
 assert.ok(!exported.includes("正文") && !exported.includes("sample.txt"), "Export must contain opaque references only");
 const imported = new LibraryPreferences(null);imported.importFavorites(exported);
 assert.deepEqual(asJson(imported.favorites),asJson(p.favorites));
+assert.deepEqual(asJson(imported.importFavorites(JSON.stringify({version:1,kind:"vividmuse-favorites",
+  favorites:[records[0].id, data[0].id, data[0].id]}))),{added:1,duplicates:2,ids:[records[0].id,data[0].id]});
 for (const raw of ["broken",JSON.stringify({version:2,kind:"vividmuse-favorites",favorites:[]}),
   JSON.stringify({version:1,kind:"vividmuse-favorites",favorites:["bad"]}),
   JSON.stringify({version:1,kind:"vividmuse-favorites",favorites:[],body:"private"})]) {
@@ -77,6 +80,9 @@ for (const [module, fields] of Object.entries(context.LIBRARY_CATALOG.modules)) 
   node.widgets=fields.map(name=>({name,value:"不使用",options:{values:context.LIBRARY_CATALOG.fields[name].map(r=>r.value)},callback(){callbacks++}}));
   const records=context.discovery.builtinRecords(node);
   assert.ok(records.length,module);
+  for(const record of records) for(const alias of record.aliases || []) {
+    assert.ok(filterRecords(records,{query:alias}).some(item=>item.id===record.id),`${module}: ${alias}`);
+  }
   const selected=records.at(-1), orig=node.widgets.map(w=>w.value);
   assert.equal(context.discovery.applyRecord(node,selected),true);
   assert.equal(callbacks,1);
@@ -108,6 +114,7 @@ class Element {
   close() {this.open=false;this.onclose?.()}
   remove() {if(this.parent)this.parent.children=this.parent.children.filter(c=>c!==this)}
   focus() {}
+  click() {this.onclick?.()}
 }
 const body=new Element("body");
 context.document={body,createElement:tag=>new Element(tag),createTextNode:content=>({textContent:content})};
@@ -119,6 +126,8 @@ const dialogNode={comfyClass:"VividMuse_ZImageCameraModule",widgets:[{name:"机�
 let dialog=await context.openDiscovery(dialogNode);
 const saved=JSON.stringify(dialogNode.widgets.map(w=>w.value));
 const query=byLabel(dialog,"搜索词");query.value="不存在 [.*(+";query.oninput();
+assert.match(byLabel(dialog,"匹配数量").textContent,/匹配 0 \//);
+assert.match(byLabel(dialog,"搜索结果").children[0].textContent,/清除关键词/);
 assert.equal(JSON.stringify(dialogNode.widgets.map(w=>w.value)),saved);
 assert.ok(byText(dialog,"应用所选条目").disabled);
 query.value="平视";query.oninput();
@@ -128,6 +137,22 @@ byText(dialog,"应用所选条目").onclick();
 assert.equal(dialogNode.widgets[0].value,"平视");assert.equal(dialogNode.widgets[0].calls,1);
 const source=byLabel(dialog,"素材来源"); source.value="prompt";await source.onchange();
 query.value="";query.oninput();
+assert.match(byLabel(dialog,"匹配数量").textContent,/匹配 1 \/ 1/);
+byLabel(dialog,"显示范围").value="favorites";byLabel(dialog,"显示范围").onchange();
+assert.match(byLabel(dialog,"搜索结果").children[0].textContent,/没有匹配收藏/);
+byLabel(dialog,"显示范围").value="all";byLabel(dialog,"显示范围").onchange();
+const txtId=(await makeTxtRecords("prompt","public-fixture.txt",dialogNode.__vividMusePromptDiscovery.entries()))[0].id;
+async function importFile(raw) {
+  byText(dialog,"导入收藏").onclick();
+  const fileInput=descendants(dialog).find(el=>el.type==="file");
+  fileInput.files=[{size:100,text:async()=>raw}];await fileInput.onchange();
+}
+const favoriteFile=JSON.stringify({version:1,kind:"vividmuse-favorites",favorites:[txtId,txtId,"b:absent:item"]});
+await importFile(favoriteFile);
+assert.match(byLabel(dialog,"收藏导入结果").textContent,/新增 2 条，重复 1 条.*1 \/ 2/);
+await importFile(favoriteFile);
+assert.match(byLabel(dialog,"收藏导入结果").textContent,/新增 0 条，重复 3 条/);
+await importFile("invalid");assert.match(byLabel(dialog,"收藏导入结果").textContent,/已有收藏未改变/);
 assert.ok(byText(dialog,'<img src=x onerror=alert(1)>'));
 byText(dialog,'<img src=x onerror=alert(1)>').onclick();byText(dialog,"应用所选条目").onclick();
 assert.ok(byLabel(dialog,"搜索结果"));
@@ -145,6 +170,21 @@ const pending=byLabel(dialog,"素材来源").onchange();dialog.close();await pen
 assert.equal(body.children.length,0);assert.equal(dialogNode.widgets[0].calls,1);
 dialog=await context.openDiscovery(serialNode);serialNode.onRemoved();
 assert.equal(body.children.length,0,"Removing the owning node closes its panel");
+// Standalone module with no entries must not widen to the entire TXT library.
+const emptyModule={comfyClass:"VividMuse_ZImageTxtModuleLibrary",widgets:[],__vividMuseModuleDiscovery:{
+  entries:()=>[{module:"人物",title:"人物A",prompt:"人物描述"}],fileName:()=>"modules.txt",module:()=>"摄影"}};
+dialog=await context.openDiscovery(emptyModule);
+assert.equal(byLabel(dialog,"字段或模块").value,"摄影");
+assert.ok(byLabel(dialog,"字段或模块").children.some(el=>el.value==="摄影"));
+assert.match(byLabel(dialog,"匹配数量").textContent,/0 \/ 0.*共 1/);
+assert.match(byLabel(dialog,"搜索结果").children[0].textContent,/当前字段或模块没有条目/);
+dialog.close();
+context.__vividMuseZImageI18n={activeLanguage:()=>"en"};
+dialog=await context.openDiscovery({comfyClass:"VividMuse_ZImageTxtPromptLibrary",widgets:[],
+  __vividMusePromptDiscovery:{entries:()=>[],fileName:()=>""}});
+assert.match(byLabel(dialog,"Match Count").textContent,/0 \/ 0/);
+assert.match(byLabel(dialog,"Search results").children[0].textContent,/No TXT library loaded/);
+dialog.close();
 const t0=performance.now();
 for(let i=0;i<100;i++) filterRecords(largeRecords,{query:`自然光${i%10}`,tags:["测试"]});
 console.log(`500-entry pure-filter mean: ${((performance.now()-t0)/100).toFixed(2)} ms (not browser paint latency)`);

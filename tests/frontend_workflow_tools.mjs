@@ -123,4 +123,14 @@ for (const name of ["画面基础", "人物", "发型", "服装", "姿态动作"
 }
 api.applyUserPreset(seedNode, { ...seedEntry, ui: {} });
 api.applyUserPreset(seedNode, { ...seedEntry, ui: undefined });
+const framed={...node,properties:{},widgets:[...node.widgets,widget("构图适配","按景别适配",["保持当前规则","按景别适配"])]};
+const framedPreset=api.capturePreset(framed,"adapted");
+api.applyUserPreset(framed,snapshot);
+assert.equal(framed.widgets.at(-1).value,"保持当前规则","Old presets reset optional adaptation");
+api.applyUserPreset(framed,framedPreset);assert.equal(framed.widgets.at(-1).value,"按景别适配");
+assert.ok(api.findConflicts(framed).some(message=>message.includes("三档密度")));
+framed.inputs=[{name:"景别",link:7}];
+assert.ok(!api.findConflicts(framed).some(message=>message.includes("鞋袜")),"Dormant linked inputs do not establish framing");
+framed.inputs=[];framed.widgets.push(widget("用户摄影片段","my framing"));
+assert.ok(!api.findConflicts(framed).some(message=>message.includes("鞋袜")),"TXT camera replacement invalidates built-in framing assumptions");
 console.log("workflow tools: preset restore/import validation, locks and conflict checks ok");

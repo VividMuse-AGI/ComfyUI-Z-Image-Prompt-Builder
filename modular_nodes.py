@@ -212,7 +212,7 @@ class ZImageModuleNodeBase:
                 *core.FIELD_OPTIONS[field_name],
             ]
             inputs[field_name] = (choices, {"default": core.FOLLOW_PRESET})
-        return {
+        schema = {
             "required": inputs,
             "hidden": {"unique_id": "UNIQUE_ID"},
             "optional": {
@@ -237,6 +237,9 @@ class ZImageModuleNodeBase:
                 "输出排版": OUTPUT_LAYOUT_INPUT,
             },
         }
+        if cls.MODULE_NAME in ("服装", "姿态动作"):
+            schema["optional"]["构图适配"] = core.FRAMING_INPUT
+        return schema
 
     def _result(
         self,
@@ -261,6 +264,7 @@ class ZImageModuleNodeBase:
         prefix = kwargs.pop("前置提示词", "")
         english_prefix = kwargs.pop("前置英文提示词", "")
         separate_modules = kwargs.pop("输出排版", "连续拼接") == "按模块分段"
+        framing_mode = kwargs.pop("构图适配", core.FRAMING_MODES[0])
         resolution_options = {name: kwargs.pop(name) for name in core.RESOLUTION_INPUTS if name in kwargs}
         context_source = prefix
         if not hasattr(context_source, "zimage_resolved_fields"):
@@ -305,17 +309,23 @@ class ZImageModuleNodeBase:
         )
         upstream_opaque_modules.discard(self.MODULE_NAME)
         render_fields = fields
-        if self.MODULE_NAME == "服装":
-            # A clothing node exposes no framing control. Only explicit camera
-            # context may hide shoes/legwear, never its invisible preset default.
+        if self.MODULE_NAME in ("服装", "姿态动作"):
+            # These modules expose no shot selector. Only explicit camera
+            # context may omit details, never their invisible preset defaults.
             shot = (
                 upstream_context.get("景别", core.EMPTY_CHOICE)
                 if "摄影" not in upstream_opaque_modules else core.EMPTY_CHOICE
             )
             render_fields = {**fields, "景别": shot}
-        fragment = render_module_fragment(self.MODULE_NAME, render_fields, density)
+        def effective_view(resolved):
+            return core.framing_view(resolved, framing_mode, shot=resolved.get("景别"),
+                                     scope=self.MODULE_NAME,
+                                     camera_opaque="摄影" in upstream_opaque_modules)
+
+        effective_fields, framing_report = effective_view(render_fields)
+        fragment = render_module_fragment(self.MODULE_NAME, effective_fields, density)
         english_fragment = core.render_english_module_fragment(
-            self.MODULE_NAME, render_fields, density
+            self.MODULE_NAME, effective_fields, density
         )
         prompt = join_chain_text(prefix, fragment, CHAIN_JOIN_POSITIONS[0], separate_modules)
         english_join = core.join_prompt_paragraphs if separate_modules else core.join_english_prompt_text
@@ -333,13 +343,15 @@ class ZImageModuleNodeBase:
         if unique_id is None:
             return result
         def render_pair(resolved):
+            resolved, _ = effective_view(resolved)
             return (render_module_fragment(self.MODULE_NAME, resolved, density),
                     core.render_english_module_fragment(self.MODULE_NAME, resolved, density))
         return execution_result(result, core=core, scope=self.MODULE_NAME, seed=seed,
                                 settings=submitted, fields=render_fields,
                                 fragments={self.MODULE_NAME: fragment},
                                 english_fragments={self.MODULE_NAME: english_fragment},
-                                render_pair=render_pair, context=upstream_context, request_trace=request_trace)
+                                render_pair=render_pair, context=upstream_context, request_trace=request_trace,
+                                framing=framing_report)
 
 
 class ZImageCanvasModule(ZImageModuleNodeBase):

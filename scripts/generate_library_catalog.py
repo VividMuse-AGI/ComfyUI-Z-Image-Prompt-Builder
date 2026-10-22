@@ -9,12 +9,49 @@ import nodes
 import modular_nodes
 
 
+# Search-only vocabulary. Keys always refer to existing canonical field values.
+SEARCH_ALIASES = {
+    ("景别", "面部特写"): ["大头照", "脸部特写", "beauty closeup"],
+    ("景别", "腰部以上"): ["腰上半身", "waist-up portrait"],
+    ("景别", "全身构图"): ["全身照", "full-length portrait"],
+    ("机位", "正上方俯拍"): ["顶拍", "overhead shot", "top-down"],
+    ("机位", "高位俯拍"): ["俯视拍摄", "high-angle shot"],
+    ("机位", "低位仰拍"): ["仰视拍摄", "low-angle shot"],
+    ("机位", "荷兰角"): ["倾斜机位", "dutch tilt"],
+    ("景深", "浅景深"): ["浅焦", "shallow focus"],
+    ("对焦位置", "双眼与面部"): ["眼部对焦", "eye focus"],
+    ("画面布局", "左侧三分线"): ["三分法", "rule of thirds"],
+    ("画面布局", "右侧三分线"): ["三分法", "rule of thirds"],
+    ("上装类型", "简洁连帽卫衣"): ["帽衫", "hoodie"],
+    ("上装类型", "飞行夹克"): ["飞行员夹克", "bomber jacket"],
+    ("上装类型", "宽松T恤"): ["宽松短袖", "oversized tee"],
+    ("上装类型", "简洁短袖T恤"): ["短袖T", "short-sleeve tee"],
+    ("下装类型", "高腰阔腿裤"): ["高腰宽腿裤", "high-waisted wide-leg pants"],
+    ("下装类型", "运动紧身裤"): ["运动打底裤", "workout leggings"],
+    ("连衣裙类型", "衬衫式连衣裙"): ["衬衫裙", "shirt dress"],
+    ("鞋履", "后空高跟鞋"): ["后空鞋", "slingbacks"],
+    ("鞋履", "尖头穆勒鞋"): ["穆勒鞋", "mules"],
+    ("手部动作", "一手托腮"): ["单手托脸", "cheek rest"],
+    ("手部动作", "比耶手势"): ["剪刀手", "victory sign"],
+    ("手部动作", "双臂抱胸"): ["抱臂", "arms crossed"],
+    ("基础姿态", "盘腿而坐"): ["盘坐", "cross-legged sitting"],
+    ("基础姿态", "墙边轻靠"): ["靠墙站", "wall lean"],
+}
+
+
 def build_catalog():
+    for (field, value), aliases in SEARCH_ALIASES.items():
+        if value not in nodes.FIELD_OPTIONS.get(field, ()):
+            raise ValueError(f"Unknown search alias target: {field}/{value}")
+        if not aliases or any(not isinstance(alias, str) or not alias.strip() for alias in aliases):
+            raise ValueError(f"Invalid search aliases: {field}/{value}")
     fields = {}
     for field in nodes.FIELD_ORDER:
         fields[field] = [
             {"value": value, "zh": nodes.FIELD_TEXT[field].get(value, value),
-             "en": nodes._english_atomic_value(field, value)}
+             "en": nodes._english_atomic_value(field, value),
+             **({"aliases": SEARCH_ALIASES[(field, value)]}
+                if (field, value) in SEARCH_ALIASES else {})}
             for value in nodes.FIELD_OPTIONS[field]
         ]
     return {"version": 1, "modules": modular_nodes.MODULE_FIELD_GROUPS, "fields": fields}

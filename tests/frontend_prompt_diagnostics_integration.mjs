@@ -69,6 +69,13 @@ for (const diagnosticsFirst of [true, false]) {
     assert.match(button.tooltip, /View random status/);
     app.languageSetting.onChange("zh");
     const structured = node.widgets.filter(w => Array.isArray(w.options?.values) && w.options.values.includes("跟随预设"));
+    if(w("构图适配")) {
+      app.languageSetting.onChange("en");
+      assert.equal(w("构图适配").label,"Framing Adaptation");
+      assert.equal(w("构图适配").options.getOptionLabel("按景别适配"),"Adapt to Framing");
+      assert.equal(w("构图适配").value,"保持当前规则");
+      app.languageSetting.onChange("zh");
+    }
     set(structured[0].name, "随机抽取");
     assert.match(button.label, /已启用随机/);
     if (key.endsWith("ChinesePromptBuilder")) {

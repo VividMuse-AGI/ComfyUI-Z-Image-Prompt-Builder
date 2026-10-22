@@ -49,6 +49,6 @@ class ModularParagraphTests(unittest.TestCase):
     def test_all_ten_schemas_append_layout(self):
         for cls in mod.NODE_CLASS_MAPPINGS.values():
             optional = cls.INPUT_TYPES()["optional"]
-            appended = set(mod.core.RESOLUTION_INPUTS) | {"选择模式", "随机种子", "词库数据"}
+            appended = set(mod.core.RESOLUTION_INPUTS) | {"选择模式", "随机种子", "词库数据", "构图适配"}
             self.assertEqual([key for key in optional if key not in appended][-1], "输出排版")
             self.assertEqual(optional["输出排版"][1]["default"], "按模块分段")

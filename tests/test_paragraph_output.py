@@ -8,7 +8,7 @@ class ParagraphOutputTests(unittest.TestCase):
 
     def test_schema_appends_layout_and_defaults_new_nodes_to_paragraphs(self):
         optional = nodes.ZImageChinesePromptBuilder.INPUT_TYPES()["optional"]
-        self.assertEqual([key for key in optional if key not in nodes.RESOLUTION_INPUTS][-1], "输出排版")
+        self.assertEqual([key for key in optional if key not in {*nodes.RESOLUTION_INPUTS, "构图适配"}][-1], "输出排版")
         self.assertEqual(optional["输出排版"][1]["default"], "按模块分段")
         self.assertEqual(self.build(), self.build(输出排版="连续拼接"))
 

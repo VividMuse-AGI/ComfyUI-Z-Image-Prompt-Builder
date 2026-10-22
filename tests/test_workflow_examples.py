@@ -41,7 +41,15 @@ class WorkflowExamplesTests(unittest.TestCase):
                             opts = definition[1] if len(definition) > 1 else {}
                             if opts.get("forceInput"):
                                 continue
-                            value = next(values)
+                            try:
+                                value = next(values)
+                            except StopIteration:
+                                # These published examples deliberately retain the old schema.
+                                # Only the newly appended, opt-in control may be absent.
+                                self.assertEqual(section, "optional")
+                                self.assertEqual(name, "构图适配")
+                                self.assertEqual(opts["default"], "保持当前规则")
+                                continue
                             if isinstance(typ, (list, tuple)):
                                 self.assertIn(value, typ, name)
                             kwargs[name] = value

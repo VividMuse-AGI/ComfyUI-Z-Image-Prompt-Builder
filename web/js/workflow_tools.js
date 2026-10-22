@@ -77,6 +77,8 @@ export function applyUserPreset(node, entry) {
     const widget = widgets(node).find(w => w.name === name);
     if (widget && !Object.hasOwn(values, name)) widget.value = value;
   }
+  const framing = widgets(node).find(w => w.name === "构图适配");
+  if (framing && !Object.hasOwn(values, "构图适配")) framing.value = "保持当前规则";
   node.properties ??= {};
   for (const key of UI_KEYS) {
     delete node.properties[key];
@@ -114,15 +116,19 @@ export function lockFields(node, names) {
 
 export function findConflicts(node) {
   const preset = presetData(node);
-  const values = Object.fromEntries(widgets(node).map(w => [w.name,
+  const values = Object.fromEntries(widgets(node).filter(w =>
+    !node.inputs?.some(input => input.name === w.name && input.link != null)).map(w => [w.name,
     w.value === "跟随预设" ? preset[w.name] : w.value]));
   const results = [];
   const close = ["面部特写", "头肩近景", "胸部以上"].includes(values["景别"]);
-  if (close && values["鞋履"] && !["不使用", "随机抽取"].includes(values["鞋履"]))
-    results.push(text("近景中通常看不到鞋履；标准/精简输出会省略鞋袜，详细输出保留。", "Footwear is usually outside a close portrait; concise/standard omit legwear and shoes, detailed keeps them."));
-  if (/坐|跪|卧/.test(values["基础姿态"] || "") && values["腿部动作"] === "自然迈步")
+  const replaced = name => typeof values[`用户${name}片段`] === "string" && values[`用户${name}片段`].trim();
+  if (close && !replaced("服装") && !replaced("摄影") && values["鞋履"] && !["不使用", "随机抽取"].includes(values["鞋履"]))
+    results.push(values["构图适配"] === "按景别适配"
+      ? text("已启用构图适配：此景别的内置鞋袜在三档密度中均省略，原选择保留。", "Framing adaptation is enabled: built-in shoes and legwear are omitted at all densities for this shot; selections are kept.")
+      : text("近景中通常看不到鞋履；标准/精简输出会省略鞋袜，详细输出保留。", "Footwear is usually outside a close portrait; concise/standard omit legwear and shoes, detailed keeps them."));
+  if (!replaced("姿态动作") && /坐|跪|卧/.test(values["基础姿态"] || "") && values["腿部动作"] === "自然迈步")
     results.push(text("坐姿、跪姿或卧姿与自然迈步可能冲突。", "A seated, kneeling or lying pose may conflict with walking."));
-  if (/站立/.test(values["基础姿态"] || "") && /坐姿|盘腿/.test(values["腿部动作"] || ""))
+  if (!replaced("姿态动作") && /站立/.test(values["基础姿态"] || "") && /坐姿|盘腿/.test(values["腿部动作"] || ""))
     results.push(text("站立姿态与坐姿腿部动作可能冲突。", "Standing may conflict with a seated leg action."));
   if (["随机抽取", "不使用"].includes(values["穿搭结构"])) {
     const selected = prefix => ["类型", "颜色", "材质", "图案"].some(suffix =>

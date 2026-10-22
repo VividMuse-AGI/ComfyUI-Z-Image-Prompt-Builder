@@ -72,6 +72,8 @@ export async function openDiscovery(node) {
   dialogOwner = node;
   const p = prefs();
   const status = element("p", ""); status.setAttribute("role", "status");
+  const feedback = element("p", ""); feedback.setAttribute("role", "status");
+  feedback.setAttribute("aria-label", text("收藏导入结果", "Favorites Import Result"));
   const warning = () => { status.textContent = p.warning ? text(
     "无法保存浏览器偏好；当前仍可选择和应用，收藏暂存于本次页面。",
     "Browser preferences cannot be saved. You can still apply entries; favorites remain in memory for this page.") : ""; };
@@ -97,6 +99,13 @@ export async function openDiscovery(node) {
   }
   const category = element("select"); category.setAttribute("aria-label", text("字段或模块", "Field or Module"));
   controls.append(source, query, view, category); dialog.append(controls);
+  const counts = element("p", ""); counts.setAttribute("role", "status");
+  counts.setAttribute("aria-label", text("匹配数量", "Match Count"));
+  const libraryHint = element("p", text(
+    "TXT收藏与文件名及词库内容关联。增删条目或修改内容后，原收藏可能无法匹配；可恢复原词库或重新收藏，其他来源的收藏仍会保留。",
+    "TXT favorites refer to a filename and library contents. Adding, removing or editing entries can prevent matches. Restore the original library or favorite entries again; references for other sources are kept."));
+  libraryHint.style.cssText = "font-size:0.9em;opacity:0.85";
+  dialog.append(counts, libraryHint, feedback);
   const tagsBox = element("div", null, "display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;max-height:100px;overflow:auto");
   dialog.append(tagsBox);
   const list = element("div", null, "max-height:32vh;overflow:auto;border:1px solid #666;border-radius:6px;padding:6px");
@@ -124,13 +133,39 @@ export async function openDiscovery(node) {
     if (currentDialog === dialog) { currentDialog = null; dialogOwner = null; }
   };
   document.body.append(dialog); dialog.showModal();
-  let records = [], selected = null, selectedTags = [], untagged = false, generation = 0;
+  let records = [], selected = null, selectedTags = [], untagged = false, generation = 0, lastImport = null;
   function render() {
-    const shown = filterRecords(records, {query: query.value, field: source.value === "builtin" ? category.value : "",
-      module: source.value === "module" ? category.value : "", tags: selectedTags, untagged, view: view.value,
+    const scope = {field: source.value === "builtin" ? category.value : "",
+      module: source.value === "module" ? category.value : ""};
+    const available = filterRecords(records, scope);
+    const shown = filterRecords(available, {query: query.value, tags: selectedTags, untagged, view: view.value,
       favorites: p.favorites, recent: p.recent});
+    const sourceLabel = sourceChoices.find(([kind]) => kind === source.value)?.[1] || "";
+    counts.textContent = text(
+      `${sourceLabel}：当前范围匹配 ${shown.length} / ${available.length} 条（来源共 ${records.length} 条）`,
+      `${sourceLabel}: ${shown.length} / ${available.length} in current scope (${records.length} in source)`);
+    libraryHint.hidden = source.value === "builtin";
+    if (lastImport) {
+      const ids = new Set(lastImport.ids);
+      const matched = available.filter(record => ids.has(record.id)).length;
+      feedback.textContent = text(
+        `收藏导入完成：新增 ${lastImport.added} 条，重复 ${lastImport.duplicates} 条；当前范围可匹配 ${matched} / ${ids.size} 条。未匹配的引用仍保留。`,
+        `Favorites imported: ${lastImport.added} added, ${lastImport.duplicates} duplicates; ${matched} / ${ids.size} match the current scope. Unmatched references are kept.`);
+    }
     list.replaceChildren();
-    if (!shown.length) list.append(element("p", text("没有匹配条目。原选择未改变。", "No matching entries. Your existing selection is unchanged.")));
+    if (!shown.length) {
+      let message;
+      if (!records.length) message = source.value === "builtin"
+        ? text("当前模块没有可搜索的内置选项。", "No searchable built-in options in this module.")
+        : text("尚未导入可用TXT词库，请先在节点中导入。", "No TXT library loaded. Import one in the node first.");
+      else if (!available.length) message = text("当前字段或模块没有条目。", "No entries in the current field or module.");
+      else if (view.value === "favorites" && !available.some(record => p.favorites.includes(record.id)))
+        message = text("当前范围没有匹配收藏。其他模块或未加载词库的引用仍保留。", "No favorites match this scope. References for other modules or unloaded libraries are kept.");
+      else if (view.value === "recent" && !available.some(record => p.recent.includes(record.id)))
+        message = text("当前范围暂无最近使用的条目。", "No recently used entries in this scope.");
+      else message = text("没有匹配条目。可清除关键词或标签筛选。", "No matching entries. Clear keywords or tag filters to broaden the search.");
+      list.append(element("p", `${message} ${text("原选择未改变。", "Your existing selection is unchanged.")}`));
+    }
     if (selected && !shown.some(item => item.id === selected.id)) { selected = null; preview.textContent = ""; apply.disabled = true; }
     for (const record of shown) {
       const row = element("div", null, "display:flex;gap:8px;margin:4px 0");
@@ -152,6 +187,7 @@ export async function openDiscovery(node) {
     const token = ++generation;
     selected = null; preview.textContent = ""; apply.disabled = true;
     records = []; list.replaceChildren(element("p", text("加载中…", "Loading…")));
+    counts.textContent = ""; feedback.textContent = "";
     selectedTags = []; untagged = false; tagsBox.replaceChildren();
     const kind = source.value;
     try {
@@ -166,15 +202,19 @@ export async function openDiscovery(node) {
       category.replaceChildren();
       const all = element("option", kind === "builtin" ? text("全部字段", "All Fields") : text("全部模块", "All Modules")); all.value = ""; category.append(all);
       const values = [...new Set(records.map(record => kind === "builtin" ? record.field : record.module).filter(Boolean))];
+      const standaloneModule = classOf(node) === "VividMuse_ZImageTxtModuleLibrary";
+      const currentModule = kind === "module" && standaloneModule ? node.__vividMuseModuleDiscovery.module() : "";
+      // A native select drops a value without an option. Keep an empty module
+      // selectable so its scope never silently expands to the whole library.
+      if (currentModule && !values.includes(currentModule)) values.push(currentModule);
       for (const value of values) {
         const label = kind === "builtin" ? (english() ? EN_CATALOG.widgetLabels[value] : value) : moduleLabel(value);
         const option = element("option", label); option.value = value; category.append(option);
       }
       category.hidden = kind === "prompt";
       // Standalone TXT modules always search the current module; changing a filter must not change node inputs.
-      const standaloneModule = classOf(node) === "VividMuse_ZImageTxtModuleLibrary";
       category.disabled = kind === "module" && standaloneModule;
-      if (category.disabled) category.value = node.__vividMuseModuleDiscovery.module();
+      if (category.disabled) category.value = currentModule;
       const allTags = [...new Set(records.flatMap(record => record.tags || []))].sort();
       function tagToggle(label, value) {
         const wrapper = element("label", null, "display:flex;gap:4px;align-items:center");
@@ -213,8 +253,8 @@ export async function openDiscovery(node) {
       try {
         const file = input.files?.[0]; if (!file) return;
         if (file.size > 1024 * 1024) throw new Error("Too large");
-        p.importFavorites(await file.text()); warning(); render();
-      } catch (_) { status.textContent = text("收藏文件无效；已有收藏未改变。", "Invalid favorites file; existing favorites are unchanged."); }
+        lastImport = p.importFavorites(await file.text()); warning(); render();
+      } catch (_) { lastImport = null; feedback.textContent = text("收藏文件无效；已有收藏未改变。", "Invalid favorites file; existing favorites are unchanged."); }
       finally { input.remove(); }
     }; input.click();
   };
