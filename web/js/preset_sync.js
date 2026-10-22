@@ -1492,6 +1492,7 @@ const PRESETS = {
 };
 
 globalThis.__vividMuseZImagePromptData = {
+  MODULE_FIELD_GROUPS,
   PRESETS,
   THEME_OPTIONS_BY_CATEGORY,
   ETHNICITY_BRANCHES_BY_CATEGORY,
@@ -1978,6 +1979,13 @@ app.registerExtension({
 
     installCompactWidgetSerialization(node);
     installCompactWidgetConfigure(node);
+    // Scoped card application must not reconfigure unrelated modules or erase history.
+    node.__vividMuseRefreshCardScope = moduleName => {
+      if (moduleName === "人物") {
+        syncEthnicityBranchOptions(node);
+        syncMakeupVisibility(node);
+      } else if (moduleName === "服装") syncClothingVisibility(node);
+    };
 
     const presetWidget = widgetByName(node, "预设");
     if (presetWidget && !presetWidget.__vividMusePresetSync) {

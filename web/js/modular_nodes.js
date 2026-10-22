@@ -355,6 +355,12 @@ function installModuleNode(node) {
 
   installSerializationGuard(node);
   installConfigure(node);
+  node.__vividMuseRefreshCardScope = moduleName => {
+    if (moduleName === "人物") {
+      syncEthnicityOptions(node);
+      syncMakeupVisibility(node);
+    } else if (moduleName === "服装") syncClothingVisibility(node);
+  };
   installPresetCallback(node);
   wrapDependencyCallback(node, "发色模式", syncHairVisibility);
   wrapDependencyCallback(node, "妆容模式", syncMakeupVisibility);
