@@ -1,8 +1,8 @@
 import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
 
-// This extension only observes inputs and execution UI messages. It never queues
-// prompts, changes seeds, replaces field values or serializes diagnostic history.
+// Observes execution UI messages; saving a result card is an explicit action.
+// Never queues prompts, changes seeds/fields or serializes diagnostic history.
 const FULL = "VividMuse_ZImageChinesePromptBuilder";
 const MODULES = new Set(["Canvas", "Person", "Hair", "Clothing", "Pose", "Scene", "Camera", "Visual"]
   .map(name => `VividMuse_ZImage${name}Module`));
@@ -291,6 +291,8 @@ function showDetails(node) {
   node.__vividMusePromptDialog?.close();
   // Freeze the panel at open time, including records evicted by a later run.
   const records = JSON.parse(JSON.stringify(node.__vividMusePromptHistory || [])).reverse();
+  const graph = rootGraph();
+  const generation = node.__vividMuseDiagnosticsGeneration || 0;
   const dialog = document.createElement("dialog");
   dialog.style.cssText = "width:min(760px,90vw);max-height:85vh;overflow:auto;padding:20px;background:var(--comfy-menu-bg,#252525);color:var(--input-text,#eee);border:1px solid #777;border-radius:10px";
   const el = (tag, content = "") => {
@@ -324,7 +326,7 @@ function showDetails(node) {
   zhBody.setAttribute("aria-label", text("中文结果正文", "Chinese Result Text"));
   enBody.setAttribute("aria-label", text("英文结果正文", "English Result Text"));
   const selected = () => records[Number(selector.value)];
-  let active = true;
+  let active = true, composing = false;
   const copy = async key => {
     const record = selected();
     if (!record) return;
@@ -356,10 +358,90 @@ function showDetails(node) {
   const actions = el("div"); actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
   actions.append(button("复制中文", "Copy Chinese", () => copy("zh")),
     button("复制英文", "Copy English", () => copy("en")), button("导出此结果", "Export This Result", exportResult));
+  const cardArea = el("section");
+  const cardActions = el("div"); cardActions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:10px 0";
+  const cardAvailability = el("p"); cardAvailability.style.whiteSpace = "pre-wrap";
+  const cardEditor = el("div"); cardEditor.hidden = true;
+  const cardName = el("input"); cardName.maxLength = 80;
+  cardName.setAttribute("aria-label", text("卡片名称", "Card name"));
+  const cardInfo = el("p"); cardInfo.style.whiteSpace = "pre-wrap";
+  const cardPreview = el("pre");
+  cardPreview.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere;max-height:26vh;overflow:auto";
+  const cardNotice = el("p", text(
+    "保存该次执行的完整模块选项，含未写入正文的隐藏或省略字段；不含发型、上游工作流，不保证换景别或密度后正文一致。保存不会应用卡片或新增锁定。",
+    "Save this execution's complete module options, including hidden or omitted fields. Hair and upstream workflows are not included. Text may differ with framing or density. Saving does not apply or lock the card."));
+  let cardDraft = null;
+  const cardModules = (node.comfyClass || node.constructor?.type) === FULL ? ["人物", "服装"]
+    : (node.comfyClass || node.constructor?.type) === "VividMuse_ZImagePersonModule" ? ["人物"]
+    : (node.comfyClass || node.constructor?.type) === "VividMuse_ZImageClothingModule" ? ["服装"] : [];
+  const checkCardOwner = record => {
+    if (!active || rootGraph() !== graph || generation !== (node.__vividMuseDiagnosticsGeneration || 0)
+        || record?.promptId == null || record?.executionNode == null
+        || nodeAtPath(graph, record.executionNode) !== node)
+      throw new Error(text("无法确认该记录所属的节点会话，请重新打开面板或执行节点。",
+        "Cannot confirm this record's node session. Reopen the panel or run the node again."));
+  };
+  const captureResult = (record, moduleName, name) => {
+    checkCardOwner(record);
+    const cards = globalThis.__vividMuseContentCards;
+    if (!cards?.captureResultCard || !cards?.saveCard) throw new Error(text(
+      "卡片功能尚未加载，请刷新页面后重试。", "Card tools are not loaded. Refresh the page and retry."));
+    return cards.captureResultCard(node, record.data, moduleName, name);
+  };
+  const guardedCardAction = action => () => {
+    if (!active || composing) return;
+    try { action(); } catch (error) { if (active) status.textContent = error.message; }
+  };
+  const clearCardDraft = () => { cardDraft = null; cardEditor.hidden = true; };
+  const cardButtons = cardModules.map(moduleName => {
+    const item = button(moduleName === "人物" ? "保存为人物卡" : "保存为穿搭卡",
+      moduleName === "人物" ? "Save as Person Card" : "Save as Outfit Card", guardedCardAction(() => {
+        const record = selected();
+        const name = `${text(moduleName === "人物" ? "人物" : "穿搭", moduleName === "人物" ? "Person" : "Outfit")} · ${record.data.seed}`;
+        const entry = captureResult(record, moduleName, name);
+        cardDraft = {record, moduleName}; cardName.value = name;
+        cardInfo.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n`
+          + `${text("执行记录", "Execution Record")}: ${record.promptId}`;
+        cardPreview.textContent = Object.entries(entry.values).map(([key, value]) =>
+          `${tr(key)}: ${displayValue(node, key, value)}`).join("\n");
+        cardEditor.hidden = false; status.textContent = ""; cardName.focus();
+      }));
+    cardActions.append(item);
+    return {item, moduleName};
+  });
+  const confirmCard = button("确认保存卡片", "Confirm Save Card", guardedCardAction(() => {
+    if (!cardDraft || cardDraft.record !== selected()) throw new Error(text(
+      "执行记录已变化，请重新选择要保存的卡片。", "The selected record changed. Choose the card to save again."));
+    const {record, moduleName} = cardDraft;
+    const entry = captureResult(record, moduleName, cardName.value);
+    const saved = node.properties?.vividMuseContentCards;
+    const exists = Array.isArray(saved) && saved.some(card => card.module === entry.module && card.name === entry.name);
+    if (exists && !window.confirm(text("覆盖同类型同名卡片？", "Replace this card of the same type and name?"))) return;
+    checkCardOwner(record);
+    globalThis.__vividMuseContentCards.saveCard(node, entry, exists);
+    clearCardDraft();
+    status.textContent = text("已保存到此节点的卡片库；请保存工作流以保留。当前选项与锁定未改变。",
+      "Saved in this node's card library; save the workflow to keep it. Current options and locks are unchanged.");
+  }));
+  cardEditor.append(cardInfo, cardNotice, cardName, cardPreview, confirmCard,
+    button("取消保存", "Cancel Save", clearCardDraft));
+  cardArea.hidden = !cardModules.length;
+  cardArea.append(cardActions, cardAvailability, cardEditor);
   const diagnostic = el("details");
   diagnostic.append(el("summary", text("字段与诊断详情", "Fields and Diagnostics")), diagnosticBody);
   const render = () => {
     const record = selected(); status.textContent = "";
+    clearCardDraft();
+    const unavailable = [];
+    for (const {item, moduleName} of cardButtons) {
+      try {
+        captureResult(record, moduleName, "preview"); item.disabled = false; item.title = "";
+      } catch (error) {
+        item.disabled = true; item.title = error.message;
+        unavailable.push(`${text(moduleName, moduleName === "人物" ? "Person" : "Outfit")}: ${error.message}`);
+      }
+    }
+    cardAvailability.textContent = unavailable.join("\n");
     if (!record) { diagnosticBody.textContent = bodyText; diagnostic.open = true; return; }
     info.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n`
       + (record.changed === null ? text("首次记录或设置／上下文不同，不比较变化。", "First record or different settings/context; changes are not comparable.")
@@ -374,13 +456,18 @@ function showDetails(node) {
     diagnosticBody.textContent = details(node, record, false);
   };
   selector.onchange = render;
-  if (records.length) dialog.append(selector, info, actions, status,
+  if (records.length) dialog.append(selector, info, actions, cardArea, status,
     el("h4", text("中文提示词", "Chinese Prompt")), zhBody, el("h4", text("英文提示词", "English Prompt")), enBody);
   else dialog.append(el("p", text("暂无实际执行记录，请先运行节点。", "No execution record yet. Run the node first.")));
   dialog.append(diagnostic); render();
+  dialog.addEventListener("compositionstart", () => { composing = true; });
+  dialog.addEventListener("compositionend", () => { composing = false; });
+  dialog.addEventListener("cancel", event => { if (composing) event.preventDefault(); });
   dialog.addEventListener("keydown", event => {
     event.stopPropagation();
-    if (event.key === "Escape" && !event.isComposing && event.keyCode !== 229) { event.preventDefault(); dialog.close(); }
+    if (event.key === "Escape" && !composing && !event.isComposing && event.keyCode !== 229) {
+      event.preventDefault(); dialog.close();
+    }
   });
   for (const name of ["keyup", "copy", "cut", "paste", "wheel"]) dialog.addEventListener(name, event => event.stopPropagation());
   dialog.onclose = () => { active = false; dialog.remove(); if (node.__vividMusePromptDialog === dialog) node.__vividMusePromptDialog = null; };

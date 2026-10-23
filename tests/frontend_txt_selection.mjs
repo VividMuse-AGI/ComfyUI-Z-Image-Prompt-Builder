@@ -5,10 +5,22 @@ import vm from "node:vm";
 const definitions = [];
 globalThis.__txtSelectionApp = {
   graph: { setDirtyCanvas() {} }, registerExtension(ext) { definitions.push(ext); },
+  async graphToPrompt(){return {output:{'1':{}}};},
 };
+const resultListeners = new Map(); let executionSequence=0;
+globalThis.__txtSelectionApi = {addEventListener(name, fn){resultListeners.set(name,fn);},
+  async queuePrompt(){return {prompt_id:String(++executionSequence)};}};
+async function deliver(node, record) {
+  node.id=1;
+  __txtSelectionApp.graph={nodes:[node],getNodeById:id=>String(id)==='1'?node:null,setDirtyCanvas(){}};
+  const {prompt_id}=await __txtSelectionApi.queuePrompt(0,await __txtSelectionApp.graphToPrompt());
+  resultListeners.get('executed')({detail:{prompt_id,node:'1',output:{vividmuse_txt_selection:[{
+    algorithm:'python-random-v1',kind:node.comfyClass.includes('TxtModule')?'module':'prompt',mode:'随机抽取',index:0,...record}]}}});
+}
 function load(file, exports = "") {
   let code = fs.readFileSync(new URL(`../web/js/${file}`, import.meta.url), "utf8")
-    .replace('import { app } from "../../scripts/app.js";', 'const app = globalThis.__txtSelectionApp;');
+    .replace('import { app } from "../../scripts/app.js";', 'const app = globalThis.__txtSelectionApp;')
+    .replace('import { api } from "../../scripts/api.js";', 'const api = globalThis.__txtSelectionApi;');
   vm.runInThisContext(`(function(){${code}\n${exports}})();`, { filename: file });
 }
 load("txt_library.js", "globalThis.__promptTools = { importTxtPromptFile, clearTxtPromptLibrary, applySelectedTxtPrompt, clearFreePrompt }; ");
@@ -111,7 +123,7 @@ for (const reverse of [false, true]) {
     const height = node.size[1];
     const result = { status: "selected", seed: "18446744073709551615", count: 2,
       title: "<script>user title</script>", prompt: "<img src=x>body", module: kind === "module" ? "人物" : null };
-    node.onExecuted({ vividmuse_txt_selection: [result] });
+    await deliver(node,result);
     assert.equal(node.__txtSelectionResult.seed, result.seed);
     assert.equal(node.__txtSelectionResultButton.name, "随机抽取：尚未执行");
     assert.equal(node.__txtSelectionResultButton.label, "上次随机结果（点击查看）");
@@ -120,7 +132,7 @@ for (const reverse of [false, true]) {
     assert.equal(node.size[1], height);
     // A cached/late execution is explicitly historical, not tied to the next seed.
     set(node, "随机种子", 17);
-    node.onExecuted({ vividmuse_txt_selection: [result] });
+    await deliver(node,result);
     assert.equal(node.__txtSelectionResult.seed, result.seed);
     assert.ok(!JSON.stringify(save(node)).includes("<script>"));
     (kind === "prompt" ? __promptTools.clearTxtPromptLibrary : __moduleTools.clearModuleLibrary)(node);
@@ -149,16 +161,17 @@ for (const reverse of [false, true]) {
 // Read-only result uses textContent, never HTML; dialog is ephemeral.
 const nodes = [];
 globalThis.document = { createElement(tag) {
-  const el = { tag, style: {}, append(...items) { this.children = items; },
-    showModal() {}, close() { this.onclose(); }, remove() { this.removed = true; } };
+  const el = { tag, style: {}, children:[],listeners:{},append(...items) { this.children.push(...items); },
+    setAttribute(){},addEventListener(k,fn){this.listeners[k]=fn;},
+    showModal() {}, close() { this.listeners.close?.(); }, remove() { this.removed = true; } };
   Object.defineProperty(el, "innerHTML", { set() { throw Error("Unsafe HTML"); } });
   nodes.push(el); return el;
 }, body: { append() {} } };
 const node = make("prompt");
-node.onExecuted({ vividmuse_txt_selection: [{ status: "empty", count: 0, seed: "9", title: "<script>", prompt: "<img>" }] });
+await deliver(node,{ status: "selected", count: 1, seed: "9", title: "<script>", prompt: "<img>",module:null });
 node.__txtSelectionResultButton.callback();
-assert.ok(nodes.find(n => n.tag === "pre").textContent.includes("<script>"));
-nodes.find(n => n.tag === "button").onclick();
+assert.ok(nodes.some(n => n.tag === "pre"&&n.textContent.includes("<script>")));
+nodes.find(n => n.tag === "button"&&n.textContent==='关闭').listeners.click();
 assert.equal(nodes.find(n => n.tag === "dialog").removed, true);
 delete globalThis.document;
 

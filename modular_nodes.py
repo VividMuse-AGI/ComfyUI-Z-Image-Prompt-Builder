@@ -289,7 +289,7 @@ class ZImageModuleNodeBase:
                 field_name,
                 core.FOLLOW_PRESET,
             )
-        request_trace = {} if unique_id is not None else None
+        request_trace = {}
         fields = core.resolve_fields(
             preset,
             core.RANDOM_SCOPES[1],
@@ -297,6 +297,13 @@ class ZImageModuleNodeBase:
             requested,
             request_trace=request_trace,
         )
+        if self.MODULE_NAME == "姿态动作":
+            fields = core.pose_scene_view(
+                fields, request_trace,
+                scene_available=("场景" not in upstream_opaque_modules
+                                 and upstream_context.get("场景地点", core.EMPTY_CHOICE)
+                                 != core.EMPTY_CHOICE),
+            )
         context_fields = dict(upstream_context)
         for module_name in upstream_opaque_modules:
             for field_name in MODULE_FIELD_GROUPS.get(module_name, ()):

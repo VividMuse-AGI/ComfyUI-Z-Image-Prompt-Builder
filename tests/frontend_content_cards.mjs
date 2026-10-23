@@ -183,7 +183,7 @@ await panel.fire("compositionstart");
 let stopped=false, prevented=false;
 const escape={key:"Escape",stopPropagation(){stopped=true;},preventDefault(){prevented=true;}};
 await panel.fire("keydown",escape);
-assert.ok(stopped && prevented && panel.open,"IME Escape must not close or reach canvas");
+assert.ok(stopped && !prevented && panel.open,"IME Escape must preserve candidate cancellation, not close or reach canvas");
 await panel.fire("cancel",{preventDefault(){prevented=true;}});
 assert.ok(panel.open);
 await panel.fire("compositionend");

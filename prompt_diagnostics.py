@@ -14,6 +14,34 @@ def module_groups(core):
     }
 
 
+def card_candidates(core, groups, fields, fragments, english_fragments, replacements):
+    """Snapshot canonical execution values before framing, without resolving again."""
+    candidates = {}
+    for module in ("人物", "服装"):
+        if module not in groups:
+            continue
+        names = groups[module]
+        replacement = replacements.get(module)
+        if isinstance(replacement, str) and replacement.strip():
+            reason = "user_replaced"
+        elif not (fragments.get(module, "").strip()
+                  or english_fragments.get(module, "").strip()):
+            reason = "empty_module"
+        elif any(name not in fields for name in names):
+            reason = "incomplete_fields"
+        elif any(not isinstance(fields[name], str)
+                 or fields[name] in (core.FOLLOW_PRESET, core.RANDOM_CHOICE)
+                 or (fields[name] != core.EMPTY_CHOICE
+                     and fields[name] not in core.FIELD_OPTIONS[name]) for name in names):
+            reason = "unsupported_values"
+        else:
+            reason = None
+        candidates[module] = {"available": reason is None, "reason": reason}
+        if reason is None:
+            candidates[module]["values"] = {name: fields[name] for name in names}
+    return {"version": 1, "modules": candidates}
+
+
 def execution_result(result, *, core, scope, seed, settings, fields, fragments,
                      english_fragments, render_pair, replacements=None, context=None,
                      request_trace=None, framing=None):
@@ -61,6 +89,8 @@ def execution_result(result, *, core, scope, seed, settings, fields, fragments,
         "context": dict(context or {}),
         "zh": str(result[0]), "en": str(result[-1]),
         "resolved": {field: fields.get(field, core.EMPTY_CHOICE) for field in field_modules},
+        "card_candidates": card_candidates(core, selected_groups, fields, fragments,
+                                           english_fragments, replacements),
         "random_fields": random_fields,
         "modules": [{"name": name, "source": "user" if isinstance(replacements.get(name), str)
                      and replacements[name].strip() else "builtin",

@@ -10,6 +10,8 @@ A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-langua
 
 > New in v0.10.0: [Person / Outfit Cards and Module Locks](docs/content-cards.md#english). Open the management panel from the node's context menu to save and reuse module-specific selections without adding node height.
 
+> New in v0.11.0: save Person / Outfit Cards from actual execution results, rename/search cards, preview changes and exchange card packs. Both TXT nodes also support [copying selected text and exporting selection records](docs/txt-result-export.md#english). See the [card guide](docs/content-cards.md#english).
+
 ## Search & Favorites
 
 Available since v0.8.0. The package still contains 11 nodes.
@@ -124,7 +126,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.10.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.10.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.10.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
+For the recommended manual install, open the [`v0.11.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.11.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.11.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -205,7 +207,7 @@ The full builder and eight standalone modules gain one compact read-only details
 
 v0.9.0 lets you select any of the last five executions. Actual text, submitted seed, and changed modules appear first; **Fields and Diagnostics** expands the technical details. **Copy Chinese** and **Copy English** preserve the actual text and line breaks; manual text selection remains available if clipboard access fails. **Export This Result** downloads JSON with a format version, actual seed as a string, Chinese/English text, resolved fields, modules, framing adaptation, and source information. This is a **content snapshot, not a workflow or user preset**. It excludes upstream workflows and cannot be imported to run or overwrite node settings. The editor's next seed and subsequent edits never replace the recorded text.
 
-To export, run the full builder or a standard module, click **Random: 0 fields · Last result** (the count varies), then select **Export This Result** in **Actual Execution Results**. Random sampling does not need to be enabled. **The two TXT nodes' Last Random Result dialogs do not offer this export.** See the [v0.9.0 acceptance record](docs/testing/2026-10-22-v0.9.0-acceptance.md) for the scope of verification.
+To export, run the full builder or a standard module, click **Random: 0 fields · Last result** (the count varies), then select **Export This Result** in **Actual Execution Results**. Random sampling does not need to be enabled. **TXT nodes use a separate selection-record format, not this full-result format.** Since v0.11.0, **Copy Selected Text** and **Export Selection Record** are available under **Last Random Result**, excluding preceding prompts. See the [TXT result guide](docs/txt-result-export.md#english). For the original full-result export's verification scope, see the [v0.9.0 acceptance record](docs/testing/2026-10-22-v0.9.0-acceptance.md).
 
 Available since v0.7.0. Automated regressions, isolated text execution, representative Chinese/English and Classic/Nodes 2.0 UI cases, saved-workflow restoration and normal reloads passed. Follow-up acceptance also covered actual deletion and undo, rapid seed submissions matched to diagnostics, and basic compatibility with ComfyUI 0.31.1 / frontend 1.48.7. Cache replay was verified in that older combination and ComfyUI 0.39.0 / frontend 1.53.10. See the [acceptance record](docs/testing/2026-10-07-focused-release-acceptance.md) for the exact scope. Other host versions and heap-memory analysis are outside these compatibility claims.
 
@@ -468,7 +470,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.10.0`
+- Current version: `0.11.0`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

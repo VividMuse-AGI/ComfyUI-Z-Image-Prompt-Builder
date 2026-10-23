@@ -4840,6 +4840,27 @@ def resolve_fields(
     return resolved
 
 
+STUDIO_EVENT_INCOMPATIBLE_LOCATIONS = frozenset({
+    "公园草地", "沙滩", "都市街道", "繁忙街道路口", "室内泳池",
+})
+
+
+def pose_scene_view(fields: Mapping[str, str], request_trace: Mapping[str, str],
+                    *, scene_available: bool) -> Dict[str, str]:
+    """Omit only a random studio moment with known conflicting scene context.
+
+    Run after all random pools; never redraw or infer a scene from hidden
+    defaults, free text or an opaque TXT replacement. Explicit values survive.
+    """
+    result = dict(fields)
+    if (scene_available
+            and request_trace.get("画面瞬间") == RANDOM_CHOICE
+            and fields.get("画面瞬间") == "棚拍间隙调整姿态"
+            and fields.get("场景地点") in STUDIO_EVENT_INCOMPATIBLE_LOCATIONS):
+        result["画面瞬间"] = EMPTY_CHOICE
+    return result
+
+
 def _brief_text(fields: Mapping[str, str], field_name: str) -> str:
     value = fields[field_name]
     if field_name == "成像媒介":
@@ -7306,10 +7327,12 @@ class ZImageChinesePromptBuilder:
         }
         random_scope = kwargs.pop("随机范围", RANDOM_SCOPES[0])
         seed = kwargs.pop("随机种子", 0)
-        request_trace = {} if unique_id is not None else None
+        request_trace = {}
         fields = resolve_fields(preset, random_scope, seed, kwargs, request_trace=request_trace)
         replacements = {name for name, value in user_module_fragments.items()
                         if isinstance(value, str) and value.strip()}
+        fields = pose_scene_view(fields, request_trace,
+                                 scene_available=not replacements.intersection(("场景", "姿态动作")))
 
         def effective_view(resolved):
             view, report = framing_view(resolved, framing_mode, shot=resolved.get("景别"),

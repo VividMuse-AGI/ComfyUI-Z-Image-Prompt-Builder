@@ -6,6 +6,8 @@
 
 > v0.10.0 新增[人物卡／穿搭卡与模块随机锁定](docs/content-cards.md)。右键节点打开管理面板，保存和复用局部字段，不增加节点高度。
 
+> v0.11.0 新增：可从实际执行结果保存人物卡／穿搭卡，管理卡片名称、差异预览和卡片包；两个 TXT 节点支持[抽中正文复制与记录导出](docs/txt-result-export.md)。详见[卡片说明](docs/content-cards.md)。
+
 ## 素材搜索与收藏
 
 从 v0.8.0 起提供以下功能；节点数量仍为 11 个。
@@ -126,7 +128,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.10.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.10.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.10.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
+推荐从 [`v0.11.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.11.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.11.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -207,7 +209,7 @@ API 调用提供可选输入 `选择模式`、`随机种子`、`词库数据`；
 
 v0.9.0 可在最近五条记录中选择一次执行，优先查看中英文正文、实际提交种子及变化模块；字段和技术说明收在“字段与诊断详情”。“复制中文”“复制英文”保留实际正文及换行；复制失败可选中文字手动复制。“导出此结果”下载带格式版本、实际种子（字符串）、中英文正文、解析字段、模块、构图适配及来源说明的 JSON。它是**内容快照，不是工作流或用户预设**，不包含上游工作流，也不支持导入后执行或自动回填设置。当前编辑器的下一次种子和改动不会覆盖历史正文。
 
-导出入口：先运行完整节点或任一标准模块，点击节点内“随机 0 项 · 查看上次结果”（数字随随机字段数量变化），在“实际执行结果”弹窗中选择“导出此结果”。无需启用随机。**两个 TXT 节点的“上次随机结果”弹窗不提供此导出功能。** 本次增补的验收范围见[ v0.9.0 验收记录](docs/testing/2026-10-22-v0.9.0-acceptance.md)。
+导出入口：先运行完整节点或任一标准模块，点击节点内“随机 0 项 · 查看上次结果”（数字随随机字段数量变化），在“实际执行结果”弹窗中选择“导出此结果”。无需启用随机。**TXT 节点使用独立的抽取记录格式，而非上述完整结果格式**：从 v0.11.0 起，在“上次随机结果”中提供“复制抽中正文”和“导出抽取记录”，只包含抽中条目，不含前置拼接文本。见[TXT 结果说明](docs/txt-result-export.md)。完整节点原导出的验收范围见[ v0.9.0 验收记录](docs/testing/2026-10-22-v0.9.0-acceptance.md)。
 
 此功能从 v0.7.0 提供。自动化回归、隔离纯文本执行、中英文／经典／Nodes 2.0 代表界面、保存恢复和正常刷新已通过验收；另补齐真实删除／撤销、快速提交种子与诊断对应，以及 ComfyUI 0.31.1／前端 1.48.7 的基本兼容。缓存回显已在该旧版组合及 ComfyUI 0.39.0／前端 1.53.10 验证，具体范围见[验收记录](docs/testing/2026-10-07-focused-release-acceptance.md)。其他宿主版本和堆内存专项不包含在兼容承诺中。
 
@@ -511,7 +513,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.10.0`
+- 当前版本：`0.11.0`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上
