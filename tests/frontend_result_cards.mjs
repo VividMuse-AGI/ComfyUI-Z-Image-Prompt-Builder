@@ -10,8 +10,9 @@ import json, nodes as n, modular_nodes as m
 classes={**n.NODE_CLASS_MAPPINGS, **{k:c for k,c in m.NODE_CLASS_MAPPINGS.items() if issubclass(c,m.ZImageModuleNodeBase)}}
 def run(c,seed):
     return getattr(c(),c.FUNCTION)(unique_id='1', **{'预设':n.PRESET_OPTIONS[1], '随机种子':seed, **dict.fromkeys(n.FIELD_ORDER,n.RANDOM_CHOICE)})['ui']['vividmuse_prompt_diagnostics'][0]
-print(json.dumps({'schemas':{k:c.INPUT_TYPES() for k,c in classes.items()}, 'results':{k:[run(c,42),run(c,n.MAX_SEED)] for k,c in classes.items()}}))
-`],{cwd:root,encoding:"utf8"}));
+print(json.dumps({'schemas':{k:c.INPUT_TYPES() for k,c in classes.items()}, 'results':{k:[run(c,42),run(c,n.MAX_SEED)] for k,c in classes.items()},
+    'concrete':{k:getattr(c(),c.FUNCTION)(unique_id='1')['ui']['vividmuse_prompt_diagnostics'][0] for k,c in classes.items()}}))
+`],{cwd:root,encoding:"utf8",env:{...process.env,PYTHONUTF8:"1",PYTHONIOENCODING:"utf-8"}}));
 const json=value=>JSON.parse(JSON.stringify(value));
 class Element {
   constructor(tag){this.tag=tag;this.children=[];this.listeners={};this.attrs={};this.style={};this.textContent="";this.value="";}
@@ -34,13 +35,18 @@ for(const diagnosticsFirst of [true,false]){
   const app={graph,registerExtension(e){extensions.push(e);},async graphToPrompt(){return {output:Object.fromEntries([...nodes].map(([id,n])=>[id,{class_type:n.comfyClass}]))};}};
   const api={addEventListener(k,fn){listeners.set(k,fn);},async queuePrompt(_number,_prompt,extra){return {prompt_id:extra.id};}};
   const ctx=vm.createContext({console,app,api,setTimeout(){},clearTimeout(){},document:{createElement:t=>new Element(t),body:new Element("body")},window:{confirm:()=>confirm()}});
-  const files=["preset_sync","modular_nodes","workflow_tools"];
+  const files=["preset_sync","modular_nodes","workflow_tools","shoot_plan_core","shoot_plan_cards"];
   diagnosticsFirst?files.unshift("prompt_diagnostics"):files.push("prompt_diagnostics");
-  for(const file of files){const source=fs.readFileSync(new URL(`../web/js/${file}.js`,import.meta.url),"utf8")
-    .replace('import { app } from "../../scripts/app.js";',"").replace('import { api } from "../../scripts/api.js";',"").replaceAll("export function ","function ");
+  for(const file of files){const original=fs.readFileSync(new URL(`../web/js/${file}.js`,import.meta.url),"utf8");
+    let source=original.replace(/import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];/g,"")
+      .replaceAll("export function ","function ").replaceAll("export const ","const ");
+    const names=[...original.matchAll(/export (?:function|const) (\w+)/g)].map(m=>m[1]);
+    if(file==="shoot_plan_core")source+=`\nglobalThis.shootCore={${names.join(",")}};`;
+    if(file==="shoot_plan_cards")source=`const {${Object.keys(ctx.shootCore).join(",")}}=globalThis.shootCore;\n${source}`;
     vm.runInContext(`(()=>{${source}\n})();`,ctx);}
   ctx.__vividMuseZImageI18n={activeLanguage:()=>lang,translateMessage:v=>v};
   for(const e of extensions)e.init?.();
+  for(const [name,input] of Object.entries(fixture.schemas))for(const e of extensions)e.beforeRegisterNodeDef?.(class {},{name,input});
   let nextId=1;
   const make=async type=>{
     const node={id:nextId++,comfyClass:key(type),widgets:[],properties:{},inputs:[],size:[360,400],
@@ -126,5 +132,48 @@ for(const diagnosticsFirst of [true,false]){
   // New cards remain usable by the public v1 validator and preserve non-target fields on application.
   const target=await make("PersonModule"),card=cards.captureResultCard(target,fixture.results[key("PersonModule")][0],"人物","roundtrip");
   cards.saveCard(target,json(card));assert.deepEqual(json(target.properties.vividMuseContentCards[0]),json(card));
-  console.log(`PASS result cards: actual Python data, scopes, frozen history, save-only, invalid records, ownership, IME; diagnosticsFirst=${diagnosticsFirst}`);
+  const shootNode=await make("ChinesePromptBuilder");
+  await emit(shootNode,"shoot-old",results[0]); await emit(shootNode,"shoot-new",results[1]);
+  shootNode.widgets.find(w=>w.name==="景别").value="随机抽取";
+  shootNode.widgets.find(w=>w.name==="用户场景片段").value="CURRENT TXT";
+  shootNode.inputs=[{name:"场景地点",link:9}];
+  panel=open(shootNode); const recordSelect=named(panel,"选择执行记录"); recordSelect.value="1"; await recordSelect.fire("change");
+  const shootBefore=state(shootNode); await button(panel,"保存为拍摄方案卡").click();
+  named(panel,"拍摄方案卡名称").value="历史拍摄"; await button(panel,"确认保存拍摄方案卡").click();
+  assert.equal(state(shootNode),shootBefore);
+  const eligible=Object.entries(results[0].shoot_plan_candidates.modules).filter(([,c])=>c.available).map(([m])=>m);
+  assert.deepEqual(Object.keys(shootNode.properties.vividMuseShootPlanCards[0].modules),eligible);
+  for(const module of eligible)assert.deepEqual(json(shootNode.properties.vividMuseShootPlanCards[0].modules[module]),results[0].shoot_plan_candidates.modules[module].values);
+  // Same-name replace must also recheck library state after confirmation.
+  await button(panel,"保存为拍摄方案卡").click();named(panel,"拍摄方案卡名称").value="历史拍摄";
+  confirm=()=>{ctx.__vividMuseShootPlanCards.saveCard(shootNode,{...json(shootNode.properties.vividMuseShootPlanCards[0]),name:"concurrent"});return true;};
+  await button(panel,"确认保存拍摄方案卡").click();assert.equal(shootNode.properties.vividMuseShootPlanCards.length,2);assert.match(status(panel),/变化/);confirm=()=>true;
+  // Changing records cancels drafts; an opened historical snapshot survives newer runs.
+  await button(panel,"保存为拍摄方案卡").click(); recordSelect.value="0";await recordSelect.fire("change");
+  await button(panel,"确认保存拍摄方案卡").click();assert.equal(shootNode.properties.vividMuseShootPlanCards.length,2);
+  const shootChecks=all(panel).filter(e=>e.type==="checkbox");
+  for(const check of shootChecks){check.checked=check.value==="摄影";await check.fire("change");}
+  await button(panel,"保存为拍摄方案卡").click();named(panel,"拍摄方案卡名称").value="仅摄影历史";
+  for(let i=0;i<6;i++)await emit(shootNode,`shoot-later-${i}`,results[0]);
+  await button(panel,"确认保存拍摄方案卡").click();
+  assert.deepEqual(Object.keys(shootNode.properties.vividMuseShootPlanCards[2].modules),["摄影"]);
+  assert.deepEqual(json(shootNode.properties.vividMuseShootPlanCards[2].modules["摄影"]),results[1].shoot_plan_candidates.modules["摄影"].values);
+  panel.close();
+  for(const [kind,module] of [["SceneModule","场景"],["CameraModule","摄影"],["VisualModule","视觉表现"]]){
+    const single=await make(kind);await emit(single,`shoot-${kind}`,fixture.concrete[single.comfyClass]);lang="en";panel=open(single);
+    assert.equal(all(panel).filter(e=>e.type==="checkbox").length,1);
+    await button(panel,"Save as Shoot Plan Card").click();named(panel,"Shoot plan card name").value="single";
+    await button(panel,"Confirm Save Shoot Plan").click();assert.deepEqual(Object.keys(single.properties.vividMuseShootPlanCards[0].modules),[module]);
+    panel.close();lang="zh";
+  }
+  const oldShoot=await make("ChinesePromptBuilder"),oldData=json(results[0]);delete oldData.shoot_plan_candidates;
+  await emit(oldShoot,"old-protocol",oldData);panel=open(oldShoot);assert.ok(button(panel,"保存为拍摄方案卡").disabled);
+  assert.ok(all(panel).some(e=>e.textContent?.includes("重新执行")));panel.close();
+  const noShoot=await make("ChinesePromptBuilder"),partial=json(results[0]);
+  partial.shoot_plan_candidates.modules["场景"]={available:false,reason:"user_replaced"};
+  await emit(noShoot,"partial",partial);panel=open(noShoot);
+  assert.ok(all(panel).find(e=>e.type==="checkbox"&&e.value==="场景").disabled);
+  await button(panel,"保存为拍摄方案卡").click();named(panel,"拍摄方案卡名称").value="not-owned";
+  app.graph={};await button(panel,"确认保存拍摄方案卡").click();assert.equal(noShoot.properties.vividMuseShootPlanCards,undefined);app.graph=graph;panel.close();
+  console.log(`PASS result cards and shoot plans: actual Python records, history, selective modules, old/TXT rejection, ownership, save-only, races; diagnosticsFirst=${diagnosticsFirst}`);
 }

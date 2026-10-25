@@ -8,6 +8,8 @@
 
 > v0.11.0 新增：可从实际执行结果保存人物卡／穿搭卡，管理卡片名称、差异预览和卡片包；两个 TXT 节点支持[抽中正文复制与记录导出](docs/txt-result-export.md)。详见[卡片说明](docs/content-cards.md)。
 
+> v0.12.0 新增[拍摄方案卡](docs/shoot-plan-cards.md)，组合保存场景、摄影、视觉表现；支持从实际执行结果保存、选择模块应用并锁定，以及 JSON 单卡／卡片包交换。入口为右键节点 → **卡片管理 / 模块锁定** → **拍摄方案卡**，适用于完整节点和这三个独立模块。
+
 ## 素材搜索与收藏
 
 从 v0.8.0 起提供以下功能；节点数量仍为 11 个。
@@ -128,7 +130,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.11.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.11.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.11.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
+推荐从 [`v0.12.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.12.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.12.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -513,7 +515,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.11.0`
+- 当前版本：`0.12.0`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上

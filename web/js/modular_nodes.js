@@ -360,6 +360,7 @@ function installModuleNode(node) {
       syncEthnicityOptions(node);
       syncMakeupVisibility(node);
     } else if (moduleName === "服装") syncClothingVisibility(node);
+    else if (moduleName === "场景") syncSceneOptions(node, false, false);
   };
   installPresetCallback(node);
   wrapDependencyCallback(node, "发色模式", syncHairVisibility);

@@ -20,6 +20,7 @@ REQUIRED = {
     "web/js/i18n_catalog.js", "web/js/resolution_catalog.js",
     "web/js/library_discovery.js", "web/js/library_discovery_core.js",
     "web/js/library_catalog.js",
+    "web/js/shoot_plan_core.js", "web/js/shoot_plan_cards.js",
 }
 
 

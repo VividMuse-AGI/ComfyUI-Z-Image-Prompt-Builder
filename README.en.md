@@ -12,6 +12,8 @@ A portrait prompt builder node for ComfyUI by VividMuse. Generate natural-langua
 
 > New in v0.11.0: save Person / Outfit Cards from actual execution results, rename/search cards, preview changes and exchange card packs. Both TXT nodes also support [copying selected text and exporting selection records](docs/txt-result-export.md#english). See the [card guide](docs/content-cards.md#english).
 
+> New in v0.12.0: [Shoot Plan Cards](docs/shoot-plan-cards.md#english) combine Scene, Camera and Visual settings. Save current settings or actual execution results, apply and optionally lock selected modules, and exchange JSON cards/packs. Open the node context menu → **Cards / Module Locks** → **Shoot Plan Cards** on the full builder or these three standalone modules.
+
 ## Search & Favorites
 
 Available since v0.8.0. The package still contains 11 nodes.
@@ -126,7 +128,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.11.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.11.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.11.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
+For the recommended manual install, open the [`v0.12.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.12.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.12.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -470,7 +472,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.11.0`
+- Current version: `0.12.0`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

@@ -14,10 +14,11 @@ def module_groups(core):
     }
 
 
-def card_candidates(core, groups, fields, fragments, english_fragments, replacements):
+def card_candidates(core, groups, fields, fragments, english_fragments, replacements,
+                    *, modules=("人物", "服装")):
     """Snapshot canonical execution values before framing, without resolving again."""
     candidates = {}
-    for module in ("人物", "服装"):
+    for module in modules:
         if module not in groups:
             continue
         names = groups[module]
@@ -40,6 +41,28 @@ def card_candidates(core, groups, fields, fragments, english_fragments, replacem
         if reason is None:
             candidates[module]["values"] = {name: fields[name] for name in names}
     return {"version": 1, "modules": candidates}
+
+
+def shoot_plan_candidates(core, groups, fields, fragments, english_fragments, replacements):
+    """Independent additive protocol; never infer modules from upstream text."""
+    result = card_candidates(core, groups, fields, fragments, english_fragments,
+                             replacements, modules=("场景", "摄影", "视觉表现"))
+    for module, candidate in result["modules"].items():
+        if not candidate["available"]:
+            continue
+        values = candidate["values"]
+        reason = None
+        if all(value == core.EMPTY_CHOICE for value in values.values()):
+            reason = "empty_module"
+        elif module == "场景":
+            category, location = values["场景大类"], values["场景地点"]
+            if category != core.EMPTY_CHOICE and location != core.EMPTY_CHOICE:
+                allowed = core.SCENE_LOCATIONS_BY_CATEGORY.get(category, ())
+                if location not in allowed:
+                    reason = "incompatible_scene"
+        if reason:
+            result["modules"][module] = {"available": False, "reason": reason}
+    return result
 
 
 def execution_result(result, *, core, scope, seed, settings, fields, fragments,
@@ -91,6 +114,8 @@ def execution_result(result, *, core, scope, seed, settings, fields, fragments,
         "resolved": {field: fields.get(field, core.EMPTY_CHOICE) for field in field_modules},
         "card_candidates": card_candidates(core, selected_groups, fields, fragments,
                                            english_fragments, replacements),
+        "shoot_plan_candidates": shoot_plan_candidates(
+            core, selected_groups, fields, fragments, english_fragments, replacements),
         "random_fields": random_fields,
         "modules": [{"name": name, "source": "user" if isinstance(replacements.get(name), str)
                      and replacements[name].strip() else "builtin",

@@ -277,6 +277,7 @@ function resultSnapshot(node, record) {
     scope: record.data.scope, seed: String(record.data.seed),
     zh: record.data.zh, en: record.data.en,
     resolved: record.data.resolved, modules: record.data.modules,
+    ...(record.data.shoot_plan_candidates ? {shoot_plan_candidates: record.data.shoot_plan_candidates} : {}),
     framing: record.data.framing || null,
     limitations: {
       content_snapshot_only: true, executable_workflow: false,
@@ -303,8 +304,8 @@ function showDetails(node) {
   };
   const title = el("h3", text("实际执行结果", "Actual Execution Results"));
   dialog.setAttribute("aria-label", title.textContent);
-  const note = el("p", text("仅保留本次会话最近 5 条。此面板为打开时的快照；运行后请重新打开。导出只保存结果正文，不包含可执行或上游工作流。",
-    "The latest 5 records are kept in this session only. Reopen after running to refresh. Export saves result content, not an executable or upstream workflow."));
+  const note = el("p", text("仅保留本次会话最近 5 条。此面板为打开时的快照；运行后请重新打开。导出是只读结果快照，不包含可执行或上游工作流。",
+    "The latest 5 records are kept in this session only. Reopen after running to refresh. Export is a read-only result snapshot, not an executable or upstream workflow."));
   const close = button("关闭", "Close", () => dialog.close());
   dialog.append(title, note, close);
   const selector = el("select");
@@ -399,6 +400,7 @@ function showDetails(node) {
         const record = selected();
         const name = `${text(moduleName === "人物" ? "人物" : "穿搭", moduleName === "人物" ? "Person" : "Outfit")} · ${record.data.seed}`;
         const entry = captureResult(record, moduleName, name);
+        clearShootDraft();
         cardDraft = {record, moduleName}; cardName.value = name;
         cardInfo.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n`
           + `${text("执行记录", "Execution Record")}: ${record.promptId}`;
@@ -427,11 +429,74 @@ function showDetails(node) {
     button("取消保存", "Cancel Save", clearCardDraft));
   cardArea.hidden = !cardModules.length;
   cardArea.append(cardActions, cardAvailability, cardEditor);
+  const shootArea = el("section"), shootChoices = el("div"), shootAvailability = el("p");
+  const shootEditor = el("div"), shootName = el("input"), shootPreview = el("pre");
+  shootEditor.hidden = true; shootName.maxLength = 80;
+  shootName.setAttribute("aria-label", text("拍摄方案卡名称", "Shoot plan card name"));
+  shootPreview.style.cssText = "white-space:pre-wrap;max-height:26vh;overflow:auto";
+  shootAvailability.style.whiteSpace = "pre-wrap";
+  const shootType = node.comfyClass || node.constructor?.type;
+  const shootModules = shootType === FULL ? ["场景", "摄影", "视觉表现"]
+    : ({VividMuse_ZImageSceneModule: ["场景"], VividMuse_ZImageCameraModule: ["摄影"],
+      VividMuse_ZImageVisualModule: ["视觉表现"]}[shootType] || []);
+  const shootLabel = module => text(module, {"场景":"Scene", "摄影":"Camera", "视觉表现":"Visual"}[module]);
+  const shootChecks = [];
+  let shootDraft = null;
+  const clearShootDraft = () => { shootDraft = null; shootEditor.hidden = true; };
+  const shootTools = () => {
+    const tools = globalThis.__vividMuseShootPlanCards;
+    if (!tools?.captureResult || !tools?.saveCard) throw new Error(text(
+      "拍摄方案卡功能尚未加载，请刷新页面。", "Shoot plan tools are not loaded. Refresh the page."));
+    return tools;
+  };
+  const captureShootResult = (record, modules, name) => {
+    checkCardOwner(record); return shootTools().captureResult(node, record.data, modules, name);
+  };
+  const selectedShootModules = () => shootChecks.filter(c => c.check.checked && !c.check.disabled).map(c => c.module);
+  const startShoot = button("保存为拍摄方案卡", "Save as Shoot Plan Card", guardedCardAction(() => {
+    const record = selected(), modules = selectedShootModules();
+    const name = `${text("拍摄方案", "Shoot Plan")} · ${record.data.seed}`;
+    const card = captureShootResult(record, modules, name);
+    clearCardDraft(); shootDraft = {record, modules}; shootName.value = name;
+    shootPreview.textContent = `${text("执行记录", "Execution Record")}: ${record.promptId}\n`
+      + `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n\n`
+      + Object.entries(card.modules).map(([module, values]) => `${shootLabel(module)}\n`
+        + Object.entries(values).map(([key, value]) => `${tr(key)}: ${displayValue(node, key, value)}`).join("\n")).join("\n\n");
+    shootEditor.hidden = false; status.textContent = ""; shootName.focus();
+  }));
+  for (const module of shootModules) {
+    const label = el("label"), check = el("input"); check.type = "checkbox"; check.value = module;
+    label.style.cssText = "display:inline-block;margin:8px";
+    label.append(check, el("span", shootLabel(module))); shootChoices.append(label); shootChecks.push({module, check});
+    check.onchange = () => { clearShootDraft(); startShoot.disabled = !selectedShootModules().length; };
+  }
+  shootEditor.append(el("p", text(
+    "仅保存所选历史记录的完整模块字段，包含未输出的省略字段；不会读取当前配置补填，也不会自动应用或锁定。",
+    "Save complete fields from the selected historical record, including omitted fields. Current settings are never used to fill gaps; saving does not apply or lock.")),
+    shootName, shootPreview, button("确认保存拍摄方案卡", "Confirm Save Shoot Plan", guardedCardAction(() => {
+      if (!shootDraft || shootDraft.record !== selected()) throw new Error(text("执行记录已变化，请重新预览。", "The record changed. Preview again."));
+      const draft = shootDraft, card = captureShootResult(draft.record, draft.modules, shootName.value), tools = shootTools();
+      const base = tools.collectionStamp(node), exists = tools.listCards(node).some(c => c.name === card.name);
+      if (exists && !window.confirm(text("覆盖同名拍摄方案卡？", "Replace this shoot plan card?"))) return;
+      checkCardOwner(draft.record);
+      if (shootDraft !== draft || selected() !== draft.record) throw new Error(text("执行记录已变化，请重新预览。", "The record changed. Preview again."));
+      tools.saveCard(node, card, exists, base); clearShootDraft();
+      status.textContent = text("拍摄方案卡已保存，请保存工作流；当前字段和锁定不变。", "Shoot plan saved. Save the workflow; current fields and locks are unchanged.");
+    })), button("取消保存拍摄方案", "Cancel Shoot Plan Save", clearShootDraft));
+  shootArea.hidden = !shootModules.length;
+  shootArea.append(shootChoices, shootAvailability, startShoot, shootEditor);
   const diagnostic = el("details");
   diagnostic.append(el("summary", text("字段与诊断详情", "Fields and Diagnostics")), diagnosticBody);
   const render = () => {
     const record = selected(); status.textContent = "";
     clearCardDraft();
+    clearShootDraft();
+    const shootReasons = [];
+    for (const {module, check} of shootChecks) {
+      try { captureShootResult(record, [module], "preview"); check.disabled = false; check.checked = true; }
+      catch (error) { check.disabled = true; check.checked = false; shootReasons.push(`${shootLabel(module)}: ${error.message}`); }
+    }
+    shootAvailability.textContent = shootReasons.join("\n"); startShoot.disabled = !selectedShootModules().length;
     const unavailable = [];
     for (const {item, moduleName} of cardButtons) {
       try {
@@ -456,7 +521,7 @@ function showDetails(node) {
     diagnosticBody.textContent = details(node, record, false);
   };
   selector.onchange = render;
-  if (records.length) dialog.append(selector, info, actions, cardArea, status,
+  if (records.length) dialog.append(selector, info, actions, cardArea, shootArea, status,
     el("h4", text("中文提示词", "Chinese Prompt")), zhBody, el("h4", text("英文提示词", "English Prompt")), enBody);
   else dialog.append(el("p", text("暂无实际执行记录，请先运行节点。", "No execution record yet. Run the node first.")));
   dialog.append(diagnostic); render();

@@ -1985,6 +1985,7 @@ app.registerExtension({
         syncEthnicityBranchOptions(node);
         syncMakeupVisibility(node);
       } else if (moduleName === "服装") syncClothingVisibility(node);
+      else if (moduleName === "场景") syncSceneLocationOptions(node, false);
     };
 
     const presetWidget = widgetByName(node, "预设");

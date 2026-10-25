@@ -38,6 +38,13 @@ class ReleasePackageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "project version"):
             validate_archive(self.archive(version="0.4.2"), "v0.5.0")
 
+    def test_shoot_plan_runtime_dependencies_are_required(self):
+        for name in ("web/js/shoot_plan_core.js", "web/js/shoot_plan_cards.js"):
+            with self.subTest(name=name):
+                self.assertIn(name, REQUIRED)
+                with self.assertRaisesRegex(ValueError, "Missing release files"):
+                    validate_archive(self.archive(omit=name), "v0.5.0")
+
     def test_required_runtime_and_release_files(self):
         for name in REQUIRED | {"docs/releases/v0.5.0.md"}:
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, "Missing"):

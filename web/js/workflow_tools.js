@@ -409,7 +409,7 @@ export function openCardsPanel(node) {
   const el = (tag, value = "") => { const item = document.createElement(tag); item.textContent = value; return item; };
   const moduleLabel = name => text(name, {"画面基础":"Canvas", "人物":"Person", "发型":"Hair", "服装":"Clothing",
     "姿态动作":"Pose", "场景":"Scene", "摄影":"Camera", "视觉表现":"Visual"}[name] || name);
-  dialog.append(el("h3", text("人物卡 / 穿搭卡 / 模块锁定", "Person / Outfit Cards / Module Locks")));
+  dialog.append(el("h3", text("卡片管理 / 模块锁定", "Cards / Module Locks")));
   dialog.append(el("p", text("卡片只保存所属模块的具体选项。人物卡包含身形和妆容，不含发型；不保证生图人脸一致。卡片随工作流保存，可导出到其他工作流。",
     "Cards save concrete options in one module. Person cards include physique and makeup, not hair; they do not guarantee face identity. Save your workflow to keep cards, or export them for another workflow.")));
   const status = el("p"); status.setAttribute("role", "status");
@@ -433,6 +433,14 @@ export function openCardsPanel(node) {
     const item = el("button", text(zh, en)); item.type = "button";
     item.addEventListener("click", guarded(fn)); parent.append(item); return item;
   };
+  const shootPlans = globalThis.__vividMuseShootPlanCards;
+  if (shootPlans?.availableModules(node).length) {
+    button(row(), "拍摄方案卡（场景 / 摄影 / 视觉表现）", "Shoot Plan Cards (Scene / Camera / Visual)", () => {
+      requireLive();
+      dialog.close();
+      shootPlans.openPanel(node);
+    });
+  }
   const moduleSelect = el("select"); moduleSelect.setAttribute("aria-label", text("卡片与锁定模块", "Card and lock module"));
   const modules = availableCardModules(node);
   for (const name of modules) { const option = el("option", moduleLabel(name)); option.value = name; moduleSelect.append(option); }
@@ -764,7 +772,7 @@ app.registerExtension({
     const previous=nodeType.prototype.getExtraMenuOptions;
     nodeType.prototype.getExtraMenuOptions=function(_,options) {
       const result=previous?.apply(this,arguments);
-      options.push({content:text("人物卡 / 穿搭卡 / 模块锁定","Person / Outfit Cards / Module Locks"),callback:()=>openCardsPanel(this)});
+      options.push({content:text("卡片管理 / 模块锁定","Cards / Module Locks"),callback:()=>openCardsPanel(this)});
       options.push({content:text("用户预设 / 随机锁定 / 组合检查","User Presets / Random Locks / Checks"),callback:()=>openPanel(this)});
       return result;
     };
