@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
+import {withCardOrganizationImports} from './card_organization_vm.mjs';
 import {execFileSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
 
@@ -24,7 +25,7 @@ const exported = [
   "planShootPlanImport", "commitShootPlanImport",
 ];
 for (const file of ["preset_sync", "modular_nodes", "shoot_plan_core"]) {
-  const source = fs.readFileSync(new URL(`../web/js/${file}.js`, import.meta.url), "utf8")
+  const source = withCardOrganizationImports(fs.readFileSync(new URL(`../web/js/${file}.js`, import.meta.url), "utf8"), ctx)
     .replace('import { app } from "../../scripts/app.js";', "")
     .replaceAll("export function ", "function ").replaceAll("export const ", "const ");
   const bridge = file === "shoot_plan_core" ? `globalThis.shootPlan={${exported.join(",")}};`

@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
+import {withCardOrganizationImports} from './card_organization_vm.mjs';
 
 const context = vm.createContext({console, setTimeout, clearTimeout});
 context.app = {registerExtension(e) { this.extension = e; }, graph: {setDirtyCanvas() {}}};
-const toolsSource=fs.readFileSync(new URL("../web/js/workflow_tools.js",import.meta.url),"utf8")
+const toolsSource=withCardOrganizationImports(fs.readFileSync(new URL("../web/js/workflow_tools.js",import.meta.url),"utf8"),context)
   .replace('import { app } from "../../scripts/app.js";',"").replaceAll("export function ","function ");
 vm.runInContext(toolsSource + "\nglobalThis.api={capturePreset,validatePreset,applyUserPreset,lockFields,findConflicts};",context);
 const api=context.api;

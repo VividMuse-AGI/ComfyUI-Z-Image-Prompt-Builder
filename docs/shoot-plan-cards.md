@@ -12,6 +12,8 @@
 
 不新增节点或常驻控件。人物卡、穿搭卡和原模块锁定功能仍保留在原面板中。
 
+v0.13.0 另加入收藏、排序和筛选后批量导出，与人物／穿搭卡行为一致，见[卡片整理说明](content-cards.md#v0130-卡片整理)。原 v1 卡片协议不变，收藏随工作流保存，不随卡片导出。
+
 ### 保存
 
 1. 在节点中配置好要保存的模块。
@@ -96,6 +98,8 @@
 Available since v0.12.0. The package retains 11 nodes with no new dependencies or online services. After updating, restart ComfyUI and refresh or reopen the page.
 
 Shoot plan cards reuse one or more complete **Scene, Camera and Visual** modules. They are not whole-node presets and do not guarantee identical generated images.
+
+Version v0.13.0 adds favorites, sorting and filtered batch export, matching Person / Outfit Cards. See [card organization](content-cards.md#v0130-card-organization). The v1 portable card format is unchanged. Favorites are saved in the workflow, not in exported cards.
 
 ### Open and save
 

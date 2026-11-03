@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {withCardOrganizationImports} from './card_organization_vm.mjs';
+import {organizationPanelCases} from './card_organization_ui_cases.mjs';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
@@ -30,7 +32,7 @@ const ctx = vm.createContext({console, app, setTimeout(fn){fn();}, clearTimeout(
   document:{createElement:t=>new Element(t),body:new Element('body')},
   window:{confirm(){confirmHook?.();return confirmed;}}});
 for(const file of ['preset_sync','modular_nodes','workflow_tools']){
-  const code=fs.readFileSync(new URL(`../web/js/${file}.js`,import.meta.url),'utf8').replace('import { app } from "../../scripts/app.js";','').replaceAll('export function ','function ');
+  const code=withCardOrganizationImports(fs.readFileSync(new URL(`../web/js/${file}.js`,import.meta.url),'utf8'),ctx).replace('import { app } from "../../scripts/app.js";','').replaceAll('export function ','function ');
   vm.runInContext(`(()=>{${code}\n${file==='workflow_tools'?'globalThis.cards={captureCard,saveCard,applyCard,filterCards,renameCard,cardDifference,validateCardPack,planCardPack,commitCardPack,openCardsPanel};':''}})()`,ctx);
 }
 const api=ctx.cards, json=x=>JSON.parse(JSON.stringify(x));
@@ -101,6 +103,8 @@ const ui=await create();api.saveCard(ui,person);api.saveCard(ui,b);api.saveCard(
 let panel=api.openCardsPanel(ui);
 input(panel,'搜索卡片名称').value='not found';await input(panel,'搜索卡片名称').fire('input');assert.ok(button(panel,'应用卡片').disabled);
 input(panel,'搜索卡片名称').value='';await input(panel,'搜索卡片名称').fire('input');
+assert.equal(input(panel,'已保存卡片').value,'');assert.ok(button(panel,'应用卡片').disabled);
+input(panel,'已保存卡片').value=person.name;await input(panel,'已保存卡片').fire('change');
 input(panel,'卡片名称').value=b.name;confirmed=false;before=snap(ui);await button(panel,'重命名').click();assert.equal(snap(ui),before);
 confirmed=true;await button(panel,'重命名').click();assert.equal(ui.properties.vividMuseContentCards.length,2);
 await button(panel,'应用卡片').click();assert.equal(w(ui,'年龄阶段').value,'20–29岁');
@@ -109,9 +113,9 @@ await button(panel,'应用卡片').click();assert.equal(w(ui,'年龄阶段').val
 await button(panel,'应用并锁定').click();assert.equal(ui.properties.vividMuseRandomLocks.length,20);
 // Search cannot narrow export silently; zero selected must not download.
 input(panel,'搜索卡片名称').value='人物 B';await input(panel,'搜索卡片名称').fire('input');
-await button(panel,'导出卡片包').click();let checks=flatten(panel).filter(e=>e.type==='checkbox');assert.equal(checks.length,2);
-checks.forEach(c=>c.checked=false);await button(panel,'确认导出卡片包').click();assert.equal(downloads.length,0);
-checks.forEach(c=>c.checked=true);await button(panel,'确认导出卡片包').click();assert.equal(downloads.length,1);
+await button(panel,'导出卡片包').click();let checks=flatten(panel).filter(e=>e.type==='checkbox'&&e.attributes['aria-label']?.includes(' / '));assert.equal(checks.length,2);
+for(const c of checks){c.checked=false;await c.fire('change');}assert.ok(button(panel,'确认导出卡片包').disabled);await button(panel,'确认导出卡片包').click();assert.equal(downloads.length,0);
+for(const c of checks){c.checked=true;await c.fire('change');}await button(panel,'确认导出卡片包').click();assert.equal(downloads.length,1);
 assert.equal(JSON.parse(await blob.text()).cards.length,2);
 const importFile=async(p,file)=>{await button(p,'导入卡片包').click();const f=flatten(p).filter(e=>e.type==='file').at(-1);f.files=[file];await f.fire('change');};
 before=snap(ui);await importFile(panel,{size:1048577,text(){throw Error('must not read');}});assert.equal(snap(ui),before);assert.match(status(panel),/1 MB/);
@@ -162,3 +166,6 @@ await button(panel,'重命名').click();confirmHook=null;
 assert.equal(snap(literalNode),atConfirmation);assert.match(status(panel),/已变化/);
 await panel.close();
 console.log('PASS phase2: search, atomic rename, differences, mixed packs, strict validation, capacity, preview races, real-source UI transactions, download selection, lifecycle and IME guards.');
+await organizationPanelCases({kind:'content',create,save:api.saveCard,open:api.openCardsPanel,template:person,
+  language:value=>{ctx.__vividMuseZImageI18n={activeLanguage:()=>value};},
+  confirm:value=>{confirmed=value;},downloads,downloadJSON:async()=>JSON.parse(await blob.text())});

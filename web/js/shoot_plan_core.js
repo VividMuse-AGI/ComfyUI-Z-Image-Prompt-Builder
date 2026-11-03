@@ -1,6 +1,8 @@
 // Structured shooting cards are separate from the v1 person/outfit card format.
 // This module never resolves random values, writes unrelated modules or runs a graph.
 export const SHOOT_PLAN_MODULES = Object.freeze(["场景", "摄影", "视觉表现"]);
+import { planNodeCardCollection, commitNodeCardOrganization } from "./card_organization.js";
+
 export const SHOOT_PLAN_STORE = "vividMuseShootPlanCards";
 const KIND = "vividmuse-shoot-plan-card";
 const LOCKS = "vividMuseRandomLocks";
@@ -227,9 +229,7 @@ export function commitShootPlanImport(node, plan) {
     || nextPlan.replaced.includes(card.name)).map(card => [card.name, card]));
   const next = listShootPlans(node).map(card => incoming.get(card.name) || card);
   next.push(...checked.cards.filter(card => nextPlan.added.includes(card.name)));
-  node.properties ??= {};
-  node.properties[SHOOT_PLAN_STORE] = clone(next);
-  dirty(node);
+  commitNodeCardOrganization(node, planNodeCardCollection(node, SHOOT_PLAN_STORE, next));
   return nextPlan;
 }
 
@@ -260,10 +260,8 @@ export function saveShootPlan(node, entry, replace = false, expectedCollection) 
   const existing = cards.find(card => card.name === validated.name);
   if (existing && !replace) throw new Error(text("已有同名拍摄方案卡，请确认覆盖。", "Confirm replacement of the existing shoot plan."));
   if (!existing && cards.length >= 100) throw new Error(text("最多保存 100 张拍摄方案卡。", "Maximum 100 saved shoot plans."));
-  node.properties ??= {};
-  node.properties[SHOOT_PLAN_STORE] = existing
-    ? cards.map(card => card === existing ? validated : card) : [...cards, validated];
-  dirty(node);
+  const next = existing ? cards.map(card => card === existing ? validated : card) : [...cards, validated];
+  commitNodeCardOrganization(node, planNodeCardCollection(node, SHOOT_PLAN_STORE, next));
   return clone(validated);
 }
 
@@ -281,16 +279,16 @@ export function renameShootPlan(node, original, name, replace = false, expectedC
   const cards = listShootPlans(node);
   if (cards.some(card => card.name === entry.name) && !replace)
     throw new Error(text("已有同名拍摄方案卡，请确认覆盖。", "Confirm replacement of the existing shoot plan."));
-  node.properties[SHOOT_PLAN_STORE] = cards.filter(card => card.name !== entry.name)
+  const next = cards.filter(card => card.name !== entry.name)
     .map(card => card === source ? entry : card);
-  dirty(node);
+  commitNodeCardOrganization(node, planNodeCardCollection(node, SHOOT_PLAN_STORE, next, {from: source, to: entry}));
   return clone(entry);
 }
 
 export function deleteShootPlan(node, original, expectedCollection = shootPlanCollectionStamp(node)) {
   const source = originalCard(node, original, expectedCollection);
-  node.properties[SHOOT_PLAN_STORE] = listShootPlans(node).filter(card => card !== source);
-  dirty(node);
+  commitNodeCardOrganization(node, planNodeCardCollection(node, SHOOT_PLAN_STORE,
+    listShootPlans(node).filter(card => card !== source)));
 }
 
 function effectiveModules(node) {

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
+import {withCardOrganizationImports} from './card_organization_vm.mjs';
 import {execFileSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
 
@@ -38,7 +39,7 @@ for(const diagnosticsFirst of [true,false]){
   const files=["preset_sync","modular_nodes","workflow_tools","shoot_plan_core","shoot_plan_cards"];
   diagnosticsFirst?files.unshift("prompt_diagnostics"):files.push("prompt_diagnostics");
   for(const file of files){const original=fs.readFileSync(new URL(`../web/js/${file}.js`,import.meta.url),"utf8");
-    let source=original.replace(/import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];/g,"")
+    let source=withCardOrganizationImports(original,ctx).replace(/import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];/g,"")
       .replaceAll("export function ","function ").replaceAll("export const ","const ");
     const names=[...original.matchAll(/export (?:function|const) (\w+)/g)].map(m=>m[1]);
     if(file==="shoot_plan_core")source+=`\nglobalThis.shootCore={${names.join(",")}};`;

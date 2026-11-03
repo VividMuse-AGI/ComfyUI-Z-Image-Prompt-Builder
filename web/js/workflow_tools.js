@@ -1,4 +1,6 @@
 import { app } from "../../scripts/app.js";
+import { planNodeCardCollection, commitNodeCardOrganization } from "./card_organization.js";
+import { createOrganizationControls, createCardPackPicker } from "./card_organization_ui.js";
 
 const STORE = "vividMuseUserPresets";
 const LOCKS = "vividMuseRandomLocks";
@@ -215,9 +217,8 @@ export function saveCard(node, entry, replace = false) {
   const same = item => item.module === entry.module && item.name === entry.name;
   if (saved.some(same) && !replace) throw new Error(text("已有同名卡片，请确认覆盖。", "Confirm replacement of the existing card."));
   if (saved.length >= 100 && !saved.some(same)) throw new Error(text("最多保存 100 张卡片。", "Maximum 100 saved cards."));
-  node.properties ??= {};
-  node.properties[CARDS] = [...saved.filter(item => !same(item)), clone(entry)];
-  dirty(node);
+  commitNodeCardOrganization(node, planNodeCardCollection(node, CARDS,
+    [...saved.filter(item => !same(item)), clone(entry)]));
 }
 
 export function applyCard(node, entry, lock = false) {
@@ -294,8 +295,7 @@ export function renameCard(node, original, name, replace = false, expected = col
   const conflict = cards.some(c => cardKey(c) === cardKey(entry));
   if (conflict && !replace) throw new Error(text("已有同名卡片，请确认覆盖。", "Confirm replacement of the existing card."));
   const next = cards.filter(c => cardKey(c) !== cardKey(entry)).map(c => cardKey(c) === cardKey(source) ? entry : c);
-  node.properties[CARDS] = next;
-  dirty(node);
+  commitNodeCardOrganization(node, planNodeCardCollection(node, CARDS, next, {from: source, to: entry}));
   return clone(entry);
 }
 
@@ -354,9 +354,7 @@ export function commitCardPack(node, plan) {
   // Revalidate rather than trust a mutable preview's proposed collection.
   const checked = planCardPack(node, plan.pack, plan.strategy);
   if (checked.added.length || checked.replaced.length) {
-    node.properties ??= {};
-    node.properties[CARDS] = clone(checked.next);
-    dirty(node);
+    commitNodeCardOrganization(node, planNodeCardCollection(node, CARDS, checked.next));
   }
   return checked;
 }
@@ -465,10 +463,14 @@ export function openCardsPanel(node) {
   const search = el("input"); search.type = "search"; search.placeholder = text("搜索卡片名称", "Search card names"); search.setAttribute("aria-label", search.placeholder);
   for (const control of [search, name, select]) control.style.cssText = "display:block;box-sizing:border-box;width:100%;margin:8px 0;padding:6px;min-width:0";
   const countLabel = el("p");
-  cardArea.append(search, countLabel, name, select);
+  const organizationHost = el("div");
+  cardArea.append(search, organizationHost, countLabel, name, select);
   const saved = () => cardCollection(node);
+  const organization = createOrganizationControls({node, parent: organizationHost, el, text, button, guarded,
+    requireLive, onResetFilters: () => { search.value = ""; }, onChange: () => { refresh(); exportPicker?.refresh(); }});
+  const matching = () => organization.matches(saved(), search.value, moduleSelect.value);
   const selected = () => {
-    const entry = filterCards(node, moduleSelect.value, search.value).find(item => item.name === select.value);
+    const entry = matching().find(item => item.name === select.value);
     if (!entry) throw new Error(text("请先选择卡片。", "Select a card first."));
     return entry;
   };
@@ -482,10 +484,11 @@ export function openCardsPanel(node) {
   const labelFor = k => globalThis.__vividMuseZImageI18n?.translateMessage?.(k) || k;
   const valueFor = (k, v) => node.widgets.find(w => w.name === k)?.options?.getOptionLabel?.(v) || v;
   const renderPreview = () => {
-    const entry = filterCards(node, moduleSelect.value, search.value).find(item => item.name === select.value);
+    const entry = matching().find(item => item.name === select.value);
+    organization.refresh(entry);
     previewStamp = ""; allPreview.textContent = ""; applicationHint.textContent = "";
     selectionButtons.forEach(b => { b.disabled = !entry; });
-    if (!entry) { preview.textContent = saved().length ? text("没有匹配的卡片。", "No matching cards.") : text("尚无卡片。", "No cards yet."); return; }
+    if (!entry) { preview.textContent = saved().length ? text("请选择卡片；无匹配时可重置筛选。", "Select a card; reset filters if none match.") : text("尚无卡片。", "No cards yet."); return; }
     try {
       const diff = cardDifference(node, entry);
       previewStamp = JSON.stringify({entry, diff});
@@ -499,23 +502,23 @@ export function openCardsPanel(node) {
         `Applies the complete module, including hidden branches. Apply & Lock adds ${diff.newLocks.length} locks.`);
     } catch (e) { preview.textContent = e.message; selectionButtons.forEach(b => { b.disabled = true; }); }
   };
-  const refresh = () => {
+  const refresh = (preferred = select.value, initial = false) => {
     const names = moduleGroups()[moduleSelect.value] || [];
     const count = names.filter(n => (node.properties?.[LOCKS] || []).includes(n)).length;
     lockStatus.textContent = text(`已锁定 ${count} / ${names.length} 个字段`, `Locked ${count} / ${names.length} fields`);
     cardArea.hidden = !CARD_MODULES.has(moduleSelect.value);
-    const current = select.value; select.replaceChildren();
-    const matches = filterCards(node, moduleSelect.value, search.value);
+    select.replaceChildren();
+    const matches = matching();
     countLabel.textContent = text(`匹配 ${matches.length} / 本节点共 ${saved().length} 张`, `${matches.length} matches / ${saved().length} cards in this node`);
     for (const entry of matches) {
-      const option = el("option", entry.name); option.value = entry.name; select.append(option);
+      const option = el("option", organization.label(entry)); option.value = entry.name; select.append(option);
     }
-    if ([...select.options].some(option => option.value === current)) select.value = current;
+    select.value = matches.some(c => c.name === preferred) ? preferred : initial ? matches[0]?.name || "" : "";
     renderPreview();
   };
-  moduleSelect.addEventListener("change", () => { status.textContent = ""; refresh(); });
-  select.addEventListener("change", renderPreview);
-  search.addEventListener("input", () => { if (!composing) refresh(); });
+  moduleSelect.addEventListener("change", guarded(() => { status.textContent = ""; refresh(""); }));
+  select.addEventListener("change", guarded(renderPreview));
+  search.addEventListener("input", guarded(() => refresh()));
   const actions = el("div"); actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"; cardArea.append(actions);
   const store = entry => {
     const base = collectionStamp(node);
@@ -536,7 +539,7 @@ export function openCardsPanel(node) {
     requireLive();
     const renamed = renameCard(node, original, newName, exists, base);
     refresh();
-    if (filterCards(node, moduleSelect.value, search.value).some(c => c.name === renamed.name)) select.value = renamed.name;
+    if (matching().some(c => c.name === renamed.name)) select.value = renamed.name;
     renderPreview(); status.textContent = text("已重命名，请保存工作流。", "Renamed. Save the workflow.");
   }));
   for (const lock of [false, true]) selectionButtons.push(button(actions, lock ? "应用并锁定" : "应用卡片", lock ? "Apply & Lock" : "Apply Card", () => {
@@ -548,7 +551,10 @@ export function openCardsPanel(node) {
     status.textContent = text("已应用所属模块，其他模块和自由提示词保持不变。", "Applied to its module; other modules and free text are unchanged.");
   }));
   const download = (entry, filename) => {
-    const url = URL.createObjectURL(new Blob([JSON.stringify(entry, null, 2)], {type: "application/json"}));
+    requireLive();
+    const blob = new Blob([JSON.stringify(entry, null, 2)], {type: "application/json"});
+    if (blob.size > 1024 * 1024) throw new Error(text("导出内容超过 1 MiB，请减少卡片数量。", "Export exceeds 1 MiB. Select fewer cards."));
+    const url = URL.createObjectURL(blob);
     const link = el("a"); link.href = url; link.download = filename;
     try { dialog.append(link); link.click(); } finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
     status.textContent = text("已请求下载卡片 JSON。", "Card JSON download requested.");
@@ -572,34 +578,29 @@ export function openCardsPanel(node) {
     const entry = selected(), base = collectionStamp(node);
     if (!window.confirm(text("删除选中的卡片？当前模块选项不受影响。", "Delete this card? Current module options will not change."))) return;
     requireLive(); if (base !== collectionStamp(node)) throw changedCollection();
-    node.properties[CARDS] = saved().filter(item => item !== entry); refresh(); dirty(node);
+    commitNodeCardOrganization(node, planNodeCardCollection(node, CARDS, saved().filter(item => item !== entry))); refresh();
   }));
   cardArea.append(applicationHint, preview, allDetails);
   const packArea = el("section"); dialog.append(packArea);
+  packArea.append(el("p", text("JSON 导出卡片配置，不包含收藏状态。", "JSON exports card settings, not favorites.")));
   packArea.hidden = !modules.some(m => CARD_MODULES.has(m));
   const packActions = el("div"), packPreview = el("section");
   packActions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:10px 0";
   packArea.append(packActions, packPreview);
-  let fileGeneration = 0;
-  const clearPack = () => { fileGeneration++; packPreview.replaceChildren(); };
+  let fileGeneration = 0, exportPicker = null;
+  const clearPack = () => { fileGeneration++; exportPicker = null; packPreview.replaceChildren(); };
   button(packActions, "导出卡片包", "Export Card Pack", () => {
     clearPack();
-    const base = collectionStamp(node);
+    const base = collectionStamp(node), ticket = fileGeneration;
     const candidates = saved().filter(c => modules.includes(c.module) && CARD_MODULES.has(c.module));
-    packPreview.append(el("p", text("默认勾选本节点支持的全部卡片，不受名称搜索影响。", "All supported cards are selected by default, independent of search.")));
-    const checks = candidates.map(card => {
-      const label = el("label"), check = el("input"); check.type = "checkbox"; check.checked = true;
-      label.style.display = "block"; label.append(check, el("span", `${moduleLabel(card.module)} / ${card.name}`)); packPreview.append(label);
-      return {card, check};
-    });
-    const count = el("p"); packPreview.append(count);
-    const update = () => { count.textContent = text(`已选择 ${checks.filter(c => c.check.checked).length} 张`, `${checks.filter(c => c.check.checked).length} selected`); };
-    checks.forEach(c => c.check.addEventListener("change", update)); update();
-    button(packPreview, "确认导出卡片包", "Confirm Export Pack", () => {
-      if (base !== collectionStamp(node)) { clearPack(); throw changedCollection(); }
-      const pack = validateCardPack({kind: "vividmuse-content-card-pack", version: 1, cards: checks.filter(c => c.check.checked).map(c => c.card)}, node);
+    const picker = createCardPackPicker({node, parent: packPreview, cards: candidates, el, text, button, guarded,
+      labelFor: card => `${moduleLabel(card.module)} / ${card.name}`});
+    exportPicker = picker;
+    picker.bindConfirm(button(packPreview, "确认导出卡片包", "Confirm Export Pack", () => {
+      if (ticket !== fileGeneration || base !== collectionStamp(node)) { clearPack(); throw changedCollection(); }
+      const pack = validateCardPack({kind: "vividmuse-content-card-pack", version: 1, cards: picker.selection()}, node);
       download(pack, "vividmuse-content-card-pack.json"); clearPack();
-    });
+    }));
     button(packPreview, "取消", "Cancel", clearPack);
   });
   button(packActions, "导入卡片包", "Import Card Pack", () => {
@@ -648,7 +649,7 @@ export function openCardsPanel(node) {
   dialog.append(status);
   button(row(), "关闭", "Close", () => dialog.close());
   dialog.addEventListener("compositionstart", () => { composing = true; });
-  dialog.addEventListener("compositionend", () => { composing = false; refresh(); });
+  dialog.addEventListener("compositionend", () => { composing = false; return guarded(() => { refresh(); exportPicker?.refresh(); })(); });
   dialog.addEventListener("keydown", event => {
     event.stopPropagation();
     if (event.key === "Escape" && !composing && !event.isComposing && event.keyCode !== 229) {
@@ -661,7 +662,9 @@ export function openCardsPanel(node) {
   for (const event of ["keyup", "copy", "cut", "paste", "wheel"]) dialog.addEventListener(event, e => e.stopPropagation());
   dialog.addEventListener("close", () => { active = false; dialog.remove(); if (node.__vividMuseCardsDialog === dialog) node.__vividMuseCardsDialog = null; }, {once: true});
   node.__vividMuseCardsDialog = dialog;
-  document.body.append(dialog); refresh(); dialog.showModal();
+  document.body.append(dialog);
+  try { refresh("", true); } catch (e) { status.textContent = e.message; selectionButtons.forEach(b => { b.disabled = true; }); }
+  dialog.showModal();
   return dialog;
 }
 

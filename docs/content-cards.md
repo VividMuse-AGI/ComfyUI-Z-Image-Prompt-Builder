@@ -39,6 +39,20 @@ v0.12.0 另提供[拍摄方案卡](shoot-plan-cards.md)，用于场景／摄影�
 
 包格式为 `{"kind":"vividmuse-content-card-pack","version":1,"cards":[完整的 v1 单卡对象]}`。已有单卡导入导出仍可用；包不能用于旧版的单卡入口，也不是结果快照或工作流。
 
+## v0.13.0 卡片整理
+
+从 v0.13.0 起，人物／穿搭卡和拍摄方案卡提供相同的整理操作，不增加画布节点高度。
+
+- 选中卡片后点击“收藏卡片”；下拉列表中的 `★` 仅为标记，不修改名称。收藏随工作流保存，不改变提示词字段、种子或随机锁定。
+- “仅收藏”与原搜索取交集；排序提供默认顺序、名称排序和收藏优先。排序不改变实际保存次序。关闭重开面板后，搜索、筛选和排序恢复默认。
+- 当前卡片被筛选隐藏时清空选择并禁用应用，不自动换成其他卡片。点击“重置筛选”可恢复列表，随后主动选择卡片。在仅收藏列表中取消收藏，只会隐藏该项，不删除卡片。
+- 重命名同步迁移收藏；覆盖同名重命名以来源卡片的收藏状态为准。删除同步清理收藏。导入覆盖同一身份卡片保留收藏，新增卡片默认未收藏。
+- 导出包默认仍勾选全部候选卡片。导出区域的搜索、仅看收藏不会取消隐藏项的勾选；总数和“将导出的全部卡片”包含隐藏的已选项。只想导出筛选结果时，先“清空勾选”，再“选择筛选结果”。零勾选时确认按钮禁用。
+- 单卡／卡片包 JSON 保持 v1 格式，导出配置、不包含收藏状态。收藏是本节点工作流信息，不随卡片跨工作流传递。
+- 异常或未知版本的收藏数据按无收藏只读显示，卡片仍可使用。只有确认“重置收藏数据”后才会替换异常数据；不会自动修复或删除卡片。如果另一类卡片库异常，当前有效卡片仍可使用，收藏暂不可编辑。
+
+卡片及收藏修改已接入一次性事务。独立 ComfyUI 已验证收藏、内容卡重命名及删除的真实撤销／重做，具体范围见[验收记录](testing/2026-11-03-v0.13.0-release-acceptance.md)。
+
 ## English
 
 ### Person / Outfit Cards and Module Locks
@@ -72,3 +86,17 @@ Review changes before applying. Expand **All fields** to inspect hidden branches
 **Export Card Pack** initially selects all supported cards in the node, independent of search; uncheck unwanted cards. **Import Card Pack** validates the entire file and previews additions, conflicts, replacements, skips and inapplicable cards. Skipping existing names is the default; replacing requires confirmation. One invalid card rejects the entire pack, including an invalid card for an unsupported target module. Legal inapplicable cards are skipped in standalone nodes. Importing never applies or locks cards automatically.
 
 The pack format is `{"kind":"vividmuse-content-card-pack","version":1,"cards":[complete v1 card objects]}`. It allows 1–100 cards; the resulting node library cannot exceed 100. Files are limited to 1,048,576 bytes and names to 80 JavaScript UTF-16 code units. Existing single-card imports/exports remain supported; packs are not compatible with the old single-card import entry or result/workflow formats.
+
+### v0.13.0 card organization
+
+Since v0.13.0, both card panels offer the same organization controls without increasing node height.
+
+Choose a card and use **Favorite Card**. The `★` decoration does not rename it. Favorites are saved with the workflow and do not change prompt fields, seeds or random locks. **Favorites only** intersects with search. **Default order**, **Name order** and **Favorites first** sort the view, not the stored library. Search, filtering and sorting reset when the panel is reopened.
+
+If filtering hides the selected card, selection and application preview are cleared; another card is not silently selected. **Reset Filters** restores the list; then choose a card explicitly. Unfavoriting while filtering favorites hides the card without deleting it.
+
+Renaming transfers favorite status; a rename that replaces another card uses the source card's status. Deleting clears the favorite reference. Importing a same-identity replacement preserves local favorites; newly imported cards start unfavorited.
+
+**Export Card Pack** initially checks all candidates. Export search and favorite filtering do not uncheck hidden selections. The total count and full list of export names include hidden selections. To export matches only, use **Clear Selection**, then **Select Matches**. The confirm button is disabled when nothing is checked. Single-card and pack JSON remain v1 and exclude favorites; favorites belong to the node's workflow, not portable card files.
+
+Invalid or future-version favorites are shown as empty and read-only while cards remain usable. **Reset Favorites Data** requires confirmation. A damaged other card library does not block editing the valid library, but favorites remain read-only. Card/favorite mutations use a single transaction. Live ComfyUI undo/redo has been checked for favorites and content-card renaming and deletion; see the [acceptance record](testing/2026-11-03-v0.13.0-release-acceptance.md#english) for the exact scope.

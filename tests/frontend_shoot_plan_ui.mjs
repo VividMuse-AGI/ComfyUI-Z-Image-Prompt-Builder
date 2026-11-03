@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
+import {withCardOrganizationImports} from './card_organization_vm.mjs';
+import {organizationPanelCases} from './card_organization_ui_cases.mjs';
 import {execFileSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
 
@@ -46,7 +48,7 @@ ctx.__vividMuseZImageI18n = {activeLanguage: () => language, localizeNode() {}, 
 for (const file of ["preset_sync", "modular_nodes", "workflow_tools", "shoot_plan_core", "shoot_plan_cards"]) {
   const original = fs.readFileSync(new URL(`../web/js/${file}.js`, import.meta.url), "utf8");
   if (file === "shoot_plan_cards") assert.ok(!/\.innerHTML\s*=|insertAdjacentHTML\s*\(/.test(original));
-  let code = original.replace(/import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];/g, "")
+  let code = withCardOrganizationImports(original, ctx).replace(/import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];/g, "")
     .replaceAll("export function ", "function ").replaceAll("export const ", "const ");
   const names = [...original.matchAll(/export (?:function|const) (\w+)/g)].map(match => match[1]);
   if (file === "shoot_plan_cards") code = `const {${Object.keys(ctx.shootCore).join(",")}} = globalThis.shootCore;\n${code}`;
@@ -86,7 +88,7 @@ const input = (panel, label) => {
 };
 const status = panel => flatten(panel).find(item => item.attributes.role === "status").textContent;
 const sectionChecks = (panel, index) => flatten(flatten(panel).filter(item => item.tag === "section")[index])
-  .filter(item => item.type === "checkbox");
+  .filter(item => item.type === "checkbox" && ["场景", "摄影", "视觉表现"].includes(item.value));
 const widget = (node, name) => node.widgets.find(item => item.name === name);
 const values = node => JSON.stringify(node.widgets.map(item => [item.name, item.value]));
 const state = node => JSON.stringify({values: JSON.parse(values(node)), properties: node.properties, inputs: node.inputs});
@@ -137,6 +139,8 @@ assert.deepEqual(sectionChecks(panel, 1).filter(check => check.checked).map(chec
 await search(panel, "场景"); assert.equal(input(panel, "已保存拍摄方案卡").options.length, 1);
 await search(panel, "missing"); assert.equal(input(panel, "已保存拍摄方案卡").options.length, 0); assert.ok(button(panel, "应用并锁定").disabled);
 await search(panel, "");
+assert.equal(input(panel, "已保存拍摄方案卡").value, "");assert.ok(button(panel, "应用所选模块").disabled);
+input(panel, "已保存拍摄方案卡").value = card.name; await input(panel, "已保存拍摄方案卡").fire("change");
 // Save, rename and delete confirmations cannot mutate on cancellation.
 input(panel, "卡片名称（最多 80 个字符）").value = card.name;
 await button(panel, "刷新可保存模块").click();
@@ -152,6 +156,7 @@ confirmed = true; const currentValues = values(full); await button(panel, "删�
 assert.equal(api.listShootPlans(full).length, 0); assert.equal(values(full), currentValues);
 // Card names are literal text; no new DOM nodes are parsed from them.
 const literal = {...card, name: "<img src=x onerror=alert(1)>"}; api.saveShootPlan(full, literal); await search(panel, "");
+input(panel, "已保存拍摄方案卡").value = literal.name; await input(panel, "已保存拍摄方案卡").fire("change");
 assert.equal(input(panel, "已保存拍摄方案卡").options[0].textContent, literal.name);
 assert.equal(flatten(panel).filter(item => ["img", "script"].includes(item.tag)).length, 0);
 // Concurrent mutation during confirmation is preserved rather than overwritten.
@@ -263,6 +268,8 @@ assert.equal(api.listShootPlans(libraryNode).length, 0, "Reading file must only 
 await button(panel, "确认导入").click();
 assert.deepEqual(clone(api.listShootPlans(libraryNode)[0]), portable);
 assert.equal(values(libraryNode), libraryValues);
+assert.equal(input(panel, "已保存拍摄方案卡").value, "");
+input(panel, "已保存拍摄方案卡").value = portable.name; await input(panel, "已保存拍摄方案卡").fire("change");
 await button(panel, "导出选中卡片").click();
 assert.deepEqual(JSON.parse(await downloads.at(-1).blob.text()), portable);
 assert.equal(downloads.at(-1).name, "vividmuse-shoot-plan-card.json"); assert.equal(blobs.size, 0);
@@ -296,3 +303,7 @@ fileInput.files = [{size: 1, text: () => new Promise(resolve => {releaseRead = r
 read = fileInput.fire("change"); before = state(libraryNode); await panel.close(); releaseRead(JSON.stringify(portable)); await read;
 assert.equal(state(libraryNode), before);
 console.log("PASS shoot plan UI: phase1 guards plus phase2 import/export, complete standalone roundtrip, preview conflicts/races, byte limits, BOM, async cancellation; mock DOM, not browser acceptance.");
+await organizationPanelCases({kind: "shoot", create, save: api.saveShootPlan, open, template: card,
+  language: value => { ctx.__vividMuseZImageI18n = {...realI18n, activeLanguage: () => value}; },
+  confirm: value => { confirmed = value; }, downloads,
+  downloadJSON: async () => JSON.parse(await downloads.at(-1).blob.text())});

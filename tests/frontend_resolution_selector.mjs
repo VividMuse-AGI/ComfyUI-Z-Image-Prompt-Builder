@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
+import {withCardOrganizationImports} from './card_organization_vm.mjs';
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -32,7 +33,7 @@ function makeContext(resolutionFirst) {
   const loadResolution = () => evaluate(resolutionSource + "\nglobalThis.resolutionTest = {calculateResolution, calculatePixelResolution, roundEven, previewResolution, visible};");
   if (resolutionFirst) loadResolution();
   for (const file of ["preset_sync", "modular_nodes", "workflow_tools", "i18n"]) {
-    let source = read("web/js/" + file + ".js")
+    let source = withCardOrganizationImports(read("web/js/" + file + ".js"), context)
       .replace('import { app } from "../../scripts/app.js";', "")
       .replace('import { EN_CATALOG } from "./i18n_catalog.js";', "const EN_CATALOG = globalThis.englishCatalog;")
       .replaceAll("export function ", "function ");

@@ -1,4 +1,5 @@
 import { app } from "../../scripts/app.js";
+import { createOrganizationControls, createCardPackPicker } from "./card_organization_ui.js";
 import {
   registerShootPlanSchema, availableShootPlanModules, captureShootPlan,
   listShootPlans, shootPlanCollectionStamp, saveShootPlan, renameShootPlan,
@@ -130,7 +131,7 @@ export function openShootPlanPanel(node) {
   const count = el("p"), select = el("select");
   select.setAttribute("aria-label", text("已保存拍摄方案卡", "Saved shoot plan cards"));
   select.style.cssText = "box-sizing:border-box;width:100%;padding:6px;margin:8px 0;min-width:0";
-  savedSection.append(search, count, select);
+  const organizationHost = el("div"); savedSection.append(search, organizationHost, count, select);
   const coverage = el("p"), applyChoices = el("div"); savedSection.append(coverage, applyChoices);
   const applyChecks = new Map();
   const changed = el("pre"), all = el("pre"), details = el("details"), hint = el("p");
@@ -142,10 +143,11 @@ export function openShootPlanPanel(node) {
   dialog.append(savedSection);
   let normalPlan = null, lockPlan = null, selectionStamp = "";
   const saved = () => listShootPlans(node);
-  const matches = () => {
-    const query = search.value.trim().toLowerCase();
-    return saved().filter(c => `${c.name} ${Object.keys(c.modules).map(moduleLabel).join(" ")} ${Object.keys(c.modules).join(" ")}`.toLowerCase().includes(query));
-  };
+  const moduleLabels = Object.fromEntries(MODULES.map(m => [m, moduleLabel(m)]));
+  const organization = createOrganizationControls({node, parent: organizationHost, el, text, button, guarded,
+    requireLive, onResetFilters: () => { search.value = ""; },
+    onChange: () => { renderList(); exportPicker?.refresh(); }, moduleLabels});
+  const matches = () => organization.matches(saved(), search.value);
   const selected = () => matches().find(c => c.name === select.value);
   const selectedApplyModules = () => [...applyChecks].filter(([, c]) => c.checked && !c.disabled).map(([m]) => m);
   const renderPreview = () => {
@@ -175,12 +177,13 @@ export function openShootPlanPanel(node) {
   const renderSelection = () => {
     const previous = new Map([...applyChecks].map(([m, c]) => [m, c.checked]));
     const entry = selected(), nextStamp = entry ? JSON.stringify(entry) : "";
+    organization.refresh(entry);
     const sameCard = nextStamp === selectionStamp;
     selectionStamp = nextStamp;
     applyChoices.replaceChildren(); applyChecks.clear();
-    renameButton.disabled = deleteButton.disabled = !entry;
+    renameButton.disabled = deleteButton.disabled = exportButton.disabled = !entry;
     if (!entry) {
-      coverage.textContent = text("暂无匹配卡片。", "No matching cards."); renderPreview(); return;
+      coverage.textContent = text("请选择卡片；无匹配时可重置筛选。", "Select a card; reset filters if none match."); renderPreview(); return;
     }
     coverage.textContent = text("卡片包含：", "Card includes: ") + Object.keys(entry.modules).map(moduleLabel).join(" / ");
     for (const module of MODULES.filter(m => Object.hasOwn(entry.modules, m))) {
@@ -194,10 +197,10 @@ export function openShootPlanPanel(node) {
     }
     renderPreview();
   };
-  const renderList = (preferred = select.value) => {
+  const renderList = (preferred = select.value, initial = false) => {
     select.replaceChildren(); const entries = matches();
-    for (const card of entries) { const option = el("option", card.name); option.value = card.name; select.append(option); }
-    if (entries.some(c => c.name === preferred)) select.value = preferred;
+    for (const card of entries) { const option = el("option", organization.label(card)); option.value = card.name; select.append(option); }
+    select.value = entries.some(c => c.name === preferred) ? preferred : initial ? entries[0]?.name || "" : "";
     count.textContent = text(`匹配 ${entries.length}；拍摄方案卡 ${saved().length} / 100（与人物／穿搭卡分别计数）`,
       `${entries.length} matches; shoot plan cards ${saved().length} / 100 (separate from person/outfit cards)`);
     renderSelection();
@@ -232,12 +235,13 @@ export function openShootPlanPanel(node) {
     status.textContent = text("卡片已删除，当前配置不变；请保存工作流。", "Card deleted; current settings unchanged. Save the workflow.");
   });
   const fileSection = el("section");
+  fileSection.append(el("p", text("JSON 导出卡片配置，不包含收藏状态。", "JSON exports card settings, not favorites.")));
   fileSection.append(el("h4", text("JSON 导入导出", "JSON Import / Export")), el("p", text(
     "文件上限 1 MiB；卡片包包含 1–100 张。独立节点保留卡片全部模块，导出不会丢失其他模块。",
     "Maximum file size: 1 MiB; packs contain 1–100 cards. Standalone nodes retain and export every module in a card.")));
   const fileActions = row(fileSection), filePreview = el("div"); fileSection.append(filePreview); dialog.append(fileSection);
-  let fileGeneration = 0;
-  const clearFilePreview = () => { fileGeneration++; filePreview.replaceChildren(); };
+  let fileGeneration = 0, exportPicker = null;
+  const clearFilePreview = () => { fileGeneration++; exportPicker = null; filePreview.replaceChildren(); };
   const download = (value, filename) => {
     requireLive();
     const blob = new Blob([JSON.stringify(value, null, 2)], {type: "application/json;charset=utf-8"});
@@ -247,7 +251,7 @@ export function openShootPlanPanel(node) {
     finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
     status.textContent = text("已请求下载 JSON；卡片和当前配置保持不变。", "JSON download requested; cards and current settings are unchanged.");
   };
-  button(fileActions, "导出选中卡片", "Export Selected Card", () => {
+  const exportButton = button(fileActions, "导出选中卡片", "Export Selected Card", () => {
     const entry = selected(); if (!entry) throw new Error(text("请先选择卡片。", "Select a card first."));
     download(validateShootPlan(entry, node), "vividmuse-shoot-plan-card.json");
   });
@@ -255,18 +259,15 @@ export function openShootPlanPanel(node) {
     clearFilePreview(); const ticket = fileGeneration, base = shootPlanCollectionStamp(node), cards = saved();
     if (!cards.length) throw new Error(text("尚无卡片可导出。", "No cards to export."));
     filePreview.append(el("p", text("选择要导出的卡片（包含完整模块）", "Select cards to export (complete modules)")));
-    const checks = cards.map(card => {
-      const check = el("input"); check.type = "checkbox"; check.checked = true;
-      const label = el("label"); label.style.cssText = "display:block;margin:6px 0";
-      label.append(check, el("span", `${card.name} — ${Object.keys(card.modules).map(moduleLabel).join(" / ")}`));
-      filePreview.append(label); return {card, check};
-    });
-    button(filePreview, "确认导出卡片包", "Confirm Export Pack", () => {
+    const picker = createCardPackPicker({node, parent: filePreview, cards, el, text, button, guarded, moduleLabels,
+      labelFor: card => `${card.name} — ${Object.keys(card.modules).map(moduleLabel).join(" / ")}`});
+    exportPicker = picker;
+    picker.bindConfirm(button(filePreview, "确认导出卡片包", "Confirm Export Pack", () => {
       if (ticket !== fileGeneration || base !== shootPlanCollectionStamp(node)) throw new Error(text("卡片库已变化，请重新选择导出。", "The library changed. Select cards to export again."));
       const pack = validateShootPlanPack({kind: "vividmuse-shoot-plan-card-pack", version: 1,
-        cards: checks.filter(item => item.check.checked).map(item => item.card)}, node);
+        cards: picker.selection()}, node);
       download(pack, "vividmuse-shoot-plan-card-pack.json"); clearFilePreview();
-    });
+    }));
     button(filePreview, "取消", "Cancel", clearFilePreview);
   });
   button(fileActions, "导入卡片或卡片包", "Import Card or Pack", () => {
@@ -324,7 +325,7 @@ export function openShootPlanPanel(node) {
   dialog.addEventListener("compositionstart", () => { composing = true; });
   dialog.addEventListener("compositionend", event => {
     composing = false;
-    if (live() && event.target === search) return guarded(() => renderList())();
+    return guarded(() => { if (event.target === search) renderList(); exportPicker?.refresh(); })();
   });
   dialog.addEventListener("keydown", event => {
     event.stopPropagation();
@@ -339,9 +340,9 @@ export function openShootPlanPanel(node) {
     if (node.__vividMuseCardsDialog === dialog) node.__vividMuseCardsDialog = null;
   }, {once: true});
   node.__vividMuseCardsDialog = dialog; document.body.append(dialog);
-  try { renderCapture(); renderList(); }
+  try { renderCapture(); renderList("", true); }
   catch (e) {
-    saveButton.disabled = applyButton.disabled = lockButton.disabled = renameButton.disabled = deleteButton.disabled = true;
+    saveButton.disabled = applyButton.disabled = lockButton.disabled = renameButton.disabled = deleteButton.disabled = exportButton.disabled = true;
     status.textContent = e.message;
   }
   dialog.showModal(); return dialog;

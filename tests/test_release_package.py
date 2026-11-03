@@ -50,6 +50,13 @@ class ReleasePackageTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, "Missing"):
                 validate_archive(self.archive(omit=name), "v0.5.0")
 
+    def test_card_organization_runtime_dependencies_are_required(self):
+        for name in ("web/js/card_organization.js", "web/js/card_organization_ui.js"):
+            with self.subTest(name=name):
+                self.assertIn(name, REQUIRED)
+                with self.assertRaisesRegex(ValueError, "Missing release files"):
+                    validate_archive(self.archive(omit=name), "v0.5.0")
+
     def test_unsafe_or_unwanted_paths(self):
         for name in ["other/file", f"{PACKAGE}/../escape", f"{PACKAGE}/.git/config",
                      f"{PACKAGE}/__pycache__/nodes.pyc", f"{PACKAGE}/..\\escape"]:

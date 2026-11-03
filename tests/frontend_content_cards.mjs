@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
+import {withCardOrganizationImports} from './card_organization_vm.mjs';
 import {execFileSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
 
@@ -14,7 +15,7 @@ const extensions = [];
 const app = {registerExtension(e) {extensions.push(e);}, graph:{setDirtyCanvas(){}}};
 const context = vm.createContext({console, app, setTimeout(){}, clearTimeout(){}});
 for (const file of ["preset_sync", "modular_nodes", "workflow_tools"]) {
-  const source = fs.readFileSync(new URL(`../web/js/${file}.js`, import.meta.url), "utf8")
+  const source = withCardOrganizationImports(fs.readFileSync(new URL(`../web/js/${file}.js`, import.meta.url), "utf8"), context)
     .replace('import { app } from "../../scripts/app.js";', "").replaceAll("export function ", "function ");
   const extra = file === "workflow_tools" ? "globalThis.cards={captureCard,validateCard,saveCard,applyCard,setModuleLock,availableCardModules,openCardsPanel};"
     : file === "preset_sync" ? "globalThis.randomFull=prepareRandomCombination;" : "globalThis.randomModule=prepareModuleRandomCombination;";
