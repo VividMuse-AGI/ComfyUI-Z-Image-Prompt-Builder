@@ -22,7 +22,7 @@ class ShootPlanCandidateTests(unittest.TestCase):
                 data = self.execute(**{"预设": preset, "随机种子": seed,
                     **dict.fromkeys(core.FIELD_ORDER, core.RANDOM_CHOICE)})
                 self.assertEqual(data["seed"], str(seed))
-                self.assertEqual(set(data["card_candidates"]["modules"]), {"人物", "服装"})
+                self.assertEqual(set(data["card_candidates"]["modules"]), {"人物", "发型", "服装", "姿态动作"})
                 self.assertEqual(data["shoot_plan_candidates"]["version"], 1)
                 for module, count in (("场景", 9), ("摄影", 7), ("视觉表现", 12)):
                     candidate = data["shoot_plan_candidates"]["modules"][module]

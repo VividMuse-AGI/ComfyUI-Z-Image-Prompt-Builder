@@ -3,8 +3,10 @@ import { supportsCardCombination, planCardCombination, commitCardCombination } f
 import { validateShootPlan } from "./shoot_plan_core.js";
 
 const text = (zh, en) => globalThis.__vividMuseZImageI18n?.activeLanguage() === "en" ? en : zh;
-const moduleLabel = name => text(name, {人物: "Person", 服装: "Clothing", 场景: "Scene", 摄影: "Camera", 视觉表现: "Visual"}[name] || name);
+const moduleLabel = name => text(name, {人物: "Person", 发型: "Hair", 服装: "Clothing", 姿态动作: "Pose / Action", 场景: "Scene", 摄影: "Camera", 视觉表现: "Visual"}[name] || name);
 const SHOOT = ["场景", "摄影", "视觉表现"];
+const CONTENT = [["person", "人物", "人物卡", "Person Card"], ["hair", "发型", "发型卡", "Hair Card"],
+  ["outfit", "服装", "穿搭卡", "Outfit Card"], ["pose", "姿态动作", "姿态动作卡", "Pose / Action Card"]];
 
 export function openCardCombinationPanel(node) {
   if (!supportsCardCombination(node)) throw new Error(text("快捷组合仅支持完整节点。", "Quick combination is available on the full builder only."));
@@ -14,8 +16,8 @@ export function openCardCombinationPanel(node) {
   dialog.style.cssText = "box-sizing:border-box;max-width:760px;width:88vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
   dialog.setAttribute("aria-label", text("卡片快捷组合", "Quick Card Combination"));
   dialog.append(el("h3", text("卡片快捷组合", "Quick Card Combination")), el("p", text(
-    "只应用所选模块。保持当前不会清空内容；人物卡不含发型，姿态动作、自由提示词、比例、分辨率和种子均保持当前。",
-    "Only selected modules are applied. Keep Current does not clear anything. Person cards exclude hair; pose, free text, ratio, resolution and seed stay unchanged.")));
+    "只应用所选模块。保持当前不会清空内容；发型、姿态动作独立选择。自由提示词、比例、分辨率和种子均保持当前。",
+    "Only selected modules are applied. Keep Current does not clear anything. Choose hair and pose independently. Free text, ratio, resolution and seed stay unchanged.")));
   dialog.append(el("p", text(
     "保留当前锁定不等于解锁。需要后续随机变化时，请在原面板解锁，再使用随机组合按钮。",
     "Preserve Current Locks does not unlock fields. For later variations, unlock them in Cards / Module Locks, then use the random combination button.")));
@@ -58,12 +60,13 @@ export function openCardCombinationPanel(node) {
     select.value = "preserve"; select.disabled = true;
     select.addEventListener("change", guarded(() => invalidate())); lockControls.set(module, select);
   };
-  for (const [key, module, english] of [["person", "人物", "Person Card"], ["outfit", "服装", "Outfit Card"]]) {
+  dialog.append(el("h4", text("人物与造型", "Subject and Styling")));
+  for (const [key, module, chinese, english] of CONTENT) {
     const section = el("section"), controls = row(section); dialog.append(section);
-    selectors[key] = control(controls, module === "服装" ? "穿搭卡" : "人物卡", english);
+    selectors[key] = control(controls, chinese, english);
     makeLock(controls, module);
   }
-  const shootSection = el("section"); dialog.append(shootSection);
+  const shootSection = el("section"); dialog.append(el("h4", text("拍摄方案", "Shoot Plan")), shootSection);
   selectors.shootPlan = control(row(shootSection), "拍摄方案卡", "Shoot Plan Card");
   const coverage = el("p"); shootSection.append(coverage);
   for (const module of SHOOT) {
@@ -89,14 +92,18 @@ export function openCardCombinationPanel(node) {
       const rows = plan.rows.filter(r => r.module === module);
       const shown = rows.filter(r => !onlyChanges || r.changed);
       return `${moduleLabel(module)} — ${rows[0].source}\n${shown.map(r =>
-        `${labelFor(r.name)}: ${valueFor(r.name, r.current)}${r.preset === undefined ? "" : ` (${valueFor(r.name, r.preset)})`} → ${valueFor(r.name, r.target)}`
+        `${labelFor(r.name)}${r.hidden ? text("（隐藏字段）", " (hidden field)") : ""}: ${valueFor(r.name, r.current)}${r.preset === undefined ? "" : ` (${valueFor(r.name, r.preset)})`} → ${valueFor(r.name, r.target)}`
       ).join("\n") || text("无字段变化。", "No field changes.")}`;
     }).join("\n\n");
     changes.textContent = render(true); all.textContent = render(false);
     summary.textContent = [text(
       `将应用 ${plan.modules.length} 个模块，修改 ${plan.rows.filter(r => r.changed).length} 个字段，新增 ${plan.newLocks.length} 项锁定。`,
       `Applies ${plan.modules.length} modules, changes ${plan.rows.filter(r => r.changed).length} fields and adds ${plan.newLocks.length} locks.`),
-      text("“不使用”会清空对应字段，包含隐藏分支。", "Unused explicitly clears a field, including hidden branches."), ...plan.warnings].join("\n");
+      text("“不使用”会清空对应字段，包含隐藏分支。", "Unused explicitly clears a field, including hidden branches."),
+      ...plan.modules.filter(module => plan.rows.filter(r => r.module === module).every(r => r.target === "不使用")).map(module => text(
+        `${moduleLabel(module)}：将清空此模块的结构化选项。`, `${moduleLabel(module)}: all structured options in this module will be cleared.`)),
+      ...(plan.modules.includes("姿态动作") ? [text("动作需要的座椅、墙面或道具不会自动添加，请自行匹配场景。", "Seating, walls or props required by a pose are not added automatically; match the scene yourself.")] : []),
+      ...plan.warnings].join("\n");
     pending = {plan, selection: JSON.stringify(selection())}; confirm.disabled = !plan.changed;
     status.textContent = plan.changed ? text("请核对差异，再确认应用。", "Review the differences, then confirm.") : text("无需应用：字段和锁定均无变化。", "Nothing to apply: fields and locks are unchanged.");
   });
@@ -114,17 +121,17 @@ export function openCardCombinationPanel(node) {
   button(navigation, "返回卡片管理", "Back to Cards", () => { dialog.close(); globalThis.__vividMuseContentCards?.openCardsPanel(node); });
   button(navigation, "关闭", "Close", () => dialog.close());
   const chosen = key => libraries[key]?.[selectors[key].value] ?? null;
-  const selection = () => ({person: chosen("person"), outfit: chosen("outfit"), shootPlan: chosen("shootPlan"),
+  const selection = () => ({...Object.fromEntries(CONTENT.map(([key]) => [key, chosen(key)])), shootPlan: chosen("shootPlan"),
     shootModules: [...checks].filter(([, check]) => check.checked && !check.disabled).map(([module]) => module),
     lockModules: [...lockControls].filter(([, select]) => !select.disabled && select.value === "lock").map(([module]) => module)});
   const updateLocks = () => {
-    lockControls.get("人物").disabled = !chosen("person"); lockControls.get("服装").disabled = !chosen("outfit");
+    for (const [key, module] of CONTENT) lockControls.get(module).disabled = !chosen(key);
     for (const module of SHOOT) lockControls.get(module).disabled = checks.get(module).disabled || !checks.get(module).checked;
   };
   const invalidate = () => {
     pending = null; confirm.disabled = true;
     changes.textContent = all.textContent = summary.textContent = status.textContent = "";
-    preview.disabled = !chosen("person") && !chosen("outfit") && ![...checks.values()].some(check => !check.disabled && check.checked);
+    preview.disabled = !CONTENT.some(([key]) => chosen(key)) && ![...checks.values()].some(check => !check.disabled && check.checked);
   };
   const updateShoot = () => {
     for (const check of checks.values()) { check.checked = false; check.disabled = true; }
@@ -138,12 +145,12 @@ export function openCardCombinationPanel(node) {
       }
     } finally { updateLocks(); invalidate(); }
   };
-  for (const key of ["person", "outfit", "shootPlan"]) selectors[key].addEventListener("change", guarded(() => {
+  for (const key of [...CONTENT.map(([key]) => key), "shootPlan"]) selectors[key].addEventListener("change", guarded(() => {
     if (key === "shootPlan") updateShoot(); else { updateLocks(); invalidate(); }
   }));
   const reload = () => {
     const messages = [];
-    for (const [key, module, store] of [["person", "人物", "vividMuseContentCards"], ["outfit", "服装", "vividMuseContentCards"], ["shootPlan", "", "vividMuseShootPlanCards"]]) {
+    for (const [key, module, store] of [...CONTENT.map(([key, module]) => [key, module, "vividMuseContentCards"]), ["shootPlan", "", "vividMuseShootPlanCards"]]) {
       const raw = node.properties?.[store] ?? [];
       const entries = Array.isArray(raw) ? raw.filter(c => c && typeof c.name === "string" && (module ? c.module === module : true)) : [];
       libraries[key] = entries.map(card => JSON.parse(JSON.stringify(card)));

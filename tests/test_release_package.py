@@ -71,6 +71,12 @@ class ReleasePackageTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, "Unexpected"):
                 validate_archive(self.archive(extra=name), "v0.5.0")
 
+    def test_card_application_transaction_is_required(self):
+        name = "web/js/card_apply_transaction.js"
+        self.assertIn(name, REQUIRED)
+        with self.assertRaisesRegex(ValueError, "Missing release files"):
+            validate_archive(self.archive(omit=name), "v0.5.0")
+
     def test_duplicate_paths(self):
         with self.assertRaisesRegex(ValueError, "duplicate"):
             validate_archive(self.archive(extra=f"{PACKAGE}/nodes.py"), "v0.5.0")

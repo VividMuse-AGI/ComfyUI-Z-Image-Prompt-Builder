@@ -2,14 +2,16 @@
 
 从 v0.14.0 起，完整节点支持在一个面板中选择人物卡、穿搭卡和拍摄方案卡，预览后一次应用所选模块。
 
+v0.15.0 增加发型卡、姿态动作卡，下文按五类卡片说明。v0.14.0 仅支持人物、穿搭、拍摄方案三种卡片。
+
 ## 中文使用说明
 
 在完整节点右键打开 **卡片管理 / 模块锁定**，点击 **卡片快捷组合**。独立模块节点不提供这个入口，继续使用各自的卡片操作。
 
 ### 选择与应用
 
-1. 分别选择一张人物卡、穿搭卡和拍摄方案卡；不需要更换的类型保留 **保持当前**。没有卡片时，返回原卡片管理面板保存或导入。
-2. 拍摄方案默认勾选其包含的场景、摄影和视觉表现，可取消不需要的模块。人物卡不包含发型，动作也不在本次应用范围内。
+1. 在“人物与造型”中分别选择人物卡、发型卡、穿搭卡、姿态动作卡，再按需选择拍摄方案卡；不需要更换的类型保留 **保持当前**。没有卡片时，返回原卡片管理面板保存或导入。
+2. 拍摄方案默认勾选其包含的场景、摄影和视觉表现，可取消不需要的模块。人物卡不包含发型；发型和姿态动作仅在明确选择对应卡片时应用。
 3. 为参与的模块选择锁定策略：**保留当前锁定**，或 **应用后锁定此模块**。前者不会解锁已有字段，后者在原锁定基础上增加所选模块字段。
 4. 点击 **预览组合**，核对来源卡片、应用模块、变化字段和新增锁定。展开 **全部字段（含隐藏分支）** 可查看完整覆盖内容。
 5. 点击 **确认应用**，然后保存工作流。选择与预览本身不会改变节点或运行生图；字段和锁都没有变化时无需应用。
@@ -18,7 +20,9 @@
 
 ### 保留范围与随机
 
-只修改参与的人物、服装、场景、摄影、视觉表现模块。画面基础、发型、姿态动作、自由提示词、TXT 内容、比例、分辨率、种子、排版和当前编辑模块保持不变；不会操作其他节点。
+最多修改参与的人物、发型、服装、姿态动作、场景、摄影、视觉表现七个模块。未选择的模块，以及画面基础、自由提示词、TXT 内容、比例、分辨率、种子、排版和当前编辑模块保持不变；不会操作其他节点。
+
+预览标出隐藏字段，全“不使用”的卡片会提示清空对应模块。动作依赖的座椅、墙面或道具不会自动加入场景，请自行匹配。
 
 显式应用仍可更新已锁定字段。卡片写入具体值，不是随机占位符。需要后续变化时，在原卡片管理面板解锁目标模块，再使用随机组合按钮；仅更改 Run 的种子不保证这些具体字段改变。
 
@@ -30,18 +34,20 @@
 - 任一参与模块存在连接输入或 TXT 替代时，整次应用停止，不会先修改其他模块。取消该模块或将对应卡片改为保持当前后，可继续应用剩余模块。
 - 本功能复用现有组合检查提示，但不保证所有搭配都合理，也不会自动改写卡片。
 
-卡片仍属于当前节点，协议与导入导出方式不变。没有新的组合卡库或自动保存的组合选择；如需复用整套节点状态，可使用现有用户预设。
+卡片仍属于当前节点，格式结构和导入导出入口不变；新增类型不兼容旧版校验器，升级／降级见[内容卡兼容说明](content-cards.md)。没有新的组合卡库或自动保存的组合选择；如需复用整套节点状态，可使用现有用户预设。
 
 ## English
 
 Since v0.14.0, the full builder can select Person, Outfit and Shoot Plan Cards in one panel, preview the differences, and apply selected modules in a single transaction.
 
+Version v0.15.0 adds Hair and Pose / Action Cards. The instructions below describe all five types; v0.14.0 supports only Person, Outfit and Shoot Plan Cards.
+
 On the full builder, open the context menu → **Cards / Module Locks** → **Quick Card Combination**. Standalone module nodes retain their existing card controls and do not offer this entry.
 
 ### Select and apply
 
-1. Choose a Person Card, Outfit Card and Shoot Plan Card independently. Leave any unwanted type on **Keep Current**. If a library is empty, return to Cards to save or import cards.
-2. A shoot plan initially checks all modules it contains. Uncheck any Scene, Camera or Visual modules you do not want to apply. Person cards exclude hair; pose is also outside this operation.
+1. Under **Subject and Styling**, independently choose Person, Hair, Outfit and Pose / Action Cards, then optionally a Shoot Plan Card. Leave any unwanted type on **Keep Current**. If a library is empty, return to Cards to save or import cards.
+2. A shoot plan initially checks all modules it contains. Uncheck any Scene, Camera or Visual modules you do not want to apply. Person cards exclude hair; Hair and Pose only change when their cards are explicitly selected.
 3. For each participating module, choose **Preserve Current Locks** or **Lock Module After Applying**. Preserving does not unlock anything; locking adds fields without removing existing locks.
 4. Use **Preview Combination** to review source cards, module coverage, changed fields and added locks. Expand **All Fields (Including Hidden Branches)** for complete values.
 5. Use **Confirm Apply**, then save the workflow. Selecting and previewing do not modify the node or generate images. If fields and locks are unchanged, there is nothing to apply.
@@ -50,7 +56,9 @@ On the full builder, open the context menu → **Cards / Module Locks** → **Qu
 
 ### Preserved settings and randomness
 
-Only the selected Person, Clothing, Scene, Camera and Visual modules change. Canvas, Hair, Pose, free text, TXT content, ratio, resolution, seed, output layout, current editor and other nodes remain unchanged.
+Only selected modules change, up to seven: Person, Hair, Clothing, Pose / Action, Scene, Camera and Visual. Unselected modules, Canvas, free text, TXT content, ratio, resolution, seed, output layout, current editor and other nodes remain unchanged.
+
+Previews label hidden fields and warn if an all-Unused card will clear a module. Seating, walls or props required by a pose are not automatically added to the scene; match them yourself.
 
 Explicit application can update locked fields. Cards write concrete options, not random markers. To vary them later, unlock the modules in Cards / Module Locks and use the random combination button. Merely changing the execution seed does not guarantee changes to concrete options.
 
@@ -62,4 +70,4 @@ Explicit application can update locked fields. Cards write concrete options, not
 - A connected input or TXT replacement in any participating module stops the entire application. Uncheck that module or set its card type to Keep Current before applying the remainder. Other selected modules are not partially applied.
 - Existing combination checks provide warnings, not comprehensive styling guarantees or automatic card corrections.
 
-Card ownership and portable formats are unchanged. There is no new combination library or persistent selection state. Existing user presets remain available for reusing the entire node configuration.
+Card ownership, format structure and import/export entries are unchanged, but older versions do not support the new types. See [content-card compatibility](content-cards.md#english) before upgrading or downgrading. There is no new combination library or persistent selection state. Existing user presets remain available for reusing the entire node configuration.

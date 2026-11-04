@@ -81,7 +81,8 @@ async function make(type = "VividMuse_ZImageChinesePromptBuilder", populated = t
   node.graph = {getNodeById: id => id === node.id ? node : null, setDirtyCanvas() {}, beforeChange() {}, afterChange() {}};
   app.graph = node.graph;
   if (populated) {
-    node.properties.vividMuseContentCards = [cards.captureCard(node, "人物", "Person A"), cards.captureCard(node, "服装", "Outfit A")];
+    node.properties.vividMuseContentCards = [cards.captureCard(node, "人物", "Person A"), cards.captureCard(node, "服装", "Outfit A"),
+      cards.captureCard(node, "发型", "Hair A"), cards.captureCard(node, "姿态动作", "Pose A")];
     node.properties.vividMuseShootPlanCards = [shoot.captureShootPlan(node, ["场景", "摄影", "视觉表现"], "Studio A")];
   }
   return node;
@@ -94,7 +95,7 @@ await test("full-node entry opens one dialog; standalone nodes have no entry", a
   await button(main, "卡片快捷组合").click();
   assert.equal(main.open, false); const panel = node.__vividMuseCardsDialog;
   assert.ok(panel.open); assert.equal(state(node), before);
-  for (const name of ["人物卡", "穿搭卡", "拍摄方案卡"]) assert.equal(control(panel, name).value, "");
+  for (const name of ["人物卡", "发型卡", "穿搭卡", "姿态动作卡", "拍摄方案卡"]) assert.equal(control(panel, name).value, "");
   assert.ok(button(panel, "预览组合").disabled); assert.ok(button(panel, "确认应用").disabled);
   await button(panel, "返回卡片管理").click(); assert.equal(panel.open, false);
   assert.ok(node.__vividMuseCardsDialog.open); await button(node.__vividMuseCardsDialog, "关闭").click();
@@ -217,8 +218,9 @@ await test("long malicious-looking names are plain text and not used as selector
 
 await test("English controls and preview use translated catalog values with canonical writes", async () => {
   language = "en"; const node = await make(), panel = ui.openCardCombinationPanel(node);
-  for (const name of ["Person Card", "Outfit Card", "Shoot Plan Card"]) assert.equal(control(panel, name).options[0].textContent, "Keep Current");
-  await select(panel, "Person Card", "0"); await select(panel, "Outfit Card", "0"); await select(panel, "Shoot Plan Card", "0");
+  for (const name of ["Person Card", "Hair Card", "Outfit Card", "Pose / Action Card", "Shoot Plan Card"]) {
+    assert.equal(control(panel, name).options[0].textContent, "Keep Current"); await select(panel, name, "0");
+  }
   await select(panel, "Camera lock policy", "lock");
   await button(panel, "Preview Combination").click(); assert.match(status(panel), /Review/);
   assert.ok(!/[\u3400-\u9fff]/u.test(allText(panel)), "English interface leaked canonical Chinese text");
@@ -255,4 +257,80 @@ await test("application failure is visible and does not leave partial fields or 
   assert.equal(state(node), before); assert.ok(button(panel, "确认应用").disabled); await panel.close();
 });
 
+await test("hair and pose selections apply independently and invalidate/reset like old selectors", async () => {
+  const node = await make(), panel = ui.openCardCombinationPanel(node), before = state(node);
+  for (const name of ["发型", "姿态动作"]) assert.ok(control(panel, `${name}锁定策略`).disabled);
+  await select(panel, "发型卡", "0"); await select(panel, "发型锁定策略", "lock");
+  await button(panel, "预览组合").click(); assert.match(allText(panel), /隐藏字段/);
+  await select(panel, "姿态动作卡", "0"); assert.ok(button(panel, "确认应用").disabled);
+  await select(panel, "姿态动作锁定策略", "lock");
+  await select(panel, "发型卡", ""); assert.ok(control(panel, "发型锁定策略").disabled);
+  await button(panel, "预览组合").click(); assert.match(allText(panel), /不会自动添加/);
+  assert.equal(state(node), before); await button(panel, "确认应用").click();
+  const groups = ctx.__vividMuseZImagePromptData.MODULE_FIELD_GROUPS;
+  assert.deepEqual(clone(node.properties.vividMuseRandomLocks), clone(groups["姿态动作"]));
+  for (const [name, value] of JSON.parse(before).values) if (!groups["姿态动作"].includes(name)) assert.deepEqual(w(node, name).value, value);
+  await select(panel, "发型卡", "0"); await button(panel, "预览组合").click();
+  control(panel, "发型卡").value = ""; await button(panel, "确认应用").click(); assert.match(status(panel), /重新预览/);
+  await button(panel, "刷新卡片列表").click();
+  for (const name of ["发型", "姿态动作"]) {
+    assert.equal(control(panel, `${name}卡`).value, ""); assert.equal(control(panel, `${name}锁定策略`).value, "preserve");
+  }
+  await panel.close();
+});
+
+await test("new modules explain empty snapshots and blocked combinations without partial writes", async () => {
+  const node = await make(), groups = ctx.__vividMuseZImagePromptData.MODULE_FIELD_GROUPS;
+  const hair = node.properties.vividMuseContentCards.find(c => c.module === "发型");
+  for (const name of groups["发型"]) hair.values[name] = "不使用";
+  const panel = ui.openCardCombinationPanel(node);
+  await select(panel, "发型卡", "0"); await select(panel, "姿态动作卡", "0");
+  await button(panel, "预览组合").click(); assert.match(allText(panel), /发型：将清空此模块/);
+  w(node, "用户姿态动作片段").value = "TXT"; const before = state(node);
+  await button(panel, "预览组合").click(); assert.match(status(panel), /姿态动作.*TXT/);
+  assert.equal(state(node), before); assert.ok(button(panel, "确认应用").disabled);
+  await select(panel, "姿态动作卡", ""); await button(panel, "预览组合").click(); await button(panel, "确认应用").click();
+  for (const name of groups["发型"]) assert.equal(w(node, name).value, "不使用");
+  assert.equal(w(node, "用户姿态动作片段").value, "TXT"); await panel.close();
+});
+
+await test("standalone hair/pose management previews empty and locked fields in both languages", async () => {
+  for (const lang of ["zh", "en"]) for (const [suffix, module] of [["Hair", "发型"], ["Pose", "姿态动作"]]) {
+    language = lang;
+    const node = await make(`VividMuse_ZImage${suffix}Module`, false);
+    const card = cards.captureCard(node, module, "Empty card");
+    for (const name of Object.keys(card.values)) card.values[name] = "不使用";
+    cards.saveCard(node, card); node.properties.vividMuseRandomLocks = Object.keys(card.values);
+    const panel = cards.openCardsPanel(node);
+    await select(panel, lang === "en" ? "Saved cards" : "已保存卡片", card.name);
+    assert.match(allText(panel), lang === "en" ? /All structured options.*cleared/ : /将清空此模块/);
+    assert.match(allText(panel), lang === "en" ? /update locked fields/ : /更新已锁定字段/);
+    if (module === "发型") assert.match(allText(panel), lang === "en" ? /hidden field/ : /隐藏字段/);
+    if (module === "姿态动作") assert.match(allText(panel), lang === "en" ? /not added automatically/ : /不会自动添加/);
+    if (lang === "en") assert.ok(!/[\u3400-\u9fff]/u.test(allText(panel)), "English management UI leaked Chinese");
+    await button(panel, lang === "en" ? "Apply Card" : "应用卡片").click();
+    for (const name of Object.keys(card.values)) assert.equal(w(node, name).value, "不使用");
+    await panel.close();
+  }
+});
+await test("full builder saves both new module cards through existing controls with separate favorites", async () => {
+  const node = await make(undefined, false), panel = cards.openCardsPanel(node);
+  const before = JSON.parse(state(node)).values;
+  for (const module of ["发型", "姿态动作"]) {
+    await select(panel, "卡片与锁定模块", module);
+    control(panel, "卡片名称").value = "共享名称";
+    await button(panel, "保存当前模块").click(); assert.match(status(panel), /卡片已保存/);
+    await button(panel, "收藏卡片").click();
+  }
+  assert.deepEqual(clone(node.properties.vividMuseContentCards.map(c=>c.module)), ["发型", "姿态动作"]);
+  assert.deepEqual(clone(node.properties.vividMuseCardOrganization.favorites.map(c=>c.module)), ["发型", "姿态动作"]);
+  assert.deepEqual(JSON.parse(state(node)).values, before);
+  const snapshot = JSON.parse(JSON.stringify(node.properties));
+  await panel.close(); node.properties = snapshot;
+  const reopened = cards.openCardsPanel(node);
+  await select(reopened, "卡片与锁定模块", "发型");
+  await select(reopened, "已保存卡片", "共享名称");
+  assert.ok(!button(reopened, "应用卡片").disabled);
+  await reopened.close();
+});
 console.log(`PASS ${passed} combination UI groups; DOM simulation only, real Classic / Nodes 2.0 acceptance pending.`);

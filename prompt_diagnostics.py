@@ -15,7 +15,7 @@ def module_groups(core):
 
 
 def card_candidates(core, groups, fields, fragments, english_fragments, replacements,
-                    *, modules=("人物", "服装")):
+                    *, modules=("人物", "发型", "服装", "姿态动作")):
     """Snapshot canonical execution values before framing, without resolving again."""
     candidates = {}
     for module in modules:

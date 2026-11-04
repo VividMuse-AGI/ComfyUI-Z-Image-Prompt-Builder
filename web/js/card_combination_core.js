@@ -1,14 +1,15 @@
 // Plan all selected cards before writing any field. No UI, persistence or queue calls.
 import { validateCard, cardDifference, findConflicts } from "./workflow_tools.js";
-import { validateShootPlan, planShootPlanApply, snapshotWidget } from "./shoot_plan_core.js";
+import { validateShootPlan, planShootPlanApply } from "./shoot_plan_core.js";
+import { commitCardFields } from "./card_apply_transaction.js";
 
 const FULL = "VividMuse_ZImageChinesePromptBuilder";
 const LOCKS = "vividMuseRandomLocks";
 const CONTENT = "vividMuseContentCards", SHOOT = "vividMuseShootPlanCards";
-const ORDER = ["人物", "服装", "场景", "摄影", "视觉表现"];
+const ORDER = ["人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现"];
 const issued = new WeakMap();
 const text = (zh, en) => globalThis.__vividMuseZImageI18n?.activeLanguage() === "en" ? en : zh;
-const label = name => text(name, {人物: "Person", 服装: "Clothing", 场景: "Scene", 摄影: "Camera", 视觉表现: "Visual"}[name] || name);
+const label = name => text(name, {人物: "Person", 发型: "Hair", 服装: "Clothing", 姿态动作: "Pose / Action", 场景: "Scene", 摄影: "Camera", 视觉表现: "Visual"}[name] || name);
 const stale = () => new Error(text("状态已变化，请重新预览并确认。", "State changed. Preview and confirm again."));
 const copy = value => JSON.parse(JSON.stringify(value));
 const widget = (node, name) => node.widgets?.find(w => w.name === name);
@@ -56,11 +57,11 @@ function targetStamp(node, sources) {
 
 export function planCardCombination(node, selection = {}) {
   if (!supportsCardCombination(node)) throw new Error(text("快捷组合仅支持完整节点。", "Quick combination is available on the full builder only."));
-  const keys = ["person", "outfit", "shootPlan", "shootModules", "lockModules"];
+  const keys = ["person", "hair", "outfit", "pose", "shootPlan", "shootModules", "lockModules"];
   if (!record(selection) || Reflect.ownKeys(selection).some(key => !keys.includes(key)))
     throw new Error(text("组合选项不正确。", "Invalid combination options."));
   const existingLocks = locks(node), rows = [], sources = [];
-  for (const [key, module] of [["person", "人物"], ["outfit", "服装"]]) {
+  for (const [key, module] of [["person", "人物"], ["hair", "发型"], ["outfit", "服装"], ["pose", "姿态动作"]]) {
     const entry = selection[key];
     if (entry == null) continue; // Keep current, never clear this module implicitly.
     try {
@@ -124,48 +125,5 @@ export function commitCardCombination(node, plan) {
   // Revalidate before writing without calling either existing single-card commit function.
   const fresh = planCardCombination(node, transaction.selection);
   issued.delete(fresh);
-  const graph = node.graph;
-  if (Boolean(graph?.beforeChange) !== Boolean(graph?.afterChange)) throw new Error(text(
-    "工作流撤销接口不完整，未应用组合。", "Incomplete workflow undo hooks; combination was not applied."));
-  const restoreWidgets = node.widgets.map(snapshotWidget);
-  const targets = new Map(plan.rows.map(row => [row.name, row.target]));
-  const expectedValues = node.widgets.filter(w => w.serialize !== false && w.options?.serialize !== false)
-    .map(w => [w, targets.has(w.name) ? targets.get(w.name) : w.value]);
-  const properties = node.properties;
-  const descriptors = properties && Object.getOwnPropertyDescriptors(properties);
-  const size = node.size && [...node.size];
-  const restore = () => {
-    for (const restoreWidget of restoreWidgets) restoreWidget();
-    node.properties = properties;
-    if (properties) {
-      for (const key of Reflect.ownKeys(properties)) if (!Object.hasOwn(descriptors, key)
-        && Object.getOwnPropertyDescriptor(properties, key)?.configurable) delete properties[key];
-      Object.defineProperties(properties, descriptors);
-    }
-    if (size && node.size) for (let i = 0; i < size.length; i++) node.size[i] = size[i];
-  };
-  let began = false, attemptedWrite = false;
-  try {
-    graph?.beforeChange?.(); began = true;
-    if (!unchanged()) throw stale();
-    attemptedWrite = true;
-    for (const row of plan.rows) widget(node, row.name).value = row.target;
-    if (plan.newLocks.length) {
-      node.properties ??= {};
-      node.properties[LOCKS] = [...new Set([...locks(node), ...plan.newLocks])];
-    }
-    for (const module of plan.modules) node.__vividMuseRefreshCardScope?.(module);
-    globalThis.__vividMuseZImageI18n?.localizeNode?.(node);
-    globalThis.__vividMusePromptDiagnostics?.refresh(node);
-    if (expectedValues.some(([control, value]) => control.value !== value)) throw new Error(text(
-      "刷新后字段与预览不一致。", "Refreshed fields differ from the preview."));
-  } catch (error) {
-    if (attemptedWrite) restore();
-    if (began) { try { graph?.afterChange?.(); } catch { /* original failure remains actionable */ } }
-    throw error;
-  }
-  try { graph?.afterChange?.(); }
-  catch (error) { restore(); throw error; }
-  try { node.setDirtyCanvas?.(true, true); graph?.setDirtyCanvas?.(true, true); } catch { /* already committed */ }
-  return {changed: true, modules: [...plan.modules], fields: plan.rows.filter(row => row.changed).length};
+  return commitCardFields(node, plan, () => { if (!unchanged()) throw stale(); });
 }

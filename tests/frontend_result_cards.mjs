@@ -118,11 +118,14 @@ for(const diagnosticsFirst of [true,false]){
       {...results[0].card_candidates.modules["人物"].values,extra:"unknown"}].map(values=>({...results[0],card_candidates:{version:1,modules:{人物:{available:true,values}}}}))]){
     const before=JSON.stringify(node.properties);assert.throws(()=>cards.captureResultCard(node,invalid,"人物","bad"));assert.equal(JSON.stringify(node.properties),before);}
   // Real independent modules expose only their own result-to-card action, in both languages.
-  for(const [kind,moduleName] of [["PersonModule","人物"],["ClothingModule","服装"],["HairModule",null]]){
+  const saveLabels={人物:"Person",服装:"Outfit",发型:"Hair",姿态动作:"Pose / Action"};
+  for(const [kind,moduleName] of [["PersonModule","人物"],["ClothingModule","服装"],["HairModule","发型"],["PoseModule","姿态动作"],["CameraModule",null]]){
     const target=await make(kind);await emit(target,kind,fixture.results[target.comfyClass][0]);lang="en";panel=open(target);
     assert.equal(!!button(panel,"Save as Person Card"),moduleName==="人物");
     assert.equal(!!button(panel,"Save as Outfit Card"),moduleName==="服装");
-    if(moduleName){await button(panel,moduleName==="人物"?"Save as Person Card":"Save as Outfit Card").click();
+    assert.equal(!!button(panel,"Save as Hair Card"),moduleName==="发型");
+    assert.equal(!!button(panel,"Save as Pose / Action Card"),moduleName==="姿态动作");
+    if(moduleName){await button(panel,`Save as ${saveLabels[moduleName]} Card`).click();
       named(panel,"Card name").value="standalone";await button(panel,"Confirm Save Card").click();
       assert.equal(target.properties.vividMuseContentCards[0].module,moduleName);}
     panel.close();lang="zh";
@@ -130,6 +133,43 @@ for(const diagnosticsFirst of [true,false]){
   const legacy=await make("ChinesePromptBuilder"),legacyData=json(results[0]);delete legacyData.card_candidates;
   await emit(legacy,"legacy",legacyData);panel=open(legacy);assert.ok(button(panel,"保存为人物卡").disabled);
   assert.ok(all(panel).some(e=>e.textContent?.includes("重新执行")));panel.close();
+  // New full-builder actions use the selected historical record, never current inputs.
+  for (const language of ["zh", "en"]) {
+    lang=language;
+    const fresh=await make("ChinesePromptBuilder");
+    await emit(fresh,`new-cards-${language}`,results[0]);
+    fresh.widgets.find(w=>w.name==="用户发型片段").value="current TXT";
+    fresh.inputs=[{name:"基础姿态",link:8}]; const before=state(fresh); panel=open(fresh);
+    for (const module of ["发型","姿态动作"]) {
+      const label=language==="en"?`Save as ${saveLabels[module]} Card`:`保存为${module}卡`;
+      assert.ok(!button(panel,label).disabled); await button(panel,label).click();
+      named(panel,language==="en"?"Card name":"卡片名称").value="same name";
+      await button(panel,language==="en"?"Confirm Save Card":"确认保存卡片").click();
+      assert.deepEqual(json(fresh.properties.vividMuseContentCards.find(c=>c.module===module).values),results[0].card_candidates.modules[module].values);
+      assert.equal(state(fresh),before);
+    }
+    assert.equal(fresh.properties.vividMuseContentCards.length,2);panel.close();
+    const partial=json(results[0]);delete partial.card_candidates.modules["发型"];delete partial.card_candidates.modules["姿态动作"];
+    await emit(fresh,`old-cards-${language}`,partial);panel=open(fresh);
+    assert.ok(button(panel,language==="en"?"Save as Hair Card":"保存为发型卡").disabled);
+    assert.ok(button(panel,language==="en"?"Save as Pose / Action Card":"保存为姿态动作卡").disabled);
+    assert.ok(!button(panel,language==="en"?"Save as Person Card":"保存为人物卡").disabled);
+    const text=all(panel).map(e=>e.textContent).join("\n");
+    assert.match(text,language==="en"?/Hair:.*Run the node again/:/发型:.*重新执行/);
+    assert.match(text,language==="en"?/Pose \/ Action:.*Run the node again/:/姿态动作:.*重新执行/);
+    panel.close();
+    const unavailable=json(results[0]);
+    unavailable.card_candidates.modules["发型"]={available:false,reason:"user_replaced"};
+    unavailable.card_candidates.modules["姿态动作"]={available:false,reason:"empty_module"};
+    await emit(fresh,`unavailable-${language}`,unavailable);panel=open(fresh);
+    assert.ok(button(panel,language==="en"?"Save as Hair Card":"保存为发型卡").disabled);
+    assert.ok(button(panel,language==="en"?"Save as Pose / Action Card":"保存为姿态动作卡").disabled);
+    const reasonText=all(panel).map(e=>e.textContent).join("\n");
+    assert.match(reasonText,language==="en"?/Hair:.*TXT/:/发型:.*TXT/);
+    assert.match(reasonText,language==="en"?/Pose \/ Action:.*no output/:/姿态动作:.*没有输出/);
+    panel.close();
+  }
+  lang="zh";
   // New cards remain usable by the public v1 validator and preserve non-target fields on application.
   const target=await make("PersonModule"),card=cards.captureResultCard(target,fixture.results[key("PersonModule")][0],"人物","roundtrip");
   cards.saveCard(target,json(card));assert.deepEqual(json(target.properties.vividMuseContentCards[0]),json(card));

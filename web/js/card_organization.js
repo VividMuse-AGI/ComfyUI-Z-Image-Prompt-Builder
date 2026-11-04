@@ -12,7 +12,7 @@ const validName = name => typeof name === "string" && name.trim() === name && na
 
 export function cardReference(card) {
   if (!object(card) || !validName(card.name)) throw new Error("Invalid card identity");
-  if (card.kind === CONTENT && ["人物", "服装"].includes(card.module))
+  if (card.kind === CONTENT && ["人物", "发型", "服装", "姿态动作"].includes(card.module))
     return {kind: CONTENT, module: card.module, name: card.name};
   if (card.kind === SHOOT) return {kind: SHOOT, name: card.name};
   throw new Error("Invalid card identity");

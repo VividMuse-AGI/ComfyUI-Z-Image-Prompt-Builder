@@ -23,6 +23,7 @@ REQUIRED = {
     "web/js/shoot_plan_core.js", "web/js/shoot_plan_cards.js",
     "web/js/card_organization.js", "web/js/card_organization_ui.js",
     "web/js/card_combination_core.js", "web/js/card_combination_ui.js", "web/js/workflow_tools.js",
+    "web/js/card_apply_transaction.js",
     "docs/card-quick-combination.md",
 }
 

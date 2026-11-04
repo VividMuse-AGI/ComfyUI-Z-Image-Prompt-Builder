@@ -5,7 +5,7 @@ import vm from "node:vm";
 // host/DOM mocks, rather than replacing their behavior with test doubles.
 export function withCardOrganizationImports(source, context) {
   context.__testCardModules ??= {};
-  return source.replace(/import\s*\{([^}]+)\}\s*from\s*["']\.\/(card_organization(?:_ui)?)\.js["'];/g,
+  return source.replace(/import\s*\{([^}]+)\}\s*from\s*["']\.\/(card_organization(?:_ui)?|card_apply_transaction)\.js["'];/g,
     (_statement, names, module) => {
       if (!context.__testCardModules[module]) {
         const original = fs.readFileSync(new URL(`../web/js/${module}.js`, import.meta.url), "utf8");

@@ -113,4 +113,15 @@ test("workflow JSON roundtrip preserves sidecar, portable card JSON unchanged", 
   assert.equal(read.seed,42); assert.deepEqual(read.locks,['x']); assert.equal(read.free,'keep');
   assert.equal(JSON.stringify(read.cards),JSON.stringify(cards));
 });
+test("hair/pose identities coexist with old names and retain favorites through rename", () => {
+  const hair = content("共同名称", "发型"), pose = content("共同名称", "姿态动作");
+  const all = [...cards, hair, pose];
+  assert.equal(new Set(all.map(key)).size, 5);
+  const favorite = api.setCardFavorite(undefined, all, hair, true);
+  const renamed = {...hair, name: "新发型"};
+  const next = all.map(c => c === hair ? renamed : c);
+  const migrated = api.reconcileCardOrganization(favorite, all, next, {from: hair, to: renamed});
+  assert.deepEqual(api.readCardOrganization(migrated, next).favorites, [api.cardReference(renamed)]);
+  assert.throws(() => key(content("unknown", "未知")));
+});
 console.log(`PASS ${groups} organization core groups; no UI integration or host undo/redo claimed.`);

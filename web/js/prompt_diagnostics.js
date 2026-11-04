@@ -369,12 +369,14 @@ function showDetails(node) {
   const cardPreview = el("pre");
   cardPreview.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere;max-height:26vh;overflow:auto";
   const cardNotice = el("p", text(
-    "保存该次执行的完整模块选项，含未写入正文的隐藏或省略字段；不含发型、上游工作流，不保证换景别或密度后正文一致。保存不会应用卡片或新增锁定。",
-    "Save this execution's complete module options, including hidden or omitted fields. Hair and upstream workflows are not included. Text may differ with framing or density. Saving does not apply or lock the card."));
+    "只保存所选模块在该次执行中的完整解析值，包括未写入正文的省略字段；不包含其他模块或上游工作流。基础发色模式下进阶染发选项可能已解析为“不使用”。保存不会应用卡片或新增锁定，换景别或密度后正文可能变化。",
+    "Save only the selected module's complete resolved values from this execution, including fields omitted from the text, not other modules or upstream workflows. Basic hair color mode may have resolved advanced dye options to Unused. Saving does not apply or lock the card; framing or density can change the text."));
   let cardDraft = null;
-  const cardModules = (node.comfyClass || node.constructor?.type) === FULL ? ["人物", "服装"]
-    : (node.comfyClass || node.constructor?.type) === "VividMuse_ZImagePersonModule" ? ["人物"]
-    : (node.comfyClass || node.constructor?.type) === "VividMuse_ZImageClothingModule" ? ["服装"] : [];
+  const cardTypes = {人物: ["人物", "Person", "Person"], 发型: ["发型", "Hair", "Hair"],
+    服装: ["穿搭", "Outfit", "Clothing"], 姿态动作: ["姿态动作", "Pose / Action", "Pose"]};
+  const nodeType = node.comfyClass || node.constructor?.type;
+  const cardModules = Object.keys(cardTypes).filter(module => nodeType === FULL
+    || nodeType === `VividMuse_ZImage${cardTypes[module][2]}Module`);
   const checkCardOwner = record => {
     if (!active || rootGraph() !== graph || generation !== (node.__vividMuseDiagnosticsGeneration || 0)
         || record?.promptId == null || record?.executionNode == null
@@ -395,10 +397,10 @@ function showDetails(node) {
   };
   const clearCardDraft = () => { cardDraft = null; cardEditor.hidden = true; };
   const cardButtons = cardModules.map(moduleName => {
-    const item = button(moduleName === "人物" ? "保存为人物卡" : "保存为穿搭卡",
-      moduleName === "人物" ? "Save as Person Card" : "Save as Outfit Card", guardedCardAction(() => {
+    const [zhName, enName] = cardTypes[moduleName];
+    const item = button(`保存为${zhName}卡`, `Save as ${enName} Card`, guardedCardAction(() => {
         const record = selected();
-        const name = `${text(moduleName === "人物" ? "人物" : "穿搭", moduleName === "人物" ? "Person" : "Outfit")} · ${record.data.seed}`;
+        const name = `${text(zhName, enName)} · ${record.data.seed}`;
         const entry = captureResult(record, moduleName, name);
         clearShootDraft();
         cardDraft = {record, moduleName}; cardName.value = name;
@@ -503,7 +505,7 @@ function showDetails(node) {
         captureResult(record, moduleName, "preview"); item.disabled = false; item.title = "";
       } catch (error) {
         item.disabled = true; item.title = error.message;
-        unavailable.push(`${text(moduleName, moduleName === "人物" ? "Person" : "Outfit")}: ${error.message}`);
+        unavailable.push(`${text(cardTypes[moduleName][0], cardTypes[moduleName][1])}: ${error.message}`);
       }
     }
     cardAvailability.textContent = unavailable.join("\n");

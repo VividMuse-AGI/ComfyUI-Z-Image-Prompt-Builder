@@ -1,11 +1,12 @@
 import { app } from "../../scripts/app.js";
 import { planNodeCardCollection, commitNodeCardOrganization } from "./card_organization.js";
 import { createOrganizationControls, createCardPackPicker } from "./card_organization_ui.js";
+import { commitCardFields } from "./card_apply_transaction.js";
 
 const STORE = "vividMuseUserPresets";
 const LOCKS = "vividMuseRandomLocks";
 const CARDS = "vividMuseContentCards";
-const CARD_MODULES = new Set(["人物", "服装"]);
+const CARD_MODULES = new Set(["人物", "发型", "服装", "姿态动作"]);
 const cardSchemas = new Map();
 const UI_KEYS = ["vividMuseActiveModule", "vividMuseOnlyEnabledModule"];
 const STANDARD_MODULES = new Set(["画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现"]);
@@ -200,7 +201,7 @@ export function captureResultCard(node, data, moduleName, name) {
     unsupported_values: text("此记录包含无法保存为卡片的选项。", "This record contains options that cannot be saved as a card."),
   };
   if (candidate?.available !== true) throw new Error(reasons[candidate?.reason] || text(
-    "此记录没有可用的模块卡片数据。", "No usable card data for this module in this record."));
+    "此记录没有可用的模块卡片数据，请重新执行后保存。", "No usable card data for this module in this record. Run the node again before saving."));
   const module = data.modules?.find(item => item.name === moduleName);
   if (module?.source !== "builtin" || ![module.zh, module.en].some(value => typeof value === "string" && value.trim()))
     throw new Error(text("此模块不是可保存的内置执行结果。", "This module is not a saveable built-in execution result."));
@@ -225,17 +226,27 @@ export function applyCard(node, entry, lock = false) {
   validateCard(entry, node);
   const names = scopeFields(node, entry.module);
   checkWritableScope(node, entry.module, names);
-  // Assign the whole module before refreshing dependencies; no per-field callbacks
-  // or full-node onConfigure, both of which can overwrite unrelated user state.
-  for (const w of widgets(node)) if (Object.hasOwn(entry.values, w.name)) w.value = entry.values[w.name];
-  if (lock) {
-    node.properties ??= {};
-    node.properties[LOCKS] = [...new Set([...(node.properties[LOCKS] || []), ...names])];
-  }
-  node.__vividMuseRefreshCardScope?.(entry.module);
-  globalThis.__vividMuseZImageI18n?.localizeNode(node);
-  globalThis.__vividMusePromptDiagnostics?.refresh(node);
-  dirty(node);
+  const existing = node.properties?.[LOCKS] ?? [];
+  const allowed = new Set(Object.values(moduleGroups()).flat());
+  if (!Array.isArray(existing) || existing.some(name => !allowed.has(name)))
+    throw new Error(text("随机锁定数据不正确。", "Invalid random lock data."));
+  const rows = names.map(name => ({name, target: entry.values[name],
+    changed: node.widgets.find(w => w.name === name).value !== entry.values[name]}));
+  const newLocks = lock ? names.filter(name => !existing.includes(name)) : [];
+  const plan = {rows, modules: [entry.module], newLocks, changed: rows.some(row => row.changed) || newLocks.length > 0};
+  const graph = node.graph, properties = node.properties, controls = [...node.widgets];
+  const generation = node.__vividMuseCardsGeneration;
+  const stamp = () => JSON.stringify({values: node.widgets.map(w => [w.name, w.value, w.options?.values]),
+    properties: node.properties, inputs: node.inputs, entry});
+  const original = stamp();
+  return commitCardFields(node, plan, () => {
+    if (graph !== node.graph || properties !== node.properties || generation !== node.__vividMuseCardsGeneration
+        || controls.length !== node.widgets.length || controls.some((w, i) => node.widgets[i] !== w)
+        || (graph?.getNodeById && graph.getNodeById(node.id) !== node) || original !== stamp())
+      throw new Error(text("状态已变化，请重新确认。", "State changed. Confirm again."));
+    validateCard(entry, node);
+    checkWritableScope(node, entry.module, names);
+  });
 }
 
 export function setModuleLock(node, moduleName, locked) {
@@ -260,6 +271,7 @@ const cardCollection = node => {
 const collectionStamp = node => JSON.stringify(cardCollection(node));
 const changedCollection = () => new Error(text("卡片库已变化，请重新预览并确认。", "The card library changed. Preview and confirm again."));
 const hiddenCardField = (name, values) => {
+  if (["基础发色", "不使用"].includes(values["发色模式"]) && ["发色色调", "染色方式"].includes(name)) return true;
   if (/^(连衣裙|连体服|上装|下装)(类型|颜色|材质|图案)$/.test(name)) {
     const structure = values["穿搭结构"];
     if (structure === "连衣裙") return !name.startsWith("连衣裙");
@@ -498,14 +510,19 @@ export function openCardsPanel(node) {
     try {
       const diff = cardDifference(node, entry);
       previewStamp = JSON.stringify({entry, diff});
-      const format = row => `${labelFor(row.name)}: ${valueFor(row.name, row.current)}${row.preset === undefined ? "" : ` (${valueFor(row.name, row.preset)})`} → ${valueFor(row.name, row.target)}`;
+      const format = row => `${labelFor(row.name)}${row.hidden ? text("（隐藏字段）", " (hidden field)") : ""}: ${valueFor(row.name, row.current)}${row.preset === undefined ? "" : ` (${valueFor(row.name, row.preset)})`} → ${valueFor(row.name, row.target)}`;
       const hiddenChanges = diff.rows.filter(r => r.changed && r.hidden).length;
       preview.textContent = diff.rows.filter(r => r.changed && !r.hidden).map(format).join("\n") || text("可见字段无变化。", "No visible field changes.");
       if (hiddenChanges) preview.textContent += text(`\n另有 ${hiddenChanges} 项隐藏分支变化，展开全部字段查看。`, `\n${hiddenChanges} hidden-branch changes; expand all fields to review.`);
       allPreview.textContent = diff.rows.map(format).join("\n");
-      applicationHint.textContent = diff.blocked || text(
+      const hints = [text(
         `应用完整模块快照，包含隐藏分支。应用并锁定将新增 ${diff.newLocks.length} 项锁定。`,
-        `Applies the complete module, including hidden branches. Apply & Lock adds ${diff.newLocks.length} locks.`);
+        `Applies the complete module, including hidden branches. Apply & Lock adds ${diff.newLocks.length} locks.`)];
+      if (diff.rows.every(r => r.target === "不使用")) hints.push(text("将清空此模块的结构化选项。", "All structured options in this module will be cleared."));
+      if (diff.rows.some(r => r.changed && node.properties?.[LOCKS]?.includes(r.name))) hints.push(text("本次显式应用将更新已锁定字段。", "This explicit application will update locked fields."));
+      if (entry.module === "姿态动作") hints.push(text("动作需要的座椅、墙面或道具不会自动添加，请自行匹配场景。", "Seating, walls or props required by a pose are not added automatically; match the scene yourself."));
+      applicationHint.style.whiteSpace = "pre-wrap";
+      applicationHint.textContent = [diff.blocked, ...hints].filter(Boolean).join("\n");
     } catch (e) { preview.textContent = e.message; selectionButtons.forEach(b => { b.disabled = true; }); }
   };
   const refresh = (preferred = select.value, initial = false) => {

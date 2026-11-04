@@ -42,7 +42,8 @@ const json = value => JSON.parse(JSON.stringify(value));
 const full = await create("VividMuse_ZImageChinesePromptBuilder");
 const groups = context.__vividMuseZImagePromptData.MODULE_FIELD_GROUPS;
 assert.equal(api.availableCardModules(full).length,8);
-for (const [moduleName, key, count] of [["人物","VividMuse_ZImagePersonModule",20],["服装","VividMuse_ZImageClothingModule",21]]) {
+for (const [moduleName, key, count] of [["人物","VividMuse_ZImagePersonModule",20],["服装","VividMuse_ZImageClothingModule",21],
+  ["发型","VividMuse_ZImageHairModule",9],["姿态动作","VividMuse_ZImagePoseModule",10]]) {
   const standalone = await create(key);
   const beforeCapture = JSON.stringify(values(full));
   const card = api.captureCard(full,moduleName,"  reusable  ");
@@ -73,7 +74,7 @@ for (const [moduleName, key, count] of [["人物","VividMuse_ZImagePersonModule"
   const locks=json(full.properties.vividMuseRandomLocks);
   const field=groups[moduleName][0];
   const snapshot=()=>JSON.stringify({values:values(full),properties:full.properties});
-  for(const bad of [null, {...stored,version:2}, {...stored,kind:"other"}, {...stored,module:"发型"},
+  for(const bad of [null, {...stored,version:2}, {...stored,kind:"other"}, {...stored,module:"未知模块"},
     {...stored,name:" "}, {...stored,name:"x".repeat(81)}, {...stored,values:{}},
     {...stored,values:{...stored.values,unknown:"a"}}, {...stored,extra:"ignored?"},
     ...["随机抽取","跟随预设","invalid",null,{}].map(value=>({...stored,values:{...stored.values,[field]:value}}))]) {
@@ -103,16 +104,16 @@ for (const [moduleName, key, count] of [["人物","VividMuse_ZImagePersonModule"
 }
 // Whole-module locks survive the full builder's all-fields random button.
 w(full,"随机范围").value="跨风格混搭（全部字段）";
-const lockedValues=Object.fromEntries([...groups["人物"],...groups["服装"]].map(n=>[n,w(full,n).value]));
+const lockedValues=Object.fromEntries(["人物","发型","服装","姿态动作"].flatMap(m=>groups[m]).map(n=>[n,w(full,n).value]));
 context.randomFull(full);
 for(const [name,value] of Object.entries(lockedValues)) assert.equal(w(full,name).value,value,name);
 assert.equal(w(full,"自由提示词").value,"keep free text");
-assert.equal(w(full,"基础姿态").value,"随机抽取");
-assert.equal(w(full,"发型造型").value,"随机抽取","Hair is intentionally independent");
+assert.equal(w(full,"基础姿态").value,lockedValues["基础姿态"]);
+assert.equal(w(full,"发型造型").value,lockedValues["发型造型"],"Hair has its own module lock");
 api.setModuleLock(full,"人物",false);
 assert.ok(groups["服装"].every(n=>full.properties.vividMuseRandomLocks.includes(n)));
 assert.ok(groups["人物"].every(n=>!full.properties.vividMuseRandomLocks.includes(n)));
-// Independent non-card modules can lock their own module but cannot import cards.
+// Independent modules can only apply their own card type.
 const pose=await create("VividMuse_ZImagePoseModule");
 assert.deepEqual(Array.from(api.availableCardModules(pose)),["姿态动作"]);
 api.setModuleLock(pose,"姿态动作",true);
@@ -120,7 +121,7 @@ assert.equal(pose.properties.vividMuseRandomLocks.length,10);
 assert.throws(()=>api.applyCard(pose,full.properties.vividMuseContentCards[0]));
 // Saved workflow properties retain cards/locks without any backend input changes.
 const restored=json(full.properties);
-assert.equal(restored.vividMuseContentCards.length,2);
+assert.equal(restored.vividMuseContentCards.length,4);
 assert.deepEqual(restored.vividMuseRandomLocks,json(full.properties.vividMuseRandomLocks));
 const personCard=restored.vividMuseContentCards.find(c=>c.module==="人物");
 api.validateCard(personCard,full);
@@ -131,7 +132,7 @@ if(nonMatching) assert.throws(()=>api.validateCard({...personCard,values:{...per
 const presetNode=await create("VividMuse_ZImageChinesePromptBuilder");
 for(const presetName of Object.keys(context.__vividMuseZImagePromptData.PRESETS)) {
   w(presetNode,"预设").value=presetName;
-  for(const moduleName of ["人物","服装"]) api.captureCard(presetNode,moduleName,presetName);
+  for(const moduleName of ["人物","服装","发型","姿态动作"]) api.captureCard(presetNode,moduleName,presetName);
 }
 const capped=await create("VividMuse_ZImagePersonModule");
 for(let i=0;i<100;i++) api.saveCard(capped,{...personCard,name:`card ${i}`});
@@ -151,12 +152,12 @@ for seed in (0,42,987654321):
     resolved = n.resolve_fields(next(iter(n.PRESETS)), n.RANDOM_SCOPES[2], seed, requested)
     assert all(resolved[k] == v for k,v in locked.items())
 for card in cards:
-    key = 'VividMuse_ZImagePersonModule' if card['module']=='人物' else 'VividMuse_ZImageClothingModule'
+    key = 'VividMuse_ZImage' + {'人物':'Person','服装':'Clothing','发型':'Hair','姿态动作':'Pose'}[card['module']] + 'Module'
     cls = m.NODE_CLASS_MAPPINGS[key]
     outputs = [cls().build_module(**{**card['values'], '随机种子':s}) for s in (0,42,987654321)]
     assert outputs[0] == outputs[1] == outputs[2]
-print('Python: locked person/outfit fields and bilingual module text stable across three seeds')
-`], {cwd:root,encoding:"utf8",input:JSON.stringify(restored.vividMuseContentCards)});
+print('Python: locked content-card fields and bilingual module text stable across three seeds')
+`], {cwd:root,encoding:"utf8",input:JSON.stringify(restored.vividMuseContentCards), env:{...process.env,PYTHONUTF8:"1",PYTHONIOENCODING:"utf-8"}});
 console.log(execution.trim());
 
 // Lightweight DOM event regression: default scope, keyboard isolation and late imports.

@@ -27,6 +27,8 @@ function load(name) {
 load("preset_sync"); load("modular_nodes");
 const cards = load("workflow_tools"), shoot = load("shoot_plan_core"), api = load("card_combination_core");
 for (const [name, input] of Object.entries(fixture)) shoot.registerShootPlanSchema({name, input});
+for (const [name, input] of Object.entries(fixture)) for (const ext of extensions)
+  ext.beforeRegisterNodeDef?.(class {}, {name, input});
 const clone = x => JSON.parse(JSON.stringify(x));
 const fullType = "VividMuse_ZImageChinesePromptBuilder";
 const groups = ctx.__vividMuseZImagePromptData.MODULE_FIELD_GROUPS;
@@ -296,6 +298,106 @@ await test("stale previews stay consumed; malformed locks and duplicate source i
   delete node.properties.vividMuseRandomLocks;
   node.properties.vividMuseContentCards.push(clone(person));
   assert.throws(() => api.planCardCombination(node, {person}));
+});
+
+await test("hair and pose join all seven modules without changing canvas or free text", async () => {
+  const hair = cards.captureCard(source, "发型", "同名卡"), pose = cards.captureCard(source, "姿态动作", "同名卡");
+  const node = await target(); node.properties.vividMuseContentCards.push(clone(hair), clone(pose));
+  const before = snapshot(node);
+  const plan = api.planCardCombination(node, {person, hair, outfit, pose, shootPlan: planCard, lockModules: ["发型", "姿态动作"]});
+  assert.equal(plan.rows.length, 88);
+  assert.deepEqual(clone(plan.modules), ["人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现"]);
+  assert.ok(plan.rows.find(row => row.name === "发色色调").hidden);
+  api.commitCardCombination(node, plan);
+  assert.equal(node.history.length, 1);
+  assert.deepEqual(clone(node.properties.vividMuseRandomLocks), [...groups["发型"], ...groups["姿态动作"]]);
+  for (const name of [...groups["画面基础"], "自由提示词", "随机种子"]) assert.equal(w(node, name).value, before.values[name]);
+  const after = state(node); node.graph.undo(); assert.deepEqual(snapshot(node), before);
+  node.graph.redo(); assert.equal(state(node), after);
+});
+
+await test("four single card types share undo, no-op detection and rollback", async () => {
+  for (const [module, suffix] of [["人物", "Person"], ["发型", "Hair"], ["服装", "Clothing"], ["姿态动作", "Pose"]]) {
+    const entry = cards.captureCard(source, module, "single");
+    for (const type of [fullType, `VividMuse_ZImage${suffix}Module`]) {
+      const node = await make(type), before = snapshot(node);
+      assert.ok(cards.applyCard(node, entry, true).changed);
+      assert.equal(node.history.length, 1);
+      const after = state(node); node.graph.undo(); assert.deepEqual(snapshot(node), before);
+      node.graph.redo(); assert.equal(state(node), after);
+      assert.equal(cards.applyCard(node, entry, true).changed, false); assert.equal(node.history.length, 1);
+    }
+    for (const mode of ["refresh", "setter", "unrelated", "after", "incomplete"]) {
+      const node = await make(), before = state(node);
+      if (mode === "refresh") node.__vividMuseRefreshCardScope = () => {node.size[1] = 900; throw Error("refresh");};
+      if (mode === "unrelated") node.__vividMuseRefreshCardScope = () => {w(node, "自由提示词").value = "bad";};
+      if (mode === "after") node.graph.afterChange = () => {throw Error("after");};
+      if (mode === "incomplete") delete node.graph.afterChange;
+      if (mode === "setter") {
+        const control = w(node, groups[module][1]); let value = control.value, fail = true;
+        Object.defineProperty(control, "value", {configurable: true, enumerable: true, get: () => value,
+          set(v) {value = v; if (fail) {fail = false; throw Error("setter");}}});
+      }
+      assert.throws(() => cards.applyCard(node, entry, true)); assert.equal(state(node), before);
+      assert.equal(node.history.length, 0);
+    }
+  }
+});
+
+await test("new card previews reject stale sources, links and TXT without partial writes", async () => {
+  const hair = cards.captureCard(source, "发型", "hair"), pose = cards.captureCard(source, "姿态动作", "pose");
+  for (const module of ["发型", "姿态动作"]) {
+    const node = await target(); node.properties.vividMuseContentCards.push(clone(hair), clone(pose));
+    const selected = {hair, pose}, plan = api.planCardCombination(node, selected);
+    node.properties.vividMuseContentCards.find(c => c.module === module).name = "changed";
+    const before = state(node); assert.throws(() => api.commitCardCombination(node, plan)); assert.equal(state(node), before);
+    node.properties.vividMuseContentCards = clone([hair, pose]);
+    node.inputs = [{name: groups[module][0], link: 1}];
+    assert.throws(() => api.planCardCombination(node, selected)); node.inputs = [];
+    w(node, `用户${module}片段`).value = "TXT";
+    assert.throws(() => api.planCardCombination(node, selected));
+    // The other module alone remains writable.
+    assert.ok(api.planCardCombination(node, module === "发型" ? {pose} : {hair}));
+  }
+});
+
+await test("four-type packs validate inapplicable cards and share one 100-card quota", async () => {
+  const hair = cards.captureCard(source, "发型", "同名卡"), pose = cards.captureCard(source, "姿态动作", "同名卡");
+  const pack = {kind: "vividmuse-content-card-pack", version: 1, cards: [person, hair, outfit, pose]};
+  for (const [module, suffix] of [["发型", "Hair"], ["姿态动作", "Pose"]]) {
+    const node = await make(`VividMuse_ZImage${suffix}Module`), before = state(node);
+    const broken = clone(pack); delete broken.cards.find(c => c.module !== module).values["年龄阶段"];
+    assert.throws(() => cards.planCardPack(node, broken)); assert.equal(state(node), before);
+    const plan = cards.planCardPack(node, pack);
+    assert.equal(plan.added.length, 1); assert.equal(plan.inapplicable.length, 3);
+    cards.commitCardPack(node, plan); assert.equal(node.properties.vividMuseContentCards[0].module, module);
+  }
+  const node = await make();
+  node.properties.vividMuseContentCards = Array.from({length: 100}, (_, i) => ({...clone(pack.cards[i % 4]), name: `card ${i}`}));
+  const before = state(node); assert.throws(() => cards.saveCard(node, hair)); assert.equal(state(node), before);
+  cards.saveCard(node, {...hair, name: "card 1"}, true); assert.equal(node.properties.vividMuseContentCards.length, 100);
+});
+
+await test("hair hidden editor values survive capture, but historical cards use only recorded candidates", async () => {
+  const node = await make();
+  for (const field of ["发色色调", "染色方式"]) w(node, field).value = w(node, field).options.values.find(v => !["跟随预设", "随机抽取", "不使用"].includes(v));
+  w(node, "发色模式").value = "基础发色";
+  const hair = cards.captureCard(node, "发型", "hidden");
+  const target = await make("VividMuse_ZImageHairModule"); cards.applyCard(target, hair);
+  for (const field of groups["发型"]) assert.equal(w(target, field).value, hair.values[field]);
+  for (const module of ["发型", "姿态动作"]) {
+    const entry = cards.captureCard(source, module, "history");
+    const record = {version: 1, scope: "全部模块", modules: [{name: module, source: "builtin", zh: "历史", en: ""}],
+      card_candidates: {version: 1, modules: {[module]: {available: true, reason: null, values: entry.values}}}};
+    w(node, `用户${module}片段`).value = "CURRENT TXT"; node.inputs = [{name: groups[module][0], link: 1}];
+    const before = state(node);
+    assert.deepEqual(clone(cards.captureResultCard(node, record, module, "history")), clone(entry));
+    assert.equal(state(node), before);
+    const legacy = clone(record); delete legacy.card_candidates.modules[module];
+    assert.throws(() => cards.captureResultCard(node, legacy, module, "bad"));
+    const incomplete = clone(record); delete incomplete.card_candidates.modules[module].values[groups[module][0]];
+    assert.throws(() => cards.captureResultCard(node, incomplete, module, "bad"));
+  }
 });
 
 console.log(`PASS ${passed} card combination core groups; simulated transactions only, live UI acceptance pending.`);
