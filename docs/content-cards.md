@@ -4,6 +4,8 @@
 
 v0.12.0 另提供[拍摄方案卡](shoot-plan-cards.md)，用于场景／摄影／视觉表现组合；它与人物／穿搭卡分开计数、分开导入，旧卡片格式不变。
 
+从 v0.14.0 起提供[卡片快捷组合](card-quick-combination.md)，在完整节点统一选择、预览和应用三类卡片；可按模块选择保留当前内容和锁定策略，一次撤销或重做整次应用。
+
 ## 使用方法
 
 1. 在完整节点或八个标准模块节点上右键，选择 **卡片管理 / 模块锁定**（早期版本为“人物卡 / 穿搭卡 / 模块锁定”）。
@@ -54,6 +56,8 @@ v0.12.0 另提供[拍摄方案卡](shoot-plan-cards.md)，用于场景／摄影�
 卡片及收藏修改已接入一次性事务。独立 ComfyUI 已验证收藏、内容卡重命名及删除的真实撤销／重做，具体范围见[验收记录](testing/2026-11-03-v0.13.0-release-acceptance.md)。
 
 ## English
+
+Since v0.14.0, [Quick Card Combination](card-quick-combination.md#english) on the full builder selects, previews and applies all three card types together. Keep unselected modules, choose module lock policies, and undo or redo the entire application once.
 
 ### Person / Outfit Cards and Module Locks
 

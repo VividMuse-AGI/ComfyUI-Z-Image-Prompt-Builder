@@ -338,7 +338,7 @@ export function planShootPlanApply(node, entry, moduleNames, lock = false) {
   return plan;
 }
 
-function snapshotWidget(control) {
+export function snapshotWidget(control) {
   const value = control.value;
   const descriptors = Object.getOwnPropertyDescriptors(control);
   // options are mutated by dependency refreshes; remember their descriptors too.

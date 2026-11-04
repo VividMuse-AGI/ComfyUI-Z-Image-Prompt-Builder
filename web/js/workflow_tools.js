@@ -431,6 +431,12 @@ export function openCardsPanel(node) {
     const item = el("button", text(zh, en)); item.type = "button";
     item.addEventListener("click", guarded(fn)); parent.append(item); return item;
   };
+  const combination = globalThis.__vividMuseCardCombination;
+  if (combination?.available(node)) {
+    button(row(), "卡片快捷组合", "Quick Card Combination", () => {
+      requireLive(); dialog.close(); combination.openPanel(node);
+    });
+  }
   const shootPlans = globalThis.__vividMuseShootPlanCards;
   if (shootPlans?.availableModules(node).length) {
     button(row(), "拍摄方案卡（场景 / 摄影 / 视觉表现）", "Shoot Plan Cards (Scene / Camera / Visual)", () => {
