@@ -16,11 +16,11 @@ ctx.modules = {};
 function load(name) {
   if (ctx.modules[name]) return ctx.modules[name];
   const raw = fs.readFileSync(new URL(`../web/js/${name}.js`, import.meta.url), "utf8");
-  const exports = [...raw.matchAll(/export (?:function|const) (\w+)/g)].map(m => m[1]);
+  const exports = [...raw.matchAll(/export (?:async )?(?:function|const) (\w+)/g)].map(m => m[1]);
   const code = raw.replace('import { app } from "../../scripts/app.js";', "")
     .replace(/import\s*\{([^}]+)\}\s*from\s*["']\.\/([\w_]+)\.js["'];/g, (_, names, file) => {
       load(file); return `const {${names}} = globalThis.modules.${file};`;
-    }).replaceAll("export function ", "function ").replaceAll("export const ", "const ");
+    }).replaceAll("export async function ", "async function ").replaceAll("export function ", "function ").replaceAll("export const ", "const ");
   vm.runInContext(`(()=>{${code}\nglobalThis.modules.${name}={${exports.join(",")}};})()`, ctx, {filename: name});
   return ctx.modules[name];
 }

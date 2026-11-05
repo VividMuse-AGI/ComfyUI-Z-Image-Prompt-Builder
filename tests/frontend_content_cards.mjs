@@ -194,7 +194,7 @@ panel=api.openCardsPanel(panelNode);
 await flatten(panel).find(e=>e.tag==="button"&&e.textContent==="导入卡片").click();
 let fileInput=flatten(panel).find(e=>e.type==="file");
 fileInput.files=[{size:1024*1024+1}]; await fileInput.fire("change");
-assert.match(flatten(panel).find(e=>e.attributes.role==="status").textContent,/1 MB/);
+assert.match(flatten(panel).find(e=>e.attributes.role==="status").textContent,/1 MiB/);
 assert.equal(panelNode.properties.vividMuseContentCards,undefined);
 await flatten(panel).find(e=>e.tag==="button"&&e.textContent==="导入卡片").click();
 fileInput=flatten(panel).find(e=>e.type==="file");

@@ -2,6 +2,8 @@ import { app } from "../../scripts/app.js";
 import { planNodeCardCollection, commitNodeCardOrganization } from "./card_organization.js";
 import { createOrganizationControls, createCardPackPicker } from "./card_organization_ui.js";
 import { commitCardFields } from "./card_apply_transaction.js";
+import { readImportData, createImportSession } from "./import_guidance.js";
+import { cardSummaryText, createCardSummaryElement } from "./card_summary_view.js";
 
 const STORE = "vividMuseUserPresets";
 const LOCKS = "vividMuseRandomLocks";
@@ -270,7 +272,7 @@ const cardCollection = node => {
 };
 const collectionStamp = node => JSON.stringify(cardCollection(node));
 const changedCollection = () => new Error(text("卡片库已变化，请重新预览并确认。", "The card library changed. Preview and confirm again."));
-const hiddenCardField = (name, values) => {
+export function hiddenCardField(name, values) {
   if (["基础发色", "不使用"].includes(values["发色模式"]) && ["发色色调", "染色方式"].includes(name)) return true;
   if (/^(连衣裙|连体服|上装|下装)(类型|颜色|材质|图案)$/.test(name)) {
     const structure = values["穿搭结构"];
@@ -281,7 +283,7 @@ const hiddenCardField = (name, values) => {
   if (values["妆容模式"] === "整体预设") return ["底妆质感", "眼影色系", "眼线造型", "唇妆颜色", "唇面质感"].includes(name);
   if (values["妆容模式"] === "分项自定义") return name === "整体妆容预设";
   return false;
-};
+}
 
 // Portable validation must also validate legal but inapplicable cards in a pack.
 // Schemas come from Comfy's registered definitions, not a second option catalog.
@@ -433,7 +435,7 @@ export function openCardsPanel(node) {
     if (graph.getNodeById?.(node.id) === node) return true;
     return (graph._nodes || []).some(child => child.subgraph && belongs(child.subgraph, seen));
   };
-  const live = () => active && (app.rootGraph || app.graph) === root &&
+  const live = () => active && dialog.open !== false && (app.rootGraph || app.graph) === root &&
     (node.__vividMuseCardsGeneration || 0) === generation && node.graph === ownerGraph &&
     (!ownerGraph?.getNodeById || ownerGraph.getNodeById(node.id) === node) &&
     (!root?.getNodeById || belongs(root));
@@ -483,6 +485,7 @@ export function openCardsPanel(node) {
   const countLabel = el("p");
   const organizationHost = el("div");
   cardArea.append(search, organizationHost, countLabel, name, select);
+  const contentSummary = createCardSummaryElement(el); cardArea.append(contentSummary);
   const saved = () => cardCollection(node);
   const organization = createOrganizationControls({node, parent: organizationHost, el, text, button, guarded,
     requireLive, onResetFilters: () => { search.value = ""; }, onChange: () => { refresh(); exportPicker?.refresh(); }});
@@ -504,10 +507,11 @@ export function openCardsPanel(node) {
   const renderPreview = () => {
     const entry = matching().find(item => item.name === select.value);
     organization.refresh(entry);
-    previewStamp = ""; allPreview.textContent = ""; applicationHint.textContent = "";
+    previewStamp = ""; allPreview.textContent = ""; applicationHint.textContent = ""; contentSummary.textContent = "";
     selectionButtons.forEach(b => { b.disabled = !entry; });
     if (!entry) { preview.textContent = saved().length ? text("请选择卡片；无匹配时可重置筛选。", "Select a card; reset filters if none match.") : text("尚无卡片。", "No cards yet."); return; }
     try {
+      contentSummary.textContent = cardSummaryText(entry, c => validateCard(c, node), hiddenCardField);
       const diff = cardDifference(node, entry);
       previewStamp = JSON.stringify({entry, diff});
       const format = row => `${labelFor(row.name)}${row.hidden ? text("（隐藏字段）", " (hidden field)") : ""}: ${valueFor(row.name, row.current)}${row.preset === undefined ? "" : ` (${valueFor(row.name, row.preset)})`} → ${valueFor(row.name, row.target)}`;
@@ -543,11 +547,12 @@ export function openCardsPanel(node) {
   select.addEventListener("change", guarded(renderPreview));
   search.addEventListener("input", guarded(() => refresh()));
   const actions = el("div"); actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"; cardArea.append(actions);
-  const store = entry => {
+  const store = (entry, current = live) => {
     const base = collectionStamp(node);
     const exists = saved().some(item => item.module === entry.module && item.name === entry.name);
     if (exists && !window.confirm(text("覆盖同类型同名卡片？", "Replace this card of the same type and name?"))) return false;
-    requireLive(); if (base !== collectionStamp(node)) throw changedCollection();
+    requireLive(); if (!current()) return false;
+    if (base !== collectionStamp(node)) throw changedCollection();
     saveCard(node, entry, exists); moduleSelect.value = entry.module; search.value = ""; refresh(); select.value = entry.name; renderPreview(); return true;
   };
   button(actions, "保存当前模块", "Save Module", () => {
@@ -584,15 +589,17 @@ export function openCardsPanel(node) {
   };
   selectionButtons.push(button(actions, "导出卡片", "Export Card", () => download(validateCard(selected(), node), "vividmuse-content-card.json")));
   button(actions, "导入卡片", "Import Card", () => {
+    clearPack(); const ticket = fileGeneration;
+    const current = () => live() && ticket === fileGeneration;
     const input = el("input"); input.type = "file"; input.accept = ".json,application/json"; input.hidden = true; dialog.append(input);
     input.addEventListener("cancel", () => input.remove());
     input.addEventListener("change", guarded(async () => {
       try {
-        const file = input.files?.[0]; if (!file) return;
-        if (file.size > 1024 * 1024) throw new Error(text("文件不能超过 1 MB。", "File must be at most 1 MB."));
-        const raw = await file.text(); if (!live()) return;
-        const entry = validateCard(JSON.parse(raw), node);
-        if (store(entry)) status.textContent = text("导入成功，点击应用卡片后生效。", "Imported. Use Apply Card to change the module.");
+        const data = await readImportData(input.files?.[0], "content-card", {isCurrent: current});
+        if (!data || !current()) return;
+        const entry = validateCard(data, node);
+        if (store(entry, current)) status.textContent = text("导入成功，点击应用卡片后生效。", "Imported. Use Apply Card to change the module.");
+      } catch (e) { if (current()) status.textContent = e.message;
       } finally { input.remove(); }
     }));
     input.click();
@@ -632,10 +639,9 @@ export function openCardsPanel(node) {
     input.addEventListener("cancel", () => input.remove());
     input.addEventListener("change", guarded(async () => {
       try {
-        const file = input.files?.[0]; if (!file) return;
-        if (file.size > 1024 * 1024) throw new Error(text("文件不能超过 1 MB。", "File must be at most 1 MB."));
-        const raw = await file.text(); if (!live() || ticket !== fileGeneration) return;
-        const pack = validateCardPack(JSON.parse(raw), node);
+        const data = await readImportData(input.files?.[0], "content-pack", {isCurrent: () => live() && ticket === fileGeneration});
+        if (!data || !live() || ticket !== fileGeneration) return;
+        const pack = validateCardPack(data, node);
         const strategy = el("select"); strategy.setAttribute("aria-label", text("同名冲突处理", "Name conflict strategy"));
         for (const [value, label] of [["skip", text("跳过同名", "Skip existing")], ["replace", text("覆盖同名", "Replace existing")]]) {
           const option = el("option", label); option.value = value; strategy.append(option);
@@ -653,10 +659,12 @@ export function openCardsPanel(node) {
         };
         strategy.addEventListener("change", update); packPreview.append(strategy, detail); update();
         button(packPreview, "确认导入卡片包", "Confirm Import Pack", () => {
+          if (ticket !== fileGeneration) return;
           if (!plan) { update(); return; }
           if (plan.base !== collectionStamp(node)) { update(); status.textContent = changedCollection().message; return; }
           if (plan.replaced.length && !window.confirm(text("确认覆盖这些同类型同名卡片？", "Replace these cards of the same type and name?"))) return;
           requireLive();
+          if (ticket !== fileGeneration) return;
           if (plan.base !== collectionStamp(node)) { update(); status.textContent = changedCollection().message; return; }
           const result = commitCardPack(node, plan);
           clearPack(); refresh();
@@ -666,6 +674,7 @@ export function openCardsPanel(node) {
             : text("没有可导入的卡片，卡片库未变化。", "No cards to import; library unchanged.");
         });
         button(packPreview, "取消", "Cancel", clearPack);
+      } catch (e) { if (live() && ticket === fileGeneration) status.textContent = e.message;
       } finally { input.remove(); }
     })); input.click();
   });
@@ -692,14 +701,17 @@ export function openCardsPanel(node) {
 }
 
 function openPanel(node) {
+  node.__vividMusePresetDialog?.close();
   const dialog = document.createElement("dialog");
+  let active = true;
+  const session = createImportSession(node, app, () => active && dialog.open !== false);
   dialog.style.cssText = "max-width:640px;width:85vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
   const title = document.createElement("h3");
   title.textContent = text("用户预设、随机锁定与组合检查", "User Presets, Random Locks & Checks");
   dialog.append(title);
   const status = document.createElement("p");
   status.setAttribute("role", "status");
-  const guarded = fn => async () => { try { await fn(); } catch(e) { status.textContent = e.message; } };
+  const guarded = fn => async () => { try { if (session.live()) await fn(); } catch(e) { if (session.live()) status.textContent = e.message; } };
   const row = () => { const el=document.createElement("div"); el.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"; dialog.append(el); return el; };
   const button = (parent, zh, en, fn) => {
     const b=document.createElement("button"); b.type="button"; b.textContent=text(zh,en);
@@ -741,13 +753,20 @@ function openPanel(node) {
     setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
   const file=document.createElement("input"); file.type="file"; file.accept=".json,application/json"; file.hidden=true; dialog.append(file);
-  button(actions,"导入预设","Import",()=>file.click());
+  let currentImport = () => false;
+  button(actions,"导入预设","Import",()=>{ currentImport = session.start(); file.value=""; file.click(); });
   file.addEventListener("change",guarded(async()=>{
-    const selected=file.files?.[0]; if(!selected)return;
-    if(selected.size>1024*1024)throw new Error(text("文件不能超过1MB。","File must be at most 1 MB."));
-    const entry=validatePreset(JSON.parse(await selected.text()),node);
-    if(saved().some(p=>p.name===entry.name) && !window.confirm(text("覆盖同名预设？","Replace this saved preset?"))) return;
-    saveEntry(entry); file.value=""; status.textContent=text("导入完成；点击应用后生效。","Imported; click Apply to use it.");
+    const current = currentImport;
+    try {
+      const data=await readImportData(file.files?.[0],"preset",{isCurrent:current});
+      if(!data || !current())return;
+      const entry=validatePreset(data,node), base=JSON.stringify(saved());
+      if(saved().some(p=>p.name===entry.name) && !window.confirm(text("覆盖同名预设？","Replace this saved preset?"))) return;
+      if(!current())return;
+      if(base!==JSON.stringify(saved()))throw new Error(text("预设库已变化，请重新导入。","Preset library changed. Import again."));
+      saveEntry(entry); status.textContent=text("导入完成；点击应用后生效。","Imported; click Apply to use it.");
+    } catch(e) { if(current())status.textContent=e.message; }
+    finally { if(current())file.value=""; }
   }));
   button(actions,"删除选中预设","Delete",()=>{
     if(!select.value || !window.confirm(text("删除选中的已保存预设？","Delete the selected saved preset?"))) return;
@@ -776,7 +795,10 @@ function openPanel(node) {
   status.style.whiteSpace="pre-wrap";dialog.append(status);
   button(row(),"关闭","Close",()=>dialog.close());
   refresh();renderLocks();
-  dialog.addEventListener("close",()=>dialog.remove(),{once:true});
+  dialog.addEventListener("close",()=>{ active=false; dialog.remove();
+    if(node.__vividMusePresetDialog===dialog)node.__vividMusePresetDialog=null;
+  },{once:true});
+  node.__vividMusePresetDialog=dialog;
   document.body.append(dialog);dialog.showModal();
 }
 
@@ -807,6 +829,7 @@ app.registerExtension({
       nodeType.prototype[event] = function () {
         this.__vividMuseCardsGeneration = (this.__vividMuseCardsGeneration || 0) + 1;
         this.__vividMuseCardsDialog?.close();
+        this.__vividMusePresetDialog?.close();
         return before?.apply(this, arguments);
       };
     }

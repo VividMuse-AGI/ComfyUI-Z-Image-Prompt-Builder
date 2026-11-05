@@ -6,6 +6,10 @@ v0.15.0 增加发型卡、姿态动作卡，下文按五类卡片说明。v0.14.
 
 ## 中文使用说明
 
+v0.16.0：每个选择器下方显示只读卡片内容，选择“保持当前”时显示该模块不修改。拍摄方案摘要区分包含模块和本次勾选模块；刷新列表会清除选择和旧摘要。内容摘要不会替代“预览组合”的应用差异，也不触发随机或撤销历史。要复用整个节点配置，使用用户预设；本版不新增“保存组合”格式。
+
+v0.16.0: each selector has a read-only contents summary. **Keep Current** means no change. Shoot-plan contents distinguish included modules from those checked for this application; refreshing lists clears selections and stale summaries. Contents do not replace **Preview Combination**, reroll randomness or create undo history. Use User Presets to reuse the complete node configuration; this version does not introduce a saved-combination format.
+
 在完整节点右键打开 **卡片管理 / 模块锁定**，点击 **卡片快捷组合**。独立模块节点不提供这个入口，继续使用各自的卡片操作。
 
 ### 选择与应用

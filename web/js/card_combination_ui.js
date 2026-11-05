@@ -1,6 +1,8 @@
 import { app } from "../../scripts/app.js";
 import { supportsCardCombination, planCardCombination, commitCardCombination } from "./card_combination_core.js";
 import { validateShootPlan } from "./shoot_plan_core.js";
+import { validateCard, hiddenCardField } from "./workflow_tools.js";
+import { cardSummaryText, createCardSummaryElement } from "./card_summary_view.js";
 
 const text = (zh, en) => globalThis.__vividMuseZImageI18n?.activeLanguage() === "en" ? en : zh;
 const moduleLabel = name => text(name, {人物: "Person", 发型: "Hair", 服装: "Clothing", 姿态动作: "Pose / Action", 场景: "Scene", 摄影: "Camera", 视觉表现: "Visual"}[name] || name);
@@ -52,7 +54,7 @@ export function openCardCombinationPanel(node) {
     label.append(select); parent.append(label); return select;
   };
   const option = (select, value, caption) => { const item = el("option", caption); item.value = value; select.append(item); };
-  const selectors = {}, libraries = {}, lockControls = new Map(), checks = new Map();
+  const selectors = {}, libraries = {}, summaries = {}, lockControls = new Map(), checks = new Map();
   const makeLock = (parent, module) => {
     const select = control(parent, `${module}锁定策略`, `${moduleLabel(module)} lock policy`);
     option(select, "preserve", text("保留当前锁定", "Preserve Current Locks"));
@@ -65,9 +67,11 @@ export function openCardCombinationPanel(node) {
     const section = el("section"), controls = row(section); dialog.append(section);
     selectors[key] = control(controls, chinese, english);
     makeLock(controls, module);
+    summaries[key] = createCardSummaryElement(el); section.append(summaries[key]);
   }
   const shootSection = el("section"); dialog.append(el("h4", text("拍摄方案", "Shoot Plan")), shootSection);
   selectors.shootPlan = control(row(shootSection), "拍摄方案卡", "Shoot Plan Card");
+  summaries.shootPlan = createCardSummaryElement(el); shootSection.append(summaries.shootPlan);
   const coverage = el("p"); shootSection.append(coverage);
   for (const module of SHOOT) {
     const controls = row(shootSection), label = el("label"), check = el("input");
@@ -132,6 +136,14 @@ export function openCardCombinationPanel(node) {
     pending = null; confirm.disabled = true;
     changes.textContent = all.textContent = summary.textContent = status.textContent = "";
     preview.disabled = !CONTENT.some(([key]) => chosen(key)) && ![...checks.values()].some(check => !check.disabled && check.checked);
+    for (const key of [...CONTENT.map(([key]) => key), "shootPlan"]) {
+      summaries[key].textContent = "";
+      try {
+        summaries[key].textContent = key === "shootPlan"
+          ? cardSummaryText(chosen(key), c => validateShootPlan(c, node), undefined, selection().shootModules)
+          : cardSummaryText(chosen(key), c => validateCard(c, node), hiddenCardField);
+      } catch (error) { summaries[key].textContent = error.message; preview.disabled = true; }
+    }
   };
   const updateShoot = () => {
     for (const check of checks.values()) { check.checked = false; check.disabled = true; }

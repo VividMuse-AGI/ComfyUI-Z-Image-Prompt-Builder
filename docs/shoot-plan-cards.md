@@ -4,6 +4,10 @@
 
 ## 中文使用说明
 
+v0.16.0：选择器下方增加“卡片内容”摘要，按场景、摄影、视觉表现各显示最多两项主要字段，明确标记本次应用／不应用。摘要来自完整卡片快照，不代表仅写入显示的字段；取消全部勾选时仍可查看内容，但不能应用。导入指引参见[内容卡说明](content-cards.md#v0160导入指引与内容摘要)，原单卡／卡片包共用入口、BOM 支持和原子导入不变。
+
+v0.16.0: **Card contents** shows up to two main fields per included Scene, Camera or Visual module, marked **Applying** or **Not applying**. It describes the complete saved snapshot, not just fields that will change. Unchecking every module keeps contents visible but disables application. Import guidance is described in the [content-card guide](content-cards.md#v0160-import-guidance-and-card-contents); the shared card/pack entry, BOM support and atomic imports are unchanged.
+
 拍摄方案卡用于保存和复用“场景、摄影、视觉表现”中的一个或多个模块。它不是整个节点的用户预设，也不会保证生成完全一致的图片。
 
 ### 入口

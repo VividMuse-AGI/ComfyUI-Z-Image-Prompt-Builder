@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
 import {webcrypto} from "node:crypto";
+import {withCardOrganizationImports} from './card_organization_vm.mjs';
 
 const read = name => fs.readFileSync(new URL(`../web/js/${name}.js`, import.meta.url), "utf8");
-const context = vm.createContext({crypto: webcrypto, TextEncoder, console});
+const context = vm.createContext({crypto: webcrypto, TextEncoder, console, Blob});
 vm.runInContext(read("library_discovery_core").replaceAll("export ", "")
   + "\nglobalThis.core={filterRecords,makeTxtRecords,LibraryPreferences,PREFERENCE_KEY};", context);
 const {filterRecords, makeTxtRecords, LibraryPreferences, PREFERENCE_KEY} = context.core;
@@ -72,7 +73,7 @@ context.app = {registerExtension(ext){this.extension=ext}};
 vm.runInContext(read("i18n_catalog").replace("export const EN_CATALOG", "globalThis.EN_CATALOG"),context);
 vm.runInContext(read("library_catalog").replace("export const LIBRARY_CATALOG", "globalThis.LIBRARY_CATALOG"),context);
 context.setTimeout = () => {};
-vm.runInContext(read("library_discovery").replace(/^import .*;\r?\n/gmu, "").replaceAll("export ","")
+vm.runInContext(withCardOrganizationImports(read("library_discovery"),context).replace(/^import .*;\r?\n/gmu, "").replaceAll("export ","")
   + "\nglobalThis.discovery={builtinRecords,applyRecord};",context);
 for (const [module, fields] of Object.entries(context.LIBRARY_CATALOG.modules)) {
   const node={comfyClass:"VividMuse_ZImageChinesePromptBuilder", __vividMuseModuleWidget:{value:module},widgets:[]};
@@ -152,7 +153,7 @@ await importFile(favoriteFile);
 assert.match(byLabel(dialog,"收藏导入结果").textContent,/新增 2 条，重复 1 条.*1 \/ 2/);
 await importFile(favoriteFile);
 assert.match(byLabel(dialog,"收藏导入结果").textContent,/新增 0 条，重复 3 条/);
-await importFile("invalid");assert.match(byLabel(dialog,"收藏导入结果").textContent,/已有收藏未改变/);
+await importFile("invalid");assert.match(byLabel(dialog,"收藏导入结果").textContent,/有效 JSON.*已有数据未改变/);
 assert.ok(byText(dialog,'<img src=x onerror=alert(1)>'));
 byText(dialog,'<img src=x onerror=alert(1)>').onclick();byText(dialog,"应用所选条目").onclick();
 assert.ok(byLabel(dialog,"搜索结果"));

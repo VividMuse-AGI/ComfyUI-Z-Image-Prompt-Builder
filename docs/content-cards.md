@@ -10,6 +10,18 @@ v0.12.0 另提供[拍摄方案卡](shoot-plan-cards.md)，用于场景／摄影�
 
 ## 使用方法
 
+### v0.16.0：导入指引与内容摘要
+
+选择卡片后，选择器下方显示只读“卡片内容”：最多五项主要有效字段，清空值和隐藏分支另行提示。即使当前字段与卡片一致，摘要仍显示卡片内容。摘要不是完整字段列表，也不是“应用差异”；省略不表示保持原值，请在应用前查看全部字段。
+
+导入时会区分入口选错、JSON 损坏、超过 1 MiB、版本不支持和结构校验失败。已知错误类型只提示正确入口，不跳转、不转换、不自动应用。用户预设无专用 `kind`，只能初步识别，仍须通过原校验。素材收藏应在“素材搜索与收藏 → 导入收藏”，TXT 应在对应 TXT 词库入口；结果记录不能直接还原导入成卡片。取消、面板关闭、切换工作流和过期文件读取不会写入数据。
+
+### v0.16.0: import guidance and card contents
+
+Selecting a card shows a read-only **Card contents** summary below the selector: up to five effective fields, plus explicit-clear and hidden-field notices. Contents remain visible when the card matches current settings. This is not the full field list or the application diff: omitted fields are still part of the snapshot. Review **All fields** before applying.
+
+Imports distinguish the wrong entry, invalid JSON, files over 1 MiB, unsupported versions and schema errors. Guidance never redirects, converts or applies data. User presets have no dedicated `kind`; tentative recognition still requires the original validator. Import material favorites through **Search & Favorites → Import Favorites**, and TXT files through their TXT library entry. Result records are not directly restorable card imports. Cancellation, panel closure, workflow changes and obsolete reads do not write data.
+
 1. 在完整节点或八个标准模块节点上右键，选择 **卡片管理 / 模块锁定**（早期版本为“人物卡 / 穿搭卡 / 模块锁定”）。
 2. 选择人物、发型、服装或姿态动作，输入名称，点击 **保存当前模块**。卡片是具体字段的快照；“跟随预设”自动转换为当前预设值，“不使用”保留。包含“随机抽取”时需先改成具体选项，或执行后从结果面板保存。
 3. 选择已保存卡片，点击 **应用卡片**，只替换该模块；也可选择 **应用并锁定**，之后随机按钮会跳过这些字段。

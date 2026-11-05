@@ -118,7 +118,7 @@ for(const c of checks){c.checked=false;await c.fire('change');}assert.ok(button(
 for(const c of checks){c.checked=true;await c.fire('change');}await button(panel,'确认导出卡片包').click();assert.equal(downloads.length,1);
 assert.equal(JSON.parse(await blob.text()).cards.length,2);
 const importFile=async(p,file)=>{await button(p,'导入卡片包').click();const f=flatten(p).filter(e=>e.type==='file').at(-1);f.files=[file];await f.fire('change');};
-before=snap(ui);await importFile(panel,{size:1048577,text(){throw Error('must not read');}});assert.equal(snap(ui),before);assert.match(status(panel),/1 MB/);
+before=snap(ui);await importFile(panel,{size:1048577,text(){throw Error('must not read');}});assert.equal(snap(ui),before);assert.match(status(panel),/1 MiB/);
 await importFile(panel,{size:2,text:async()=>'{!'});assert.equal(snap(ui),before);
 await importFile(panel,{size:1048576,text:async()=>JSON.stringify(pack([person]))});await button(panel,'取消').click();assert.equal(snap(ui),before);
 await importFile(panel,{size:100,text:async()=>JSON.stringify(pack([person]))});
@@ -156,7 +156,7 @@ assert.equal(input(panel,'已保存卡片').children[0].textContent,literal.name
 assert.equal(flatten(panel).filter(e=>e.tag==='img'||e.tag==='script').length,0);
 before=snap(literalNode);
 await importFile(panel,{size:100,text:async()=>{throw Error('read failed');}});
-assert.equal(snap(literalNode),before);assert.match(status(panel),/read failed/);
+assert.equal(snap(literalNode),before);assert.match(status(panel),/无法读取文件/);
 assert.equal(flatten(panel).filter(e=>e.type==='file').length,0);
 // A library mutation during a native confirmation cannot overwrite stale data.
 api.saveCard(literalNode,b);await panel.close();panel=api.openCardsPanel(literalNode);

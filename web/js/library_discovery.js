@@ -2,6 +2,7 @@ import { app } from "../../scripts/app.js";
 import { EN_CATALOG } from "./i18n_catalog.js";
 import { LIBRARY_CATALOG } from "./library_catalog.js";
 import { filterRecords, makeTxtRecords, LibraryPreferences } from "./library_discovery_core.js";
+import { readImportData, createImportSession } from "./import_guidance.js";
 
 const FULL = "VividMuse_ZImageChinesePromptBuilder";
 const MODULES = {
@@ -70,6 +71,7 @@ export async function openDiscovery(node) {
   dialog.setAttribute("aria-label", text("素材搜索与收藏", "Search & Favorites"));
   currentDialog = dialog;
   dialogOwner = node;
+  const importSession = createImportSession(node, app, () => currentDialog === dialog && dialog.open);
   const p = prefs();
   const status = element("p", ""); status.setAttribute("role", "status");
   const feedback = element("p", ""); feedback.setAttribute("role", "status");
@@ -246,15 +248,19 @@ export async function openDiscovery(node) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   importButton.onclick = () => {
+    if (!importSession.live()) return;
+    const current = importSession.start();
     const input = element("input"); input.type = "file"; input.accept = ".json,application/json";
     input.hidden = true; dialog.append(input);
     input.oncancel = () => input.remove();
     input.onchange = async () => {
       try {
-        const file = input.files?.[0]; if (!file) return;
-        if (file.size > 1024 * 1024) throw new Error("Too large");
-        lastImport = p.importFavorites(await file.text()); warning(); render();
-      } catch (_) { lastImport = null; feedback.textContent = text("收藏文件无效；已有收藏未改变。", "Invalid favorites file; existing favorites are unchanged."); }
+        const data = await readImportData(input.files?.[0], "favorites", {isCurrent: current});
+        if (!data || !current()) return;
+        try { lastImport = p.importFavorites(JSON.stringify(data)); }
+        catch (_) { throw new Error(text("收藏文件的条目或结构无效；已有收藏未改变。", "Invalid favorites entries or structure; existing favorites are unchanged.")); }
+        warning(); render();
+      } catch (error) { if (current()) { lastImport = null; feedback.textContent = error.message; } }
       finally { input.remove(); }
     }; input.click();
   };
@@ -272,6 +278,11 @@ function install(node) {
   node.onRemoved = function() {
     if (dialogOwner === this) currentDialog?.close();
     return onRemoved?.apply(this, arguments);
+  };
+  const onConfigure = node.onConfigure;
+  node.onConfigure = function() {
+    if (dialogOwner === this) currentDialog?.close();
+    return onConfigure?.apply(this, arguments);
   };
   // Each target already has its own serialization guard; this covers extension load order as well.
   const onSerialize = node.onSerialize;

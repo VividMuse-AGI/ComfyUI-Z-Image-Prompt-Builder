@@ -1,5 +1,7 @@
 import { app } from "../../scripts/app.js";
 import { createOrganizationControls, createCardPackPicker } from "./card_organization_ui.js";
+import { readImportData } from "./import_guidance.js";
+import { cardSummaryText, createCardSummaryElement } from "./card_summary_view.js";
 import {
   registerShootPlanSchema, availableShootPlanModules, captureShootPlan,
   listShootPlans, shootPlanCollectionStamp, saveShootPlan, renameShootPlan,
@@ -41,7 +43,7 @@ export function openShootPlanPanel(node) {
     if (graph.getNodeById?.(node.id) === node) return true;
     return (graph._nodes || []).some(child => child.subgraph && belongs(child.subgraph, seen));
   };
-  const live = () => active && (app.rootGraph || app.graph) === root && node.graph === owner &&
+  const live = () => active && dialog.open !== false && (app.rootGraph || app.graph) === root && node.graph === owner &&
     (node.__vividMuseCardsGeneration || 0) === generation &&
     (!owner?.getNodeById || owner.getNodeById(node.id) === node) &&
     (!root?.getNodeById || belongs(root));
@@ -132,6 +134,7 @@ export function openShootPlanPanel(node) {
   select.setAttribute("aria-label", text("已保存拍摄方案卡", "Saved shoot plan cards"));
   select.style.cssText = "box-sizing:border-box;width:100%;padding:6px;margin:8px 0;min-width:0";
   const organizationHost = el("div"); savedSection.append(search, organizationHost, count, select);
+  const contentSummary = createCardSummaryElement(el); savedSection.append(contentSummary);
   const coverage = el("p"), applyChoices = el("div"); savedSection.append(coverage, applyChoices);
   const applyChecks = new Map();
   const changed = el("pre"), all = el("pre"), details = el("details"), hint = el("p");
@@ -151,11 +154,12 @@ export function openShootPlanPanel(node) {
   const selected = () => matches().find(c => c.name === select.value);
   const selectedApplyModules = () => [...applyChecks].filter(([, c]) => c.checked && !c.disabled).map(([m]) => m);
   const renderPreview = () => {
-    normalPlan = lockPlan = null; changed.textContent = all.textContent = hint.textContent = "";
+    normalPlan = lockPlan = null; changed.textContent = all.textContent = hint.textContent = contentSummary.textContent = "";
     applyButton.disabled = lockButton.disabled = true;
     const entry = selected(); if (!entry) return;
     try {
       const modules = selectedApplyModules();
+      contentSummary.textContent = cardSummaryText(entry, c => validateShootPlan(c, node), undefined, modules);
       normalPlan = planShootPlanApply(node, entry, modules, false);
       lockPlan = planShootPlanApply(node, entry, modules, true);
       const format = r => `${labelFor(r.name)}: ${valueFor(r.name, r.current)}${r.preset === undefined ? "" : ` (${valueFor(r.name, r.preset)})`} → ${valueFor(r.name, r.target)}`;
@@ -175,6 +179,8 @@ export function openShootPlanPanel(node) {
     } catch (e) { normalPlan = lockPlan = null; hint.textContent = e.message; }
   };
   const renderSelection = () => {
+    contentSummary.textContent = "";
+    normalPlan = lockPlan = null; applyButton.disabled = lockButton.disabled = true;
     const previous = new Map([...applyChecks].map(([m, c]) => [m, c.checked]));
     const entry = selected(), nextStamp = entry ? JSON.stringify(entry) : "";
     organization.refresh(entry);
@@ -276,12 +282,9 @@ export function openShootPlanPanel(node) {
     input.addEventListener("cancel", () => input.remove());
     input.addEventListener("change", guarded(async () => {
       try {
-        const file = input.files?.[0]; if (!file) return;
-        if (file.size > 1024 * 1024) throw new Error(text("文件不能超过 1 MiB。", "File must be at most 1 MiB."));
-        const raw = await file.text();
-        if (!live() || ticket !== fileGeneration) return;
-        if (new Blob([raw]).size > 1024 * 1024) throw new Error(text("文件不能超过 1 MiB。", "File must be at most 1 MiB."));
-        const parsed = JSON.parse(raw.replace(/^\uFEFF/, ""));
+        const parsed = await readImportData(input.files?.[0], "shoot-plan", {stripBom: true,
+          isCurrent: () => live() && ticket === fileGeneration});
+        if (!parsed || !live() || ticket !== fileGeneration) return;
         // Validate before adding controls. A bad card invalidates the entire file.
         planShootPlanImport(node, parsed);
         const strategy = el("select"); strategy.setAttribute("aria-label", text("同名冲突处理", "Name conflict strategy"));
@@ -316,6 +319,7 @@ export function openShootPlanPanel(node) {
             `Added ${result.added.length}, replaced ${result.replaced.length}, skipped ${result.skipped.length}, inapplicable ${result.inapplicable.length}. Not applied; save the workflow.`);
         });
         button(filePreview, "取消", "Cancel", clearFilePreview);
+      } catch (e) { if (live() && ticket === fileGeneration) status.textContent = e.message;
       } finally { input.remove(); }
     })); input.click();
   });

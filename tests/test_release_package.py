@@ -81,6 +81,13 @@ class ReleasePackageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate"):
             validate_archive(self.archive(extra=f"{PACKAGE}/nodes.py"), "v0.5.0")
 
+    def test_card_usability_runtime_dependencies_are_required(self):
+        for name in ("web/js/import_guidance.js", "web/js/card_summary.js", "web/js/card_summary_view.js"):
+            with self.subTest(name=name):
+                self.assertIn(name, REQUIRED)
+                with self.assertRaisesRegex(ValueError, "Missing release files"):
+                    validate_archive(self.archive(omit=name), "v0.5.0")
+
 
 if __name__ == "__main__":
     unittest.main()

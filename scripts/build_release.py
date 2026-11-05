@@ -24,6 +24,7 @@ REQUIRED = {
     "web/js/card_organization.js", "web/js/card_organization_ui.js",
     "web/js/card_combination_core.js", "web/js/card_combination_ui.js", "web/js/workflow_tools.js",
     "web/js/card_apply_transaction.js",
+    "web/js/import_guidance.js", "web/js/card_summary.js", "web/js/card_summary_view.js",
     "docs/card-quick-combination.md",
 }
 
