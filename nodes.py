@@ -13,9 +13,11 @@ from typing import Dict, Iterable, Mapping, Sequence
 try:
     from .resolution import ASPECT_RESOLUTIONS, RESOLUTION_INPUTS, resolution_from_options
     from .framing import FRAMING_INPUT, FRAMING_MODES, framing_view
+    from .prompt_diagnostics import SamplingTrace
 except ImportError:
     from resolution import ASPECT_RESOLUTIONS, RESOLUTION_INPUTS, resolution_from_options
     from framing import FRAMING_INPUT, FRAMING_MODES, framing_view
+    from prompt_diagnostics import SamplingTrace
 
 
 FOLLOW_PRESET = "跟随预设"
@@ -4328,6 +4330,7 @@ def resolve_fields(
     requested: Mapping[str, str],
     *,
     request_trace: Dict[str, str] | None = None,
+    sampling_trace: SamplingTrace | None = None,
 ) -> Dict[str, str]:
     """Resolve presets, explicit locks and deterministic random fields."""
 
@@ -4737,7 +4740,11 @@ def resolve_fields(
                     global_bundles, group_fields, resolved, random_fields
                 )
             candidates = candidates or list(bundles)
+        sampling_event = (sampling_trace.record(group_fields, candidates, active, "initial")
+                          if sampling_trace is not None else None)
         selected_bundle = rng.choice(candidates)
+        if sampling_trace is not None:
+            sampling_trace.selected(sampling_event, selected_bundle)
         if group_fields == SCENE_GROUP_FIELDS:
             for field_name in SCENE_GROUP_FIELDS:
                 if field_name not in explicit_scene_locks:
@@ -4824,8 +4831,15 @@ def resolve_fields(
         )
 
     changed = REFERENCE_POOL.apply(seed, resolved, random_fields)
+    if sampling_trace is not None:
+        sampling_trace.reference_changed(changed)
     if changed.intersection(("姿态动作", "场景")) and random_fields.intersection(CAMERA_OUTPUT_FIELDS):
-        camera = rng.choice(_camera_bundle_candidates(preset, random_scope, resolved, random_fields))
+        camera_candidates = _camera_bundle_candidates(preset, random_scope, resolved, random_fields)
+        sampling_event = (sampling_trace.record(CAMERA_OUTPUT_FIELDS, camera_candidates, random_fields,
+                                                "after_reference") if sampling_trace is not None else None)
+        camera = rng.choice(camera_candidates)
+        if sampling_trace is not None:
+            sampling_trace.selected(sampling_event, camera)
         for field in random_fields.intersection(CAMERA_OUTPUT_FIELDS):
             resolved[field] = camera[field]
     if "场景" in changed and random_fields.intersection(LIGHTING_OUTPUT_FIELDS):
@@ -4833,7 +4847,11 @@ def resolve_fields(
         plans = [p for p in plans if _lighting_matches_environment(p, resolved, random_fields)]
         compatible = _matching_bundles(plans, LIGHTING_OUTPUT_FIELDS, resolved, random_fields)
         if compatible:
+            sampling_event = (sampling_trace.record(LIGHTING_OUTPUT_FIELDS, compatible, random_fields,
+                                                    "after_reference") if sampling_trace is not None else None)
             lighting = rng.choice(compatible)
+            if sampling_trace is not None:
+                sampling_trace.selected(sampling_event, lighting)
             for field in random_fields.intersection(LIGHTING_OUTPUT_FIELDS):
                 resolved[field] = lighting[field]
 
@@ -7328,7 +7346,10 @@ class ZImageChinesePromptBuilder:
         random_scope = kwargs.pop("随机范围", RANDOM_SCOPES[0])
         seed = kwargs.pop("随机种子", 0)
         request_trace = {}
-        fields = resolve_fields(preset, random_scope, seed, kwargs, request_trace=request_trace)
+        import sys
+        sampling_trace = SamplingTrace(sys.modules[__name__]) if unique_id is not None else None
+        fields = resolve_fields(preset, random_scope, seed, kwargs, request_trace=request_trace,
+                                sampling_trace=sampling_trace)
         replacements = {name for name, value in user_module_fragments.items()
                         if isinstance(value, str) and value.strip()}
         fields = pose_scene_view(fields, request_trace,
@@ -7397,12 +7418,11 @@ class ZImageChinesePromptBuilder:
             return zh, en
 
         # Passing the module object avoids duplicate imports and circular dependencies.
-        import sys
         return execution_result(result, core=sys.modules[__name__], scope="全部模块", seed=seed,
                                 settings=submitted, fields=fields, fragments=fragments,
                                 english_fragments=english_fragments, render_pair=render_pair,
                                 replacements=user_module_fragments, request_trace=request_trace,
-                                framing=framing_report)
+                                framing=framing_report, sampling_trace=sampling_trace)
 
 
 NODE_CLASS_MAPPINGS = {

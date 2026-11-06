@@ -136,4 +136,24 @@ for(const reverse of [false,true]) {
   assert.ok(panel.removed);assert.equal(prevented,1);
   for(let i=0;i<140;i++)await h.queue('bound-'+i);assert.ok(h.ctx.txt.submissions.size<=128);
 }
-console.log('PASS TXT results: backend fixtures, both observer orders, ownership/cache/races, snapshots, raw text, uint64, empty/invalid records, clipboard failure, download cleanup and no business-state mutation.');
+// v0.17: explanations describe the selected historical scope, including in manual mode.
+for(const kind of ['prompt','module'])for(const lang of ['zh','en']) {
+  const h=harness(),n=h.node(kind);h.app.graph=h.graph([n]);
+  h.ctx.__vividMuseZImageI18n={activeLanguage:()=>lang,localizeNode(){},translateMessage:s=>s};
+  for(const count of [0,1,5]) {
+    const raw={...fixtures[kind],count,index:count?0:null,status:count?'selected':'empty',
+      prompt:count?'same body':'',title:count?'same title':''};
+    await h.queue(`explain-${count}`);h.execute(`explain-${count}`,raw);
+    n.widgets.find(w=>w.name==='选择模式').value='手动选择';
+    n.widgets.find(w=>w.name==='随机种子').value=1234;
+    const before=state(n),queueCount=h.queueCount;
+    const panel=h.ctx.txt.showResult(n);
+    const content=all(panel).filter(e=>e.tag==='p').map(e=>e.textContent).join('\n');
+    const expected=lang==='zh' ? [ /没有可抽取条目/, /仅有 1 条/, /不同条目的正文也可能相同/ ]
+      : [ /No entries were available/, /had one candidate/, /different entries may have identical text/ ];
+    assert.match(content,expected[count===0?0:count===1?1:2]);
+    assert.equal(state(n),before);assert.equal(h.queueCount,queueCount);
+    panel.close();assert.ok(panel.removed);
+  }
+}
+console.log('PASS TXT results: backend fixtures, both observer orders, ownership/cache/races, snapshots, raw text, uint64, empty/invalid records, clipboard failure, download cleanup, bilingual candidate explanations and no business-state mutation.');

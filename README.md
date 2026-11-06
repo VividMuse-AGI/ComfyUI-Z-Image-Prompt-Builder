@@ -2,7 +2,7 @@
 
 > [English](README.en.md) | 中文
 
-> v0.16.0：新增导入格式识别与正确入口指引，以及内容卡、拍摄方案卡和快捷组合的只读内容摘要。保留现有卡片格式与操作规则，详见[发布说明](docs/releases/v0.16.0.md)。
+> v0.17.0：结果面板区分当前随机配置与历史执行，解释候选数量、后续覆盖和重复结果；两个 TXT 节点增加零／单／多条候选提示。不改变提示词或随机算法，详见[发布说明](docs/releases/v0.17.0.md)。
 
 > v0.14.0 新增[卡片快捷组合](docs/card-quick-combination.md)：完整节点可统一选择人物卡、穿搭卡和拍摄方案卡，预览后一次应用。支持按模块保留当前内容、设置锁定及一次撤销／重做，不增加节点高度。
 
@@ -136,7 +136,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.16.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.16.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.16.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
+推荐从 [`v0.17.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.17.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.17.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -207,6 +207,15 @@ API 调用提供可选输入 `选择模式`、`随机种子`、`词库数据`；
 ### 随机状态与执行结果
 
 完整节点和八个独立模块新增一个紧凑入口“随机状态与执行结果”，点击后查看只读详情，不增加常驻长面板。
+
+v0.17.0 在原面板补充“当前配置”和“本次抽取说明”：
+
+- 当前随机字段数量与锁定状态单独显示。改变种子不会启用随机；解锁也不会自动将固定值改成随机。
+- 场景、摄影、光线、配色／质感按实际采样环节显示候选条目数，以及当前随机字段对应的不同组合数。光线与配色／质感分开统计，不能相乘当作全模块总组合数。
+- 只有一种字段组合时，换种子可能仍不变；候选较多时也允许重复命中。未统计的字段明确标注，不视为只有一套。
+- 引用扩展导致后续联动时，区分“初次抽取”“后续已覆盖”和“联动后重抽”；历史说明属于所选执行，不按当前配置重新计算。
+- 两个独立 TXT 节点的历史面板分别解释零条、单条和多条候选。单条候选不会因为换种子变成其他条目，不同条目也可能具有相同正文。
+- 说明只读，不会自动重抽、应用字段、修改锁定或增加工作流数据。旧记录缺少新信息时正常降级；现有结果导出格式不变。
 
 - 提示当前是否启用随机，区分指定值、跟随预设、随机和省略。随机范围既控制随机按钮启用的字段，也影响候选池；Run 不会自动开启其他字段。
 - 记录实际提交种子、中英文输出、解析字段及模块变化。输入框生成后显示的下一次种子不会覆盖记录；改动选项后提示历史结果仅供参考。
@@ -521,7 +530,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.16.0`
+- 当前版本：`0.17.0`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上

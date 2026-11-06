@@ -1,6 +1,6 @@
 # ComfyUI-Z-Image-Prompt-Builder
 
-> v0.16.0: adds import-format guidance and read-only content summaries for content cards, Shoot Plan Cards and Quick Card Combination. Existing formats and application rules are preserved. See the [release notes](docs/releases/v0.16.0.md#english).
+> v0.17.0: separates current random settings from historical execution and explains candidate counts, later replacements and repeated results. Both TXT nodes explain zero, one or multiple candidates. Prompt output and randomization are unchanged. See the [release notes](docs/releases/v0.17.0.md#english).
 
 > New in v0.14.0: [Quick Card Combination](docs/card-quick-combination.md#english) lets the full builder select Person, Outfit and Shoot Plan Cards together, preview changes, then apply them in one transaction. Keep unselected modules, choose module lock policies, and undo/redo the combination without adding node height.
 
@@ -134,7 +134,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.16.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.16.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.16.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
+For the recommended manual install, open the [`v0.17.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.17.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.17.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -205,6 +205,15 @@ Local automated tests, text-only execution and real Chinese/English UI checks in
 ## Random Status and Execution Result
 
 The full builder and eight standalone modules gain one compact read-only details button, without a permanent tall panel.
+
+v0.17.0 adds **Current Configuration** and **Sampling Details for This Execution** to the existing panel:
+
+- Current random-field counts and lock protection are shown separately. Changing the seed does not enable randomization; unlocking does not change a fixed value to Random.
+- Instrumented scene, camera, lighting and color/finish sampling steps show candidate-entry counts and distinct combinations of the active random fields. Lighting and color/finish are separate groups. Do not multiply these counts into a whole-module total.
+- One field combination can explain unchanged results, while multiple candidates still allow repeats. Unmeasured fields are explicitly identified rather than reported as having a single option.
+- Reference extensions can trigger later draws. Initial draws, overwritten steps and redraws are distinguished; historical explanations belong to the selected execution and are not recalculated from current settings.
+- Both standalone TXT nodes explain zero, one and multiple candidates in their historical panels. A single candidate cannot change into a different entry just by changing the seed; different entries may also contain identical text.
+- Explanations are read-only: no automatic resampling, field application, lock changes or new workflow data. Older records without this information degrade gracefully. Existing result-export formats are unchanged.
 
 - Distinguishes Fixed, Follow Preset, Random and Omit. Random Scope controls which fields the randomize button enables and also affects candidate pools. Run does not enable other fields.
 - Records the actual submitted seed, Chinese/English outputs, resolved fields and module changes. The next seed displayed by the editor never replaces that record. Edited settings mark it as historical.
@@ -478,7 +487,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.16.0`
+- Current version: `0.17.0`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

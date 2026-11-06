@@ -21,6 +21,100 @@ const language = () => globalThis.__vividMuseZImageI18n?.activeLanguage?.() || "
 const text = (zh, en) => language() === "en" ? en : zh;
 const tr = value => globalThis.__vividMuseZImageI18n?.translateMessage?.(value) || value;
 const displayValue = (node, name, value) => widget(node, name)?.options?.getOptionLabel?.(value) || tr(value);
+// Sampling-point whitelist only; no candidate selection logic is duplicated here.
+const DRAW_GROUPS = {
+  scene: {module: "场景", fields: ["场景大类", "场景地点", "时间切片", "天气状态", "前景框景", "背景环境", "环境细节", "空间材质", "空间层次"], labels: ["场景套组", "Scene bundle"]},
+  camera: {module: "摄影", fields: ["景别", "画面布局", "等效焦段", "拍摄距离", "机位", "景深", "对焦位置"], labels: ["摄影套组", "Camera bundle"]},
+  lighting: {module: "视觉表现", fields: ["主光来源", "光线方向", "光线质地", "照明落点", "阴影表现"], labels: ["光线", "Lighting"]},
+  color_finish: {module: "视觉表现", fields: ["主配色", "色温倾向", "画面对比", "影像风格", "细节质地", "高光处理", "颗粒质感"], labels: ["配色／质感", "Color / finish"]},
+};
+const MODULE_NAMES = {Canvas: "画面基础", Person: "人物", Hair: "发型", Clothing: "服装", Pose: "姿态动作", Scene: "场景", Camera: "摄影", Visual: "视觉表现"};
+const MODULE_EN = {画面基础: "Canvas", 人物: "Person", 发型: "Hair", 服装: "Clothing", 姿态动作: "Pose / action", 场景: "Scene", 摄影: "Camera", 视觉表现: "Visual"};
+const moduleText = name => language() === "en" ? MODULE_EN[name] : name;
+const nodeScope = node => {
+  const kind = node.comfyClass || node.constructor?.type;
+  return kind === FULL ? "全部模块" : MODULE_NAMES[kind?.replace(/^VividMuse_ZImage|Module$/g, "")];
+};
+
+function parseRandomExplanation(raw, scope) {
+  if (raw === undefined) return {status: "missing"};
+  const object = value => value && typeof value === "object" && !Array.isArray(value);
+  const allowed = module => Object.hasOwn(MODULE_EN, module) && (scope === "全部模块" || scope === module);
+  const count = value => Number.isSafeInteger(value) && value > 0;
+  if (!object(raw) || raw.version !== 1 || raw.coverage !== "partial" || typeof raw.truncated !== "boolean"
+      || !Array.isArray(raw.draws) || raw.draws.length > 16 || !Array.isArray(raw.unmeasured)
+      || raw.unmeasured.length > 8) return {status: "invalid"};
+  const draws = [], unmeasured = [], seenModules = new Set();
+  for (const row of raw.draws) {
+    if (!object(row) || !Object.hasOwn(DRAW_GROUPS, row.group)) return {status: "invalid"};
+    const group = DRAW_GROUPS[row.group];
+    if (!allowed(row.module) || row.module !== group.module || !["initial", "after_reference"].includes(row.stage)
+        || (row.stage === "after_reference" && !["camera", "lighting"].includes(row.group))
+        || !count(row.entry_count) || !count(row.distinct_active_count) || row.distinct_active_count > row.entry_count
+        || !["retained", "overwritten", "unknown"].includes(row.effect)
+        || !Array.isArray(row.active_fields) || !row.active_fields.length || row.active_fields.length > group.fields.length
+        || new Set(row.active_fields).size !== row.active_fields.length
+        || row.active_fields.some(field => !group.fields.includes(field))) return {status: "invalid"};
+    draws.push({module: row.module, group: row.group, stage: row.stage, entry_count: row.entry_count,
+      distinct_active_count: row.distinct_active_count, active_fields: [...row.active_fields], effect: row.effect});
+  }
+  for (const row of raw.unmeasured) {
+    if (!object(row) || !allowed(row.module) || seenModules.has(row.module)
+        || !["no_random_fields", "not_instrumented", "reference_replacement"].includes(row.reason)) return {status: "invalid"};
+    seenModules.add(row.module); unmeasured.push({module: row.module, reason: row.reason});
+  }
+  return {status: "valid", data: {version: 1, coverage: "partial", truncated: raw.truncated, draws, unmeasured}};
+}
+
+function randomExplanationLines(record) {
+  if (!record) return [text("待执行后查看实际抽取说明。", "Run to see actual sampling details.")];
+  if (record.explanationStatus === "invalid") return [text("本条记录的候选信息无效，已忽略；原输出仍可查看。", "Invalid candidate metadata was ignored; the original result remains available.")];
+  const parsed = parseRandomExplanation(record.data.random_explanation, record.data.scope);
+  if (parsed.status === "missing") return [text("此记录未提供候选统计，不代表只有一套。", "This record has no candidate statistics; that does not mean there is only one option.")];
+  if (parsed.status !== "valid") return [text("本条记录的候选信息无效，已忽略；原输出仍可查看。", "Invalid candidate metadata was ignored; the original result remains available.")];
+  const lines = [text("仅说明所选执行的采样环节，不是当前配置预览或模块总组合数。上游随机上下文变化时，候选也可能改变。",
+    "Sampling steps from the selected execution only, not a live preview or whole-module combination count. Candidates may change with randomized upstream context.")];
+  if (parsed.data.truncated) lines.push(text("记录已截断，只展示部分采样证据。", "Truncated record: only partial sampling evidence is shown."));
+  for (const row of parsed.data.draws) {
+    const label = text(...DRAW_GROUPS[row.group].labels);
+    const stage = row.stage === "initial" ? text("初次抽取", "Initial draw") : text("联动后重抽", "Draw after reference update");
+    const amount = text(`${row.entry_count} 个候选条目 / ${row.distinct_active_count} 种随机字段组合`,
+      `${row.entry_count} candidate entries / ${row.distinct_active_count} distinct active-field combinations`);
+    const effect = row.effect === "overwritten"
+      ? text("后续已覆盖：这是早期采样信息，不代表最终候选。", "Later overwritten: this earlier sampling evidence does not describe final candidates.")
+      : row.effect === "unknown" ? text("最终影响未确定。", "Final effect is unknown.")
+      : row.distinct_active_count === 1
+        ? text("该次采样环节只有一种字段组合；不保证整个模块或正文不变。", "This sampling step has one field combination; this does not imply unchanged module or prompt output.")
+        : text("不同种子仍可能抽到相同结果。", "Different seeds may still select the same result.");
+    lines.push(`${label} · ${stage}: ${amount}\n${effect}`);
+  }
+  const reasons = {
+    no_random_fields: text("本次未启用随机字段。", "No random fields enabled in this execution."),
+    not_instrumented: text("有未统计的随机字段，不代表只有一套。", "Some random fields are unmeasured; this does not imply a single option."),
+    reference_replacement: text("引用扩展已更新本模块，最终候选数量未统计。", "Reference expansion updated this module; final candidate count is unmeasured."),
+  };
+  for (const row of parsed.data.unmeasured) lines.push(`${moduleText(row.module)}: ${reasons[row.reason]}`);
+  return lines;
+}
+
+function executionImpactLines(record) {
+  if (!record) return [];
+  const rows = record.data.random_fields;
+  if (!rows.length) return [text("本次执行没有随机字段。", "This execution had no random fields.")];
+  const labels = {
+    user_replaced: ["被用户模块文本替代", "Replaced by user module text"],
+    framing_omitted: ["被构图适配省略", "Omitted by framing adaptation"],
+    not_randomized: ["联动规则取消随机", "Randomization removed by dependency rules"],
+    empty: ["本次解析为空", "Resolved to empty"],
+    not_in_text: ["移除此字段不影响当前文本", "Removing the field does not affect the current text"],
+  };
+  const lines = [];
+  for (const [status, label] of Object.entries(labels)) {
+    const count = rows.filter(row => row?.status === status).length;
+    if (count) lines.push(`${text(...label)}: ${count}`);
+  }
+  return lines;
+}
 const fields = node => (node.widgets || []).filter(w => w.serialize !== false
   && Array.isArray(w.options?.values) && w.options.values.includes("跟随预设"));
 
@@ -139,7 +233,23 @@ function currentState(node) {
       : w.value === "不使用" ? "empty" : "fixed" }));
   const replaced = (node.widgets || []).filter(w => /^用户.+片段$/u.test(w.name)
     && !linked(node, w.name) && typeof w.value === "string" && w.value.trim()).map(w => w.name.slice(2, -2));
-  return { rows, randomCount: rows.filter(row => row.mode === "random").length, replaced };
+  const locks = node.properties?.vividMuseRandomLocks;
+  const locked = Array.isArray(locks) ? [...new Set(locks.filter(name => rows.some(row => row.field === name)))] : [];
+  return { rows, randomCount: rows.filter(row => row.mode === "random").length, replaced, locked };
+}
+
+function currentConfigurationLines(node) {
+  const state = currentState(node);
+  const lines = [text("当前配置（不是历史执行状态）", "Current Configuration (Not Historical Execution State)")];
+  const count = mode => state.rows.filter(row => row.mode === mode).length;
+  lines.push(text(`随机 ${count("random")} 项；指定值 ${count("fixed")} 项；跟随预设 ${count("preset")} 项；不使用 ${count("empty")} 项。`,
+    `Random: ${count("random")}; fixed: ${count("fixed")}; follow preset: ${count("preset")}; omit: ${count("empty")}.`));
+  if (node.inputs?.some(input => input.link != null)) lines.push(text("存在连接输入，控件不能代表全部实际输入；以下历史说明以实际执行为准。", "Connected inputs exist; widgets do not represent all executed inputs. Historical explanations use actual execution data."));
+  else if (!state.randomCount) lines.push(text("改变种子不会启用随机；请使用已有随机按钮，或将需要变化的字段设为随机抽取。", "Changing the seed does not enable randomness. Use the existing randomize button or set desired fields to Random."));
+  if (state.locked.length) lines.push(text(`当前 ${state.locked.length} 个字段受随机按钮锁定保护。解锁不自动启用随机；手动编辑、切换预设和清空仍然有效。此状态不能解释历史结果。`,
+    `${state.locked.length} current fields are protected from randomize buttons. Unlocking does not enable randomization. Manual edits, preset changes and clearing remain available. This current state does not explain historical results.`));
+  if (nodeScope(node) !== "全部模块") lines.push(text("独立模块使用同主题候选范围，不提供完整节点的随机范围切换。", "Standalone modules use same-theme candidates, without the full builder's random-scope selector."));
+  return lines;
 }
 
 function stale(node, record) {
@@ -169,7 +279,13 @@ function acceptResult(node, data, promptId = null, executionNode = null) {
   if (promptId != null && (order == null
       || (previous && order < previous.order))) return false;
   if (previous && promptId != null && previous.promptId === String(promptId)) return false;
-  const record = { data, promptId: promptId == null ? null : String(promptId),
+  const scope = nodeScope(node);
+  const explanation = data.random_explanation !== undefined && data.scope !== scope
+    ? {status: "invalid"} : parseRandomExplanation(data.random_explanation, scope);
+  const stored = {...data};
+  delete stored.random_explanation;
+  if (explanation.status === "valid") stored.random_explanation = explanation.data;
+  const record = { data: stored, explanationStatus: explanation.status, promptId: promptId == null ? null : String(promptId),
     executionNode, order: order ?? ++nextOrder, changed: comparison(previous?.data, data) };
   node.__vividMusePromptHistory ??= [];
   node.__vividMusePromptHistory.push(record);
@@ -195,12 +311,13 @@ function details(node, record = node.__vividMusePromptHistory?.at(-1), includeOu
   const state = currentState(node);
   const history = node.__vividMusePromptHistory || [];
   const lines = [text("随机状态与实际执行结果", "Random Status and Actual Execution Result"), summary(node), "",
+    ...currentConfigurationLines(node), "",
     text("此面板为打开时的快照；运行或修改后请关闭并重新打开。",
       "This panel is a snapshot. Close and reopen after running or editing."),
     text("运行只抽取已设为随机抽取的字段；改变种子不会启用随机。",
       "Run samples only fields set to Random. Changing the seed does not enable randomization."),
-    text("随机范围控制随机按钮启用哪些字段，也影响已随机字段的候选池；指定值、跟随预设、不使用均保持固定。",
-      "Random Scope controls which fields the randomize button enables and affects random candidate pools. Fixed, Follow Preset and Omit stay fixed."),
+    ...(nodeScope(node) === "全部模块" ? [text("随机范围控制随机按钮启用哪些字段，也影响已随机字段的候选池；指定值、跟随预设、不使用均保持固定。",
+      "Random Scope controls which fields the randomize button enables and affects random candidate pools. Fixed, Follow Preset and Omit stay fixed.")] : []),
     text("输入框的种子可能已变为下一次种子；下方记录的是实际提交种子。",
       "The editor may show the next seed. The record below uses the actual submitted seed.")];
   const hasConnections = node.inputs?.some(input => input.link != null);
@@ -222,6 +339,7 @@ function details(node, record = node.__vividMusePromptHistory?.at(-1), includeOu
   lines.push(`${tr("随机种子")}: ${data.seed}`, `${text("执行范围", "Execution Scope")}: ${data.scope === "全部模块" ? text("全部模块", "All Modules") : tr(data.scope)}`);
   if (record.promptId) lines.push(`${text("执行标识", "Execution ID")}: ${record.promptId}`);
   if (record.executionNode) lines.push(`${text("节点执行路径", "Node Execution Path")}: ${record.executionNode}`);
+  lines.push("", text("本次抽取说明", "Sampling Details for This Execution"), ...executionImpactLines(record), ...randomExplanationLines(record), "");
   lines.push(changed === null ? text("首次记录或设置／上下文不同：不比较变化。",
     "First record or different settings/context: changes are not comparable.")
     : text(`相对上次可比较执行：${changed.length} 个模块变化。`, `Compared with the last comparable execution: ${changed.length} modules changed.`));
@@ -288,6 +406,7 @@ function resultSnapshot(node, record) {
 
 function showDetails(node) {
   const bodyText = details(node);
+  const configurationText = currentConfigurationLines(node).join("\n");
   if (!globalThis.document?.createElement) { globalThis.alert?.(bodyText); return; }
   node.__vividMusePromptDialog?.close();
   // Freeze the panel at open time, including records evicted by a later run.
@@ -307,7 +426,9 @@ function showDetails(node) {
   const note = el("p", text("仅保留本次会话最近 5 条。此面板为打开时的快照；运行后请重新打开。导出是只读结果快照，不包含可执行或上游工作流。",
     "The latest 5 records are kept in this session only. Reopen after running to refresh. Export is a read-only result snapshot, not an executable or upstream workflow."));
   const close = button("关闭", "Close", () => dialog.close());
-  dialog.append(title, note, close);
+  const configuration = el("p", configurationText); configuration.style.whiteSpace = "pre-wrap";
+  configuration.setAttribute("aria-label", text("当前配置摘要", "Current Configuration Summary"));
+  dialog.append(title, note, close, configuration);
   const selector = el("select");
   selector.setAttribute("aria-label", text("选择执行记录", "Select Execution Record"));
   selector.style.cssText = "display:block;max-width:100%;margin:12px 0";
@@ -317,6 +438,10 @@ function showDetails(node) {
   });
   selector.value = "0";
   const info = el("p");
+  const sampling = el("pre");
+  sampling.setAttribute("aria-label", text("本次抽取说明", "Sampling Details for This Execution"));
+  sampling.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere;max-height:24vh;overflow:auto";
+  sampling.tabIndex = 0;
   const status = el("p"); status.setAttribute("role", "status");
   const zhBody = el("pre"), enBody = el("pre"), diagnosticBody = el("pre");
   for (const body of [zhBody, enBody, diagnosticBody]) {
@@ -510,6 +635,7 @@ function showDetails(node) {
     }
     cardAvailability.textContent = unavailable.join("\n");
     if (!record) { diagnosticBody.textContent = bodyText; diagnostic.open = true; return; }
+    sampling.textContent = [...executionImpactLines(record), ...randomExplanationLines(record)].join("\n");
     info.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n`
       + (record.changed === null ? text("首次记录或设置／上下文不同，不比较变化。", "First record or different settings/context; changes are not comparable.")
         : text(`相对前次可比较执行：${record.changed.length} 个模块变化`, `Compared with the previous comparable execution: ${record.changed.length} modules changed`)
@@ -523,7 +649,7 @@ function showDetails(node) {
     diagnosticBody.textContent = details(node, record, false);
   };
   selector.onchange = render;
-  if (records.length) dialog.append(selector, info, actions, cardArea, shootArea, status,
+  if (records.length) dialog.append(selector, info, sampling, actions, cardArea, shootArea, status,
     el("h4", text("中文提示词", "Chinese Prompt")), zhBody, el("h4", text("英文提示词", "English Prompt")), enBody);
   else dialog.append(el("p", text("暂无实际执行记录，请先运行节点。", "No execution record yet. Run the node first.")));
   dialog.append(diagnostic); render();

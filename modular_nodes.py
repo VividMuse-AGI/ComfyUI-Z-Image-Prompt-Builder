@@ -12,11 +12,11 @@ from typing import Mapping
 try:  # Package import inside ComfyUI.
     from . import nodes as core
     from .txt_selection import SELECTION_MODES, select_txt
-    from .prompt_diagnostics import execution_result
+    from .prompt_diagnostics import execution_result, SamplingTrace
 except ImportError:  # Direct import used by the repository tests.
     import nodes as core
     from txt_selection import SELECTION_MODES, select_txt
-    from prompt_diagnostics import execution_result
+    from prompt_diagnostics import execution_result, SamplingTrace
 
 
 MODULE_FIELD_GROUPS: Mapping[str, tuple[str, ...]] = {
@@ -290,12 +290,14 @@ class ZImageModuleNodeBase:
                 core.FOLLOW_PRESET,
             )
         request_trace = {}
+        sampling_trace = SamplingTrace(core, self.MODULE_NAME) if unique_id is not None else None
         fields = core.resolve_fields(
             preset,
             core.RANDOM_SCOPES[1],
             seed,
             requested,
             request_trace=request_trace,
+            sampling_trace=sampling_trace,
         )
         if self.MODULE_NAME == "姿态动作":
             fields = core.pose_scene_view(
@@ -358,7 +360,7 @@ class ZImageModuleNodeBase:
                                 fragments={self.MODULE_NAME: fragment},
                                 english_fragments={self.MODULE_NAME: english_fragment},
                                 render_pair=render_pair, context=upstream_context, request_trace=request_trace,
-                                framing=framing_report)
+                                framing=framing_report, sampling_trace=sampling_trace)
 
 
 class ZImageCanvasModule(ZImageModuleNodeBase):

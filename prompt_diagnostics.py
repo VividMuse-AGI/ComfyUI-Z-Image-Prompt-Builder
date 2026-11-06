@@ -1,6 +1,95 @@
 """Read-only execution metadata. No random draws, input writes or new ports."""
 
 
+class SamplingTrace:
+    """Bounded evidence from actual draw sites, never an alternative resolver.
+
+    Counts describe active-field projections at a conditional sampling step,
+    not distinct output strings, whole-module possibilities or probabilities.
+    """
+
+    LIMIT = 16
+
+    def __init__(self, core, scope="全部模块"):
+        self.core = core
+        self.scope = scope
+        self.groups = {
+            tuple(core.SCENE_GROUP_FIELDS): ("场景", "scene"),
+            tuple(core.CAMERA_OUTPUT_FIELDS): ("摄影", "camera"),
+            tuple(core.LIGHTING_OUTPUT_FIELDS): ("视觉表现", "lighting"),
+            (*core.COLOR_OUTPUT_FIELDS, *core.FINISH_OUTPUT_FIELDS): ("视觉表现", "color_finish"),
+        }
+        self.rows = []
+        self.selected_values = {}
+        self.reference_modules = set()
+        self.truncated = False
+
+    def record(self, group_fields, candidates, active, stage):
+        spec = self.groups.get(tuple(group_fields))
+        if spec is None or self.scope not in ("全部模块", spec[0]):
+            return None
+        fields = [field for field in group_fields if field in active]
+        if not fields:
+            return None
+        # A later draw supersedes the earlier draw even when values coincide.
+        for row in self.rows:
+            if row["group"] == spec[1]:
+                row["effect"] = "overwritten"
+        if len(self.rows) >= self.LIMIT:
+            self.truncated = True
+            return None
+        index = len(self.rows)
+        self.rows.append({
+            "module": spec[0], "group": spec[1], "stage": stage,
+            "entry_count": len(candidates),
+            "distinct_active_count": len({tuple(item[field] for field in fields) for item in candidates}),
+            "active_fields": fields, "effect": "unknown",
+        })
+        return index
+
+    def selected(self, index, selected):
+        if index is not None:
+            row = self.rows[index]
+            self.selected_values[index] = tuple(selected[field] for field in row["active_fields"])
+
+    def reference_changed(self, changed):
+        # The extension pool is deliberately unmeasured in this version.
+        # Camera/light redraws, when they occur, get their own later records.
+        for module in changed:
+            if self.scope in ("全部模块", module):
+                self.reference_modules.add(module)
+        for row in self.rows:
+            if row["module"] in changed:
+                row["effect"] = "overwritten"
+
+    def snapshot(self, fields, requested):
+        draws = []
+        for index, row in enumerate(self.rows):
+            item = {**row, "active_fields": list(row["active_fields"])}
+            if item["effect"] != "overwritten" and index in self.selected_values:
+                current = tuple(fields.get(field) for field in item["active_fields"])
+                item["effect"] = "retained" if current == self.selected_values[index] else "overwritten"
+            draws.append(item)
+        groups = module_groups(self.core)
+        unmeasured = []
+        for module, names in groups.items():
+            if self.scope not in ("全部模块", module):
+                continue
+            active = {name for name in names if requested.get(name) == self.core.RANDOM_CHOICE}
+            measured = {field for row in draws if row["module"] == module for field in row["active_fields"]}
+            if not active:
+                reason = "no_random_fields"
+            elif module in self.reference_modules:
+                reason = "reference_replacement"
+            elif active - measured:
+                reason = "not_instrumented"
+            else:
+                continue
+            unmeasured.append({"module": module, "reason": reason})
+        return {"version": 1, "coverage": "partial", "truncated": self.truncated,
+                "draws": draws, "unmeasured": unmeasured}
+
+
 def module_groups(core):
     return {
         "画面基础": ("画面比例", "成像媒介", "写真大类", "写真主题"),
@@ -67,7 +156,7 @@ def shoot_plan_candidates(core, groups, fields, fragments, english_fragments, re
 
 def execution_result(result, *, core, scope, seed, settings, fields, fragments,
                      english_fragments, render_pair, replacements=None, context=None,
-                     request_trace=None, framing=None):
+                     request_trace=None, framing=None, sampling_trace=None):
     """Measure text effects by rendering resolved fields, never resolving again.
 
     Removing one field is a text-sensitivity check, not a candidate-count estimate
@@ -124,4 +213,6 @@ def execution_result(result, *, core, scope, seed, settings, fields, fragments,
     }
     if framing is not None:
         metadata["framing"] = framing
+    if sampling_trace is not None:
+        metadata["random_explanation"] = sampling_trace.snapshot(fields, request_trace)
     return {"result": result, "ui": {"vividmuse_prompt_diagnostics": [metadata]}}

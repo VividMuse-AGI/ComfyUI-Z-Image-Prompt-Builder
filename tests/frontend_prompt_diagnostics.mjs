@@ -169,7 +169,7 @@ set(node, "发色", "随机抽取");
 await submit("safe", 7, "<img src=x onerror=alert(1)>", node, "not_in_text");
 node.__vividMusePromptStatusButton.callback();
 assert.ok(elements.find(el => el.tag === "dialog").opened);
-const pre = elements.find(el => el.tag === "pre");
+const pre = elements.find(el => el.attrs["aria-label"] === "中文结果正文");
 assert.match(pre.textContent, /<img src=x onerror=alert\(1\)>/);
 assert.equal(pre.innerHTML, undefined);
 elements.find(el => el.tag === "button").onclick();

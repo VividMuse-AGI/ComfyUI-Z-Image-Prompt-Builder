@@ -222,6 +222,12 @@ function showResult(node) {
     + `\n${tr("候选数量")}: ${result.count}\n${tr(result.module || "")}\n${result.title}\n`
     + text(`原词库索引（从0开始）: ${result.index ?? "—"}`, `Original library index (zero-based): ${result.index ?? "—"}`) : unavailable;
   dialog.append(el("pre", info));
+  if (result) dialog.append(el("p", result.count === 0
+    ? text("本次所选范围没有可抽取条目，请检查词库和模块选择。", "No entries were available in this execution's scope. Check the library and module selection.")
+    : result.count === 1
+      ? text("本次仅有 1 条可抽取条目；词库与范围不变时，更换种子仍会抽到该条目。", "This execution had one candidate. With the same library and scope, changing the seed still selects that entry.")
+      : text(`本次可抽取 ${result.count} 条；不同种子可能重复命中，不同条目的正文也可能相同。`,
+        `This execution had ${result.count} candidates. Different seeds may repeat a selection, and different entries may have identical text.`)));
   const body = document.createElement("pre");
   body.textContent = result?.prompt || "";
   body.setAttribute("aria-label", text("抽中正文", "Selected Text"));
