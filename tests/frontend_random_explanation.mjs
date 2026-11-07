@@ -15,8 +15,11 @@ def coherent(updates):
  return n.ZImageChinesePromptBuilder().build_prompt(unique_id='1',**args)['ui']['vividmuse_prompt_diagnostics'][0]
 coherence=[coherent(x) for x in [{},{'组合协调':'默认组合'},{'组合协调':'future'},{'基础姿态':'泳池边坐姿'},{'自由提示词':'用户内容'},{'基础姿态':'盘腿而坐','腿部动作':n.RANDOM_CHOICE,'随机种子':1},dict.fromkeys(n.CAMERA_OUTPUT_FIELDS,n.RANDOM_CHOICE)]]
 coherence.append(coherent({'预设':'自定义组合','随机种子':21,'基础姿态':'泳池边坐姿',**dict.fromkeys((*n.SCENE_GROUP_FIELDS,*n.LIGHTING_OUTPUT_FIELDS),n.RANDOM_CHOICE)}))
+for changes in [{'随机范围':n.RANDOM_SCOPES[0],'随机种子':2}, {'随机种子':0}, {'腿部动作':'坐姿双膝并拢'}, {'随机种子':0,'自由提示词':'用户文字'}]:
+ coherence.append(coherent({'基础姿态':'自然站立','腿部动作':n.RANDOM_CHOICE,'手部动作':'双手托住咖啡杯',**changes}))
 for cls,context,values in [(m.ZImagePoseModule,{'场景地点':'校园教室'},{'基础姿态':n.RANDOM_CHOICE,'随机种子':29}), (m.ZImageSceneModule,{'基础姿态':'泳池边坐姿'},{'场景地点':n.RANDOM_CHOICE,'随机种子':21})]:
  coherence.append(cls().build_module(unique_id='1',**{**dict.fromkeys(m.MODULE_FIELD_GROUPS[cls.MODULE_NAME],n.EMPTY_CHOICE),'预设':'自定义组合','前置提示词':m.PromptChainText('上游。',context),'组合协调':'协调优先',**values})['ui']['vividmuse_prompt_diagnostics'][0])
+coherence.append(m.ZImagePoseModule().build_module(unique_id='1',**{**dict.fromkeys(n.POSE_OUTPUT_FIELDS,n.EMPTY_CHOICE),'预设':n.PRESET_OPTIONS[0],'随机种子':2,'基础姿态':'自然站立','手部动作':'双手托住咖啡杯','腿部动作':n.RANDOM_CHOICE,'组合协调':'协调优先'})['ui']['vividmuse_prompt_diagnostics'][0])
 print(json.dumps({'schemas':{k:c.INPUT_TYPES() for k,c in classes.items()},'results':{k:data(c) for k,c in classes.items()},
  'coherence':coherence,'pose_fields':n.POSE_OUTPUT_FIELDS,
  'groups':{'scene':n.SCENE_GROUP_FIELDS,'camera':n.CAMERA_OUTPUT_FIELDS,'lighting':n.LIGHTING_OUTPUT_FIELDS,'color_finish':n.COLOR_OUTPUT_FIELDS+n.FINISH_OUTPUT_FIELDS}}))
@@ -42,7 +45,7 @@ const ctx=vm.createContext({app,api:{addEventListener:(name,fn)=>listeners.set(n
  __vividMuseZImageI18n:{activeLanguage:()=>language,translateMessage:s=>s}});
 let source=fs.readFileSync(new URL('../web/js/prompt_diagnostics.js',import.meta.url),'utf8')
  .replace('import { app } from "../../scripts/app.js";','').replace('import { api } from "../../scripts/api.js";','');
-vm.runInContext(`${source}\nglobalThis.tools={parseRandomExplanation,randomExplanationLines,executionImpactLines,currentConfigurationLines,details,acceptResult,showDetails,resultSnapshot,DRAW_GROUPS,parseCoherenceExplanation,coherenceExplanationLines,COHERENCE_POSE_FIELDS,stale};`,ctx);
+vm.runInContext(`${source}\nglobalThis.tools={parseRandomExplanation,randomExplanationLines,executionImpactLines,currentConfigurationLines,details,acceptResult,showDetails,resultSnapshot,DRAW_GROUPS,parseCoherenceExplanation,coherenceExplanationLines,coherenceSummaryLines,COHERENCE_POSE_FIELDS,stale};`,ctx);
 const t=ctx.tools;
 assert.deepEqual(copy(Object.fromEntries(Object.entries(t.DRAW_GROUPS).map(([key,v])=>[key,v.fields]))),fixture.groups);
 function make(kind,schema){
@@ -179,9 +182,43 @@ for(const payload of fixture.coherence){
   const area=find(node.__vividMusePromptDialog,lang==='zh'?'本次组合协调':'Coherence for This Execution');
   assert.ok(area&&!area.hidden);assert.match(area.style.cssText,/max-height/);
   assert.match(area.style.cssText,/font-size:14px;line-height:1\.6/);
+  const detail=find(node.__vividMusePromptDialog,lang==='zh'?'协调详情':'Coherence Details');
+  assert.ok(detail);assert.equal(detail.open,false,'details start collapsed');
+  assert.equal(detail.hidden,!payload.coherence_explanation.events.length);
+  assert.equal(detail.children[0].tag,'summary','native keyboard-operable disclosure');
+  if(!detail.hidden){
+    const body=detail.children[1];
+    assert.match(body.style.cssText,/font-size:14px;line-height:1\.6/);
+    if(payload.coherence_explanation.events.some(e=>e.status==='no_candidate')){
+      assert.match(area.textContent,lang==='zh'?/无可靠替代/:/no reliable replacement/);
+      assert.match(body.textContent,lang==='zh'?/可用替代候选：0/:/Eligible replacement candidates: 0/);
+    }
+    detail.open=true;
+    const historySelect=flatten(node.__vividMusePromptDialog).find(e=>e.tag==='select');
+    historySelect.onchange();assert.equal(detail.open,false,'history selection resets disclosure');
+    if(lang==='en')assert.doesNotMatch(body.textContent,/[\u3400-\u9fff]/);
+  }
   if(lang==='en')assert.doesNotMatch(area.textContent,/[\u3400-\u9fff]/);
   node.__vividMusePromptDialog.close();assert.equal(state(node),before);
  }
+}
+language='zh';
+// Simultaneous statuses remain visible; repeated rule events do not double-count fields.
+const mixed=copy(fixture.coherence[0]);
+const adjusted=mixed.coherence_explanation.events[0];
+mixed.coherence_explanation.events=[adjusted,copy(adjusted),
+ {rule_id:'standing_seated_legs',module:'姿态动作',status:'no_candidate',fields:[],before:{},after:{},candidate_count:0},
+ {rule_id:'standing_pigeon_legs',module:'姿态动作',status:'unknown_context',fields:[],before:{},after:{},candidate_count:0}];
+mixed.coherence_explanation.truncated=true;
+const mixedRecord=add(full,mixed);
+for(const lang of ['zh','en']){
+ language=lang;const summary=t.coherenceSummaryLines(mixedRecord,full).join('\n');
+ assert.match(summary,lang==='zh'?/已调整 1 个随机字段/:/1 random field adjusted/);
+ assert.match(summary,lang==='zh'?/无可靠替代/:/no reliable replacement/);
+ assert.match(summary,lang==='zh'?/未判断/:/Not evaluated/);
+ assert.match(summary,lang==='zh'?/截断/:/Truncated/);
+ assert.doesNotMatch(summary,/→/,'before/after stays in details');
+ assert.equal((summary.match(lang==='zh'?/已调整 1 个随机字段/g:/1 random field adjusted/g)||[]).length,1);
 }
 language='zh';
 const valid=fixture.coherence[0].coherence_explanation;
@@ -198,6 +235,8 @@ for(const block of badCoherence){
  const record=add(full,base);assert.equal(record.coherenceStatus,'invalid');assert.equal(record.data.coherence_explanation,undefined);
  assert.equal(record.data.zh,base.zh);assert.deepEqual(copy(record.data.card_candidates),base.card_candidates);
  assert.match(t.coherenceExplanationLines(record,full).join('\n'),/已忽略/);
+ assert.match(t.coherenceSummaryLines(record,full).join('\n'),/已忽略/);
+ t.showDetails(full);assert.equal(find(full.__vividMusePromptDialog,'协调详情').hidden,true);full.__vividMusePromptDialog.close();
 }
 const extraCoherence=copy(valid);extraCoherence.private='not kept';extraCoherence.events[0].private='not kept';extraCoherence.loop=extraCoherence;
 const parsed=t.parseCoherenceExplanation(extraCoherence,'全部模块');assert.equal(parsed.status,'valid');

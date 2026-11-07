@@ -102,6 +102,8 @@ function randomExplanationLines(record) {
 const COHERENCE_POSE_FIELDS = ["画面瞬间", "基础姿态", "身体方向", "身体重心", "肩颈状态", "手部动作", "腿部动作", "头部方向", "视线", "表情"];
 const COHERENCE_RULES = {
   crossed_legs_stool_support: {modules: ["姿态动作"], fields: COHERENCE_POSE_FIELDS, labels: ["盘腿与高脚椅支撑", "Crossed legs / stool support"]},
+  standing_seated_legs: {modules: ["姿态动作"], fields: COHERENCE_POSE_FIELDS, labels: ["站姿与坐姿腿部动作", "Standing / seated leg action"]},
+  standing_pigeon_legs: {modules: ["姿态动作"], fields: COHERENCE_POSE_FIELDS, labels: ["站姿与鸽子式伸展", "Standing / pigeon stretch"]},
   pool_pose_classroom_location: {modules: ["姿态动作", "场景"], fields: [...COHERENCE_POSE_FIELDS, ...DRAW_GROUPS.scene.fields], labels: ["泳池动作与教室场景", "Pool pose / classroom location"]},
   camera_context: {modules: ["摄影"], fields: DRAW_GROUPS.camera.fields, labels: ["摄影上下文联动", "Camera context update"]},
   lighting_context: {modules: ["视觉表现"], fields: DRAW_GROUPS.lighting.fields, labels: ["光线上下文联动", "Lighting context update"]},
@@ -155,10 +157,42 @@ function coherenceExplanationLines(record, node) {
   };
   for (const row of events) {
     lines.push(`${text(...COHERENCE_RULES[row.rule_id].labels)}: ${text(...reasons[row.status])}`);
-    if (row.candidate_count) lines.push(text(`可用替代候选：${row.candidate_count}`, `Eligible replacement candidates: ${row.candidate_count}`));
+    if (row.candidate_count || ["adjusted", "retained", "no_candidate"].includes(row.status))
+      lines.push(text(`可用替代候选：${row.candidate_count}`, `Eligible replacement candidates: ${row.candidate_count}`));
     for (const field of row.fields) lines.push(`${tr(field)}: ${displayValue(node, field, row.before[field])} → ${displayValue(node, field, row.after[field])}`);
   }
   if (truncated) lines.push(text("记录已截断，仅展示部分协调证据。", "Truncated record: only partial coherence evidence is shown."));
+  return lines;
+}
+
+function coherenceSummaryLines(record, node) {
+  const parsed = parseCoherenceExplanation(record?.data.coherence_explanation, nodeScope(node));
+  if (record?.coherenceStatus === "invalid" || parsed.status !== "valid"
+      || parsed.data.mode === "standard" || !parsed.data.events.length) return coherenceExplanationLines(record, node);
+  const lines = [text("本次组合协调：协调优先", "Coherence for This Execution: Coherence First")];
+  const groups = new Map();
+  for (const row of parsed.data.events) {
+    const key = `${row.module}:${row.status}`;
+    if (!groups.has(key)) groups.set(key, {module: row.module, status: row.status, fields: new Set()});
+    const group = groups.get(key);
+    for (const f of row.fields) if (row.before[f] !== row.after[f]) group.fields.add(f);
+  }
+  const reasons = {
+    retained: ["保留：联动复核后值未变", "Retained: values unchanged after recheck"],
+    preserved_explicit: ["保留：指定内容或上游内容受保护", "Retained: explicit or upstream content is protected"],
+    no_candidate: ["保留：原候选范围内无可靠替代", "Retained: no reliable replacement in the original pool"],
+    unknown_context: ["未判断：上下文不足或含自定义内容", "Not evaluated: insufficient or custom context"],
+    unsupported_source: ["未判断：候选来源未支持，原结果保留", "Not evaluated: unsupported candidate source; original result retained"],
+  };
+  for (const group of groups.values()) {
+    if (group.status === "adjusted") {
+      lines.push(`${moduleText(group.module)}: ` + (group.fields.size
+        ? text(`已调整 ${group.fields.size} 个随机字段`, `${group.fields.size} random ${group.fields.size === 1 ? "field" : "fields"} adjusted`) + ` (${[...group.fields].map(tr).join(", ")})`
+        : text("记录中没有实际变化的字段", "No changed fields in this record")));
+    } else lines.push(`${moduleText(group.module)}: ${text(...reasons[group.status])}`);
+  }
+  lines.push(text("仅检查已覆盖规则；保留或跳过不代表冲突已解决。", "Only covered rules are checked; retained or skipped does not mean resolved."));
+  if (parsed.data.truncated) lines.push(text("记录已截断，仅展示部分协调证据。", "Truncated record: only partial coherence evidence is shown."));
   return lines;
 }
 
@@ -521,6 +555,12 @@ function showDetails(node) {
   coordination.style.cssText = sampling.style.cssText;
   coordination.tabIndex = 0;
   coordination.hidden = !["全部模块", "姿态动作", "场景"].includes(nodeScope(node));
+  const coordinationDetails = el("details"), coordinationBody = el("pre");
+  coordinationDetails.setAttribute("aria-label", text("协调详情", "Coherence Details"));
+  coordinationDetails.append(el("summary", text("查看协调详情", "View Coherence Details")), coordinationBody);
+  coordinationDetails.style.cssText = "font-size:14px;line-height:1.6";
+  coordinationBody.style.cssText = sampling.style.cssText;
+  coordinationBody.tabIndex = 0;
   const status = el("p"); status.setAttribute("role", "status");
   const zhBody = el("pre"), enBody = el("pre"), diagnosticBody = el("pre");
   for (const body of [zhBody, enBody, diagnosticBody]) {
@@ -692,6 +732,7 @@ function showDetails(node) {
   shootArea.hidden = !shootModules.length;
   shootArea.append(shootChoices, shootAvailability, startShoot, shootEditor);
   const diagnostic = el("details");
+  diagnostic.setAttribute("aria-label", text("字段与诊断详情", "Fields and Diagnostics"));
   diagnostic.append(el("summary", text("字段与诊断详情", "Fields and Diagnostics")), diagnosticBody);
   const render = () => {
     const record = selected(); status.textContent = "";
@@ -720,7 +761,12 @@ function showDetails(node) {
     cardAvailability.textContent = unavailable.join("\n");
     if (!record) { diagnosticBody.textContent = bodyText; diagnostic.open = true; return; }
     sampling.textContent = [...executionImpactLines(record), ...randomExplanationLines(record)].join("\n");
-    coordination.textContent = coordination.hidden ? "" : coherenceExplanationLines(record, node).join("\n");
+    coordination.textContent = coordination.hidden ? "" : coherenceSummaryLines(record, node).join("\n");
+    const coherence = parseCoherenceExplanation(record.data.coherence_explanation, nodeScope(node));
+    coordinationDetails.open = false;
+    coordinationDetails.hidden = coordination.hidden || record.coherenceStatus === "invalid"
+      || coherence.status !== "valid" || !coherence.data.events.length;
+    coordinationBody.textContent = coordinationDetails.hidden ? "" : coherenceExplanationLines(record, node).join("\n");
     info.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n`
       + (record.changed === null ? text("首次记录或设置／上下文不同，不比较变化。", "First record or different settings/context; changes are not comparable.")
         : text(`相对前次可比较执行：${record.changed.length} 个模块变化`, `Compared with the previous comparable execution: ${record.changed.length} modules changed`)
@@ -734,7 +780,7 @@ function showDetails(node) {
     diagnosticBody.textContent = details(node, record, false);
   };
   selector.onchange = render;
-  if (records.length) dialog.append(selector, info, sampling, coordination, actions, cardArea, shootArea, status,
+  if (records.length) dialog.append(selector, info, sampling, coordination, coordinationDetails, actions, cardArea, shootArea, status,
     el("h4", text("中文提示词", "Chinese Prompt")), zhBody, el("h4", text("英文提示词", "English Prompt")), enBody);
   else dialog.append(el("p", text("暂无实际执行记录，请先运行节点。", "No execution record yet. Run the node first.")));
   dialog.append(diagnostic); render();

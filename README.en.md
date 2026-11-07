@@ -1,6 +1,6 @@
 # ComfyUI-Z-Image-Prompt-Builder
 
-> v0.18.0: optional Combination Coherence on the full builder, Pose and Scene nodes. Standard preserves existing behavior; Coherence First adjusts only eligible random fields for covered conflicts. Result explanations also gain larger text and deduplicated module labels. See the [release notes](docs/releases/v0.18.0.md#english).
+> v0.19.0: detects additional explicit standing/seated-leg and standing/pigeon-stretch conflicts, with a coherence summary and expandable details. No reliable replacement means retention with an explanation, not a resolved conflict. See the [release notes](docs/releases/v0.19.0.md#english).
 
 > New in v0.14.0: [Quick Card Combination](docs/card-quick-combination.md#english) lets the full builder select Person, Outfit and Shoot Plan Cards together, preview changes, then apply them in one transaction. Keep unselected modules, choose module lock policies, and undo/redo the combination without adding node height.
 
@@ -134,7 +134,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.18.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.18.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.18.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
+For the recommended manual install, open the [`v0.19.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.19.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.19.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -202,16 +202,16 @@ The API retains canonical input identifiers regardless of interface language. Us
 
 Local automated tests, text-only execution and real Chinese/English UI checks in classic and Nodes 2.0 layouts have passed. See the [acceptance record](docs/testing/2026-09-27-txt-random-acceptance.md) for scope and limitations; this is not a compatibility guarantee for every ComfyUI version.
 
-## Combination Coherence (v0.18.0)
+## Combination Coherence (since v0.18.0, extended in v0.19.0)
 
 The full builder and standalone Pose and Scene nodes offer **Combination Coherence**:
 
 - **Standard** preserves v0.17.0 randomization and existing dependencies. Legacy workflows without this setting use Standard.
 - **Coherence First** adjusts only built-in fields eligible for randomization in the current node, using the original candidate pool. It does not enable randomization, unlock fields, or rewrite explicit selections, preset-following values or upstream text. Switching modes can change the result for the same seed.
 
-Initial coverage is limited to two explicit combinations: sitting cross-legged with a stool-rung leg action, and a poolside seated pose in a campus classroom. If no reliable replacement exists, the original combination is retained with an explanation. Relevant cross-module rules are conservatively skipped when free text, TXT or unknown context makes the evidence incomplete. User text is not parsed; this is not a guarantee of all combinations or generated anatomy.
+Coverage includes sitting cross-legged with a stool-rung leg action and a poolside seated pose in a campus classroom. v0.19.0 also detects specific standing poses combined with explicit seated-leg actions or a pigeon stretch; ordinary bent or crossed legs are not treated as conflicts in general. Conflicts in one group are evaluated together, and replacements must satisfy all applicable rules. If no reliable replacement exists, the original combination is retained with an explanation. Relevant rules are conservatively skipped when free text, TXT or unknown context makes the evidence incomplete. User text is not parsed; this is not a guarantee of all combinations or generated anatomy.
 
-Set the fields you want to vary to Random, select Coherence First, run, then open Last result. Coherence for This Execution shows the executed mode, before/after values or retention reasons without writing changes back into dropdowns. For chains, Scene → Pose → Camera is recommended. Each node has its own mode and may change only its own fields, never preceding output.
+Set the fields you want to vary to Random, select Coherence First, run, then open Last result. Coherence for This Execution summarizes the executed mode, number of adjusted fields and reasons for retaining or skipping content. Expand View Coherence Details for rules, before/after values and candidate counts. Zero candidates does not mean resolved. Explanations do not write changes back into dropdowns. For chains, Scene → Pose → Camera is recommended. Each node has its own mode and may change only its own fields, never preceding output.
 
 ## Random Status and Execution Result
 
@@ -498,7 +498,7 @@ GitHub Actions runs the configured checks automatically on pushes and pull reque
 
 ## Release Information
 
-- Current version: `0.18.0`
+- Current version: `0.19.0`
 - GitHub: [VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Releases: [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)
 - Comfy Registry Publisher ID: `VividMuse-AGI`

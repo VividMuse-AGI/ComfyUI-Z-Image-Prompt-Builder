@@ -1,4 +1,4 @@
-"""Bounded, opt-in coordination of two proven structured-field conflicts."""
+"""Bounded, opt-in coordination of proven structured-field conflicts."""
 import hashlib
 import random
 
@@ -6,6 +6,15 @@ import random
 RULES = (
     ('crossed_legs_stool_support', ('基础姿态', '腿部动作'), ('盘腿而坐', '一脚踩高脚椅横杆')),
     ('pool_pose_classroom_location', ('基础姿态', '场景地点'), ('泳池边坐姿', '校园教室')),
+)
+STANDING_POSES = ('自然站立', '侧身站立', '叉腰站立')
+SEATED_LEGS = ('坐姿一腿稍向前', '坐姿双腿偏向一侧', '坐姿双膝并拢')
+STANDING_RULES = frozenset(('standing_seated_legs', 'standing_pigeon_legs'))
+RULES += tuple(
+    (rule_id, ('基础姿态', '腿部动作'), (pose, leg))
+    for rule_id, legs in (('standing_seated_legs', SEATED_LEGS),
+                          ('standing_pigeon_legs', ('鸽子式腿部伸展',)))
+    for pose in STANDING_POSES for leg in legs
 )
 EMPTY = '不使用'
 STANDING_LEGS = frozenset(('双脚自然平行', '一脚轻微向前', '一腿轻微屈膝', '脚踝交叉'))
@@ -36,6 +45,12 @@ def compatible(rule_id, fields, known):
     pose, legs, scene = (fields.get(f) for f in ('基础姿态', '腿部动作', '场景地点'))
     if rule_id == 'crossed_legs_stool_support':
         return (pose, legs) in (('盘腿而坐', '盘腿而坐'), ('高脚椅坐姿', '一脚踩高脚椅横杆'))
+    if rule_id in STANDING_RULES:
+        return ((pose in STANDING_POSES and legs in STANDING_LEGS)
+                or (pose == '椅子前缘坐姿' and legs in ('坐姿一腿稍向前', '坐姿双膝并拢'))
+                or (pose == '低位鸽子式' and legs == '鸽子式腿部伸展'))
+    if rule_id != 'pool_pose_classroom_location':
+        return False
     if pose == '泳池边坐姿' and scene == '室内泳池':
         return True
     return (scene == '校园教室' and pose == '自然站立'
@@ -78,6 +93,7 @@ class CoherencePass:
     def apply(self, fields, random_fields, seed, groups, reference_changed, fantasy_themes):
         writable = self.writable_fields & self.known_fields & random_fields
         changed = set()
+        pending = {}
         for rule_id, rule_fields, _ in conflicts(fields):
             if not self.writable_fields.intersection(rule_fields):
                 continue
@@ -86,7 +102,7 @@ class CoherencePass:
             self.events.append(event)
             if not set(rule_fields).issubset(self.known_fields):
                 continue
-            if rule_id == 'pool_pose_classroom_location' and (
+            if rule_id in STANDING_RULES.union(('pool_pose_classroom_location',)) and (
                 self.opaque_text
                 or ('写真大类' in self.known_fields and fields.get('写真大类') == '幻想概念')
                 or ('写真主题' in self.known_fields and fields.get('写真主题') in fantasy_themes)
@@ -101,6 +117,10 @@ class CoherencePass:
             if module in reference_changed:
                 event['status'] = 'unsupported_source'
                 continue
+            pending.setdefault(module, []).append((rule_id, event))
+        # One candidate selection per owned group; satisfy all applicable rules
+        # together without consuming the standard random stream.
+        for module, requirements in pending.items():
             active = [f for f in groups[module] if f in writable]
             fixed = [f for f in groups[module] if f in self.known_fields and f not in active
                      and fields.get(f, EMPTY) != EMPTY]
@@ -109,17 +129,21 @@ class CoherencePass:
                 if any(f not in item for f in active) or any(item.get(f) != fields[f] for f in fixed):
                     continue
                 proposed = {**fields, **{f: item[f] for f in active}}
-                if compatible(rule_id, proposed, self.known_fields) and not conflicts(proposed):
+                if (all(compatible(rule_id, proposed, self.known_fields) for rule_id, _ in requirements)
+                        and not conflicts(proposed)):
                     candidates.append(proposed)
-            event['candidate_count'] = len(candidates)
+            for _, event in requirements:
+                event['candidate_count'] = len(candidates)
             if not candidates:
-                event['status'] = 'no_candidate'
+                for _, event in requirements:
+                    event['status'] = 'no_candidate'
                 continue
             selected = self.rng(seed, module).choice(candidates)
             updated = [f for f in active if selected[f] != fields[f]]
-            event.update(status='adjusted', fields=updated,
-                         before={f: fields[f] for f in updated},
-                         after={f: selected[f] for f in updated})
+            for _, event in requirements:
+                event.update(status='adjusted' if updated else 'retained', fields=updated,
+                             before={f: fields[f] for f in updated},
+                             after={f: selected[f] for f in updated})
             fields.update({f: selected[f] for f in updated})
             if updated:
                 changed.add(module)

@@ -195,7 +195,7 @@ const action = label => all(resultDialog).find(el=>el.tag==="button" && el.textC
 const select = labeled("选择执行记录");
 select.value = "1"; select.onchange();
 assert.equal(labeled("中文结果正文").textContent, "历史中文\n分段");
-assert.equal(all(resultDialog).find(el=>el.tag==="details").open, undefined, "Verbose diagnostics start collapsed");
+assert.equal(labeled("字段与诊断详情").open, undefined, "Verbose diagnostics start collapsed");
 let copied;
 sandbox.navigator = {clipboard:{async writeText(value){copied=value;}}};
 await action("复制中文").onclick(); assert.equal(copied,"历史中文\n分段");
@@ -216,7 +216,7 @@ assert.deepEqual(snapshot.resolved,{发色:"黑色",鞋履:"不使用"});
 assert.equal(snapshot.limitations.executable_workflow,false);
 assert.equal(snapshot.limitations.includes_upstream_workflow,false);
 assert.equal(snapshot.framing.omitted[0].field,"鞋履");
-assert.match(all(resultDialog).find(el=>el.tag==="details").children[1].textContent,/按景别省略，原选择保留/);
+assert.match(labeled("字段与诊断详情").children[1].textContent,/按景别省略，原选择保留/);
 while(timers.length) timers.shift()(); assert.equal(revoked,"blob:test");
 assert.equal(JSON.stringify(node.widgets.map(w=>w.value)),serializedBefore);
 assert.equal(JSON.stringify(node.__vividMusePromptHistory),historyBefore);
