@@ -70,11 +70,19 @@ def txt_execution_result(prompt, selection):
 class PromptChainText(str):
     """String output that also carries resolved module fields at runtime."""
 
-    def __new__(cls, value="", resolved_fields=None, opaque_modules=None):
+    def __new__(cls, value="", resolved_fields=None, opaque_modules=None, *, unstructured_text=False):
         instance = super().__new__(cls, value)
         instance.zimage_resolved_fields = dict(resolved_fields or {})
         instance.zimage_opaque_modules = frozenset(opaque_modules or ())
+        # Runtime provenance only: never a mode, file-format or prompt input.
+        instance.zimage_unstructured_text = bool(unstructured_text)
         return instance
+
+
+def has_unstructured_text(*values):
+    return any(str(value or "").strip() and (
+        not hasattr(value, "zimage_resolved_fields")
+        or getattr(value, "zimage_unstructured_text", False)) for value in values)
 
 
 def _finish_fragment(text: str) -> str:
@@ -82,7 +90,8 @@ def _finish_fragment(text: str) -> str:
     return f"{normalized}。" if normalized else ""
 
 
-def join_chain_text(prefix: str, current: str, position: str, separate_modules: bool = False) -> str:
+def join_chain_text(prefix: str, current: str, position: str, separate_modules: bool = False,
+                    *, unstructured_current=False) -> str:
     """Join one chainable node body without rewriting either fragment."""
 
     resolved_fields = getattr(prefix, "zimage_resolved_fields", None)
@@ -108,7 +117,9 @@ def join_chain_text(prefix: str, current: str, position: str, separate_modules: 
             "自由提示词在前",
         )
     if resolved_fields is not None or opaque_modules is not None:
-        return PromptChainText(joined, resolved_fields, opaque_modules)
+        return PromptChainText(joined, resolved_fields, opaque_modules,
+                               unstructured_text=has_unstructured_text(prefix)
+                               or (unstructured_current and bool(current_text.strip())))
     return joined
 
 
@@ -239,6 +250,8 @@ class ZImageModuleNodeBase:
         }
         if cls.MODULE_NAME in ("服装", "姿态动作"):
             schema["optional"]["构图适配"] = core.FRAMING_INPUT
+        if cls.MODULE_NAME in ("姿态动作", "场景"):
+            schema["optional"]["组合协调"] = core.COHERENCE_INPUT
         return schema
 
     def _result(
@@ -265,6 +278,7 @@ class ZImageModuleNodeBase:
         english_prefix = kwargs.pop("前置英文提示词", "")
         separate_modules = kwargs.pop("输出排版", "连续拼接") == "按模块分段"
         framing_mode = kwargs.pop("构图适配", core.FRAMING_MODES[0])
+        coherence_mode = kwargs.pop("组合协调", core.COHERENCE_MODES[0])
         resolution_options = {name: kwargs.pop(name) for name in core.RESOLUTION_INPUTS if name in kwargs}
         context_source = prefix
         if not hasattr(context_source, "zimage_resolved_fields"):
@@ -291,6 +305,16 @@ class ZImageModuleNodeBase:
             )
         request_trace = {}
         sampling_trace = SamplingTrace(core, self.MODULE_NAME) if unique_id is not None else None
+        coordination = None
+        if self.MODULE_NAME in ("姿态动作", "场景") and coherence_mode == core.COHERENCE_MODES[1]:
+            own = set(MODULE_FIELD_GROUPS[self.MODULE_NAME])
+            known = set(upstream_context) & set(core.FIELD_ORDER)
+            for name in upstream_opaque_modules:
+                known.difference_update(MODULE_FIELD_GROUPS.get(name, ()))
+            known.update(own)
+            plain_prefix = has_unstructured_text(prefix, english_prefix)
+            coordination = core.CoherencePass(known_fields=known, writable_fields=own,
+                opaque_text=bool(plain_prefix or upstream_opaque_modules))
         fields = core.resolve_fields(
             preset,
             core.RANDOM_SCOPES[1],
@@ -298,6 +322,7 @@ class ZImageModuleNodeBase:
             requested,
             request_trace=request_trace,
             sampling_trace=sampling_trace,
+            **({'coherence': coordination} if coordination is not None else {}),
         )
         if self.MODULE_NAME == "姿态动作":
             fields = core.pose_scene_view(
@@ -349,6 +374,9 @@ class ZImageModuleNodeBase:
             upstream_opaque_modules,
             resolution_options=resolution_options,
         )
+        for value in result:
+            if isinstance(value, PromptChainText):
+                value.zimage_unstructured_text = has_unstructured_text(prefix, english_prefix)
         if unique_id is None:
             return result
         def render_pair(resolved):
@@ -360,7 +388,9 @@ class ZImageModuleNodeBase:
                                 fragments={self.MODULE_NAME: fragment},
                                 english_fragments={self.MODULE_NAME: english_fragment},
                                 render_pair=render_pair, context=upstream_context, request_trace=request_trace,
-                                framing=framing_report, sampling_trace=sampling_trace)
+                                framing=framing_report, sampling_trace=sampling_trace,
+                                coherence=(core.coherence_explanation(coherence_mode, coordination, self.MODULE_NAME)
+                                           if self.MODULE_NAME in ("姿态动作", "场景") and "组合协调" in submitted else None))
 
 
 class ZImageCanvasModule(ZImageModuleNodeBase):
@@ -472,6 +502,7 @@ class ZImageTxtPromptLibrary:
                 selection[0] if selection is not None else kwargs.get("自由提示词", ""),
                 kwargs.get("拼接位置", CHAIN_JOIN_POSITIONS[0]),
                 kwargs.get("输出排版", "连续拼接") == "按模块分段",
+                unstructured_current=True,
             ), selection,
         )
 
@@ -535,6 +566,7 @@ class ZImageTxtModuleLibrary:
             module_text,
             kwargs.get("拼接位置", CHAIN_JOIN_POSITIONS[0]),
             kwargs.get("输出排版", "连续拼接") == "按模块分段",
+            unstructured_current=True,
         )
         module_name = kwargs.get("模块类型", TXT_MODULE_TYPES[0])
         if module_name not in MODULE_FIELD_GROUPS or not str(module_text).strip():
@@ -549,7 +581,8 @@ class ZImageTxtModuleLibrary:
             getattr(prefix, "zimage_opaque_modules", ()) or ()
         )
         opaque_modules.add(module_name)
-        return txt_execution_result(PromptChainText(prompt, context_fields, opaque_modules), selection)
+        return txt_execution_result(PromptChainText(prompt, context_fields, opaque_modules,
+                                    unstructured_text=has_unstructured_text(prompt)), selection)
 
 
 NODE_CLASS_MAPPINGS = {

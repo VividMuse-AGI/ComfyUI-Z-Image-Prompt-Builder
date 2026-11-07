@@ -124,7 +124,7 @@ class ResolutionSelectorTests(unittest.TestCase):
         for cls in classes.values():
             schema = cls.INPUT_TYPES()
             if cls in (n.ZImageChinesePromptBuilder, m.ZImageCanvasModule):
-                legacy_order = [name for name in schema["optional"] if name != "构图适配"]
+                legacy_order = [name for name in schema["optional"] if name not in {"构图适配", "组合协调"}]
                 self.assertEqual(legacy_order[-len(r.RESOLUTION_INPUTS):], list(r.RESOLUTION_INPUTS))
                 self.assertNotIn("分辨率模式", schema["required"])
             else:

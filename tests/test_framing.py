@@ -127,7 +127,7 @@ class FramingTests(unittest.TestCase):
     def test_schema_is_optional_appended_and_limited_to_relevant_nodes(self):
         for cls in (core.ZImageChinesePromptBuilder, modules.ZImageClothingModule, modules.ZImagePoseModule):
             optional = cls.INPUT_TYPES()["optional"]
-            self.assertEqual(list(optional)[-1], "构图适配")
+            self.assertEqual([key for key in optional if key != "组合协调"][-1], "构图适配")
             self.assertEqual(optional["构图适配"][1]["default"], FRAMING_MODES[0])
         self.assertNotIn("构图适配", modules.ZImageCanvasModule.INPUT_TYPES()["optional"])
 

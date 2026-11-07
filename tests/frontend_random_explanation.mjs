@@ -10,7 +10,15 @@ import json,nodes as n,modular_nodes as m
 classes={**n.NODE_CLASS_MAPPINGS,**{k:c for k,c in m.NODE_CLASS_MAPPINGS.items() if issubclass(c,m.ZImageModuleNodeBase)}}
 def data(c):
  return getattr(c(),c.FUNCTION)(unique_id='1',**{'预设':n.PRESET_OPTIONS[1],'随机种子':42,**dict.fromkeys(n.FIELD_ORDER,n.RANDOM_CHOICE)})['ui']['vividmuse_prompt_diagnostics'][0]
+def coherent(updates):
+ args={**dict.fromkeys(n.FIELD_ORDER,n.EMPTY_CHOICE),'预设':n.PRESET_OPTIONS[0],'随机范围':n.RANDOM_SCOPES[2],'随机种子':29,'基础姿态':n.RANDOM_CHOICE,'场景地点':'校园教室','组合协调':'协调优先',**updates}
+ return n.ZImageChinesePromptBuilder().build_prompt(unique_id='1',**args)['ui']['vividmuse_prompt_diagnostics'][0]
+coherence=[coherent(x) for x in [{},{'组合协调':'默认组合'},{'组合协调':'future'},{'基础姿态':'泳池边坐姿'},{'自由提示词':'用户内容'},{'基础姿态':'盘腿而坐','腿部动作':n.RANDOM_CHOICE,'随机种子':1},dict.fromkeys(n.CAMERA_OUTPUT_FIELDS,n.RANDOM_CHOICE)]]
+coherence.append(coherent({'预设':'自定义组合','随机种子':21,'基础姿态':'泳池边坐姿',**dict.fromkeys((*n.SCENE_GROUP_FIELDS,*n.LIGHTING_OUTPUT_FIELDS),n.RANDOM_CHOICE)}))
+for cls,context,values in [(m.ZImagePoseModule,{'场景地点':'校园教室'},{'基础姿态':n.RANDOM_CHOICE,'随机种子':29}), (m.ZImageSceneModule,{'基础姿态':'泳池边坐姿'},{'场景地点':n.RANDOM_CHOICE,'随机种子':21})]:
+ coherence.append(cls().build_module(unique_id='1',**{**dict.fromkeys(m.MODULE_FIELD_GROUPS[cls.MODULE_NAME],n.EMPTY_CHOICE),'预设':'自定义组合','前置提示词':m.PromptChainText('上游。',context),'组合协调':'协调优先',**values})['ui']['vividmuse_prompt_diagnostics'][0])
 print(json.dumps({'schemas':{k:c.INPUT_TYPES() for k,c in classes.items()},'results':{k:data(c) for k,c in classes.items()},
+ 'coherence':coherence,'pose_fields':n.POSE_OUTPUT_FIELDS,
  'groups':{'scene':n.SCENE_GROUP_FIELDS,'camera':n.CAMERA_OUTPUT_FIELDS,'lighting':n.LIGHTING_OUTPUT_FIELDS,'color_finish':n.COLOR_OUTPUT_FIELDS+n.FINISH_OUTPUT_FIELDS}}))
 `],{cwd:root,encoding:'utf8'}));
 const copy=x=>JSON.parse(JSON.stringify(x));
@@ -34,7 +42,7 @@ const ctx=vm.createContext({app,api:{addEventListener:(name,fn)=>listeners.set(n
  __vividMuseZImageI18n:{activeLanguage:()=>language,translateMessage:s=>s}});
 let source=fs.readFileSync(new URL('../web/js/prompt_diagnostics.js',import.meta.url),'utf8')
  .replace('import { app } from "../../scripts/app.js";','').replace('import { api } from "../../scripts/api.js";','');
-vm.runInContext(`${source}\nglobalThis.tools={parseRandomExplanation,randomExplanationLines,executionImpactLines,currentConfigurationLines,details,acceptResult,showDetails,resultSnapshot,DRAW_GROUPS};`,ctx);
+vm.runInContext(`${source}\nglobalThis.tools={parseRandomExplanation,randomExplanationLines,executionImpactLines,currentConfigurationLines,details,acceptResult,showDetails,resultSnapshot,DRAW_GROUPS,parseCoherenceExplanation,coherenceExplanationLines,COHERENCE_POSE_FIELDS,stale};`,ctx);
 const t=ctx.tools;
 assert.deepEqual(copy(Object.fromEntries(Object.entries(t.DRAW_GROUPS).map(([key,v])=>[key,v.fields]))),fixture.groups);
 function make(kind,schema){
@@ -61,6 +69,9 @@ for(const [kind,data] of Object.entries(fixture.results)){
   language=lang;t.showDetails(node);const panel=node.__vividMusePromptDialog;
   const sampling=find(panel,lang==='zh'?'本次抽取说明':'Sampling Details for This Execution');
   assert.ok(sampling);assert.ok(sampling.textContent.includes(lang==='zh'?'所选执行':'selected execution'));
+  assert.match(sampling.style.cssText,/font-size:14px/);
+  assert.match(sampling.style.cssText,/line-height:1\.6/);
+  assert.match(sampling.style.cssText,/max-height:24vh;overflow:auto/);
   assert.ok(find(panel,lang==='zh'?'当前配置摘要':'Current Configuration Summary'));
   if(lang==='en')assert.doesNotMatch(sampling.textContent,/[\u3400-\u9fff]/);
   panel.close();assert.ok(panel.removed);assert.equal(node.widgets.length,count);assert.equal(state(node),before);
@@ -144,4 +155,66 @@ picker.value='1';picker.onchange();assert.match(summary.textContent,/1 种随机
 const snapshot=summary.textContent;add(full,{...old,random_explanation:partial});assert.equal(summary.textContent,snapshot);
 p.close();full.onConfigure({});assert.equal(full.__vividMusePromptHistory.length,0);
 assert.equal(mutations,0);
+
+// Public-node coherence payloads, including true module-chain executions.
+assert.deepEqual(copy(t.COHERENCE_POSE_FIELDS),fixture.pose_fields);
+const catalogCtx=vm.createContext({});
+vm.runInContext(fs.readFileSync(new URL('../web/js/i18n_catalog.js',import.meta.url),'utf8').replace('export const EN_CATALOG =','globalThis.catalog ='),catalogCtx);
+const catalog=catalogCtx.catalog;
+const translations={};
+const collect=obj=>{for(const [k,v] of Object.entries(obj)){if(typeof v==='string')translations[k]=v;else if(v && typeof v==='object')collect(v);}};
+collect(catalog);
+ctx.__vividMuseZImageI18n.translateMessage=s=>language==='en'?(translations[s]||s):s;
+assert.equal(translations['组合协调'],'Combination Coherence');
+assert.equal(translations['协调优先'],'Coherence First');
+assert.equal(translations['默认组合'],'Standard');
+for(const payload of fixture.coherence){
+ const kind=payload.scope==='全部模块'?fullKey:payload.scope==='场景'?'VividMuse_ZImageSceneModule':'VividMuse_ZImagePoseModule';
+ const node=make(kind,fixture.schemas[kind]);const original=copy(payload),before=state(node);
+ const record=add(node,payload);assert.equal(record.coherenceStatus,'valid');assert.equal(record.explanationStatus,'valid');
+ assert.deepEqual(payload,original);
+ assert.equal(t.resultSnapshot(node,record).coherence_explanation,undefined);
+ for(const lang of ['zh','en']){
+  language=lang;t.showDetails(node);
+  const area=find(node.__vividMusePromptDialog,lang==='zh'?'本次组合协调':'Coherence for This Execution');
+  assert.ok(area&&!area.hidden);assert.match(area.style.cssText,/max-height/);
+  assert.match(area.style.cssText,/font-size:14px;line-height:1\.6/);
+  if(lang==='en')assert.doesNotMatch(area.textContent,/[\u3400-\u9fff]/);
+  node.__vividMusePromptDialog.close();assert.equal(state(node),before);
+ }
+}
+language='zh';
+const valid=fixture.coherence[0].coherence_explanation;
+const badCoherence=[null,[],{}, {...valid,version:2},{...valid,mode:'unknown'},{...valid,coverage:'complete'},
+ {...valid,fallback:'yes'},{...valid,truncated:1},{...valid,events:Array(17).fill(valid.events[0])},
+ {...valid,mode:'standard'}];
+for(const change of [{rule_id:'__proto__'},{rule_id:'future'},{module:'人物'},{status:'guaranteed'},
+ {module:'场景'},
+ {fields:['自由提示词']},{fields:['基础姿态','基础姿态']},{before:{基础姿态:'x'.repeat(257)}},
+ {after:{基础姿态:3}},{after:{unexpected:'value'}},{candidate_count:-1},{candidate_count:1.5}])
+ badCoherence.push({...valid,events:[{...valid.events[0],...change}]});
+for(const block of badCoherence){
+ const base=copy(fixture.coherence[0]);base.coherence_explanation=block;
+ const record=add(full,base);assert.equal(record.coherenceStatus,'invalid');assert.equal(record.data.coherence_explanation,undefined);
+ assert.equal(record.data.zh,base.zh);assert.deepEqual(copy(record.data.card_candidates),base.card_candidates);
+ assert.match(t.coherenceExplanationLines(record,full).join('\n'),/已忽略/);
+}
+const extraCoherence=copy(valid);extraCoherence.private='not kept';extraCoherence.events[0].private='not kept';extraCoherence.loop=extraCoherence;
+const parsed=t.parseCoherenceExplanation(extraCoherence,'全部模块');assert.equal(parsed.status,'valid');
+assert.equal(parsed.data.private,undefined);assert.equal(parsed.data.events[0].private,undefined);
+assert.equal(t.parseCoherenceExplanation(valid,'摄影').status,'invalid');
+const oldCoherence=copy(fixture.results[fullKey]);const historical=add(full,oldCoherence);
+assert.match(t.coherenceExplanationLines(historical,full).join('\n'),/未提供/);
+const mode=full.widgets.find(w=>w.name==='组合协调');mode.value='协调优先';
+assert.equal(t.stale(full,historical),true,'old record missing setting is not coherent');
+full.inputs=[{name:'组合协调',link:5}];
+// A connected input cannot be compared with its hidden widget; other settings may still be stale.
+const cleanNode=make(fullKey,fixture.schemas[fullKey]);
+const cleanRecord=add(cleanNode,{...oldCoherence,settings:{}});
+cleanNode.widgets.find(w=>w.name==='组合协调').value='协调优先';assert.equal(t.stale(cleanNode,cleanRecord),true);
+cleanNode.inputs=[{name:'组合协调',link:5}];assert.equal(t.stale(cleanNode,cleanRecord),false);
+const finalRecord=add(full,fixture.coherence[0]);valid.events[0].after['基础姿态']='输入被修改';
+assert.equal(finalRecord.data.coherence_explanation.events[0].after['基础姿态'],'自然站立');
+full.onConfigure({});assert.equal(full.__vividMusePromptHistory.length,0);assert.equal(mutations,0);
+console.log(`PASS coherence: ${fixture.coherence.length} real payloads, bilingual dialog, ${badCoherence.length} invalid blocks, export/card preservation, legacy settings and connected inputs. Simulation only.`);
 console.log(`PASS random explanation: ${Object.keys(fixture.results).length} real node payloads, 2 languages, ${invalid.length} invalid blocks, old records, frozen history, current locks, export compatibility and no edits. DOM simulation, not browser QA.`);

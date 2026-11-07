@@ -14,10 +14,12 @@ try:
     from .resolution import ASPECT_RESOLUTIONS, RESOLUTION_INPUTS, resolution_from_options
     from .framing import FRAMING_INPUT, FRAMING_MODES, framing_view
     from .prompt_diagnostics import SamplingTrace
+    from .combination_coherence import CoherencePass, INPUT as COHERENCE_INPUT, MODES as COHERENCE_MODES, explanation as coherence_explanation
 except ImportError:
     from resolution import ASPECT_RESOLUTIONS, RESOLUTION_INPUTS, resolution_from_options
     from framing import FRAMING_INPUT, FRAMING_MODES, framing_view
     from prompt_diagnostics import SamplingTrace
+    from combination_coherence import CoherencePass, INPUT as COHERENCE_INPUT, MODES as COHERENCE_MODES, explanation as coherence_explanation
 
 
 FOLLOW_PRESET = "跟随预设"
@@ -4331,8 +4333,12 @@ def resolve_fields(
     *,
     request_trace: Dict[str, str] | None = None,
     sampling_trace: SamplingTrace | None = None,
+    coherence: CoherencePass | None = None,
 ) -> Dict[str, str]:
     """Resolve presets, explicit locks and deterministic random fields."""
+
+    if coherence is not None:
+        coherence.reset()
 
     preset = LEGACY_PRESET_NAMES.get(preset, preset)
     random_scope = LEGACY_RANDOM_SCOPES.get(random_scope, random_scope)
@@ -4742,6 +4748,8 @@ def resolve_fields(
             candidates = candidates or list(bundles)
         sampling_event = (sampling_trace.record(group_fields, candidates, active, "initial")
                           if sampling_trace is not None else None)
+        if coherence is not None and group_fields in (POSE_OUTPUT_FIELDS, SCENE_GROUP_FIELDS):
+            coherence.remember("姿态动作" if group_fields == POSE_OUTPUT_FIELDS else "场景", candidates)
         selected_bundle = rng.choice(candidates)
         if sampling_trace is not None:
             sampling_trace.selected(sampling_event, selected_bundle)
@@ -4854,6 +4862,51 @@ def resolve_fields(
                 sampling_trace.selected(sampling_event, lighting)
             for field in random_fields.intersection(LIGHTING_OUTPUT_FIELDS):
                 resolved[field] = lighting[field]
+
+    if coherence is not None:
+        coordinated = coherence.apply(
+            resolved, random_fields, seed,
+            {"姿态动作": POSE_OUTPUT_FIELDS, "场景": SCENE_GROUP_FIELDS},
+            changed, THEME_OPTIONS_BY_CATEGORY.get("幻想概念", ()),
+        )
+        if sampling_trace is not None:
+            sampling_trace.coherence_changed(coordinated)
+        owned_random = random_fields & coherence.known_fields & coherence.writable_fields
+        visible_context = {f: resolved[f] if f in coherence.known_fields else EMPTY_CHOICE for f in FIELD_ORDER}
+        if coordinated.intersection(("姿态动作", "场景")) and owned_random.intersection(CAMERA_OUTPUT_FIELDS):
+            candidates = _camera_bundle_candidates(preset, random_scope, visible_context, owned_random)
+            before = {f: resolved[f] for f in CAMERA_OUTPUT_FIELDS if f in owned_random}
+            if candidates:
+                event = (sampling_trace.record(CAMERA_OUTPUT_FIELDS, candidates, owned_random, "after_coherence")
+                         if sampling_trace is not None else None)
+                camera = coherence.rng(seed, "摄影").choice(candidates)
+                if sampling_trace is not None:
+                    sampling_trace.selected(event, camera)
+                for field in owned_random.intersection(CAMERA_OUTPUT_FIELDS):
+                    resolved[field] = camera[field]
+            coherence.downstream("摄影", "adjusted" if candidates else "no_candidate", before, resolved, len(candidates))
+        elif coordinated.intersection(("姿态动作", "场景")) and any(
+            f in coherence.known_fields and resolved[f] != EMPTY_CHOICE for f in CAMERA_OUTPUT_FIELDS
+        ):
+            coherence.downstream("摄影", "preserved_explicit", {}, {})
+        if "场景" in coordinated and owned_random.intersection(LIGHTING_OUTPUT_FIELDS):
+            plans = _scene_compatible_lighting_plans(visible_context)
+            plans = [p for p in plans if _lighting_matches_environment(p, visible_context, owned_random)]
+            candidates = _matching_bundles(plans, LIGHTING_OUTPUT_FIELDS, visible_context, owned_random)
+            before = {f: resolved[f] for f in LIGHTING_OUTPUT_FIELDS if f in owned_random}
+            if candidates:
+                event = (sampling_trace.record(LIGHTING_OUTPUT_FIELDS, candidates, owned_random, "after_coherence")
+                         if sampling_trace is not None else None)
+                lighting = coherence.rng(seed, "视觉表现").choice(candidates)
+                if sampling_trace is not None:
+                    sampling_trace.selected(event, lighting)
+                for field in owned_random.intersection(LIGHTING_OUTPUT_FIELDS):
+                    resolved[field] = lighting[field]
+            coherence.downstream("视觉表现", "adjusted" if candidates else "no_candidate", before, resolved, len(candidates))
+        elif "场景" in coordinated and any(
+            f in coherence.known_fields and resolved[f] != EMPTY_CHOICE for f in LIGHTING_OUTPUT_FIELDS
+        ):
+            coherence.downstream("视觉表现", "preserved_explicit", {}, {})
 
     return resolved
 
@@ -7327,6 +7380,7 @@ class ZImageChinesePromptBuilder:
         )
         optional.update(RESOLUTION_INPUTS)
         optional["构图适配"] = FRAMING_INPUT
+        optional["组合协调"] = COHERENCE_INPUT
         return {"required": inputs, "optional": optional, "hidden": {"unique_id": "UNIQUE_ID"}}
 
     def build_prompt(self, **kwargs):
@@ -7338,6 +7392,7 @@ class ZImageChinesePromptBuilder:
         join_position = kwargs.pop("拼接位置", PROMPT_JOIN_POSITIONS[0])
         separate_modules = kwargs.pop("输出排版", "连续拼接") == "按模块分段"
         framing_mode = kwargs.pop("构图适配", FRAMING_MODES[0])
+        coherence_mode = kwargs.pop("组合协调", COHERENCE_MODES[0])
         resolution_options = {name: kwargs.pop(name) for name in RESOLUTION_INPUTS if name in kwargs}
         user_module_fragments = {
             module_name: kwargs.pop(input_name, "")
@@ -7348,10 +7403,20 @@ class ZImageChinesePromptBuilder:
         request_trace = {}
         import sys
         sampling_trace = SamplingTrace(sys.modules[__name__]) if unique_id is not None else None
-        fields = resolve_fields(preset, random_scope, seed, kwargs, request_trace=request_trace,
-                                sampling_trace=sampling_trace)
         replacements = {name for name, value in user_module_fragments.items()
                         if isinstance(value, str) and value.strip()}
+        coordination = None
+        if coherence_mode == COHERENCE_MODES[1]:
+            try:
+                from .prompt_diagnostics import module_groups
+            except ImportError:
+                from prompt_diagnostics import module_groups
+            known = {f for name, fields in module_groups(sys.modules[__name__]).items()
+                     if name not in replacements for f in fields}
+            coordination = CoherencePass(known_fields=known, writable_fields=known,
+                opaque_text=bool(str(free_prompt).strip() or replacements))
+        fields = resolve_fields(preset, random_scope, seed, kwargs, request_trace=request_trace,
+                                sampling_trace=sampling_trace, **({'coherence': coordination} if coordination is not None else {}))
         fields = pose_scene_view(fields, request_trace,
                                  scene_available=not replacements.intersection(("场景", "姿态动作")))
 
@@ -7422,7 +7487,9 @@ class ZImageChinesePromptBuilder:
                                 settings=submitted, fields=fields, fragments=fragments,
                                 english_fragments=english_fragments, render_pair=render_pair,
                                 replacements=user_module_fragments, request_trace=request_trace,
-                                framing=framing_report, sampling_trace=sampling_trace)
+                                framing=framing_report, sampling_trace=sampling_trace,
+                                coherence=(coherence_explanation(coherence_mode, coordination, "全部模块")
+                                           if "组合协调" in submitted else None))
 
 
 NODE_CLASS_MAPPINGS = {

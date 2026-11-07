@@ -26,5 +26,17 @@ for (const name of ["ChinesePromptBuilder", "CanvasModule", "PersonModule", "Hai
   framing.value="按景别适配";
   node.onConfigure({widgets_values:["原文","按模块分段","按景别适配"]});
   node.onConfigure({});assert.equal(framing.value,"按景别适配");
+  if (["ChinesePromptBuilder", "PoseModule", "SceneModule"].includes(name)) {
+    const coherence={name:"组合协调",value:"协调优先"};node.widgets.push(coherence);
+    node.onConfigure({widgets_values:["原文","按模块分段","按景别适配"]});
+    assert.equal(coherence.value,"默认组合");
+    coherence.value="协调优先";
+    node.onConfigure({widgets_values:["原文","按模块分段","按景别适配","协调优先"]});
+    node.onConfigure({});assert.equal(coherence.value,"协调优先");
+    // Converted input widgets retain their serialized value slot in Classic.
+    coherence.type="converted-widget";
+    node.onConfigure({widgets_values:["原文","按模块分段","按景别适配","协调优先"]});
+    assert.equal(coherence.value,"协调优先");
+  }
 }
 console.log("all ten modular nodes: layout migration OK");

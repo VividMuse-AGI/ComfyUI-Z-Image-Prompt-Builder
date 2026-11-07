@@ -13,6 +13,8 @@ function restoreLegacyLayout(node, info) {
   if (index >= info.widgets_values.length) widgets[index].value = "连续拼接";
   const framingIndex = widgets.findIndex(widget => widget.name === "构图适配");
   if (framingIndex >= info.widgets_values.length) widgets[framingIndex].value = "保持当前规则";
+  const coherenceIndex = widgets.findIndex(widget => widget.name === "组合协调");
+  if (coherenceIndex >= info.widgets_values.length) widgets[coherenceIndex].value = "默认组合";
 }
 
 app.registerExtension({

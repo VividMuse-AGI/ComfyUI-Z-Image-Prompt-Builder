@@ -1901,6 +1901,10 @@ export const EN_CATALOG = {
       "跟随预设": "Follow Preset",
       "随机抽取": "Random"
     },
+    "组合协调": {
+      "协调优先": "Coherence First",
+      "默认组合": "Standard"
+    },
     "细节质地": {
       "CCD直接感": "With direct early-digital detail",
       "不使用": "None",
@@ -2585,6 +2589,7 @@ export const EN_CATALOG = {
     "百万像素（MP）": "1 MP = 1,000,000 pixels. Enter 1, 2, 3 or 0.5; range 0.1–16 MP. Editing this activates Preserve Aspect Ratio; divisible dimensions make the actual area approximate.",
     "目标总像素": "For Calculate from Pixels: each unit is 1024 x 1024 pixels, not a 1K long edge. Dimensions are rounded separately to the divisor.",
     "目标总像素（万）": "Enter 100 / 200 / 300 for 1 / 2 / 3 million pixels. Keeps the exact aspect ratio; alignment makes the actual area approximate. Range: 10–1600.",
+    "组合协调": "Only coordinates built-in fields permitted to randomize. Explicit values remain unchanged; custom text is not interpreted. Changing this mode may change results for the same seed.",
     "自由提示词": "Write your own positive prompt. Both Chinese and English outputs preserve it verbatim and place it according to Join Position.",
     "输出排版": "Separate modules and free text with blank lines, or keep the original continuous format.",
     "选择模式": "Manual uses your draft. Random samples the library by seed, preserving the draft and disabling manual apply. Different seeds may select the same entry.",
@@ -2713,6 +2718,7 @@ export const EN_CATALOG = {
     "穿搭结构": "Outfit Structure",
     "等效焦段": "Equivalent Focal Length",
     "线条重点": "Body-line Emphasis",
+    "组合协调": "Combination Coherence",
     "细节质地": "Detail Rendering",
     "肤色": "Skin Tone",
     "肤质": "Skin Texture",

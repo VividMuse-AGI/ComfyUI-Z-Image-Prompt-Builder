@@ -22,6 +22,7 @@ class SamplingTrace:
         self.rows = []
         self.selected_values = {}
         self.reference_modules = set()
+        self.coherence_modules = set()
         self.truncated = False
 
     def record(self, group_fields, candidates, active, stage):
@@ -81,6 +82,8 @@ class SamplingTrace:
                 reason = "no_random_fields"
             elif module in self.reference_modules:
                 reason = "reference_replacement"
+            elif module in self.coherence_modules:
+                reason = "coherence_replacement"
             elif active - measured:
                 reason = "not_instrumented"
             else:
@@ -88,6 +91,14 @@ class SamplingTrace:
             unmeasured.append({"module": module, "reason": reason})
         return {"version": 1, "coverage": "partial", "truncated": self.truncated,
                 "draws": draws, "unmeasured": unmeasured}
+
+    def coherence_changed(self, changed):
+        for module in changed:
+            if self.scope in ("全部模块", module):
+                self.coherence_modules.add(module)
+        for row in self.rows:
+            if row["module"] in changed:
+                row["effect"] = "overwritten"
 
 
 def module_groups(core):
@@ -156,7 +167,7 @@ def shoot_plan_candidates(core, groups, fields, fragments, english_fragments, re
 
 def execution_result(result, *, core, scope, seed, settings, fields, fragments,
                      english_fragments, render_pair, replacements=None, context=None,
-                     request_trace=None, framing=None, sampling_trace=None):
+                    request_trace=None, framing=None, sampling_trace=None, coherence=None):
     """Measure text effects by rendering resolved fields, never resolving again.
 
     Removing one field is a text-sensitivity check, not a candidate-count estimate
@@ -215,4 +226,6 @@ def execution_result(result, *, core, scope, seed, settings, fields, fragments,
         metadata["framing"] = framing
     if sampling_trace is not None:
         metadata["random_explanation"] = sampling_trace.snapshot(fields, request_trace)
+    if coherence is not None:
+        metadata["coherence_explanation"] = coherence
     return {"result": result, "ui": {"vividmuse_prompt_diagnostics": [metadata]}}

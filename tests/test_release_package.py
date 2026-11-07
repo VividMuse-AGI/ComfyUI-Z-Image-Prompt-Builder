@@ -34,6 +34,11 @@ class ReleasePackageTests(unittest.TestCase):
     def test_fixed_root_archive(self):
         self.assertEqual(validate_archive(self.archive(), "v0.5.0"), len(REQUIRED) + 1)
 
+    def test_coherence_runtime_is_required(self):
+        self.assertIn("combination_coherence.py", REQUIRED)
+        with self.assertRaisesRegex(ValueError, "Missing release files"):
+            validate_archive(self.archive(omit="combination_coherence.py"), "v0.5.0")
+
     def test_version_mismatch(self):
         with self.assertRaisesRegex(ValueError, "project version"):
             validate_archive(self.archive(version="0.4.2"), "v0.5.0")

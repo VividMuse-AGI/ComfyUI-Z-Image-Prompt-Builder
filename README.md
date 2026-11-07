@@ -2,7 +2,7 @@
 
 > [English](README.en.md) | 中文
 
-> v0.17.0：结果面板区分当前随机配置与历史执行，解释候选数量、后续覆盖和重复结果；两个 TXT 节点增加零／单／多条候选提示。不改变提示词或随机算法，详见[发布说明](docs/releases/v0.17.0.md)。
+> v0.18.0：完整节点、姿态动作和场景节点新增可选“组合协调”。默认组合保持原行为，协调优先只调整可随机字段中的已覆盖冲突；同时改善结果说明的字号和重复文字。详见[发布说明](docs/releases/v0.18.0.md)。
 
 > v0.14.0 新增[卡片快捷组合](docs/card-quick-combination.md)：完整节点可统一选择人物卡、穿搭卡和拍摄方案卡，预览后一次应用。支持按模块保留当前内容、设置锁定及一次撤销／重做，不增加节点高度。
 
@@ -136,7 +136,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.17.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.17.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.17.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
+推荐从 [`v0.18.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.18.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.18.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -203,6 +203,17 @@ git pull
 API 调用提供可选输入 `选择模式`、`随机种子`、`词库数据`；后者为 JSON 字符串，例如 `{"version":1,"kind":"prompt","entries":[{"title":"示例","tags":[],"prompt":"窗边自然光人像"}]}`。模块库使用 `kind:"module"`，每条增加中文规范模块值，例如 `module:"人物"`。输入键和值保持中文，界面语言不改变接口。TXT 原有 1 MiB、500 条、单条 20,000 字符限制不变；执行 JSON 独立上限为 8 MiB，总文本上限 1,100,000 个 UTF-16 单元，预留标题及 JSON 转义开销。
 
 本地自动化、纯文本执行器及中英文／经典／Nodes 2.0 实机验收已完成。验收范围与限制见[测试记录](docs/testing/2026-09-27-txt-random-acceptance.md)，不代表所有 ComfyUI 版本的兼容保证。
+
+### 组合协调（v0.18.0）
+
+完整节点、独立姿态动作和场景节点提供“组合协调”：
+
+- **默认组合**：保持 v0.17.0 的既有随机与联动行为；旧工作流缺少此设置时使用此模式。
+- **协调优先**：只在原候选范围内调整当前节点允许随机变化的内置字段，不自动启用随机、解锁或改写指定值、跟随预设和上游文本。切换模式可能改变相同种子的结果。
+
+首批只覆盖“盘腿而坐与高脚椅横杆腿部动作”和“泳池边坐姿与校园教室”两个明确组合。没有可靠替代时保留原组合并说明；涉及自由提示词、TXT 或未知上下文时，相关跨模块规则保守跳过。不解析用户文字，不保证所有搭配或生图人体正确。
+
+使用方法：将需要变化的字段设为“随机抽取”，选择“协调优先”并运行，再打开“查看上次结果”。“本次组合协调”显示实际模式、调整前后值或保留原因，不回写下拉框。模块串联建议场景→姿态动作→摄影；每个节点独立设置模式，只调整自身字段，不回写上游。
 
 ### 随机状态与执行结果
 
@@ -530,7 +541,7 @@ python -c "import nodes; nodes.ZImageChinesePromptBuilder().build_prompt()"
 
 ## 发布信息
 
-- 当前版本：`0.17.0`
+- 当前版本：`0.18.0`
 - GitHub：[VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder)
 - Comfy Registry Publisher ID：`VividMuse-AGI`
 - 目标宿主：ComfyUI `0.31.1` 及以上

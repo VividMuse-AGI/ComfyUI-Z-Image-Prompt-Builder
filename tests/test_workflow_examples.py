@@ -45,10 +45,11 @@ class WorkflowExamplesTests(unittest.TestCase):
                                 value = next(values)
                             except StopIteration:
                                 # These published examples deliberately retain the old schema.
-                                # Only the newly appended, opt-in control may be absent.
+                                # Only the specifically appended opt-in controls may be absent.
                                 self.assertEqual(section, "optional")
-                                self.assertEqual(name, "构图适配")
-                                self.assertEqual(opts["default"], "保持当前规则")
+                                defaults = {"构图适配": "保持当前规则", "组合协调": "默认组合"}
+                                self.assertIn(name, defaults)
+                                self.assertEqual(opts["default"], defaults[name])
                                 continue
                             if isinstance(typ, (list, tuple)):
                                 self.assertIn(value, typ, name)

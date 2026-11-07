@@ -207,6 +207,25 @@ for(const diagnosticsFirst of [true,false]){
     await button(panel,"Confirm Save Shoot Plan").click();assert.deepEqual(Object.keys(single.properties.vividMuseShootPlanCards[0].modules),[module]);
     panel.close();lang="zh";
   }
+  // Both module-prefixed and shared errors must have exactly one module label.
+  for(const language of ["zh","en"]){
+    lang=language;
+    const target=await make("ChinesePromptBuilder");
+    for(const missing of [false,true]){
+      const payload=json(results[0]);
+      if(missing)delete payload.shoot_plan_candidates;
+      else for(const module of ["场景","摄影","视觉表现"])
+        payload.shoot_plan_candidates.modules[module]={available:false,reason:"empty_module"};
+      await emit(target,`labels-${language}-${missing}`,payload);panel=open(target);
+      const reason=missing?(language==="zh"?"此记录不包含拍摄方案数据，请重新执行。":"This record has no shoot plan data. Run the node again.")
+        :(language==="zh"?"此模块在该次执行中没有可保存的输出。":"This module has no saveable output in this execution.");
+      const labels=language==="zh"?["场景","摄影","视觉表现"]:["Scene","Camera","Visual"];
+      assert.ok(all(panel).some(e=>e.textContent===labels.map(label=>`${label}: ${reason}`).join("\n")));
+      assert.ok(button(panel,language==="zh"?"保存为拍摄方案卡":"Save as Shoot Plan Card").disabled);
+      panel.close();
+    }
+  }
+  lang="zh";
   const oldShoot=await make("ChinesePromptBuilder"),oldData=json(results[0]);delete oldData.shoot_plan_candidates;
   await emit(oldShoot,"old-protocol",oldData);panel=open(oldShoot);assert.ok(button(panel,"保存为拍摄方案卡").disabled);
   assert.ok(all(panel).some(e=>e.textContent?.includes("重新执行")));panel.close();
