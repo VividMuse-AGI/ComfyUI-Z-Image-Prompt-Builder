@@ -536,7 +536,7 @@ function showDetails(node) {
   const close = button("关闭", "Close", () => dialog.close());
   const configuration = el("p", configurationText); configuration.style.whiteSpace = "pre-wrap";
   configuration.setAttribute("aria-label", text("当前配置摘要", "Current Configuration Summary"));
-  dialog.append(title, note, close, configuration);
+  dialog.append(title, close);
   const selector = el("select");
   selector.setAttribute("aria-label", text("选择执行记录", "Select Execution Record"));
   selector.style.cssText = "display:block;max-width:100%;margin:12px 0";
@@ -546,6 +546,7 @@ function showDetails(node) {
   });
   selector.value = "0";
   const info = el("p");
+  const changes = el("p"); changes.style.whiteSpace = "pre-wrap";
   const sampling = el("pre");
   sampling.setAttribute("aria-label", text("本次抽取说明", "Sampling Details for This Execution"));
   sampling.style.cssText = "font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;max-height:24vh;overflow:auto";
@@ -572,20 +573,57 @@ function showDetails(node) {
   enBody.setAttribute("aria-label", text("英文结果正文", "English Result Text"));
   const selected = () => records[Number(selector.value)];
   let active = true, composing = false;
+  let copyAttempt = 0;
+  const manualCopyArea = el("section"); manualCopyArea.hidden = true;
+  const manualCopyLabel = el("p"), manualCopyText = el("textarea");
+  manualCopyText.readOnly = true; manualCopyText.rows = 6;
+  manualCopyText.style.cssText = "box-sizing:border-box;width:100%;resize:vertical;min-height:100px;user-select:text";
+  manualCopyText.setAttribute("aria-label", text("手动复制正文", "Manual Copy Text"));
+  manualCopyArea.append(manualCopyLabel, manualCopyText);
+  const prepareManualCopy = (key, record) => {
+    manualCopyText.value = record.data[key] || "";
+    manualCopyLabel.textContent = key === "zh"
+      ? text("中文正文：已全选，请按 Ctrl+C（Mac：⌘C），然后粘贴。", "Chinese text selected. Press Ctrl+C (Mac: ⌘C), then paste.")
+      : text("英文正文：已全选，请按 Ctrl+C（Mac：⌘C），然后粘贴。", "English text selected. Press Ctrl+C (Mac: ⌘C), then paste.");
+    manualCopyArea.hidden = false;
+    manualCopyText.focus(); manualCopyText.select();
+  };
+  const manualCopy = key => {
+    const record = selected(); if (!record) return;
+    copyAttempt++;
+    more.open = false;
+    prepareManualCopy(key, record);
+    status.textContent = text("正文已选中，尚未复制；请按 Ctrl+C（Mac：⌘C）。", "Text selected, not yet copied. Press Ctrl+C (Mac: ⌘C).");
+  };
   const copy = async key => {
     const record = selected();
     if (!record) return;
+    const attempt = ++copyAttempt;
+    const current = () => active && selected() === record && attempt === copyAttempt;
+    status.textContent = key === "zh" ? text("正在复制中文…", "Copying Chinese…") : text("正在复制英文…", "Copying English…");
     try {
       if (!globalThis.navigator?.clipboard?.writeText) throw Error("Clipboard unavailable");
       await globalThis.navigator.clipboard.writeText(record.data[key] || "");
-      if (active && selected() === record) status.textContent = text("正文已复制。", "Result text copied.");
+      if (current()) {
+        const message = key === "zh"
+          ? text("已发送中文复制请求。", "Chinese copy request sent.")
+          : text("已发送英文复制请求。", "English copy request sent.");
+        status.textContent = message;
+        globalThis.setTimeout(() => {
+          if (current() && status.textContent === message) status.textContent = "";
+        }, 3000);
+      }
     } catch {
-      if (active && selected() === record) status.textContent = text("复制失败，请选中下方正文手动复制。", "Copy failed. Select the result text below and copy it manually.");
+      if (current()) {
+        prepareManualCopy(key, record);
+        status.textContent = text("复制失败，正文已选中；请按 Ctrl+C（Mac：⌘C）手动复制。", "Copy failed. Text selected; press Ctrl+C (Mac: ⌘C) to copy manually.");
+      }
     }
   };
   const exportResult = () => {
     const record = selected();
     if (!record) return;
+    more.open = false;
     let url, link;
     try {
       const json = JSON.stringify(resultSnapshot(node, record), null, 2);
@@ -601,8 +639,17 @@ function showDetails(node) {
     }
   };
   const actions = el("div"); actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+  actions.setAttribute("aria-label", text("结果操作", "Result Actions"));
+  const more = el("details");
+  more.setAttribute("aria-label", text("更多结果操作", "More Result Actions"));
+  more.append(el("summary", text("更多…", "More…")));
+  const moreActions = el("div"); moreActions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:8px 0";
+  moreActions.append(button("导出结果 JSON", "Export Result JSON", exportResult),
+    button("手动复制中文", "Manual Copy Chinese", () => manualCopy("zh")),
+    button("手动复制英文", "Manual Copy English", () => manualCopy("en")));
+  more.append(moreActions, el("p", text("导出为只读结果快照，不是工作流或可导入卡片。", "Export is a read-only result snapshot, not a workflow or importable card.")));
   actions.append(button("复制中文", "Copy Chinese", () => copy("zh")),
-    button("复制英文", "Copy English", () => copy("en")), button("导出此结果", "Export This Result", exportResult));
+    button("复制英文", "Copy English", () => copy("en")), more);
   const cardArea = el("section");
   const cardActions = el("div"); cardActions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:10px 0";
   const cardAvailability = el("p"); cardAvailability.style.whiteSpace = "pre-wrap";
@@ -733,9 +780,20 @@ function showDetails(node) {
   shootArea.append(shootChoices, shootAvailability, startShoot, shootEditor);
   const diagnostic = el("details");
   diagnostic.setAttribute("aria-label", text("字段与诊断详情", "Fields and Diagnostics"));
-  diagnostic.append(el("summary", text("字段与诊断详情", "Fields and Diagnostics")), diagnosticBody);
+  diagnostic.append(el("summary", text("字段与技术详情", "Fields and Technical Details")), note, diagnosticBody);
+  const savedCards = el("details");
+  savedCards.setAttribute("aria-label", text("保存为卡片", "Save as Card"));
+  savedCards.hidden = !cardModules.length && !shootModules.length;
+  savedCards.append(el("summary", text("保存为卡片", "Save as Card")),
+    el("p", text("保存所选执行结果，不是当前编辑器设置。", "Save the selected execution result, not current editor settings.")), cardArea, shootArea);
+  const explanation = el("details");
+  explanation.setAttribute("aria-label", text("随机与组合说明", "Randomness and Combination"));
+  explanation.append(el("summary", text("随机与组合说明", "Randomness and Combination")),
+    el("h4", text("当前设置", "Current Settings")), configuration,
+    el("h4", text("所选执行记录", "Selected Execution")), changes, sampling, coordination, coordinationDetails);
   const render = () => {
     const record = selected(); status.textContent = "";
+    copyAttempt++; more.open = false; manualCopyArea.hidden = true; manualCopyText.value = "";
     clearCardDraft();
     clearShootDraft();
     const shootReasons = [];
@@ -759,7 +817,7 @@ function showDetails(node) {
       }
     }
     cardAvailability.textContent = unavailable.join("\n");
-    if (!record) { diagnosticBody.textContent = bodyText; diagnostic.open = true; return; }
+    if (!record) { diagnosticBody.textContent = bodyText; return; }
     sampling.textContent = [...executionImpactLines(record), ...randomExplanationLines(record)].join("\n");
     coordination.textContent = coordination.hidden ? "" : coherenceSummaryLines(record, node).join("\n");
     const coherence = parseCoherenceExplanation(record.data.coherence_explanation, nodeScope(node));
@@ -767,21 +825,22 @@ function showDetails(node) {
     coordinationDetails.hidden = coordination.hidden || record.coherenceStatus === "invalid"
       || coherence.status !== "valid" || !coherence.data.events.length;
     coordinationBody.textContent = coordinationDetails.hidden ? "" : coherenceExplanationLines(record, node).join("\n");
-    info.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n`
-      + (record.changed === null ? text("首次记录或设置／上下文不同，不比较变化。", "First record or different settings/context; changes are not comparable.")
+    changes.textContent = (record.changed === null ? text("首次记录或设置／上下文不同，不比较变化。", "First record or different settings/context; changes are not comparable.")
         : text(`相对前次可比较执行：${record.changed.length} 个模块变化`, `Compared with the previous comparable execution: ${record.changed.length} modules changed`)
-          + (record.changed.length ? ` (${record.changed.map(tr).join(", ")})` : ""))
+          + (record.changed.length ? ` (${record.changed.map(tr).join(", ")})` : ""));
+    info.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}`
       + (stale(node, record) ? text("\n当前设置与此记录不同；这是历史结果。", "\nCurrent settings differ from this historical result.") : "");
     info.style.whiteSpace = "pre-wrap";
-    if (record.data.framing?.status && record.data.framing.status !== "disabled") info.textContent += text(
+    if (record.data.framing?.status && record.data.framing.status !== "disabled") changes.textContent += text(
       `\n构图适配省略 ${record.data.framing.omitted.length} 项，原因见字段与诊断详情。`,
       `\nFraming adaptation omitted ${record.data.framing.omitted.length} fields; see Fields and Diagnostics for reasons.`);
     zhBody.textContent = record.data.zh || ""; enBody.textContent = record.data.en || "";
     diagnosticBody.textContent = details(node, record, false);
   };
   selector.onchange = render;
-  if (records.length) dialog.append(selector, info, sampling, coordination, coordinationDetails, actions, cardArea, shootArea, status,
-    el("h4", text("中文提示词", "Chinese Prompt")), zhBody, el("h4", text("英文提示词", "English Prompt")), enBody);
+  if (records.length) dialog.append(selector, info, actions, status, manualCopyArea,
+    el("h4", text("中文提示词", "Chinese Prompt")), zhBody, el("h4", text("英文提示词", "English Prompt")), enBody,
+    el("p", text("运行后重新打开可查看最新结果。", "Reopen after running to view the latest result.")), savedCards, explanation);
   else dialog.append(el("p", text("暂无实际执行记录，请先运行节点。", "No execution record yet. Run the node first.")));
   dialog.append(diagnostic); render();
   dialog.addEventListener("compositionstart", () => { composing = true; });
@@ -803,7 +862,7 @@ function showDetails(node) {
 function refresh(node) {
   const button = node?.__vividMusePromptStatusButton;
   if (!button) return;
-  const label = summary(node);
+  const label = text("查看结果", "View Results");
   const changed = button.label !== label;
   button.label = button.__vividMuseDisplayText = label;
   button.tooltip = text("点击查看当前随机状态和上次实际输出；不会修改输入。", "View random status and last actual output; inputs are not modified.");
@@ -823,7 +882,7 @@ function install(node) {
     node.__vividMuseDiagnosticsGeneration = 0;
     const button = node.addWidget("button", "随机状态与执行结果", null, () => showDetails(node), { serialize: false });
     button.serialize = false;
-    button.__vividMuseDynamicLabel = lang => summary(node, lang);
+    button.__vividMuseDynamicLabel = lang => lang === "en" ? "View Results" : "查看结果";
     node.__vividMusePromptStatusButton = button;
     const before = node.onConfigure;
     node.onConfigure = function () {

@@ -5956,6 +5956,16 @@ export const LIBRARY_CATALOG = {
         "value": "双手捧白色瓷杯",
         "zh": "双手轻轻捧住一只白色瓷杯",
         "en": "holding a white porcelain cup gently with both hands"
+      },
+      {
+        "value": "一手轻扶翻领",
+        "zh": "一只手轻扶衣服向外翻折的领片，另一只手自然垂落",
+        "en": "one hand lightly touching the folded-over collar of the garment, the other arm resting naturally at the side"
+      },
+      {
+        "value": "一手轻扶领口边缘",
+        "zh": "一只手轻扶衣服领口的布料边缘，另一只手自然垂落",
+        "en": "one hand lightly touching the fabric edge of the neckline, the other arm resting naturally at the side"
       }
     ],
     "腿部动作": [

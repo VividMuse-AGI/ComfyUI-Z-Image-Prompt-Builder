@@ -91,17 +91,18 @@ let passed = 0;
 async function test(name, run) { language = "zh"; await run(); passed++; console.log(`PASS combination UI: ${name}`); }
 
 await test("full-node entry opens one dialog; standalone nodes have no entry", async () => {
-  const node = await make(), before = state(node), main = cards.openCardsPanel(node);
-  await button(main, "卡片快捷组合").click();
-  assert.equal(main.open, false); const panel = node.__vividMuseCardsDialog;
+  const node = await make(), before = state(node), main = cards.openLibraryManager(node);
+  await button(main, "组合应用").click();
+  assert.equal(main.open, true); const panel = node.__vividMuseCardsDialog;
+  assert.equal(panel.tag,"section"); assert.equal(node.__vividMuseLibraryDialog,main);
   assert.ok(panel.open); assert.equal(state(node), before);
   for (const name of ["人物卡", "发型卡", "穿搭卡", "姿态动作卡", "拍摄方案卡"]) assert.equal(control(panel, name).value, "");
   assert.ok(button(panel, "预览组合").disabled); assert.ok(button(panel, "确认应用").disabled);
   await button(panel, "返回卡片管理").click(); assert.equal(panel.open, false);
-  assert.ok(node.__vividMuseCardsDialog.open); await button(node.__vividMuseCardsDialog, "关闭").click();
+  assert.ok(node.__vividMuseCardsDialog.open); assert.equal(node.__vividMuseLibraryDialog,main); await button(main, "关闭").click();
   for (const type of Object.keys(schemas).filter(k => /^VividMuse_ZImage(?:Canvas|Person|Hair|Clothing|Pose|Scene|Camera|Visual)Module$/.test(k))) {
-    const own = await make(type, false), ownPanel = cards.openCardsPanel(own);
-    assert.ok(!flatten(ownPanel).some(e => e.textContent === "卡片快捷组合"));
+    const own = await make(type, false), ownPanel = cards.openLibraryManager(own);
+    assert.ok(!flatten(ownPanel).some(e => e.textContent === "组合应用"));
     assert.throws(() => ui.openCardCombinationPanel(own)); await ownPanel.close();
   }
 });

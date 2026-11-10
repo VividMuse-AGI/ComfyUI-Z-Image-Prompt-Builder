@@ -82,9 +82,10 @@ for (const [index, kind] of kinds.entries()) {
   assert.match(tools.details(node), /改变种子不会改变本节点的结构化内容/);
   const hostStates = new Map(node.widgets.map(w => [w.name, w]));
   set(node, "随机种子", 777);
-  assert.match(button.label, /随机未启用/);
+  assert.equal(button.label, "查看结果");
   set(node, "发色", "随机抽取");
-  assert.match(button.label, /已启用随机：1/);
+  assert.equal(button.label, "查看结果");
+  assert.match(tools.summary(node), /已启用随机：1/);
   set(node, "用户发型片段", "我的头发");
   assert.match(tools.details(node), /用户文本替代内置模块：发型/);
   assert.equal(w(node, "鞋履").value, "不使用");
@@ -145,7 +146,7 @@ assert.equal(node.__vividMusePromptHistory.length, 0, "Late-start result must no
 
 let lang = "en";
 sandbox.__vividMuseZImageI18n = {activeLanguage: () => lang, translateMessage: s => s};
-assert.match(node.__vividMusePromptStatusButton.__vividMuseDynamicLabel("en"), /^Random:/);
+assert.equal(node.__vividMusePromptStatusButton.__vividMuseDynamicLabel("en"), "View Results");
 assert.match(tools.details(node), /Run samples only fields set to Random/);
 set(node, "发色", "不使用");
 assert.match(tools.summary(node), /Random off/);
@@ -162,6 +163,7 @@ sandbox.document = {
     const el = {tag, style: {}, attrs: {}, children: [], events: {},
       setAttribute(k,v) {this.attrs[k]=v;}, addEventListener(k,fn) {this.events[k]=fn;},
       append(...children) {this.children.push(...children);}, click() {this.onclick?.();},
+      focus() {this.focused = true;}, select() {this.selectedText = this.value;},
       close() {this.onclose?.();}, remove() {this.removed = true;}, showModal() {this.opened = true;}};
     Object.defineProperty(el, "innerHTML", {set() {throw Error("No HTML writes");}});
     elements.push(el); return el;
@@ -192,6 +194,22 @@ const resultDialog = node.__vividMusePromptDialog;
 const all = root => [root,...root.children.flatMap(all)];
 const labeled = label => all(resultDialog).find(el=>el.attrs["aria-label"]===label);
 const action = label => all(resultDialog).find(el=>el.tag==="button" && el.textContent===label);
+// Primary output precedes all advanced sections. Hidden controls remain reachable.
+const primary = labeled("结果操作"), more = labeled("更多结果操作");
+assert.deepEqual(primary.children.map(e=>e.tag), ["button", "button", "details"]);
+assert.deepEqual(primary.children.slice(0,2).map(e=>e.textContent), ["复制中文", "复制英文"]);
+assert.ok(!more.open);
+assert.ok(all(more).includes(action("导出结果 JSON")));
+assert.ok(all(more).includes(action("手动复制中文")));
+assert.ok(all(more).includes(action("手动复制英文")));
+for (const label of ["保存为卡片", "随机与组合说明", "字段与诊断详情"]) {
+  const section = labeled(label);
+  assert.ok(!section.open, `${label} starts collapsed`);
+  assert.ok(resultDialog.children.indexOf(section) > resultDialog.children.indexOf(labeled("英文结果正文")));
+}
+assert.ok(all(labeled("随机与组合说明")).includes(labeled("当前配置摘要")));
+assert.ok(all(labeled("随机与组合说明")).includes(labeled("本次抽取说明")));
+assert.ok(resultDialog.children.indexOf(primary) < resultDialog.children.indexOf(labeled("中文结果正文")));
 const select = labeled("选择执行记录");
 select.value = "1"; select.onchange();
 assert.equal(labeled("中文结果正文").textContent, "历史中文\n分段");
@@ -199,15 +217,47 @@ assert.equal(labeled("字段与诊断详情").open, undefined, "Verbose diagnost
 let copied;
 sandbox.navigator = {clipboard:{async writeText(value){copied=value;}}};
 await action("复制中文").onclick(); assert.equal(copied,"历史中文\n分段");
+assert.match(all(resultDialog).find(el=>el.attrs.role==="status").textContent,/中文复制/);
 await action("复制英文").onclick(); assert.equal(copied,"black hair");
+assert.match(all(resultDialog).find(el=>el.attrs.role==="status").textContent,/英文复制/);
+const manualText = labeled("手动复制正文");
+assert.equal(manualText.readOnly, true);
+more.open = true;
+action("手动复制中文").onclick();
+assert.equal(more.open, false);
+assert.equal(manualText.value, "历史中文\n分段");
+assert.equal(manualText.selectedText, manualText.value);
+assert.equal(manualText.focused, true);
+assert.match(all(resultDialog).find(el=>el.attrs.role==="status").textContent,/尚未复制/);
+assert.equal(copied, "black hair", "Manual selection must not claim or perform an API copy");
+action("手动复制英文").onclick(); assert.equal(manualText.selectedText, "black hair");
 sandbox.navigator.clipboard.writeText = async()=>{throw Error("denied");};
 await action("复制中文").onclick();
 assert.match(all(resultDialog).find(el=>el.attrs.role==="status").textContent,/复制失败/);
+assert.equal(manualText.selectedText, "历史中文\n分段");
 assert.equal(labeled("中文结果正文").textContent,"历史中文\n分段");
+// An unavailable API takes the same usable manual path.
+sandbox.navigator = {};
+await action("复制英文").onclick(); assert.equal(manualText.selectedText, "black hair");
+// Late failures must not replace a manual choice or a newly selected record.
+let rejectCopy;
+sandbox.navigator.clipboard = {writeText() {return new Promise((resolve,reject)=>{rejectCopy=reject;});}};
+const lateCopy = action("复制英文").onclick();
+action("手动复制中文").onclick(); rejectCopy(Error("late denial")); await lateCopy;
+assert.equal(manualText.value, "历史中文\n分段");
+assert.match(all(resultDialog).find(el=>el.attrs.role==="status").textContent,/尚未复制/);
+const oldCopy = action("复制中文").onclick();
+select.value = "0"; select.onchange(); rejectCopy(Error("record changed")); await oldCopy;
+assert.equal(manualText.value, "");
+assert.equal(all(resultDialog).find(el=>el.children.includes(manualText)).hidden, true);
+assert.equal(all(resultDialog).find(el=>el.attrs.role==="status").textContent, "");
+select.value = "1"; select.onchange();
 let exportedBlob, revoked;
 sandbox.Blob = Blob;
 sandbox.URL = {createObjectURL(blob){exportedBlob=blob;return "blob:test";},revokeObjectURL(url){revoked=url;}};
-action("导出此结果").onclick();
+more.open = true;
+action("导出结果 JSON").onclick();
+assert.equal(more.open, false);
 const snapshot = JSON.parse(await exportedBlob.text());
 assert.equal(snapshot.kind,"vividmuse-prompt-result"); assert.equal(snapshot.version,1);
 assert.equal(snapshot.seed,"18446744073709551615"); assert.equal(snapshot.zh,"历史中文\n分段");
@@ -216,12 +266,12 @@ assert.deepEqual(snapshot.resolved,{发色:"黑色",鞋履:"不使用"});
 assert.equal(snapshot.limitations.executable_workflow,false);
 assert.equal(snapshot.limitations.includes_upstream_workflow,false);
 assert.equal(snapshot.framing.omitted[0].field,"鞋履");
-assert.match(labeled("字段与诊断详情").children[1].textContent,/按景别省略，原选择保留/);
+assert.match(labeled("字段与诊断详情").children.find(e=>e.tag==="pre").textContent,/按景别省略，原选择保留/);
 while(timers.length) timers.shift()(); assert.equal(revoked,"blob:test");
 assert.equal(JSON.stringify(node.widgets.map(w=>w.value)),serializedBefore);
 assert.equal(JSON.stringify(node.__vividMusePromptHistory),historyBefore);
 sandbox.URL.createObjectURL=()=>{throw Error("download unavailable");};
-action("导出此结果").onclick();
+action("导出结果 JSON").onclick();
 assert.match(all(resultDialog).find(el=>el.attrs.role==="status").textContent,/无法导出/);
 // Later runs may evict history entries; an open panel must still show its snapshot.
 for(let i=0;i<6;i++) await submit(`panel-open-${i}`,i,"later",node);
@@ -237,18 +287,40 @@ assert.equal(resultDialog.removed,undefined);
 resultDialog.events.keydown({key:"Escape",stopPropagation(){},preventDefault(){}});
 assert.ok(resultDialog.removed);
 lang="en";
+await submit("english-panel-old", "42", "历史中文\n分段", node);
+await submit("english-panel-new", "43", "新的中文结果", node);
 node.__vividMusePromptStatusButton.callback();
 assert.ok(all(node.__vividMusePromptDialog).find(el=>el.textContent==="Copy English"));
+const englishPanel = node.__vividMusePromptDialog;
+const englishAction = name => all(englishPanel).find(el=>el.tag==="button"&&el.textContent===name);
+const englishSelect = all(englishPanel).find(el=>el.attrs["aria-label"]==="Select Execution Record");
+const oldRecordIndex = [...node.__vividMusePromptHistory].reverse().findIndex(record=>record.promptId==="english-panel-old");
+assert.ok(oldRecordIndex>=0);
+englishSelect.value = String(oldRecordIndex); englishSelect.onchange();
+await englishAction("Copy Chinese").onclick(); assert.equal(copied,"历史中文\n分段");
+await englishAction("Copy English").onclick(); assert.equal(copied,"black hair");
+const englishStatus = all(englishPanel).find(el=>el.attrs.role==="status");
+assert.equal(englishStatus.textContent,"English copy request sent.");
+while(timers.length) timers.shift()();
+assert.equal(englishStatus.textContent, "", "Success message expires without reading clipboard");
+const englishMore = all(englishPanel).find(el=>el.attrs["aria-label"]==="More Result Actions");
+assert.ok(!englishMore.open);
+englishMore.open = true; englishAction("Manual Copy Chinese").onclick();
+assert.equal(all(englishPanel).find(el=>el.attrs["aria-label"]==="Manual Copy Text").value,"历史中文\n分段");
+assert.equal(englishMore.open,false);
 node.__vividMusePromptDialog.close(); lang="zh";
 for (const [index,kind] of kinds.entries()) {
   const recordNode=make(kind,100+index);
   recordNode.__vividMusePromptStatusButton.callback();
   assert.ok(all(recordNode.__vividMusePromptDialog).some(el=>/暂无实际执行记录/.test(el.textContent)));
-  assert.ok(!all(recordNode.__vividMusePromptDialog).some(el=>el.textContent==="导出此结果"));
+  assert.ok(!all(recordNode.__vividMusePromptDialog).some(el=>el.textContent==="导出结果 JSON"));
+  assert.ok(!all(recordNode.__vividMusePromptDialog).find(el=>el.attrs["aria-label"]==="字段与诊断详情").open);
   recordNode.__vividMusePromptDialog.close();
   tools.acceptResult(recordNode,data(recordNode,"18446744073709551615",`${kind}正文`));
   recordNode.__vividMusePromptStatusButton.callback();
   assert.equal(all(recordNode.__vividMusePromptDialog).find(el=>el.attrs["aria-label"]==="中文结果正文").textContent,`${kind}正文`);
+  const saveSection=all(recordNode.__vividMusePromptDialog).find(el=>el.attrs["aria-label"]==="保存为卡片");
+  assert.equal(saveSection.hidden,kind==="CanvasModule");
   recordNode.__vividMusePromptDialog.close();nodes.delete(String(recordNode.id));
 }
 

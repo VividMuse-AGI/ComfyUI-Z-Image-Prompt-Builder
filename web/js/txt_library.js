@@ -401,6 +401,9 @@ function installTxtLibraryWidgets(node) {
   const clearButton = addHelperWidget(
     node, "button", "清除已导入词库", null, () => clearTxtPromptLibrary(node),
   );
+  clearButton.label = clearButton.__vividMuseDisplayText = "移除 TXT 用户词库";
+  clearButton.tooltip = "移除导入的完整提示词条目列表；保留已写入的自由提示词。";
+  clearFreePromptButton.tooltip = "仅清空自由提示词；保留结构化内容、已导入词库和前置输入。";
 
   node.__vividMuseTxtLibraryToggle = toggle;
   node.__vividMuseTxtLibraryEntryWidget = entryWidget;
@@ -410,11 +413,15 @@ function installTxtLibraryWidgets(node) {
     entryWidget,
     modeWidget,
     applyButton,
-    clearFreePromptButton,
+    ...(isStandaloneNode(node) ? [clearFreePromptButton] : []),
     clearButton,
   ];
   for (const widget of [toggle, ...node.__vividMuseTxtLibraryControls]) {
     moveWidgetBefore(node, widget, freePromptWidget);
+  }
+  if (!isStandaloneNode(node)) {
+    node.widgets.splice(node.widgets.indexOf(clearFreePromptButton), 1);
+    node.widgets.splice(node.widgets.indexOf(freePromptWidget) + 1, 0, clearFreePromptButton);
   }
   syncTxtLibraryControls(node, false);
   setTxtLibraryExpanded(node, Boolean(node.properties?.[EXPANDED_PROPERTY]), false);

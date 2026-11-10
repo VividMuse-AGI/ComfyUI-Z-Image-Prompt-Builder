@@ -10,6 +10,10 @@ v0.12.0 另提供[拍摄方案卡](shoot-plan-cards.md)，用于场景／摄影�
 
 ## 使用方法
 
+当前结果入口为“查看结果 → 保存为卡片”（展开）；卡片管理中的导入、导出、重命名、删除位于“管理…”。模块卡片、整套预设和组合应用在同一管理弹窗的页签中切换。
+
+Current result entry: **View Results → Save as Card** (expand). Card imports, exports, rename and delete are under **Manage…**. Module cards, whole presets and combination application use tabs in the same manager.
+
 ### v0.16.0：导入指引与内容摘要
 
 选择卡片后，选择器下方显示只读“卡片内容”：最多五项主要有效字段，清空值和隐藏分支另行提示。即使当前字段与卡片一致，摘要仍显示卡片内容。摘要不是完整字段列表，也不是“应用差异”；省略不表示保持原值，请在应用前查看全部字段。
@@ -22,7 +26,7 @@ Selecting a card shows a read-only **Card contents** summary below the selector:
 
 Imports distinguish the wrong entry, invalid JSON, files over 1 MiB, unsupported versions and schema errors. Guidance never redirects, converts or applies data. User presets have no dedicated `kind`; tentative recognition still requires the original validator. Import material favorites through **Search & Favorites → Import Favorites**, and TXT files through their TXT library entry. Result records are not directly restorable card imports. Cancellation, panel closure, workflow changes and obsolete reads do not write data.
 
-1. 在完整节点或八个标准模块节点上右键，选择 **卡片管理 / 模块锁定**（早期版本为“人物卡 / 穿搭卡 / 模块锁定”）。
+1. 在完整节点或对应独立模块节点上右键，选择 **我的预设与卡片 → 模块卡片**。画面基础节点只提供整套预设，不提供模块卡片。
 2. 选择人物、发型、服装或姿态动作，输入名称，点击 **保存当前模块**。卡片是具体字段的快照；“跟随预设”自动转换为当前预设值，“不使用”保留。包含“随机抽取”时需先改成具体选项，或执行后从结果面板保存。
 3. 选择已保存卡片，点击 **应用卡片**，只替换该模块；也可选择 **应用并锁定**，之后随机按钮会跳过这些字段。
 4. 人物卡包含年龄、族裔、五官、肤色、身形和妆容的 20 个字段，不包含发型。发型卡含发色模式、发色、发色色调、染色方式、头发长度、发质与卷度、发型造型、刘海和头部配饰，共 9 字段。穿搭卡含服装、鞋袜、配件的 21 字段。姿态动作卡含画面瞬间、基础姿态、身体方向、身体重心、肩颈状态、手部动作、腿部动作、头部方向、视线、表情，共 10 字段。
@@ -32,7 +36,7 @@ Imports distinguish the wrong entry, invalid JSON, files over 1 MiB, unsupported
 
 ### v0.15.0：发型与姿态动作卡
 
-卡片包请从 **右键节点 → 卡片管理 / 模块锁定 → 导入卡片包** 导入；不要使用“素材搜索与收藏 → 导入收藏”。卡片包保存模块配置，素材收藏文件保存条目标识，两者不是同一种 JSON 格式。
+卡片包请从 **右键节点 → 我的预设与卡片 → 模块卡片 → 管理… → 导入卡片包** 导入；不要使用“素材搜索与收藏 → 导入收藏”。卡片包保存模块配置，素材收藏文件保存条目标识，两者不是同一种 JSON 格式。
 
 - 完整节点可管理四类内容卡；发型／姿态动作独立节点仅操作各自模块。保存、应用、收藏、重命名及卡片包沿用现有入口。
 - 在“实际执行结果”中选择记录，再点 **保存为发型卡** 或 **保存为姿态动作卡**。保存的是该记录的解析值，不读取当前编辑器新值，也不会应用或锁定。完整节点提供四种保存按钮，独立节点只提供自身类型。
@@ -49,7 +53,7 @@ Imports distinguish the wrong entry, invalid JSON, files over 1 MiB, unsupported
 
 ## 锁定的含义
 
-- 完整节点支持八个标准模块整组锁定；独立模块只能锁定自身。原“用户预设 / 随机锁定 / 组合检查”面板仍提供字段级锁定。
+- 右键“随机设置与检查”提供模块及字段级锁定。完整节点支持八个标准模块；独立模块只能锁定自身。
 - 锁定将预设引用落实为具体值；Run 更改种子不会重新抽取这些具体字段，随机按钮也跳过它们。
 - 锁定不是禁止编辑。手动改值、切换整套预设、清空仍然有效。解锁只解除随机保护，不会立即随机或恢复预设引用。
 - 卡片应用不会更改当前编辑模块、预设选择、种子、分辨率、排版、构图适配、其他模块或自由提示词。
@@ -98,7 +102,7 @@ Available since v0.10.0. The package still contains 11 nodes, with no new depend
 
 Version v0.12.0 also offers separate [Shoot Plan Cards](shoot-plan-cards.md#english) for Scene / Camera / Visual combinations, with a separate quota and import format. Existing person/outfit cards are unchanged.
 
-Right-click the full builder or a standard module and select **Cards / Module Locks** (called **Person / Outfit Cards / Module Locks** in earlier versions). Choose **Person**, **Hair**, **Clothing** or **Pose**, enter a name, and use **Save Module**. **Follow Preset** becomes the current concrete preset value; **Unused** is preserved. For unresolved **Random** fields, choose concrete values or run the node and save from its execution result.
+Right-click the full builder or a corresponding standalone module and select **My Presets & Cards → Module Cards**. Choose **Person**, **Hair**, **Outfit** or **Pose**, enter a name, and use **Save Module**. Canvas offers whole presets only. **Follow Preset** becomes the current concrete preset value; **Unused** is preserved. For unresolved **Random** fields, choose concrete values or run the node and save from its execution result.
 
 **Apply Card** changes only its module. **Apply & Lock** also protects those fields from random buttons. Person cards contain 20 fields, including physique and makeup, but not hair. Hair cards contain 9 fields: color mode, color, color tone, dye technique, length, texture/curl, hairstyle, bangs and head accessories. Outfit cards contain 21 clothing/accessory fields. Pose / Action cards contain 10 fields: moment, base pose, body direction, weight distribution, shoulder/neck posture, hands, legs, head direction, gaze and expression. Fixed descriptions do not guarantee face identity or an exact pose skeleton.
 
@@ -106,7 +110,7 @@ Save the workflow to persist cards and locks. Export/import JSON to reuse a card
 
 ### v0.15.0 Hair and Pose / Action Cards
 
-Import a card pack through **node context menu → Cards / Module Locks → Import Card Pack**, not **Search & Favorites → Import Favorites**. Card packs contain module settings; material favorites files contain item references. These JSON formats are not interchangeable.
+Import a card pack through **My Presets & Cards → Module Cards → Manage… → Import Card Pack**, not **Search & Favorites → Import Favorites**. Card packs contain module settings; material favorites files contain item references. These JSON formats are not interchangeable.
 
 In **Actual Execution Results**, choose a record, then **Save as Hair Card** or **Save as Pose / Action Card**. The full builder offers four content-card actions; each corresponding standalone module offers only its own. Saving uses historical resolved values, not later editor values, and neither applies nor locks the card.
 
@@ -120,7 +124,7 @@ Content cards and packs remain v1, but the added module types require v0.15.0 or
 
 Save a separate workflow backup before upgrading. For downgrade, restore that backup or first export a Person / Outfit-only pack from v0.15 for the older version. Exporting a compatible pack does not convert the whole workflow. Do not expect older versions to correctly edit card/favorite data in workflows containing new types.
 
-The full builder supports whole-module locks for all eight standard modules; standalone nodes lock their own module. Existing field-level controls remain under **User Presets / Random Locks / Checks**. Locking resolves preset references to concrete values, so changing the execution seed does not reroll those fields. Manual edits, preset changes and explicit clearing remain available. Unlocking leaves current values unchanged; use a random button to enable random choices again.
+Right-click **Random Settings & Checks** for module and field locks. The full builder supports all eight modules; standalone nodes lock their own module. Locking resolves preset references to concrete values, so changing the execution seed does not reroll those fields. Manual edits, preset changes and explicit clearing remain available. Unlocking leaves current values unchanged; use a random setup button to enable random choices again.
 
 Applying cards preserves the preset selector, current editing module, seed, resolution, output layout, framing mode, other modules and free text. Linked target inputs or a TXT replacement block capture/application/new locks rather than silently editing inactive controls. Unlocking remains available. Card JSON is not a workflow, identity model, reference image, or result-panel snapshot; these formats are not interchangeable.
 

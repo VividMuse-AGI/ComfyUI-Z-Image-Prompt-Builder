@@ -12,9 +12,9 @@ v0.16.0: **Card contents** shows up to two main fields per included Scene, Camer
 
 ### 入口
 
-在完整节点，或场景、摄影、视觉表现独立节点上，打开右键菜单 **卡片管理 / 模块锁定**，然后点击 **拍摄方案卡（场景 / 摄影 / 视觉表现）**。
+在完整节点，或场景、摄影、视觉表现独立节点上，打开右键菜单 **我的预设与卡片 → 模块卡片**，选择卡片类型 **拍摄方案（场景／摄影／视觉表现）**。
 
-不新增节点或常驻控件。人物卡、穿搭卡和原模块锁定功能仍保留在原面板中。
+不新增节点或常驻控件。人物／穿搭等类型在同一管理弹窗切换；随机锁定移至右键“随机设置与检查”。
 
 v0.13.0 另加入收藏、排序和筛选后批量导出，与人物／穿搭卡行为一致，见[卡片整理说明](content-cards.md#v0130-卡片整理)。原 v1 卡片协议不变，收藏随工作流保存，不随卡片导出。
 
@@ -30,7 +30,7 @@ v0.13.0 另加入收藏、排序和筛选后批量导出，与人物／穿搭卡
 
 ### 从指定执行结果保存
 
-运行节点后，点击“随机状态与执行结果”入口，在实际执行结果面板选择所需记录，勾选可保存的场景／摄影／视觉表现，点击“保存为拍摄方案卡”，核对字段并命名，最后确认保存。
+运行节点后，点击“查看结果”，在实际执行结果面板选择所需记录，展开卡片保存区，勾选可保存的场景／摄影／视觉表现，点击“保存为拍摄方案卡”，核对字段并命名，最后确认保存。
 
 - 保存的是选中那次执行的实际字段，不是当前控件；种子改了也不会替换历史记录。
 - 面板保留打开时的记录快照；查看后来执行的记录需要重新打开面板。
@@ -41,7 +41,7 @@ v0.13.0 另加入收藏、排序和筛选后批量导出，与人物／穿搭卡
 
 ### JSON 单卡与卡片包
 
-在拍摄方案卡面板中使用“导出选中卡片”“导出卡片包”或“导入卡片或卡片包”。
+在拍摄方案卡面板的“管理…”中使用“导出选中卡片”“导出卡片包”或“导入卡片或卡片包”。
 
 - 单文件上限 **1 MiB（1,048,576 字节）**；卡片包包含 1—100 张卡片。
 - 导入先校验整个文件，再显示新增、覆盖、跳过同名和不适用数量。默认跳过同名；覆盖需明确确认。
@@ -49,7 +49,7 @@ v0.13.0 另加入收藏、排序和筛选后批量导出，与人物／穿搭卡
 - 独立模块节点接收至少包含自身模块的卡片，并保留其中其他模块；导出不会把组合卡裁剪成单模块。
 - 导入只加入卡片库，不应用字段、不新增锁定；导入后请保存工作流。
 - 卡片库在预览之后变化，需要重新预览确认。导出包可勾选卡片，不一定要导出全部。
-- 拍摄方案卡与原人物／穿搭卡协议分开，不能混装。结果面板的“导出此结果”是只读结果快照，不是可导入的卡片或工作流。
+- 拍摄方案卡与原人物／穿搭卡协议分开，不能混装。结果面板“更多… → 导出结果 JSON”是只读快照，不是可导入的卡片或工作流。
 
 单卡结构示例（字段与选项必须使用规范中文名，英文界面也一样）：
 
@@ -107,7 +107,7 @@ Version v0.13.0 adds favorites, sorting and filtered batch export, matching Pers
 
 ### Open and save
 
-On the full builder or the Scene, Camera or Visual module node, open the context menu **Cards / Module Locks**, then choose **Shoot Plan Cards (Scene / Camera / Visual)**.
+On the full builder or the Scene, Camera or Visual module node, open **My Presets & Cards → Module Cards**, then choose **Shoot Plan (Scene / Camera / Visual)**. Imports, exports, rename and delete are under **Manage…**; locks are under the separate **Random Settings & Checks** entry.
 
 Enter a name, check saveable modules, review the optional field summary, and save the card. Save the workflow to retain it. Cards are stored in this node, not in a browser-wide shared library. The limit is 100 shoot plan cards, separate from the existing person/outfit card allowance.
 
@@ -115,7 +115,7 @@ Follow Preset is captured as concrete values. Choose concrete values before savi
 
 ### Save a selected execution result
 
-After running the node, open its random status / actual execution result panel. Select a record, check saveable Scene, Camera and Visual modules, then use **Save as Shoot Plan Card**, review the fields, enter a name and confirm.
+After running the node, open **View Results**, select a record and expand **Save as Card**. Check saveable Scene, Camera and Visual modules, then use **Save as Shoot Plan Card**, review the fields, enter a name and confirm.
 
 The card uses the selected execution, never current editor values. The panel is an opening-time snapshot; reopen it for later runs. Current links or TXT replacements do not prevent saving a historical built-in result, but applying the card still checks the current target.
 
@@ -123,14 +123,14 @@ TXT-replaced modules, empty output, incomplete fields and incompatible scene cat
 
 ### JSON cards and packs
 
-Use **Export Selected Card**, **Export Card Pack**, or **Import Card or Pack** in the shoot plan panel.
+Expand **Manage…** in the shoot plan panel for **Export Selected Card**, **Export Card Pack**, or **Import Card or Pack**.
 
 - Maximum file size: **1 MiB (1,048,576 bytes)**. A pack contains 1–100 cards.
 - Import validates the entire file, then previews new, replaced, skipped and inapplicable cards. Same-name conflicts default to Skip; replacement requires confirmation.
 - A malformed card rejects the entire file, even if that card is inapplicable to this node. No partial import is performed.
 - Standalone nodes accept cards containing their own module, retain all modules, and export the complete card without projection or data loss.
 - Import only adds cards; it does not apply fields or locks. Save the workflow afterward. If the collection changes after preview, review and confirm again.
-- Pack export allows card selection. Shoot plan cards cannot be mixed with old person/outfit cards. **Export This Result** produces a read-only result snapshot, not an importable card or workflow.
+- Pack export allows card selection. Shoot plan cards cannot be mixed with old person/outfit cards. **More… → Export Result JSON** produces a read-only snapshot, not an importable card or workflow.
 
 The portable single-card protocol uses `kind: vividmuse-shoot-plan-card`, `version: 1`, `name`, and `modules` containing complete canonical module field maps. Packs use `kind: vividmuse-shoot-plan-card-pack`, `version: 1`, and `cards`. Canonical keys and values remain Chinese regardless of display language. Prefer exporting from the node instead of hand-authoring incomplete field maps.
 

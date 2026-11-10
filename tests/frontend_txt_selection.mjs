@@ -126,7 +126,7 @@ for (const reverse of [false, true]) {
     await deliver(node,result);
     assert.equal(node.__txtSelectionResult.seed, result.seed);
     assert.equal(node.__txtSelectionResultButton.name, "随机抽取：尚未执行");
-    assert.equal(node.__txtSelectionResultButton.label, "上次随机结果（点击查看）");
+    assert.equal(node.__txtSelectionResultButton.label, "查看抽取结果");
     assert.equal(node.hostWidgetStates.get(node.__txtSelectionResultButton.name), node.__txtSelectionResultButton);
     assert.equal(w(node, body).value, "手动草稿");
     assert.equal(node.size[1], height);

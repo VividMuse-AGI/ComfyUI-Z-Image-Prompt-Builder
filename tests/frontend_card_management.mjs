@@ -54,6 +54,23 @@ const snap=n=>JSON.stringify({properties:n.properties,values:n.widgets.map(w=>[w
 const full=await create(), person=api.captureCard(full,'人物','窗边 Summer'), outfit=api.captureCard(full,'服装','窗边 Summer');
 const b={...json(person),name:'人物 B',values:{...person.values,'年龄阶段':'30–39岁'}};
 const pack=cards=>({kind:'vividmuse-content-card-pack',version:1,cards:json(cards)});
+// Manual-only actions use the existing schema/card format, including module locks.
+for(const label of ['一手轻扶衣领','一手轻扶翻领','一手轻扶领口边缘']){
+  const source=await create();w(source,'手部动作').value=label;
+  const card=api.captureCard(source,'姿态动作',`Manual ${label}`);
+  api.saveCard(source,card);
+  const serialized=JSON.parse(JSON.stringify(pack([card])));
+  for(const kind of ['ChinesePromptBuilder','PoseModule']){
+    const target=await create(kind), importPlan=api.planCardPack(target,serialized);
+    api.commitCardPack(target,importPlan);
+    const saved=target.properties.vividMuseContentCards[0];
+    assert.equal(saved.values['手部动作'],label);
+    api.applyCard(target,saved,true);
+    assert.equal(w(target,'手部动作').value,label);
+    assert.ok(target.properties.vividMuseRandomLocks.includes('手部动作'));
+    assert.equal(api.cardDifference(target,saved).rows.filter(row=>row.changed).length,0);
+  }
+}
 api.saveCard(full,person);api.saveCard(full,outfit);api.saveCard(full,b);
 let before=snap(full);
 assert.equal(api.filterCards(full,'人物','SUMMER').length,1);

@@ -19,7 +19,7 @@ print(json.dumps({'prompt':run('prompt'),'module':run('module'),'empty':run('mod
 `],{cwd:root,encoding:'utf8'}));
 const plain=v=>JSON.parse(JSON.stringify(v));
 function harness(reverse=false) {
-  const listeners=new Map(),extensions=[],downloads=[],revoked=[];
+  const listeners=new Map(),extensions=[],downloads=[],revoked=[],statusTimers=[];
   let copied=null,copyImpl=async s=>{copied=s;},blob,clickFails=false;
   class Element {
     constructor(tag){this.tag=tag;this.children=[];this.attributes={};this.listeners={};this.style={};this.textContent='';}
@@ -40,7 +40,7 @@ function harness(reverse=false) {
   const api={addEventListener(k,fn){if(!listeners.has(k))listeners.set(k,[]);listeners.get(k).push(fn);},
     async queuePrompt(_n,_p,options={}){queueCount++;return options.response?options.response():{prompt_id:options.id};}};
   const ctx=vm.createContext({app,api,console,Blob,URL:{createObjectURL(b){blob=b;return 'blob:fixture';},revokeObjectURL:u=>revoked.push(u)},
-    navigator:{clipboard:{writeText:s=>copyImpl(s)}},setTimeout:fn=>fn(),document:{createElement:t=>new Element(t),body:new Element('body')}});
+    navigator:{clipboard:{writeText:s=>copyImpl(s)}},setTimeout:(fn,ms)=>ms===3000?statusTimers.push(fn):fn(),document:{createElement:t=>new Element(t),body:new Element('body')}});
   for(const name of reverse?['txt_selection','prompt_diagnostics']:['prompt_diagnostics','txt_selection']) {
     const code=fs.readFileSync(new URL(`../web/js/${name}.js`,import.meta.url),'utf8')
       .replace('import { app } from "../../scripts/app.js";','').replace('import { api } from "../../scripts/api.js";','');
@@ -56,7 +56,7 @@ function harness(reverse=false) {
   const emit=(name,detail)=>{for(const fn of listeners.get(name)||[])fn({detail});};
   const execute=(id,raw,path='1')=>emit('executed',{prompt_id:id,node:path,output:{vividmuse_txt_selection:[raw]}});
   const queue=async(id,options={})=>api.queuePrompt(0,await app.graphToPrompt(),{id,...options});
-  return {app,api,ctx,graph,node,emit,execute,queue,downloads,revoked,
+  return {app,api,ctx,graph,node,emit,execute,queue,downloads,revoked,statusTimers,
     get copied(){return copied;},get queueCount(){return queueCount;},set copyImpl(fn){copyImpl=fn;},set clickFails(v){clickFails=v;}};
 }
 const all=e=>[e,...e.children.flatMap(all)];
@@ -71,7 +71,19 @@ for(const reverse of [false,true]) {
   assert.equal(h.queueCount,1,'observers must not submit extra jobs');
   assert.equal(n.__txtSelectionResult.seed,'18446744073709551615');
   const before=state(n);panel=h.ctx.txt.showResult(n);
+  const selectedBody=all(panel).find(e=>e.attributes['aria-label']==='抽中正文');
+  const actionRow=all(panel).find(e=>e.attributes['aria-label']==='抽取结果操作');
+  const explanation=all(panel).find(e=>e.attributes['aria-label']==='抽取说明');
+  assert.ok(panel.children.indexOf(actionRow)<panel.children.indexOf(selectedBody));
+  assert.ok(panel.children.indexOf(selectedBody)<panel.children.indexOf(explanation));
+  assert.ok(!explanation.open);
+  assert.equal(selectedBody.tabIndex,0);
+  assert.deepEqual(actionRow.children.map(e=>e.textContent),['复制抽中正文','导出抽取记录']);
   await button(panel,'复制抽中正文').click();assert.equal(h.copied,fixtures.prompt.prompt);
+  assert.match(status(panel),/已发送正文复制请求/);
+  await button(panel,'复制抽中正文').click();
+  h.statusTimers.shift()();assert.match(status(panel),/已发送正文复制请求/,'Older timer must not clear a newer copy status');
+  h.statusTimers.shift()();assert.equal(status(panel),'');
   await button(panel,'导出抽取记录').click();
   const exported=JSON.parse(await h.downloads.at(-1).blob.text());
   assert.equal(exported.prompt,fixtures.prompt.prompt);assert.equal(exported.source.node_type,n.comfyClass);
@@ -148,6 +160,8 @@ for(const kind of ['prompt','module'])for(const lang of ['zh','en']) {
     n.widgets.find(w=>w.name==='随机种子').value=1234;
     const before=state(n),queueCount=h.queueCount;
     const panel=h.ctx.txt.showResult(n);
+    const explanation=all(panel).find(e=>e.attributes['aria-label']===(lang==='zh'?'抽取说明':'Selection Details'));
+    assert.ok(explanation&&!explanation.open);
     const content=all(panel).filter(e=>e.tag==='p').map(e=>e.textContent).join('\n');
     const expected=lang==='zh' ? [ /没有可抽取条目/, /仅有 1 条/, /不同条目的正文也可能相同/ ]
       : [ /No entries were available/, /had one candidate/, /different entries may have identical text/ ];

@@ -205,6 +205,7 @@ const helperCases = [
   ["🧩 TXT模块词库（全模块）", "🧩 TXT模块词库（模块.txt · 18条）", "🧩 TXT Module Library (模块.txt · 18 entries)"],
   ["应用到画面基础模块（当前：未设置）", "应用到人物模块（当前：我的标题）", "Apply to Person Module (Current: 我的标题)"],
   ["随机抽取：尚未执行", "上次随机结果（点击查看）", "Last Random Result (Click to View)"],
+  ["随机抽取：尚未执行", "查看抽取结果", "View Draw Result"],
 ];
 for (const [name, displayText, english] of helperCases) {
   const helper = { name, type: "button", serialize: false, options: { disabled: true },
@@ -285,4 +286,25 @@ for (const language of ["en", "zh", "en", "zh"]) {
     language === "en" ? "No candidates in the current scope" : "当前范围没有候选");
 }
 
+// Action display names are independent of saved keys and work after language switches.
+const actionCases = [
+  ["🎲 生成随机组合", "🎲 设置随机组合", "🎲 Set Up Random Combination"],
+  ["🎲 生成本模块随机组合", "🎲 设置本模块随机", "🎲 Set Up Module Randomness"],
+  ["清空内容…", "清空内容…", "Clear Content…"],
+  ["清空当前用户模块", "清空当前用户模块文本", "Clear Current User Module Text"],
+  ["清除已导入词库", "移除 TXT 用户词库", "Remove TXT Prompt Library"],
+  ["清除模块词库", "移除 TXT 模块词库", "Remove TXT Module Library"],
+];
+for (const [name, zh, en] of actionCases) {
+  const action = {name, type:"button", serialize:false, options:{serialize:false}, tooltip:"中文说明", __vividMuseDisplayText:zh};
+  txtRandomNode.widgets.push(action);
+  for (const lang of ["en","zh","en","zh"]) {
+    languageSetting.onChange(lang);
+    globalThis.__vividMuseZImageI18n.localizeNode(txtRandomNode);
+    assert.equal(action.name,name);
+    assert.equal(action.label,lang === "en" ? en : zh);
+    if (lang === "en" && name !== "清空内容…") assert.doesNotMatch(action.tooltip,/[\u3400-\u9fff]/u);
+    if (lang === "zh") assert.equal(action.tooltip,"中文说明");
+  }
+}
 console.log("frontend i18n ok");

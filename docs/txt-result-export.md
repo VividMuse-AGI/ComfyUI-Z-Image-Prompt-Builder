@@ -5,7 +5,7 @@
 ## 使用
 
 1. 导入词库，选择“随机抽取”，运行一次。
-2. 点击节点原有的“上次随机结果（点击查看）”。
+2. 点击节点的“查看抽取结果”；正文和复制／导出按钮优先显示，候选说明按需展开。
 3. “复制抽中正文”只复制抽中的条目正文，保留换行；不附加标题、种子或前置提示词。
 4. “导出抽取记录”下载 `vividmuse-txt-selection-result.json`，包含正文、标题、实际执行种子、模块和候选信息。
 
@@ -22,7 +22,7 @@ JSON 的种子是字符串，避免大整数精度损失；`index` 是原词库�
 
 Available since v0.11.0 on the standalone **TXT Prompt Library** and **TXT Module Library** nodes.
 
-Import a library, select **Random Selection**, run it, then click **Last Random Result (Click to View)**. **Copy Selected Text** copies only the selected entry, preserving its line breaks. **Export Selection Record** downloads `vividmuse-txt-selection-result.json` with the actual execution seed and selection metadata.
+Import a library, select **Random Selection**, run it, then click **View Draw Result**. Text and copy/export actions are shown first; candidate explanations expand on demand. **Copy Selected Text** copies only the selected entry, preserving its line breaks. **Export Selection Record** downloads `vividmuse-txt-selection-result.json` with the actual execution seed and selection metadata.
 
 The panel shows a **historical random selection**, not the current manual draft or combined upstream output. Its content is frozen when opened; close and reopen it for a newer result. Different seeds can select the same entry.
 

@@ -1540,6 +1540,7 @@ function installCompactWidgetConfigure(node) {
   if (node.__vividMuseCompactConfigure) return;
   const originalOnConfigure = node.onConfigure;
   node.onConfigure = function (info) {
+    node.__vividMuseClearDialog?.close();
     const result = originalOnConfigure?.apply(this, arguments);
     const layoutWidget = widgetByName(node, "输出排版");
     const serializedWidgets = (node.widgets || []).filter(widget =>
@@ -1922,7 +1923,18 @@ function enableOnlyModule(node, moduleName) {
   const moduleFields = MODULE_FIELD_GROUPS[moduleName];
   if (!moduleFields) {
     console.error(`VividMuse: unknown module ${moduleName}`);
-    return;
+    return false;
+  }
+  const otherContent = FIELD_NAMES.some(name => !moduleFields.includes(name)
+    && widgetByName(node, name)?.value != null && widgetByName(node, name)?.value !== EMPTY_CHOICE)
+    || node.widgets?.some(w => /^用户.+片段$/u.test(w.name)
+      && w.name !== `用户${moduleName}片段` && String(w.value ?? "").trim());
+  if (otherContent) {
+    const i18n = globalThis.__vividMuseZImageI18n;
+    const message = i18n?.activeLanguage?.() === "en"
+      ? `Keep only ${i18n?.translateMessage?.(moduleName) || moduleName}? Other modules' built-in selections and applied user text will be cleared. Free Prompt and imported libraries are kept.`
+      : `仅保留“${moduleName}”模块？其他模块的内置选择和已应用用户文本将被清空。保留自由提示词及已导入词库。`;
+    if (!globalThis.confirm?.(message)) return false;
   }
   const activeValues = new Map(moduleFields.map((fieldName) => [
     fieldName,
@@ -1949,6 +1961,77 @@ function clearEverything(node) {
   markDirty(node);
 }
 
+// Keep the original action objects/callbacks for integrations, but do not leave
+// hidden button placeholders in either Canvas or Nodes 2.0 layouts.
+function openClearContents(node) {
+  node.__vividMuseClearDialog?.close();
+  const english = globalThis.__vividMuseZImageI18n?.activeLanguage?.() === "en";
+  const text = (zh, en) => english ? en : zh;
+  const graph = node.graph;
+  const root = app.graph;
+  const dialog = document.createElement("dialog");
+  dialog.setAttribute("aria-label", text("清空内容", "Clear Content"));
+  dialog.style.cssText = "width:min(480px,90vw);max-height:85vh;overflow:auto;padding:20px;font-size:15px;line-height:1.6;color:var(--input-text,#eee);background:var(--comfy-menu-bg,#222);border:1px solid #777;border-radius:10px;";
+  const title = document.createElement("h3");
+  title.textContent = text("清空内容", "Clear Content");
+  const label = document.createElement("label");
+  label.textContent = text("清空范围", "What to clear");
+  const select = document.createElement("select");
+  select.style.cssText = "display:block;width:100%;font:inherit;margin:8px 0;";
+  for (const [value, caption] of [
+    ["structured", text("清空结构化内容", "Clear Structured Content")],
+    ["all", text("清空全部提示词", "Clear All Prompt Content")],
+  ]) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = caption;
+    select.append(option);
+  }
+  select.value = "structured";
+  label.append(select);
+  const description = document.createElement("p");
+  const describe = () => {
+    description.textContent = select.value === "all"
+      ? text("清空内置字段、已应用用户模块文本及自由提示词。保留已导入词库、尺寸计算设置、种子和锁定配置。不会删除卡片或预设。", "Clear built-in selections, applied user module text and Free Prompt. Keep imported libraries, resolution calculation settings, seed and locks. Saved cards and presets are not deleted.")
+      : text("清空内置字段及已应用用户模块文本。保留自由提示词、已导入词库、尺寸计算设置、种子和锁定配置。不会删除卡片或预设。", "Clear built-in selections and applied user module text. Keep Free Prompt, imported libraries, resolution calculation settings, seed and locks. Saved cards and presets are not deleted.");
+  };
+  select.addEventListener("change", describe);
+  describe();
+  const cancel = document.createElement("button");
+  cancel.textContent = text("取消", "Cancel");
+  cancel.onclick = () => dialog.close();
+  const confirm = document.createElement("button");
+  confirm.textContent = text("确认清空", "Confirm Clear");
+  confirm.onclick = () => {
+    if (!dialog.open || node.__vividMuseClearDialog !== dialog
+      || node.graph !== graph || app.graph !== root) { dialog.close(); return; }
+    const action = select.value === "all" ? node.__vividMuseClearEverythingButton
+      : node.__vividMuseClearStructuredButton;
+    dialog.close();
+    action?.callback?.();
+  };
+  for (const button of [cancel, confirm]) button.style.cssText = "font:inherit;margin:4px;padding:6px 12px;white-space:normal;";
+  let composing = false;
+  dialog.addEventListener("compositionstart", () => { composing = true; });
+  dialog.addEventListener("compositionend", () => { composing = false; });
+  dialog.addEventListener("cancel", event => { if (composing) event.preventDefault(); });
+  dialog.addEventListener("keydown", event => {
+    if (composing || event.isComposing || event.keyCode === 229) { event.stopPropagation(); return; }
+    if (event.key === "Escape") { event.preventDefault(); dialog.close(); }
+    event.stopPropagation();
+  });
+  for (const event of ["keyup", "copy", "cut", "paste", "wheel"]) dialog.addEventListener(event, e => e.stopPropagation());
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    if (node.__vividMuseClearDialog === dialog) node.__vividMuseClearDialog = null;
+  });
+  dialog.append(title, label, description, cancel, confirm);
+  node.__vividMuseClearDialog = dialog;
+  document.body.append(dialog);
+  dialog.showModal();
+  cancel.focus();
+}
+
 function placeStructuredActionsBeforePromptLibraries(node) {
   const targets = [
     node.__vividMuseTxtModuleToggle,
@@ -1964,8 +2047,7 @@ function placeStructuredActionsBeforePromptLibraries(node) {
     node.__vividMuseRandomButton,
     node.__vividMusePromptStatusButton,
     node.__vividMuseEnableOnlyModuleButton,
-    node.__vividMuseClearStructuredButton,
-    node.__vividMuseClearEverythingButton,
+    node.__vividMuseClearContentsButton,
   ];
   for (const action of actions) moveWidgetBefore(node, action, target);
   refreshNode2Widgets(node);
@@ -1979,6 +2061,14 @@ app.registerExtension({
 
     installCompactWidgetSerialization(node);
     installCompactWidgetConfigure(node);
+    if (!node.__vividMuseClearLifecycle) {
+      const onRemoved = node.onRemoved;
+      node.onRemoved = function () {
+        node.__vividMuseClearDialog?.close();
+        return onRemoved?.apply(this, arguments);
+      };
+      node.__vividMuseClearLifecycle = true;
+    }
     // Scoped card application must not reconfigure unrelated modules or erase history.
     node.__vividMuseRefreshCardScope = moduleName => {
       if (moduleName === "人物") {
@@ -2111,6 +2201,9 @@ app.registerExtension({
       node.__vividMuseRandomButton = addNonSerializedWidget(
         node, "button", "🎲 生成随机组合", null, () => prepareRandomCombination(node),
       );
+      node.__vividMuseRandomButton.__vividMuseDisplayText = "🎲 设置随机组合";
+      node.__vividMuseRandomButton.label = "🎲 设置随机组合";
+      node.__vividMuseRandomButton.tooltip = "按随机范围准备字段；运行节点后查看结果。仅改变种子不会把固定内容变为随机。";
     }
 
     if (!node.__vividMuseClearStructuredButton) {
@@ -2124,6 +2217,17 @@ app.registerExtension({
         node, "button", "全部清空", null, () => clearEverything(node),
       );
     }
+
+    for (const action of [node.__vividMuseClearStructuredButton, node.__vividMuseClearEverythingButton]) {
+      const index = node.widgets.indexOf(action);
+      if (index >= 0) node.widgets.splice(index, 1);
+    }
+    if (!node.__vividMuseClearContentsButton) {
+      node.__vividMuseClearContentsButton = addNonSerializedWidget(
+        node, "button", "清空内容…", null, () => openClearContents(node),
+      );
+    }
+    node.__vividMuseEnableOnlyModuleButton.tooltip = "保留当前模块，清空其他模块的内置选择及已应用用户文本；保留自由提示词和已导入词库。";
 
     placeStructuredActionsBeforePromptLibraries(node);
     ensureConfiguredNode(node);

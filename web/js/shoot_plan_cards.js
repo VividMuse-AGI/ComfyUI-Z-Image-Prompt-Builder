@@ -17,15 +17,16 @@ const moduleLabel = name => text(name === "视觉表现" ? "视觉表现（灯�
 const copy = value => JSON.parse(JSON.stringify(value));
 
 // A mutually exclusive view of the existing card dialog, not another node widget.
-export function openShootPlanPanel(node) {
+export function openShootPlanPanel(node, {host = null} = {}) {
   const supported = availableShootPlanModules(node);
   if (!supported.length) throw new Error(text("此节点不支持拍摄方案卡。", "This node does not support shoot plan cards."));
-  node.__vividMuseCardsDialog?.close();
+  if (!host) node.__vividMuseCardsDialog?.close();
   const el = (tag, value = "") => {
     const element = document.createElement(tag); element.textContent = value; return element;
   };
-  const dialog = el("dialog");
-  dialog.style.cssText = "max-width:760px;width:88vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
+  const dialog = el(host ? "section" : "dialog");
+  if (host) { dialog.open = true; dialog.close = () => host.close(); }
+  else dialog.style.cssText = "max-width:760px;width:88vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
   const title = el("h3", text("拍摄方案卡", "Shoot Plan Cards"));
   dialog.append(title);
   dialog.append(el("p", text(
@@ -43,7 +44,7 @@ export function openShootPlanPanel(node) {
     if (graph.getNodeById?.(node.id) === node) return true;
     return (graph._nodes || []).some(child => child.subgraph && belongs(child.subgraph, seen));
   };
-  const live = () => active && dialog.open !== false && (app.rootGraph || app.graph) === root && node.graph === owner &&
+  const live = () => active && dialog.open !== false && host?.live?.() !== false && (app.rootGraph || app.graph) === root && node.graph === owner &&
     (node.__vividMuseCardsGeneration || 0) === generation &&
     (!owner?.getNodeById || owner.getNodeById(node.id) === node) &&
     (!root?.getNodeById || belongs(root));
@@ -63,7 +64,7 @@ export function openShootPlanPanel(node) {
     const item = el("button", text(zh, en)); item.type = "button";
     item.addEventListener("click", guarded(fn)); parent.append(item); return item;
   };
-  button(row(dialog), "人物卡 / 穿搭卡 / 模块锁定", "Person / Outfit Cards / Module Locks", () => {
+  if (!host) button(row(dialog), "返回卡片管理", "Back to Cards", () => {
     dialog.close(); globalThis.__vividMuseContentCards?.openCardsPanel(node);
   });
   const control = (type, zh, en) => {
@@ -142,8 +143,12 @@ export function openShootPlanPanel(node) {
   details.append(el("summary", text("全部字段（含隐藏字段）", "All Fields (Including Hidden Fields)")), all);
   hint.style.whiteSpace = "pre-wrap";
   savedSection.append(changed, details, hint);
-  const applyActions = row(savedSection), management = row(savedSection);
+  const applyActions = row(savedSection);
+  const manageArea = el("details"); manageArea.setAttribute("aria-label", text("拍摄方案管理操作", "Shoot Plan Management Actions"));
+  manageArea.append(el("summary", text("管理…", "Manage…")));
+  const management = row(manageArea);
   dialog.append(savedSection);
+  dialog.append(manageArea);
   let normalPlan = null, lockPlan = null, selectionStamp = "";
   const saved = () => listShootPlans(node);
   const moduleLabels = Object.fromEntries(MODULES.map(m => [m, moduleLabel(m)]));
@@ -245,7 +250,7 @@ export function openShootPlanPanel(node) {
   fileSection.append(el("h4", text("JSON 导入导出", "JSON Import / Export")), el("p", text(
     "文件上限 1 MiB；卡片包包含 1–100 张。独立节点保留卡片全部模块，导出不会丢失其他模块。",
     "Maximum file size: 1 MiB; packs contain 1–100 cards. Standalone nodes retain and export every module in a card.")));
-  const fileActions = row(fileSection), filePreview = el("div"); fileSection.append(filePreview); dialog.append(fileSection);
+  const fileActions = row(fileSection), filePreview = el("div"); fileSection.append(filePreview); manageArea.append(fileSection);
   let fileGeneration = 0, exportPicker = null;
   const clearFilePreview = () => { fileGeneration++; exportPicker = null; filePreview.replaceChildren(); };
   const download = (value, filename) => {
@@ -325,7 +330,7 @@ export function openShootPlanPanel(node) {
   });
   select.addEventListener("change", guarded(renderSelection));
   search.addEventListener("input", guarded(() => renderList()));
-  dialog.append(status); button(row(dialog), "关闭", "Close", () => dialog.close());
+  dialog.append(status); if (!host) button(row(dialog), "关闭", "Close", () => dialog.close());
   dialog.addEventListener("compositionstart", () => { composing = true; });
   dialog.addEventListener("compositionend", event => {
     composing = false;
@@ -339,17 +344,18 @@ export function openShootPlanPanel(node) {
   });
   dialog.addEventListener("cancel", event => { if (composing) event.preventDefault(); });
   for (const type of ["keyup", "copy", "cut", "paste", "wheel"]) dialog.addEventListener(type, event => event.stopPropagation());
-  dialog.addEventListener("close", () => {
-    active = false; normalPlan = lockPlan = null; dialog.remove();
+  const dispose = () => {
+    active = false; dialog.open = false; normalPlan = lockPlan = null; dialog.remove();
     if (node.__vividMuseCardsDialog === dialog) node.__vividMuseCardsDialog = null;
-  }, {once: true});
-  node.__vividMuseCardsDialog = dialog; document.body.append(dialog);
+  };
+  if (host) host.mount(dialog, dispose); else dialog.addEventListener("close", dispose, {once: true});
+  node.__vividMuseCardsDialog = dialog; if (!host) document.body.append(dialog);
   try { renderCapture(); renderList("", true); }
   catch (e) {
     saveButton.disabled = applyButton.disabled = lockButton.disabled = renameButton.disabled = deleteButton.disabled = exportButton.disabled = true;
     status.textContent = e.message;
   }
-  dialog.showModal(); return dialog;
+  if (!host) dialog.showModal(); return dialog;
 }
 
 globalThis.__vividMuseShootPlanCards = {openPanel: openShootPlanPanel, availableModules: availableShootPlanModules,

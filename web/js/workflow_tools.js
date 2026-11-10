@@ -414,14 +414,15 @@ export function findConflicts(node) {
   return results;
 }
 
-export function openCardsPanel(node) {
-  node.__vividMuseCardsDialog?.close();
-  const dialog = document.createElement("dialog");
-  dialog.style.cssText = "max-width:680px;width:85vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
+export function openCardsPanel(node, {host = null, moduleName = null} = {}) {
+  if (!host) node.__vividMuseCardsDialog?.close();
+  const dialog = document.createElement(host ? "section" : "dialog");
+  if (host) { dialog.open = true; dialog.close = () => host.close(); }
+  else dialog.style.cssText = "max-width:680px;width:85vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
   const el = (tag, value = "") => { const item = document.createElement(tag); item.textContent = value; return item; };
   const moduleLabel = name => text(name, {"画面基础":"Canvas", "人物":"Person", "发型":"Hair", "服装":"Clothing",
     "姿态动作":"Pose", "场景":"Scene", "摄影":"Camera", "视觉表现":"Visual"}[name] || name);
-  dialog.append(el("h3", text("卡片管理 / 模块锁定", "Cards / Module Locks")));
+  if (!host) dialog.append(el("h3", text("卡片管理 / 模块锁定", "Cards / Module Locks")));
   dialog.append(el("p", text("卡片只保存所属模块的具体选项。人物卡包含身形和妆容，不含发型；不保证生图人脸一致。卡片随工作流保存，可导出到其他工作流。",
     "Cards save concrete options in one module. Person cards include physique and makeup, not hair; they do not guarantee face identity. Save your workflow to keep cards, or export them for another workflow.")));
   const status = el("p"); status.setAttribute("role", "status");
@@ -435,7 +436,7 @@ export function openCardsPanel(node) {
     if (graph.getNodeById?.(node.id) === node) return true;
     return (graph._nodes || []).some(child => child.subgraph && belongs(child.subgraph, seen));
   };
-  const live = () => active && dialog.open !== false && (app.rootGraph || app.graph) === root &&
+  const live = () => active && dialog.open !== false && host?.live?.() !== false && (app.rootGraph || app.graph) === root &&
     (node.__vividMuseCardsGeneration || 0) === generation && node.graph === ownerGraph &&
     (!ownerGraph?.getNodeById || ownerGraph.getNodeById(node.id) === node) &&
     (!root?.getNodeById || belongs(root));
@@ -446,13 +447,13 @@ export function openCardsPanel(node) {
     item.addEventListener("click", guarded(fn)); parent.append(item); return item;
   };
   const combination = globalThis.__vividMuseCardCombination;
-  if (combination?.available(node)) {
+  if (!host && combination?.available(node)) {
     button(row(), "卡片快捷组合", "Quick Card Combination", () => {
       requireLive(); dialog.close(); combination.openPanel(node);
     });
   }
   const shootPlans = globalThis.__vividMuseShootPlanCards;
-  if (shootPlans?.availableModules(node).length) {
+  if (!host && shootPlans?.availableModules(node).length) {
     button(row(), "拍摄方案卡（场景 / 摄影 / 视觉表现）", "Shoot Plan Cards (Scene / Camera / Visual)", () => {
       requireLive();
       dialog.close();
@@ -464,9 +465,12 @@ export function openCardsPanel(node) {
   for (const name of modules) { const option = el("option", moduleLabel(name)); option.value = name; moduleSelect.append(option); }
   if (CARD_MODULES.has(node.properties?.vividMuseActiveModule) && modules.includes(node.properties.vividMuseActiveModule)) moduleSelect.value = node.properties.vividMuseActiveModule;
   else if (modules.includes("人物")) moduleSelect.value = "人物";
-  row().append(moduleSelect);
-  const lockStatus = el("p"); dialog.append(lockStatus);
-  const lockActions = row();
+  if (moduleName && modules.includes(moduleName)) moduleSelect.value = moduleName;
+  if (!host) row().append(moduleSelect);
+  const lockArea = el("section"); lockArea.hidden = !!host;
+  if (!host) dialog.append(lockArea);
+  const lockStatus = el("p"); lockArea.append(lockStatus);
+  const lockActions = el("div"); lockArea.append(lockActions);
   button(lockActions, "锁定此模块", "Lock Module", () => {
     setModuleLock(node, moduleSelect.value, true); refresh();
     status.textContent = text("已锁定具体选项；随机按钮跳过该模块。", "Concrete options locked; random buttons skip this module.");
@@ -475,7 +479,7 @@ export function openCardsPanel(node) {
     setModuleLock(node, moduleSelect.value, false); refresh();
     status.textContent = text("已解锁，当前选项不变；点击随机按钮才会重新设为随机。", "Unlocked without changing options; use a random button to enable random choices again.");
   });
-  dialog.append(el("p", text("锁定不阻止手动编辑、切换预设或清空。随机字段需先选具体值；跟随预设会固定为当前预设值。字段级锁定仍在原高级面板中。",
+  lockArea.append(el("p", text("锁定不阻止手动编辑、切换预设或清空。随机字段需先选具体值；跟随预设会固定为当前预设值。字段级锁定仍在原高级面板中。",
     "Locks do not prevent manual edits, preset changes or clearing. Choose concrete values for Random fields first; Follow Preset is frozen to the current value. Field-level locks remain in the existing advanced panel.")));
   const cardArea = el("section"); dialog.append(cardArea);
   const name = el("input"); name.maxLength = 80; name.placeholder = text("卡片名称", "Card name"); name.setAttribute("aria-label", name.placeholder);
@@ -547,6 +551,9 @@ export function openCardsPanel(node) {
   select.addEventListener("change", guarded(renderPreview));
   search.addEventListener("input", guarded(() => refresh()));
   const actions = el("div"); actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"; cardArea.append(actions);
+  const management = el("details"); management.setAttribute("aria-label", text("卡片管理操作", "Card Management Actions"));
+  management.append(el("summary", text("管理…", "Manage…"))); cardArea.append(management);
+  const managementActions = el("div"); managementActions.style.cssText = actions.style.cssText; management.append(managementActions);
   const store = (entry, current = live) => {
     const base = collectionStamp(node);
     const exists = saved().some(item => item.module === entry.module && item.name === entry.name);
@@ -558,7 +565,7 @@ export function openCardsPanel(node) {
   button(actions, "保存当前模块", "Save Module", () => {
     if (store(captureCard(node, moduleSelect.value, name.value))) status.textContent = text("卡片已保存，请保存工作流以保留。", "Card saved. Save the workflow to keep it.");
   });
-  selectionButtons.push(button(actions, "重命名", "Rename", () => {
+  selectionButtons.push(button(managementActions, "重命名", "Rename", () => {
     const original = clone(selected()), base = collectionStamp(node);
     const newName = name.value.trim();
     validateCard({...original, name: newName}, node);
@@ -587,8 +594,8 @@ export function openCardsPanel(node) {
     try { dialog.append(link); link.click(); } finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
     status.textContent = text("已请求下载卡片 JSON。", "Card JSON download requested.");
   };
-  selectionButtons.push(button(actions, "导出卡片", "Export Card", () => download(validateCard(selected(), node), "vividmuse-content-card.json")));
-  button(actions, "导入卡片", "Import Card", () => {
+  selectionButtons.push(button(managementActions, "导出卡片", "Export Card", () => download(validateCard(selected(), node), "vividmuse-content-card.json")));
+  button(managementActions, "导入卡片", "Import Card", () => {
     clearPack(); const ticket = fileGeneration;
     const current = () => live() && ticket === fileGeneration;
     const input = el("input"); input.type = "file"; input.accept = ".json,application/json"; input.hidden = true; dialog.append(input);
@@ -604,14 +611,14 @@ export function openCardsPanel(node) {
     }));
     input.click();
   });
-  selectionButtons.push(button(actions, "删除卡片", "Delete Card", () => {
+  selectionButtons.push(button(managementActions, "删除卡片", "Delete Card", () => {
     const entry = selected(), base = collectionStamp(node);
     if (!window.confirm(text("删除选中的卡片？当前模块选项不受影响。", "Delete this card? Current module options will not change."))) return;
     requireLive(); if (base !== collectionStamp(node)) throw changedCollection();
     commitNodeCardOrganization(node, planNodeCardCollection(node, CARDS, saved().filter(item => item !== entry))); refresh();
   }));
   cardArea.append(applicationHint, preview, allDetails);
-  const packArea = el("section"); dialog.append(packArea);
+  const packArea = el("section"); management.append(packArea);
   packArea.append(el("p", text("JSON 导出卡片配置，不包含收藏状态。", "JSON exports card settings, not favorites.")));
   packArea.hidden = !modules.some(m => CARD_MODULES.has(m));
   const packActions = el("div"), packPreview = el("section");
@@ -679,7 +686,7 @@ export function openCardsPanel(node) {
     })); input.click();
   });
   dialog.append(status);
-  button(row(), "关闭", "Close", () => dialog.close());
+  if (!host) button(row(), "关闭", "Close", () => dialog.close());
   dialog.addEventListener("compositionstart", () => { composing = true; });
   dialog.addEventListener("compositionend", () => { composing = false; return guarded(() => { refresh(); exportPicker?.refresh(); })(); });
   dialog.addEventListener("keydown", event => {
@@ -692,36 +699,45 @@ export function openCardsPanel(node) {
   });
   dialog.addEventListener("cancel", event => { if (composing) event.preventDefault(); });
   for (const event of ["keyup", "copy", "cut", "paste", "wheel"]) dialog.addEventListener(event, e => e.stopPropagation());
-  dialog.addEventListener("close", () => { active = false; dialog.remove(); if (node.__vividMuseCardsDialog === dialog) node.__vividMuseCardsDialog = null; }, {once: true});
+  const dispose = () => { active = false; dialog.open = false; dialog.remove(); if (node.__vividMuseCardsDialog === dialog) node.__vividMuseCardsDialog = null; };
+  if (host) host.mount(dialog, dispose);
+  else dialog.addEventListener("close", dispose, {once: true});
   node.__vividMuseCardsDialog = dialog;
-  document.body.append(dialog);
+  if (!host) document.body.append(dialog);
   try { refresh("", true); } catch (e) { status.textContent = e.message; selectionButtons.forEach(b => { b.disabled = true; }); }
-  dialog.showModal();
+  if (!host) dialog.showModal();
   return dialog;
 }
 
-function openPanel(node) {
-  node.__vividMusePresetDialog?.close();
-  const dialog = document.createElement("dialog");
-  let active = true;
-  const session = createImportSession(node, app, () => active && dialog.open !== false);
-  dialog.style.cssText = "max-width:640px;width:85vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
+function openPanel(node, {host = null, mode = "presets"} = {}) {
+  if (!host) { node.__vividMuseLibraryDialog?.close(); node.__vividMusePresetDialog?.close(); }
+  const dialog = document.createElement(host ? "section" : "dialog");
+  if (host) { dialog.open = true; dialog.close = () => host.close(); }
+  let active = true, composing = false;
+  const session = createImportSession(node, app, () => active && dialog.open !== false && host?.live?.() !== false);
+  if (!host) dialog.style.cssText = "max-width:640px;width:85vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
   const title = document.createElement("h3");
-  title.textContent = text("用户预设、随机锁定与组合检查", "User Presets, Random Locks & Checks");
+  title.textContent = mode === "random" ? text("随机设置与检查", "Random Settings & Checks") : text("整套预设", "Whole Presets");
+  dialog.setAttribute("aria-label", title.textContent);
   dialog.append(title);
   const status = document.createElement("p");
   status.setAttribute("role", "status");
-  const guarded = fn => async () => { try { if (session.live()) await fn(); } catch(e) { if (session.live()) status.textContent = e.message; } };
+  const guarded = fn => async () => { try { if (session.live() && !composing) await fn(); } catch(e) { if (session.live()) status.textContent = e.message; } };
   const row = () => { const el=document.createElement("div"); el.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"; dialog.append(el); return el; };
   const button = (parent, zh, en, fn) => {
     const b=document.createElement("button"); b.type="button"; b.textContent=text(zh,en);
     b.addEventListener("click", guarded(fn)); parent.append(b); return b;
   };
+  let refresh = () => {}, renderLocks = () => {};
+  if (mode === "presets") {
   const name = document.createElement("input");
   name.placeholder=text("输入预设名称", "Preset name"); name.maxLength=80;
+  name.setAttribute("aria-label", name.placeholder);
   const select=document.createElement("select");
+  select.setAttribute("aria-label", text("已保存预设", "Saved Presets"));
+  for (const control of [name, select]) control.style.cssText="max-width:100%;min-width:0;padding:6px";
   const saved = () => Array.isArray(node.properties?.[STORE]) ? node.properties[STORE] : [];
-  const refresh = () => {
+  refresh = () => {
     select.replaceChildren();
     for (const entry of saved()) { const o=document.createElement("option"); o.value=entry.name; o.textContent=entry.name; select.append(o); }
   };
@@ -735,9 +751,13 @@ function openPanel(node) {
   };
   row().append(name,select);
   const actions=row();
+  const management=document.createElement("details"), managementLabel=document.createElement("summary");
+  management.setAttribute("aria-label",text("预设管理操作","Preset Management Actions"));
+  managementLabel.textContent=text("管理…","Manage…");management.append(managementLabel);dialog.append(management);
   button(actions,"保存当前状态","Save Current",()=>{
     const entry=capturePreset(node,name.value);
     if(saved().some(p=>p.name===entry.name) && !window.confirm(text("覆盖同名预设？","Replace this saved preset?"))) return;
+    if(!session.live())return;
     saveEntry(entry); status.textContent=text("已保存到本节点，保存工作流后会保留。","Saved in this node; save the workflow to keep it.");
   });
   button(actions,"应用选中预设","Apply",()=>{
@@ -745,7 +765,7 @@ function openPanel(node) {
     if(!entry) throw new Error(text("先选择预设。","Select a preset first."));
     applyUserPreset(node,entry); renderLocks(); status.textContent=text("已恢复字段、自由文本和模块状态。","Fields, free text and module state restored.");
   });
-  button(actions,"导出选中预设","Export",()=>{
+  button(management,"导出选中预设","Export",()=>{
     const entry=saved().find(p=>p.name===select.value);
     if(!entry) throw new Error(text("先选择预设。","Select a preset first."));
     const url=URL.createObjectURL(new Blob([JSON.stringify(entry,null,2)],{type:"application/json"}));
@@ -754,7 +774,7 @@ function openPanel(node) {
   });
   const file=document.createElement("input"); file.type="file"; file.accept=".json,application/json"; file.hidden=true; dialog.append(file);
   let currentImport = () => false;
-  button(actions,"导入预设","Import",()=>{ currentImport = session.start(); file.value=""; file.click(); });
+  button(management,"导入预设","Import",()=>{ currentImport = session.start(); file.value=""; file.click(); });
   file.addEventListener("change",guarded(async()=>{
     const current = currentImport;
     try {
@@ -768,23 +788,46 @@ function openPanel(node) {
     } catch(e) { if(current())status.textContent=e.message; }
     finally { if(current())file.value=""; }
   }));
-  button(actions,"删除选中预设","Delete",()=>{
+  button(management,"删除选中预设","Delete",()=>{
     if(!select.value || !window.confirm(text("删除选中的已保存预设？","Delete the selected saved preset?"))) return;
+    if(!session.live())return;
     node.properties[STORE]=saved().filter(p=>p.name!==select.value);refresh();dirty(node);
   });
+  }
+  if (mode === "random") {
+  const moduleStatus=document.createElement("pre");moduleStatus.style.cssText="white-space:pre-wrap;font:inherit";
+  moduleStatus.setAttribute("aria-label",text("模块锁定摘要","Module Lock Summary"));dialog.append(moduleStatus);
+  const moduleSelect=document.createElement("select");moduleSelect.setAttribute("aria-label",text("锁定模块","Lock Module"));
+  const modules=availableCardModules(node);
+  for(const module of modules){const option=document.createElement("option");option.value=module;
+    option.textContent=globalThis.__vividMuseZImageI18n?.translateMessage?.(module)||module;moduleSelect.append(option);}
+  if(modules.includes(node.properties?.vividMuseActiveModule))moduleSelect.value=node.properties.vividMuseActiveModule;
+  const moduleActions=row();moduleActions.append(moduleSelect);
+  button(moduleActions,"锁定此模块","Lock Module",()=>{setModuleLock(node,moduleSelect.value,true);renderLocks();
+    status.textContent=text("已锁定具体选项；随机按钮跳过该模块。","Concrete options locked; random buttons skip this module.");});
+  button(moduleActions,"解锁此模块","Unlock Module",()=>{setModuleLock(node,moduleSelect.value,false);renderLocks();
+    status.textContent=text("已解锁，当前选项不变；使用随机按钮才会重新设为随机。","Unlocked without changing options; use a random button to enable random choices again.");});
+  const fieldDetails=document.createElement("details"), fieldTitle=document.createElement("summary");
+  fieldDetails.setAttribute("aria-label",text("字段级锁定","Field Locks"));fieldTitle.textContent=text("字段级锁定","Field Locks");
+  fieldDetails.append(fieldTitle);dialog.append(fieldDetails);
   const hint=document.createElement("p");
   hint.textContent=text("随机锁定只约束随机按钮；手动编辑、切换预设和清空仍然有效。勾选字段后点击保存锁定。跟随预设会固定为当前预设值；随机字段需先选具体值。","Locks affect random buttons only. Manual edits, preset changes and clearing remain available. Check fields and save locks. Follow Preset becomes a concrete value; choose a concrete value before locking a Random field.");
   dialog.append(hint);
-  const locks=document.createElement("div"); locks.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:220px;overflow:auto";dialog.append(locks);
-  const renderLocks=()=>{
+  const locks=document.createElement("div"); locks.style.cssText="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px;max-height:220px;overflow:auto";fieldDetails.append(locks);
+  renderLocks=()=>{
+    const locked=new Set(node.properties?.[LOCKS]||[]);
+    moduleStatus.textContent=modules.map(module=>{const names=moduleGroups()[module]||[],count=names.filter(n=>locked.has(n)).length;
+      const state=count===0?text("未锁定","Unlocked"):count===names.length?text("全部锁定","Fully locked"):text("部分锁定","Partially locked");
+      const label=globalThis.__vividMuseZImageI18n?.translateMessage?.(module)||module;
+      return `${label}: ${state} (${count}/${names.length})`;}).join("\n");
     locks.replaceChildren();
     for(const w of fields(node)) {
       const label=document.createElement("label"), check=document.createElement("input");check.type="checkbox";check.value=w.name;
       check.checked=(node.properties?.[LOCKS]||[]).includes(w.name);
-      label.append(check,document.createTextNode(w.label||w.name)); locks.append(label);
+      label.append(check,document.createTextNode(w.label||globalThis.__vividMuseZImageI18n?.translateMessage?.(w.name)||w.name)); locks.append(label);
     }
   };
-  button(row(),"保存锁定","Save Locks",()=>{
+  button(fieldDetails,"保存锁定","Save Locks",()=>{
     lockFields(node,[...locks.querySelectorAll("input:checked")].map(e=>e.value));
     renderLocks();
     status.textContent=text("随机锁定已保存。","Random locks saved.");
@@ -792,17 +835,122 @@ function openPanel(node) {
   button(row(),"检查当前组合","Check Combination",()=>{
     status.textContent=findConflicts(node).join("\n") || text("未发现已知的明显冲突；这不代表生图效果已验证。","No known obvious conflicts found; image quality is not verified.");
   });
+  }
   status.style.whiteSpace="pre-wrap";dialog.append(status);
-  button(row(),"关闭","Close",()=>dialog.close());
+  if (!host) button(row(),"关闭","Close",()=>dialog.close());
   refresh();renderLocks();
-  dialog.addEventListener("close",()=>{ active=false; dialog.remove();
+  dialog.addEventListener("compositionstart",()=>{composing=true;});
+  dialog.addEventListener("compositionend",()=>{composing=false;});
+  dialog.addEventListener("keydown",event=>{event.stopPropagation();if(event.key==="Escape"&&!composing&&!event.isComposing&&event.keyCode!==229){event.preventDefault();dialog.close();}});
+  dialog.addEventListener("cancel",event=>{if(composing)event.preventDefault();});
+  for(const event of ["keyup","copy","cut","paste","wheel"])dialog.addEventListener(event,e=>e.stopPropagation());
+  const dispose=()=>{ active=false; dialog.open=false; dialog.remove();
     if(node.__vividMusePresetDialog===dialog)node.__vividMusePresetDialog=null;
-  },{once:true});
+  };
+  if(host)host.mount(dialog,dispose);else dialog.addEventListener("close",dispose,{once:true});
   node.__vividMusePresetDialog=dialog;
-  document.body.append(dialog);dialog.showModal();
+  if(!host){document.body.append(dialog);dialog.showModal();}
+  return dialog;
 }
 
-globalThis.__vividMuseContentCards = { captureResultCard, saveCard, openCardsPanel };
+let managerSerial = 0;
+export function openLibraryManager(node, initialTab = "presets") {
+  node.__vividMuseLibraryDialog?.close();
+  node.__vividMuseCardsDialog?.close();
+  node.__vividMusePresetDialog?.close();
+  const el = (tag, caption = "") => { const item = document.createElement(tag); item.textContent = caption; return item; };
+  const dialog = el("dialog"), title = text("我的预设与卡片", "My Presets & Cards");
+  dialog.setAttribute("aria-label", title);
+  dialog.style.cssText = "box-sizing:border-box;width:min(800px,90vw);max-height:85vh;overflow:auto;background:var(--comfy-menu-bg,#242424);color:var(--input-text,#eee);border:1px solid #777;border-radius:10px;padding:20px;font-size:14px;line-height:1.5";
+  let active = true, composing = false;
+  const session = createImportSession(node, app, () => active && dialog.open !== false);
+  const close = el("button", text("关闭", "Close")); close.type = "button";
+  close.addEventListener("click", () => dialog.close());
+  const tabs = el("div"); tabs.setAttribute("role", "tablist"); tabs.setAttribute("aria-label", title);
+  tabs.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:12px 0";
+  const content = el("section"), status = el("p"); status.setAttribute("role", "status");
+  const id = `vividmuse-manager-${++managerSerial}`;
+  content.id = `${id}-content`; content.setAttribute("role", "tabpanel");
+  dialog.append(el("h3", title), close, tabs, content, status);
+  // Each mounted view keeps its original validators and ownership guards.
+  // Disposing on navigation invalidates pending file reads and apply previews.
+  const region = parent => {
+    let dispose = null;
+    const clear = () => { const previous = dispose; dispose = null; previous?.(); parent.replaceChildren(); };
+    return {clear, live: () => session.live(), close: () => dialog.close(), navigate: key => activate(key),
+      mount(view, cleanup) { clear(); dispose = cleanup; parent.append(view); }};
+  };
+  const area = region(content), buttons = new Map();
+  const shoot = globalThis.__vividMuseShootPlanCards, combination = globalThis.__vividMuseCardCombination;
+  const modules = availableCardModules(node).filter(name => CARD_MODULES.has(name));
+  const hasShoot = !!shoot?.availableModules(node).length;
+  const definitions = [["presets", "整套预设", "Whole Presets"]];
+  if (modules.length || hasShoot) definitions.push(["cards", "模块卡片", "Module Cards"]);
+  if (combination?.available(node)) definitions.push(["combination", "组合应用", "Apply Combination"]);
+  const moduleLabel = name => text(name === "服装" ? "穿搭" : name,
+    {人物:"Person", 发型:"Hair", 服装:"Outfit", 姿态动作:"Pose / Action"}[name] || name);
+  function activate(key) {
+    if (!session.live() || composing || !buttons.has(key)) return;
+    area.clear(); status.textContent = "";
+    for (const [name, button] of buttons) {
+      button.setAttribute("aria-selected", String(name === key)); button.tabIndex = name === key ? 0 : -1;
+    }
+    content.setAttribute("aria-labelledby", buttons.get(key).id);
+    try {
+      if (key === "presets") openPanel(node, {host: area, mode: "presets"});
+      else if (key === "combination") combination.openPanel(node, {host: area});
+      else {
+        const wrapper = el("section"), selector = el("select"), slot = el("section");
+        selector.setAttribute("aria-label", text("卡片类型", "Card Type"));
+        selector.style.cssText = "max-width:100%;padding:6px;margin:8px 0";
+        for (const name of modules) { const option = el("option", moduleLabel(name)); option.value = name; selector.append(option); }
+        if (hasShoot) { const option = el("option", text("拍摄方案（场景／摄影／视觉表现）", "Shoot Plan (Scene / Camera / Visual)")); option.value = "shoot"; selector.append(option); }
+        selector.value = modules.includes(node.properties?.vividMuseActiveModule) ? node.properties.vividMuseActiveModule : modules[0] || "shoot";
+        wrapper.append(selector, slot);
+        const inner = region(slot);
+        let viewActive = true;
+        area.mount(wrapper, () => { viewActive = false; inner.clear(); });
+        const showType = () => {
+          if (!viewActive || !session.live() || composing) return;
+          inner.clear(); status.textContent = "";
+          try {
+            if (selector.value === "shoot" && hasShoot) shoot.openPanel(node, {host: inner});
+            else if (modules.includes(selector.value)) openCardsPanel(node, {host: inner, moduleName: selector.value});
+          } catch (error) { status.textContent = error.message; }
+        };
+        selector.addEventListener("change", showType); showType();
+      }
+    } catch (error) { area.clear(); status.textContent = error.message; }
+  }
+  for (const [key, zh, en] of definitions) {
+    const button = el("button", text(zh, en)); button.type = "button"; button.id = `${id}-${key}`;
+    button.setAttribute("role", "tab"); button.setAttribute("aria-controls", content.id);
+    button.addEventListener("click", () => activate(key));
+    button.addEventListener("keydown", event => {
+      if (composing || event.isComposing || event.keyCode === 229) return;
+      const keys = definitions.map(row => row[0]), index = keys.indexOf(key);
+      const next = {ArrowRight: (index + 1) % keys.length, ArrowLeft: (index + keys.length - 1) % keys.length, Home: 0, End: keys.length - 1}[event.key];
+      if (next === undefined || !session.live()) return;
+      event.preventDefault(); event.stopPropagation(); activate(keys[next]); buttons.get(keys[next]).focus?.();
+    });
+    tabs.append(button); buttons.set(key, button);
+  }
+  dialog.addEventListener("compositionstart", () => { composing = true; });
+  dialog.addEventListener("compositionend", () => { composing = false; });
+  dialog.addEventListener("cancel", event => { if (composing) event.preventDefault(); });
+  dialog.addEventListener("keydown", event => { event.stopPropagation();
+    if (event.key === "Escape" && !composing && !event.isComposing && event.keyCode !== 229) { event.preventDefault(); dialog.close(); } });
+  for (const event of ["keyup", "copy", "cut", "paste", "wheel"]) dialog.addEventListener(event, e => e.stopPropagation());
+  dialog.addEventListener("close", () => {
+    active = false; area.clear(); dialog.remove();
+    if (node.__vividMuseLibraryDialog === dialog) node.__vividMuseLibraryDialog = null;
+  }, {once: true});
+  node.__vividMuseLibraryDialog = dialog;
+  document.body.append(dialog); dialog.showModal(); activate(buttons.has(initialTab) ? initialTab : "presets");
+  return dialog;
+}
+
+globalThis.__vividMuseContentCards = { captureResultCard, saveCard, openCardsPanel: node => openLibraryManager(node, "cards") };
 
 app.registerExtension({
   name:"VividMuse.ZImagePromptBuilder.WorkflowTools",
@@ -820,14 +968,15 @@ app.registerExtension({
     const previous=nodeType.prototype.getExtraMenuOptions;
     nodeType.prototype.getExtraMenuOptions=function(_,options) {
       const result=previous?.apply(this,arguments);
-      options.push({content:text("卡片管理 / 模块锁定","Cards / Module Locks"),callback:()=>openCardsPanel(this)});
-      options.push({content:text("用户预设 / 随机锁定 / 组合检查","User Presets / Random Locks / Checks"),callback:()=>openPanel(this)});
+      options.push({content:text("我的预设与卡片","My Presets & Cards"),callback:()=>openLibraryManager(this)});
+      options.push({content:text("随机设置与检查","Random Settings & Checks"),callback:()=>openPanel(this,{mode:"random"})});
       return result;
     };
     for (const event of ["onRemoved", "onConfigure"]) {
       const before = nodeType.prototype[event];
       nodeType.prototype[event] = function () {
         this.__vividMuseCardsGeneration = (this.__vividMuseCardsGeneration || 0) + 1;
+        this.__vividMuseLibraryDialog?.close();
         this.__vividMuseCardsDialog?.close();
         this.__vividMusePresetDialog?.close();
         return before?.apply(this, arguments);

@@ -391,6 +391,8 @@ function installModuleNode(node) {
     null,
     () => setAllModuleFields(node, FOLLOW_PRESET),
   );
+  randomButton.label = randomButton.__vividMuseDisplayText = "🎲 设置本模块随机";
+  randomButton.tooltip = "准备本模块的随机字段；运行节点后查看结果。仅改变种子不会把固定内容变为随机。";
   const clearButton = addHelperWidget(
     node,
     "button",

@@ -10,7 +10,7 @@ v0.16.0：每个选择器下方显示只读卡片内容，选择“保持当前�
 
 v0.16.0: each selector has a read-only contents summary. **Keep Current** means no change. Shoot-plan contents distinguish included modules from those checked for this application; refreshing lists clears selections and stale summaries. Contents do not replace **Preview Combination**, reroll randomness or create undo history. Use User Presets to reuse the complete node configuration; this version does not introduce a saved-combination format.
 
-在完整节点右键打开 **卡片管理 / 模块锁定**，点击 **卡片快捷组合**。独立模块节点不提供这个入口，继续使用各自的卡片操作。
+在完整节点右键打开 **我的预设与卡片 → 组合应用**。独立模块节点不提供这个页签，继续使用各自的卡片操作。
 
 ### 选择与应用
 
@@ -28,7 +28,7 @@ v0.16.0: each selector has a read-only contents summary. **Keep Current** means 
 
 预览标出隐藏字段，全“不使用”的卡片会提示清空对应模块。动作依赖的座椅、墙面或道具不会自动加入场景，请自行匹配。
 
-显式应用仍可更新已锁定字段。卡片写入具体值，不是随机占位符。需要后续变化时，在原卡片管理面板解锁目标模块，再使用随机组合按钮；仅更改 Run 的种子不保证这些具体字段改变。
+显式应用仍可更新已锁定字段。卡片写入具体值，不是随机占位符。需要后续变化时，在右键“随机设置与检查”解锁目标模块，再用“设置随机组合”；仅更改 Run 的种子不保证这些具体字段改变。
 
 ### 取消与异常
 
@@ -46,7 +46,7 @@ Since v0.14.0, the full builder can select Person, Outfit and Shoot Plan Cards i
 
 Version v0.15.0 adds Hair and Pose / Action Cards. The instructions below describe all five types; v0.14.0 supports only Person, Outfit and Shoot Plan Cards.
 
-On the full builder, open the context menu → **Cards / Module Locks** → **Quick Card Combination**. Standalone module nodes retain their existing card controls and do not offer this entry.
+On the full builder, open **My Presets & Cards → Apply Combination**. Standalone module nodes retain their card controls and do not offer this tab.
 
 ### Select and apply
 
@@ -64,7 +64,7 @@ Only selected modules change, up to seven: Person, Hair, Clothing, Pose / Action
 
 Previews label hidden fields and warn if an all-Unused card will clear a module. Seating, walls or props required by a pose are not automatically added to the scene; match them yourself.
 
-Explicit application can update locked fields. Cards write concrete options, not random markers. To vary them later, unlock the modules in Cards / Module Locks and use the random combination button. Merely changing the execution seed does not guarantee changes to concrete options.
+Explicit application can update locked fields. Cards write concrete options, not random markers. To vary them later, unlock modules in **Random Settings & Checks**, then use **Set Up Random Combination**. Merely changing the execution seed does not guarantee changes to concrete options.
 
 ### Cancel and recover
 

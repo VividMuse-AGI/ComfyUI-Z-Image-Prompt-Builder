@@ -10,7 +10,9 @@ Builds structured natural-language positive prompts for portrait photography. Th
 4. Add optional text in **Free Prompt** and choose its join position.
 5. Connect either **Chinese Prompt** or **English Prompt** to the appropriate text encoder.
 
-**Generate Random Combination** respects a currently isolated module. **Enable Only This Module** changes module values; merely switching **Module to Edit** only changes what is visible.
+**Set Up Random Combination** prepares random fields, respects a currently isolated module and does not execute the node. Run, then open **View Results**. Changing only the seed does not make fixed fields random or guarantee different text. **Enable Only This Module** clears other modules' selections and applied user text after confirmation when content exists; free text and imported libraries are kept. Merely switching **Module to Edit** only changes what is visible.
+
+**Clear Content…** offers **Clear Structured Content** or **Clear All Prompt Content**, with scope confirmation. Imported libraries, saved cards/presets and resolution calculation settings are kept. **Clear Free Prompt** remains beside the text box. Library removal keeps already applied text.
 
 ## Language
 
@@ -18,7 +20,7 @@ Open ComfyUI Settings and change **Z-Image Prompt Builder: Interface language / 
 
 The English output renders built-in fields in English and preserves Free Prompt and applied TXT module fragments verbatim. Supply English user text for a fully English result.
 
-Right-click this node and choose **User Presets / Random Locks / Checks** to save or import named presets, protect fields from random buttons, and inspect known conflicts. Presets are stored in the node and persist when the workflow is saved. Export JSON to reuse them elsewhere. Concise and Standard omit built-in shoes and legwear in face, head-and-shoulders and chest-up shots; Detailed retains them.
+Right-click **My Presets & Cards** to save or import presets and cards; less frequent actions are under **Manage…**. Use **Random Settings & Checks** to protect fields and inspect known conflicts. Presets persist when the workflow is saved. Export JSON to reuse them elsewhere. Concise and Standard omit built-in shoes and legwear in face, head-and-shoulders and chest-up shots; Detailed retains them.
 
 ## Resolution settings
 

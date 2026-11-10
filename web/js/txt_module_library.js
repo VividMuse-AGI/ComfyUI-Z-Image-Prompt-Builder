@@ -468,7 +468,7 @@ function wrapButtonCallback(widget, marker, afterCallback) {
   const originalCallback = widget.callback;
   widget.callback = function () {
     const result = originalCallback?.apply(this, arguments);
-    afterCallback();
+    if (result !== false) afterCallback();
     return result;
   };
   widget[marker] = true;
@@ -478,7 +478,8 @@ function installExistingControlIntegration(node) {
   if (isStandaloneNode(node)) return;
   for (const buttonName of ["清空结构化模块", "全部清空"]) {
     wrapButtonCallback(
-      widgetByName(node, buttonName),
+      widgetByName(node, buttonName) || (buttonName === "全部清空"
+        ? node.__vividMuseClearEverythingButton : node.__vividMuseClearStructuredButton),
       "__vividMuseTxtModuleClearIntegration",
       () => clearAllUserModules(node),
     );
@@ -601,6 +602,10 @@ function installModuleLibraryWidgets(node) {
   const clearLibraryButton = addHelperWidget(
     node, "button", "清除模块词库", null, () => clearModuleLibrary(node),
   );
+  clearModuleButton.label = clearModuleButton.__vividMuseDisplayText = "清空当前用户模块文本";
+  clearModuleButton.tooltip = "仅清空当前用户模块的已应用文本；保留内置字段、其他模块和词库条目。";
+  clearLibraryButton.label = clearLibraryButton.__vividMuseDisplayText = "移除 TXT 模块词库";
+  clearLibraryButton.tooltip = "移除导入的模块条目列表；保留已应用的模块文本。";
 
   node.__vividMuseTxtModuleToggle = toggle;
   node.__vividMuseTxtModuleModuleWidget = moduleWidget;

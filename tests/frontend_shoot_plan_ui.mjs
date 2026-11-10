@@ -96,8 +96,12 @@ const search = async (panel, query) => { const control = input(panel, "搜索名
 const changeCheck = async (check, checked) => { check.checked = checked; await check.fire("change"); };
 const full = await create();
 let panel = ctx.__vividMuseContentCards.openCardsPanel(full);
-await button(panel, "拍摄方案卡（场景 / 摄影 / 视觉表现）").click();
-assert.equal(panel.open, false); panel = full.__vividMuseCardsDialog;
+const manager = panel, type = input(panel, "卡片类型");
+type.value = "shoot"; await type.fire("change");
+assert.equal(full.__vividMuseLibraryDialog, manager); assert.ok(manager.open);
+assert.equal(full.__vividMuseCardsDialog.tag, "section");
+assert.ok(flatten(manager).some(e=>e.textContent==="保存为拍摄方案卡"));
+await manager.close(); panel = open(full);
 assert.ok(panel.open);
 assert.equal(sectionChecks(panel, 0).length, 3);
 assert.ok(sectionChecks(panel, 0).every(check => check.checked && !check.disabled));

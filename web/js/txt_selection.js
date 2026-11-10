@@ -187,8 +187,7 @@ function refresh(node, kind, resize = false) {
   }
   if (node.__txtSelectionResultButton) {
     // Always historical: safe for queued results, cached replay and next-seed changes.
-    node.__txtSelectionResultButton.label = node.__txtSelectionResultButton.__vividMuseDisplayText = node.__txtSelectionResult
-      ? "上次随机结果（点击查看）" : "随机抽取：尚未执行";
+    node.__txtSelectionResultButton.label = node.__txtSelectionResultButton.__vividMuseDisplayText = "查看抽取结果";
   }
   globalThis.__vividMuseZImageI18n?.localizeNode?.(node);
   if (resize) {
@@ -215,14 +214,15 @@ function showResult(node) {
   dialog.style.cssText = "max-width:680px;width:85vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
   const el = (tag, value = "") => { const item = document.createElement(tag); item.textContent = value; return item; };
   dialog.setAttribute("aria-label", text("历史随机抽取记录", "Historical Random Selection"));
-  dialog.append(el("h3", text("历史随机抽取记录", "Historical Random Selection")),
-    el("p", text("只包含抽中条目，不含前置提示词或上游工作流；不代表当前手动内容。关闭后重开查看最新记录。",
-      "Selected entry only, without preceding prompts or upstream workflow; not the current manual draft. Reopen for the latest record.")));
+  dialog.append(el("h3", text("历史随机抽取记录", "Historical Random Selection")));
+  const explanation = el("details");
+  explanation.setAttribute("aria-label", text("抽取说明", "Selection Details"));
+  explanation.append(el("summary", text("抽取说明", "Selection Details")));
   const info = result ? `${result.status === "empty" ? tr("当前范围没有候选") : tr("已抽取")}\n${tr("随机种子")}: ${result.seed}`
     + `\n${tr("候选数量")}: ${result.count}\n${tr(result.module || "")}\n${result.title}\n`
     + text(`原词库索引（从0开始）: ${result.index ?? "—"}`, `Original library index (zero-based): ${result.index ?? "—"}`) : unavailable;
-  dialog.append(el("pre", info));
-  if (result) dialog.append(el("p", result.count === 0
+  explanation.append(el("pre", info));
+  if (result) explanation.append(el("p", result.count === 0
     ? text("本次所选范围没有可抽取条目，请检查词库和模块选择。", "No entries were available in this execution's scope. Check the library and module selection.")
     : result.count === 1
       ? text("本次仅有 1 条可抽取条目；词库与范围不变时，更换种子仍会抽到该条目。", "This execution had one candidate. With the same library and scope, changing the seed still selects that entry.")
@@ -232,10 +232,21 @@ function showResult(node) {
   body.textContent = result?.prompt || "";
   body.setAttribute("aria-label", text("抽中正文", "Selected Text"));
   body.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere;max-height:45vh;overflow:auto;user-select:text";
-  dialog.append(body);
+  body.tabIndex = 0;
   const status = el("p"); status.setAttribute("role", "status");
-  const actions = el("div"); actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap"; dialog.append(actions, status);
-  let active = true;
+  const actions = el("div"); actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+  actions.setAttribute("aria-label", text("抽取结果操作", "Selection Result Actions"));
+  const close = el("button", tr("关闭")); close.type = "button";
+  close.addEventListener("click", () => dialog.close());
+  dialog.append(close, el("p", result
+    ? `${text("实际种子", "Actual Seed")}: ${result.seed}`
+      + (result.status === "empty" ? text(" · 当前范围没有候选", " · No candidates in this scope") : "") : unavailable),
+    el("p", text("仅为抽中条目，不含前置文本。运行后重新打开查看最新记录。",
+      "Selected entry only, without preceding text. Reopen after running for the latest record.")),
+    actions, status, body, explanation);
+  explanation.append(el("p", text("不代表当前手动内容；导出为抽取记录，不是工作流或可导入卡片。",
+    "Not the current manual draft. Export is a selection record, not a workflow or importable card.")));
+  let active = true, copyAttempt = 0;
   const live = () => active && liveOwner(owner);
   const button = (label, disabled, fn) => {
     const b = el("button", label); b.type = "button"; b.disabled = disabled;
@@ -243,13 +254,20 @@ function showResult(node) {
   };
   const copy = button(text("复制抽中正文", "Copy Selected Text"), !result || result.status === "empty", async () => {
     if (!live()) return;
+    const attempt = ++copyAttempt;
     copy.disabled = true;
     try {
       if (!globalThis.navigator?.clipboard?.writeText) throw new Error("unavailable");
       await navigator.clipboard.writeText(result.prompt);
-      if (live()) status.textContent = text("正文已复制。", "Selected text copied.");
+      if (live()) {
+        const message = text("已发送正文复制请求。", "Text copy request sent.");
+        status.textContent = message;
+        setTimeout(() => {
+          if (live() && attempt === copyAttempt && status.textContent === message) status.textContent = "";
+        }, 3000);
+      }
     } catch {
-      if (live()) status.textContent = text("复制失败，请选中上方正文手动复制。", "Copy failed. Select the text above and copy it manually.");
+      if (live()) status.textContent = text("复制失败，请选中下方正文手动复制。", "Copy failed. Select the text below and copy it manually.");
     } finally { if (live()) copy.disabled = false; }
   });
   button(text("导出抽取记录", "Export Selection Record"), !result, () => {
@@ -263,7 +281,6 @@ function showResult(node) {
     } catch { status.textContent = text("导出失败，请重试。", "Export failed. Please retry."); }
     finally { link?.remove(); if (url) setTimeout(() => URL.revokeObjectURL(url), 1000); }
   });
-  button(tr("关闭"), false, () => dialog.close());
   dialog.addEventListener("keydown", e => {
     e.stopPropagation();
     if (e.key === "Escape" && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); dialog.close(); }

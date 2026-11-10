@@ -263,7 +263,7 @@ for (const resolutionFirst of [false, true]) {
       }
       change(find("当前编辑模块"), "画面基础");
       assert.equal(state.toggle.hidden, false);
-      find("全部清空").callback();
+      node.__vividMuseClearEverythingButton.callback();
     } else find("清空本模块").callback();
     assert.equal(state.backing["目标总像素"].value, 2); // clear text, not canvas settings
 
@@ -290,7 +290,7 @@ for (const resolutionFirst of [false, true]) {
     random?.callback();
     assert.equal(state.backing["目标总像素（万）"].value, 200);
     assert.equal(state.backing["分辨率模式"].value, "固定比例总像素");
-    (find("全部清空") || find("清空本模块")).callback();
+    (node.__vividMuseClearEverythingButton || find("清空本模块")).callback();
     assert.equal(state.backing["目标总像素（万）"].value, 200);
     assert.equal(state.backing["分辨率模式"].value, "固定比例总像素");
 

@@ -241,11 +241,18 @@ OUTPUT_LABELS_EN = {
 UI_LABELS_EN = {
     "随机状态与执行结果": "Random Status and Execution Result",
     "上次随机结果（点击查看）": "Last Random Result (Click to View)",
+    "查看抽取结果": "View Draw Result",
     "随机抽取：尚未执行": "Random Selection: Not Executed Yet",
     "分辨率设置": "Resolution Settings",
     "分辨率高级设置": "Advanced Resolution Settings",
     "仅启用当前模块": "Enable Only This Module",
     "🎲 生成随机组合": "🎲 Generate Random Combination",
+    "🎲 设置随机组合": "🎲 Set Up Random Combination",
+    "🎲 设置本模块随机": "🎲 Set Up Module Randomness",
+    "清空内容…": "Clear Content…",
+    "清空当前用户模块文本": "Clear Current User Module Text",
+    "移除 TXT 用户词库": "Remove TXT Prompt Library",
+    "移除 TXT 模块词库": "Remove TXT Module Library",
     "清空结构化模块": "Clear Structured Modules",
     "全部清空": "Clear Everything",
     "🎲 生成本模块随机组合": "🎲 Randomize This Module",
@@ -264,6 +271,13 @@ UI_LABELS_EN = {
 
 
 TOOLTIPS_EN = {
+    "🎲 生成随机组合": "Prepare fields according to Random Scope, then run the node to view results. Changing only the seed does not make fixed fields random.",
+    "🎲 生成本模块随机组合": "Prepare this module's random fields, then run the node to view results. Changing only the seed does not make fixed fields random.",
+    "仅启用当前模块": "Keep the current module and clear other modules' built-in selections and applied user text. Keep Free Prompt and imported libraries.",
+    "清空自由提示词": "Clear only Free Prompt. Keep structured content, imported libraries and connected upstream input.",
+    "清除已导入词库": "Remove imported full-prompt entries. Keep text already added to Free Prompt.",
+    "清空当前用户模块": "Clear only the current applied user module text. Keep built-in fields, other modules and library entries.",
+    "清除模块词库": "Remove imported module entries. Keep already applied module text.",
     "随机状态与执行结果": "View random status and last actual output; inputs are not modified.",
     "选择模式": "Manual uses your draft. Random samples the library by seed, preserving the draft and disabling manual apply. Different seeds may select the same entry.",
     "百万像素（MP）": "1 MP = 1,000,000 pixels. Enter 1, 2, 3 or 0.5; range 0.1–16 MP. Editing this activates Preserve Aspect Ratio; divisible dimensions make the actual area approximate.",
@@ -428,6 +442,9 @@ def _option_catalog() -> dict[str, dict[str, str]]:
         for value in nodes.FIELD_OPTIONS[field_name]:
             rendered = nodes._english_atomic_value(field_name, value)
             rendered = OPTION_OVERRIDES.get(field_name, {}).get(value, rendered)
+            if field_name == "手部动作":
+                rendered = next((item["english_label"] for item in nodes.MANUAL_HAND_ACTIONS
+                                 if item["label"] == value), rendered)
             if field_name == "服装配件":
                 rendered = accessory_labels.get(value, rendered)
             if not rendered:

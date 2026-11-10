@@ -7506,3 +7506,31 @@ except ImportError:
     from reference_pool import ReferencePool
 
 REFERENCE_POOL = ReferencePool(globals())
+
+# Manual-only additions are registered after all legacy options and random pools.
+# Keep their source of truth here: never add them to pose bundles or fallback pools.
+MANUAL_HAND_ACTIONS = (
+    {
+        "id": "touch_foldover_collar", "label": "一手轻扶翻领",
+        "text": "一只手轻扶衣服向外翻折的领片，另一只手自然垂落",
+        "english": "one hand lightly touching the folded-over collar of the garment, the other arm resting naturally at the side",
+        "english_label": "Hand lightly touching a fold-over collar",
+    },
+    {
+        "id": "touch_neckline_edge", "label": "一手轻扶领口边缘",
+        "text": "一只手轻扶衣服领口的布料边缘，另一只手自然垂落",
+        "english": "one hand lightly touching the fabric edge of the neckline, the other arm resting naturally at the side",
+        "english_label": "Hand lightly touching the neckline edge",
+    },
+)
+for _manual_action in MANUAL_HAND_ACTIONS:
+    _manual_label = _manual_action["label"]
+    if (_manual_label in FIELD_OPTIONS["手部动作"]
+            or _manual_action["id"] in _ENGLISH_OPTION_ID_MAPS["手部动作"].values()):
+        raise ValueError(f"Duplicate manual hand action: {_manual_label}")
+    FIELD_OPTIONS["手部动作"].append(_manual_label)
+    for _manual_table in (FIELD_TEXT, POSE_FIELD_TEXT, POSE_VALUE_TEXT):
+        _manual_table["手部动作"][_manual_label] = _manual_action["text"]
+    _ENGLISH_OPTION_ID_MAPS["手部动作"][_manual_label] = _manual_action["id"]
+    _ENGLISH_NATURAL_ID_PHRASES["手部动作"][_manual_action["id"]] = _manual_action["english"]
+    _ENGLISH_VALUE_OVERRIDES["手部动作", _manual_label] = _manual_action["english"]

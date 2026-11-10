@@ -10,19 +10,20 @@ const SHOOT = ["场景", "摄影", "视觉表现"];
 const CONTENT = [["person", "人物", "人物卡", "Person Card"], ["hair", "发型", "发型卡", "Hair Card"],
   ["outfit", "服装", "穿搭卡", "Outfit Card"], ["pose", "姿态动作", "姿态动作卡", "Pose / Action Card"]];
 
-export function openCardCombinationPanel(node) {
+export function openCardCombinationPanel(node, {host = null} = {}) {
   if (!supportsCardCombination(node)) throw new Error(text("快捷组合仅支持完整节点。", "Quick combination is available on the full builder only."));
-  node.__vividMuseCardsDialog?.close();
+  if (!host) node.__vividMuseCardsDialog?.close();
   const el = (tag, value = "") => { const item = document.createElement(tag); item.textContent = value; return item; };
-  const dialog = el("dialog");
-  dialog.style.cssText = "box-sizing:border-box;max-width:760px;width:88vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
+  const dialog = el(host ? "section" : "dialog");
+  if (host) { dialog.open = true; dialog.close = () => host.close(); }
+  else dialog.style.cssText = "box-sizing:border-box;max-width:760px;width:88vw;max-height:85vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:20px";
   dialog.setAttribute("aria-label", text("卡片快捷组合", "Quick Card Combination"));
   dialog.append(el("h3", text("卡片快捷组合", "Quick Card Combination")), el("p", text(
     "只应用所选模块。保持当前不会清空内容；发型、姿态动作独立选择。自由提示词、比例、分辨率和种子均保持当前。",
     "Only selected modules are applied. Keep Current does not clear anything. Choose hair and pose independently. Free text, ratio, resolution and seed stay unchanged.")));
   dialog.append(el("p", text(
-    "保留当前锁定不等于解锁。需要后续随机变化时，请在原面板解锁，再使用随机组合按钮。",
-    "Preserve Current Locks does not unlock fields. For later variations, unlock them in Cards / Module Locks, then use the random combination button.")));
+    "保留当前锁定不等于解锁。需要后续随机变化时，请在“随机设置与检查”中解锁，再使用随机组合按钮。",
+    "Preserve Current Locks does not unlock fields. For later variations, unlock them in Random Settings & Checks, then use the random combination button.")));
   let active = true, composing = false, pending = null;
   const root = app.rootGraph || app.graph, owner = node.graph, generation = node.__vividMuseCardsGeneration || 0;
   const belongs = (graph, seen = new Set()) => {
@@ -31,7 +32,7 @@ export function openCardCombinationPanel(node) {
     return graph.getNodeById?.(node.id) === node || (graph._nodes || []).some(child => child.subgraph && belongs(child.subgraph, seen));
   };
   const requireLive = () => {
-    if (!active || (app.rootGraph || app.graph) !== root || node.graph !== owner
+    if (!active || host?.live?.() === false || (app.rootGraph || app.graph) !== root || node.graph !== owner
       || (node.__vividMuseCardsGeneration || 0) !== generation
       || (owner?.getNodeById && owner.getNodeById(node.id) !== node)
       || (root?.getNodeById && !belongs(root)))
@@ -122,8 +123,11 @@ export function openCardCombinationPanel(node) {
   dialog.append(summary, changes, details, status);
   const navigation = row(dialog);
   button(navigation, "刷新卡片列表", "Refresh Card Lists", () => reload());
-  button(navigation, "返回卡片管理", "Back to Cards", () => { dialog.close(); globalThis.__vividMuseContentCards?.openCardsPanel(node); });
-  button(navigation, "关闭", "Close", () => dialog.close());
+  button(navigation, "返回卡片管理", "Back to Cards", () => {
+    if (host) host.navigate("cards");
+    else { dialog.close(); globalThis.__vividMuseContentCards?.openCardsPanel(node); }
+  });
+  if (!host) button(navigation, "关闭", "Close", () => dialog.close());
   const chosen = key => libraries[key]?.[selectors[key].value] ?? null;
   const selection = () => ({...Object.fromEntries(CONTENT.map(([key]) => [key, chosen(key)])), shootPlan: chosen("shootPlan"),
     shootModules: [...checks].filter(([, check]) => check.checked && !check.disabled).map(([module]) => module),
@@ -183,12 +187,13 @@ export function openCardCombinationPanel(node) {
   });
   dialog.addEventListener("cancel", event => { if (composing) event.preventDefault(); });
   for (const event of ["keyup", "copy", "cut", "paste", "wheel"]) dialog.addEventListener(event, e => e.stopPropagation());
-  dialog.addEventListener("close", () => {
-    active = false; pending = null; dialog.remove();
+  const dispose = () => {
+    active = false; dialog.open = false; pending = null; dialog.remove();
     if (node.__vividMuseCardsDialog === dialog) node.__vividMuseCardsDialog = null;
-  }, {once: true});
-  node.__vividMuseCardsDialog = dialog; document.body.append(dialog);
-  reload(); dialog.showModal(); return dialog;
+  };
+  if (host) host.mount(dialog, dispose); else dialog.addEventListener("close", dispose, {once: true});
+  node.__vividMuseCardsDialog = dialog; if (!host) document.body.append(dialog);
+  reload(); if (!host) dialog.showModal(); return dialog;
 }
 
 globalThis.__vividMuseCardCombination = {available: supportsCardCombination, openPanel: openCardCombinationPanel};

@@ -18,7 +18,7 @@ for (const diagnosticsFirst of [true, false]) {
     settingsLookup: {}, getSettingValue(_id, fallback) {return fallback;},
     addSetting(setting) {app.languageSetting = setting;},
   }}, registerExtension(ext) {extensions.push(ext);}};
-  const context = vm.createContext({console, app, api: {addEventListener() {}},
+  const context = vm.createContext({console, app, confirm: () => true, api: {addEventListener() {}},
     setTimeout(fn) {scheduled.push(fn);}, clearTimeout() {}});
   const evaluate = source => vm.runInContext(`(()=>{${source}\n})();`, context);
   evaluate(read("i18n_catalog").replace("export const EN_CATALOG =", "globalThis.englishCatalog ="));
@@ -63,9 +63,12 @@ for (const diagnosticsFirst of [true, false]) {
     const w = name => node.widgets.find(w => w.name === name);
     const set = (name, value) => {const item = w(name); item.value = value; item.callback?.(value);};
     app.languageSetting.onChange("zh");
-    assert.match(button.label, /随机未启用/);
+    assert.equal(button.label, "查看结果");
     app.languageSetting.onChange("en");
-    assert.match(button.label, /Random off/);
+    assert.equal(button.label, "View Results");
+    assert.equal(random.label, key.endsWith("ChinesePromptBuilder") ? "🎲 Set Up Random Combination" : "🎲 Set Up Module Randomness");
+    assert.match(random.tooltip, /does not make fixed fields random/);
+    if (node.__vividMuseClearContentsButton) assert.equal(node.__vividMuseClearContentsButton.label,"Clear Content…");
     assert.match(button.tooltip, /View random status/);
     app.languageSetting.onChange("zh");
     const structured = node.widgets.filter(w => Array.isArray(w.options?.values) && w.options.values.includes("跟随预设"));
@@ -77,7 +80,7 @@ for (const diagnosticsFirst of [true, false]) {
       app.languageSetting.onChange("zh");
     }
     set(structured[0].name, "随机抽取");
-    assert.match(button.label, /已启用随机/);
+    assert.equal(button.label, "查看结果");
     if (key.endsWith("ChinesePromptBuilder")) {
       set("自由提示词", "自由文本必须保留");
       // Existing exclusive-module and random-lock behavior must remain authoritative.

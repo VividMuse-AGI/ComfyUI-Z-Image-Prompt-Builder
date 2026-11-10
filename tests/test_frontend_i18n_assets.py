@@ -28,10 +28,15 @@ class FrontendI18nAssetTests(unittest.TestCase):
 
     def test_english_readme_limits_chinese_to_legacy_reference(self):
         readme = (ROOT / "README.en.md").read_text(encoding="utf-8")
+        cjk = re.compile(r"[\u3400-\u9fff]")
+        self.assertIsNone(cjk.search(readme))
+        self.assertIn("docs/user-guide.en.md", readme)
+        # Detailed canonical Chinese identifiers remain available in the guide,
+        # not in the task-first English landing page.
+        readme = (ROOT / "docs/user-guide.en.md").read_text(encoding="utf-8")
         summary = "<summary>Legacy Chinese compatibility reference</summary>"
         before, remainder = readme.split(summary, 1)
         legacy_reference, after = remainder.split("</details>", 1)
-        cjk = re.compile(r"[\u3400-\u9fff]")
         self.assertIsNone(cjk.search(before + after))
         self.assertIsNotNone(cjk.search(legacy_reference))
 
