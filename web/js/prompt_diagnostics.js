@@ -36,6 +36,156 @@ const nodeScope = node => {
   return kind === FULL ? "全部模块" : MODULE_NAMES[kind?.replace(/^VividMuse_ZImage|Module$/g, "")];
 };
 
+// Only the root graph on a capable host is
+// eligible. Ownership of incoming live results is still checked by routeResult.
+const switchResults = (() => {
+  let store, graph, loading, awaitingActivation;
+  let snapshots = new WeakMap();
+  const staged = new Map(), successful = new Map();
+  const clearPending = () => { staged.clear(); successful.clear(); };
+  const invalidate = () => {
+    snapshots = new WeakMap(); loading = null; awaitingActivation = null; clearPending();
+  };
+  const trackerOf = workflow => {
+    const tracker = workflow?.changeTracker;
+    return tracker && typeof tracker === "object" ? tracker : null;
+  };
+  const compatible = () => store && graph === app.rootGraphOrUndefined && Array.isArray(store.openWorkflows);
+  const current = () => {
+    if (!compatible()) return null;
+    const workflow = store.activeWorkflow, tracker = trackerOf(workflow);
+    if (!tracker || !store.openWorkflows.includes(workflow)) return null;
+    if (store.openWorkflows.filter(item => trackerOf(item) === tracker).length !== 1) return null;
+    return tracker;
+  };
+  const keyOf = node => node?.id != null && target(node)
+    && graph?.getNodeById?.(node.id) === node ? String(node.id) : null;
+  const keyOfRemoved = node => node?.id != null && target(node) ? String(node.id) : null;
+  const forget = (tracker, key) => {
+    snapshots.get(tracker)?.delete(key);
+    for (const [id, entries] of staged) {
+      if (entries.get(key)?.tracker === tracker) entries.delete(key);
+      if (!entries.size) staged.delete(id);
+    }
+  };
+  const forgetWorkflow = tracker => {
+    snapshots.delete(tracker);
+    for (const [id, entries] of staged) {
+      for (const [key, entry] of entries) if (entry.tracker === tracker) entries.delete(key);
+      if (!entries.size) staged.delete(id);
+    }
+    for (const [id, owner] of successful) if (owner === tracker) successful.delete(id);
+  };
+  const recordType = node => node.comfyClass || node.constructor?.type;
+  const remove = event => {
+    const key = keyOfRemoved(event.detail?.node);
+    if (key == null) return;
+    if (loading || awaitingActivation) { invalidate(); return; }
+    forget(current(), key);
+  };
+  const commit = ({ tracker, node, key, generation, record }) => {
+    if (loading || current() !== tracker || keyOf(node) !== key
+        || node.__vividMuseDiagnosticsGeneration !== generation) return;
+    let records = snapshots.get(tracker);
+    if (!records) { records = new Map(); snapshots.set(tracker, records); }
+    const previous = records.get(key);
+    if (!previous || record.order > previous.record.order) {
+      records.set(key, { type: recordType(node), record: JSON.parse(JSON.stringify(record)) });
+    }
+  };
+  return {
+    setup() {
+      if (store) return;
+      const candidate = app.extensionManager?.workflow, root = app.rootGraphOrUndefined;
+      if (!api?.addEventListener || !Array.isArray(candidate?.openWorkflows)
+          || typeof candidate?.$onAction !== "function" || typeof candidate?.onUserActivation !== "function"
+          || typeof root?.getNodeById !== "function" || typeof root?.events?.addEventListener !== "function") return;
+      try {
+        candidate.$onAction(({ name, args, after, onError }) => {
+          if (name !== "closeWorkflow") return;
+          const closing = trackerOf(args?.[0]);
+          if (awaitingActivation?.from === closing || awaitingActivation?.to === closing) awaitingActivation = null;
+          if (closing && loading?.before.has(closing)) loading.before.delete(closing);
+          after(() => {
+            if (closing) forgetWorkflow(closing);
+          });
+          onError(() => { awaitingActivation = null; });
+        }, true);
+        candidate.onUserActivation(workflow => {
+          const plan = awaitingActivation;
+          awaitingActivation = null;
+          const tracker = current();
+          if (!plan || !tracker || tracker !== plan.to || trackerOf(workflow) !== tracker
+              || workflow !== store.activeWorkflow) return;
+          for (const [key, { type, record }] of snapshots.get(tracker) || []) {
+            const node = graph.getNodeById(key);
+            if (!target(node) || recordType(node) !== type || node.__vividMusePromptHistory?.length) continue;
+            node.__vividMusePromptHistory = [{ ...JSON.parse(JSON.stringify(record)), restoredAcrossWorkflow: true }];
+            refresh(node);
+            node.setDirtyCanvas?.(true, true);
+          }
+        });
+        root.events.addEventListener("node:removed", remove);
+        store = candidate; graph = root;
+      } catch { store = undefined; }
+    },
+    beforeLoad() {
+      if (loading || !compatible()) { invalidate(); return; }
+      awaitingActivation = null; clearPending();
+      loading = {
+        from: current(), before: new Set(store.openWorkflows.map(trackerOf).filter(Boolean)),
+        configured: false,
+      };
+    },
+    beforeConfigure() {
+      if (!loading || !compatible() || loading.configured) { invalidate(); return; }
+      loading.configured = true;
+    },
+    afterConfigure() {
+      if (!loading?.configured || !compatible() || loading.finished) { invalidate(); return; }
+      loading.finished = true;
+    },
+    afterLoad() {
+      if (!loading?.finished || !compatible()) { invalidate(); return; }
+      const outgoing = loading;
+      loading = null;
+      const to = current();
+      if (!to || !outgoing.from || to === outgoing.from || !outgoing.before.has(to)
+          || !store.openWorkflows.some(workflow => trackerOf(workflow) === outgoing.from)) {
+        if (to) snapshots.delete(to);
+        return;
+      }
+      awaitingActivation = { from: outgoing.from, to };
+    },
+    invalidate,
+    forgetReconfigured(node) {
+      if (loading) return;
+      const key = keyOf(node);
+      if (key != null) { awaitingActivation = null; forget(current(), key); }
+    },
+    accepted(node, record) {
+      if (loading || record.promptId == null) return;
+      const tracker = current(), key = keyOf(node);
+      if (!tracker || key == null || record.executionNode !== key) return;
+      const entry = { tracker, node, key, record, generation: node.__vividMuseDiagnosticsGeneration };
+      if (successful.get(record.promptId) === tracker) { commit(entry); return; }
+      let entries = staged.get(record.promptId);
+      if (!entries) { entries = new Map(); bounded(staged, record.promptId, entries); }
+      entries.set(key, entry);
+    },
+    success(id) {
+      const tracker = current();
+      if (loading || !tracker || terminalIds.has(id)
+          || !(submissions.has(id) || pendingRequests)) return;
+      bounded(successful, id, tracker);
+      const entries = staged.get(id);
+      staged.delete(id);
+      for (const entry of entries?.values() || []) commit(entry);
+    },
+    terminal(id) { staged.delete(id); successful.delete(id); },
+  };
+})();
+
 function parseRandomExplanation(raw, scope) {
   if (raw === undefined) return {status: "missing"};
   const object = value => value && typeof value === "object" && !Array.isArray(value);
@@ -398,6 +548,7 @@ function acceptResult(node, data, promptId = null, executionNode = null) {
   node.__vividMusePromptHistory ??= [];
   node.__vividMusePromptHistory.push(record);
   if (node.__vividMusePromptHistory.length > HISTORY_LIMIT) node.__vividMusePromptHistory.shift();
+  switchResults.accepted(node, record);
   refresh(node);
   node.setDirtyCanvas?.(true, true);
   return true;
@@ -669,6 +820,9 @@ function showDetails(node) {
   const cardModules = Object.keys(cardTypes).filter(module => nodeType === FULL
     || nodeType === `VividMuse_ZImage${cardTypes[module][2]}Module`);
   const checkCardOwner = record => {
+    if (record?.restoredAcrossWorkflow) throw new Error(text(
+      "此历史结果可复制或导出；如需制成卡片，请先运行当前节点。",
+      "Copy or export this restored result. To create a card, run the current node first."));
     if (!active || rootGraph() !== graph || generation !== (node.__vividMuseDiagnosticsGeneration || 0)
         || record?.promptId == null || record?.executionNode == null
         || nodeAtPath(graph, record.executionNode) !== node)
@@ -829,6 +983,7 @@ function showDetails(node) {
         : text(`相对前次可比较执行：${record.changed.length} 个模块变化`, `Compared with the previous comparable execution: ${record.changed.length} modules changed`)
           + (record.changed.length ? ` (${record.changed.map(tr).join(", ")})` : ""));
     info.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}`
+      + (record.restoredAcrossWorkflow ? text("\n切回工作流时找回的上次运行结果。", "\nLast result restored when you returned to this workflow.") : "")
       + (stale(node, record) ? text("\n当前设置与此记录不同；这是历史结果。", "\nCurrent settings differ from this historical result.") : "");
     info.style.whiteSpace = "pre-wrap";
     if (record.data.framing?.status && record.data.framing.status !== "disabled") changes.textContent += text(
@@ -886,6 +1041,7 @@ function install(node) {
     node.__vividMusePromptStatusButton = button;
     const before = node.onConfigure;
     node.onConfigure = function () {
+      switchResults.forgetReconfigured(this);
       this.__vividMusePromptHistory = [];
       this.__vividMuseDiagnosticsGeneration++;
       this.__vividMusePromptDialog?.close();
@@ -933,18 +1089,29 @@ function install(node) {
 }
 
 api?.addEventListener?.("executed", event => routeResult(event.detail));
+api?.addEventListener?.("execution_success", event => {
+  const id = event.detail?.prompt_id;
+  if (id != null) switchResults.success(String(id));
+});
 for (const name of ["execution_error", "execution_interrupted"]) api?.addEventListener?.(name, event => {
   const id = event.detail?.prompt_id;
   if (id == null) return;
   terminalIds.add(String(id));
   if (terminalIds.size > ORDERS_LIMIT) terminalIds.delete(terminalIds.values().next().value);
   earlyResults.delete(String(id));
+  switchResults.terminal(String(id));
 });
 
 globalThis.__vividMusePromptDiagnostics = { refresh, install };
 app.registerExtension({
   name: "VividMuse.ZImagePromptBuilder.PromptDiagnostics",
   init: observeSubmissions,
+  setup: switchResults.setup,
+  beforeLoadGraph: switchResults.beforeLoad,
+  beforeConfigureGraph: switchResults.beforeConfigure,
+  afterConfigureGraph: switchResults.afterConfigure,
+  afterLoadGraph: switchResults.afterLoad,
+  onGraphLoadError: switchResults.invalidate,
   nodeCreated(node) {
     if (!target(node)) return;
     install(node);

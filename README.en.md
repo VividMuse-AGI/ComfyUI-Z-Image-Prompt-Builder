@@ -27,6 +27,8 @@ For Git installations, run `git pull` inside the node folder, restart and force-
 3. Click ComfyUI **Run**.
 4. Click **View Results**, then **Copy Chinese / Copy English**. **More…** contains result JSON export and manual-copy options.
 
+On supported frontends, return to a workflow that is still open on the same page and use **View Results** to recover the latest successful result without rerunning. This works for the full builder and all eight standalone modules, not the two TXT nodes. Refreshing the page or closing and reopening the workflow does not restore results.
+
 Search ComfyUI Settings for **Z-Image Prompt Builder: Interface language** to choose Chinese or English. Interface language does not change saved fields, prompt text or ports.
 
 ## Choose your nodes
@@ -96,6 +98,6 @@ python -m unittest discover -s tests -p "test_*.py"
 
 Run each `tests/frontend_*.mjs` file with Node for frontend regressions. See [development checks](docs/user-guide.en.md#development-checks).
 
-The published version is **0.19.0**. Interface simplification on this working branch is not released yet. See [CHANGELOG](CHANGELOG.md) and [Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases) for version history.
+Source version: **0.21.0**. See [CHANGELOG](CHANGELOG.md) for changes and [Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases) for published installation packages.
 
 Author: VividMuse · [MIT License](LICENSE)

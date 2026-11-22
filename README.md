@@ -27,6 +27,8 @@ Git 安装在节点目录执行 `git pull` 更新，再重启并强制刷新。�
 3. 点击 ComfyUI **Run**。
 4. 点击节点的 **查看结果**，使用 **复制中文／复制英文**；导出结果 JSON 和手动复制在 **更多…** 中。
 
+在支持此功能的前端，同一页面切回仍打开的工作流后，完整节点和八个独立模块可在 **查看结果** 中找回最近一条成功结果，无需重跑。刷新页面或关闭工作流后重开不会恢复。两个独立 TXT 节点不受此功能影响。
+
 在 ComfyUI 设置中搜索 **Z-Image Prompt Builder: Interface language** 可切换中文或 English。界面语言不改变保存的字段、提示词或输出端口。
 
 ## 选择哪种节点
@@ -96,6 +98,6 @@ python -m unittest discover -s tests -p "test_*.py"
 
 前端回归逐个运行 `node tests/frontend_*.mjs` 中的脚本。完整命令见[开发测试](docs/user-guide.md#开发测试)。
 
-当前已发布版本：**0.19.0**。本工作分支的界面整理尚未发布；历史功能与版本说明见 [CHANGELOG](CHANGELOG.md) 和 [Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)。
+当前源码版本：**0.21.0**。版本变更见 [CHANGELOG](CHANGELOG.md)，已发布的安装包见 [Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases)。
 
 作者：VividMuse · [MIT License](LICENSE)

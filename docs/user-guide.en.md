@@ -121,7 +121,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 Then restart ComfyUI. The project has no extra dependencies, so no `pip install` is needed.
 
-For the recommended manual install, open the [`v0.19.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.19.0), download `ComfyUI-Z-Image-Prompt-Builder-v0.19.0.zip`, and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
+For the recommended manual install, download the dedicated package for your version from [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases) and extract it directly into `custom_nodes`. Its internal root folder is already named `ComfyUI-Z-Image-Prompt-Builder`. Use the accompanying `SHA256SUMS.txt` to verify the download.
 
 GitHub's automatically generated `Source code (zip)` and `Source code (tar.gz)` archives append the version to the extracted folder name. That is normal, but they are not the recommended installation download. If you use one, rename the extracted folder to `ComfyUI-Z-Image-Prompt-Builder` and make sure no other version remains in `custom_nodes`.
 
@@ -235,7 +235,11 @@ v0.9.0 lets you select any of the last five executions. Actual text, submitted s
 
 To export, run the full builder or a standard module, click **View Results**, then select **More… → Export Result JSON** in **Actual Execution Results**. Random sampling does not need to be enabled. **TXT nodes use a separate selection-record format, not this full-result format.** Since v0.11.0, **Copy Selected Text** and **Export Selection Record** are available under **View Draw Result**, excluding preceding prompts. See the [TXT result guide](txt-result-export.md#english). For the original full-result export's verification scope, see the [v0.9.0 acceptance record](testing/2026-10-22-v0.9.0-acceptance.md).
 
-Available since v0.7.0. Automated regressions, isolated text execution, representative Chinese/English and Classic/Nodes 2.0 UI cases, saved-workflow restoration and normal reloads passed. Follow-up acceptance also covered actual deletion and undo, rapid seed submissions matched to diagnostics, and basic compatibility with ComfyUI 0.31.1 / frontend 1.48.7. Cache replay was verified in that older combination and ComfyUI 0.39.0 / frontend 1.53.10. See the [acceptance record](testing/2026-10-07-focused-release-acceptance.md) for the exact scope. Other host versions and heap-memory analysis are outside these compatibility claims.
+**Returning to a workflow (v0.21.0):** On supported frontends, switch from A to B and back to the still-open A in the same browser tab. In **View Results**, the full builder and each standard module can recover their own latest successful result, including the original text, line breaks, actual seed and execution ID. You can copy or export a restored result; run the current node again before saving a card. Without switching, up to five recent records remain available.
+
+Refreshing, closing and reopening, duplicating the workflow, or recreating a node (including undoing its deletion) does not restore old results. A job that finishes while you are away is not added retroactively. This feature does not cover nodes inside subgraphs or the two standalone TXT nodes. Frontends that lack the necessary capabilities, or where result ownership cannot be determined, keep the existing behavior; running, copying and exporting results in the current session still work. Recovery was tested on ComfyUI 0.46.0 / frontend 1.59.6 in Classic and Nodes 2.0. The official Desktop app was not tested separately.
+
+Basic diagnostics have been available since v0.7.0. Earlier acceptance covered actual deletion and undo, rapid seed submissions matched to diagnostics, and basic compatibility with ComfyUI 0.31.1 / frontend 1.48.7. Cache replay was verified in that older combination and ComfyUI 0.39.0 / frontend 1.53.10. See the [acceptance record](testing/2026-10-07-focused-release-acceptance.md) for the exact scope. Those earlier tests did not validate the v0.21.0 recovery feature on those versions.
 
 ## Framing Adaptation (v0.9.0)
 

@@ -127,7 +127,7 @@ ComfyUI/custom_nodes/ComfyUI-Z-Image-Prompt-Builder
 
 然后重新启动 ComfyUI。项目没有额外依赖，因此不需要执行 `pip install`。
 
-推荐从 [`v0.19.0` Release](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases/tag/v0.19.0) 下载附件 `ComfyUI-Z-Image-Prompt-Builder-v0.19.0.zip`，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
+推荐从 [GitHub Releases](https://github.com/VividMuse-AGI/ComfyUI-Z-Image-Prompt-Builder/releases) 下载对应版本的专用安装包，直接解压到 `custom_nodes`；安装包内部已经固定为 `ComfyUI-Z-Image-Prompt-Builder`，无需改名。可使用同页的 `SHA256SUMS.txt` 核对下载文件。
 
 GitHub 自动生成的 `Source code (zip)` 和 `Source code (tar.gz)` 会在目录名后附加版本号，这是正常行为，但不作为推荐安装入口。如果使用自动源码包，请将解压目录改名为 `ComfyUI-Z-Image-Prompt-Builder`，并确认 `custom_nodes` 中没有其他版本副本。
 
@@ -241,7 +241,11 @@ v0.9.0 可在最近五条记录中选择一次执行，优先查看中英文正�
 
 导出入口：先运行完整节点或任一标准模块，点击节点内“查看结果”，在“实际执行结果”弹窗中选择“更多… → 导出结果 JSON”。无需启用随机。**TXT 节点使用独立的抽取记录格式，而非上述完整结果格式**：在“查看抽取结果”中提供“复制抽中正文”和“导出抽取记录”，只包含抽中条目，不含前置拼接文本。见[TXT 结果说明](txt-result-export.md)。完整节点原导出的验收范围见[ v0.9.0 验收记录](testing/2026-10-22-v0.9.0-acceptance.md)。
 
-此功能从 v0.7.0 提供。自动化回归、隔离纯文本执行、中英文／经典／Nodes 2.0 代表界面、保存恢复和正常刷新已通过验收；另补齐真实删除／撤销、快速提交种子与诊断对应，以及 ComfyUI 0.31.1／前端 1.48.7 的基本兼容。缓存回显已在该旧版组合及 ComfyUI 0.39.0／前端 1.53.10 验证，具体范围见[验收记录](testing/2026-10-07-focused-release-acceptance.md)。其他宿主版本和堆内存专项不包含在兼容承诺中。
+**切回工作流（v0.21.0）：** 在支持此功能的前端，同一浏览器标签页内从 A 切到 B、再切回仍打开的 A，可在完整节点或标准模块的「查看结果」找回各自最近一条已成功执行的记录。保留原文、换行、实际种子和执行标识，不按当前设置重算。找回的记录可复制、导出；要制成卡片，须先运行当前节点。不切换时仍最多查看五条。
+
+刷新、关闭后重开、另存副本、删除后重建或撤销删除均不会带回旧记录。切走期间才结束的任务不补录；此功能不适用于子图内节点或两个独立 TXT 节点。缺少所需前端能力或无法确认归属时，不恢复旧记录，但运行、复制和导出当前会话的结果不受影响。实机覆盖 ComfyUI 0.46.0／前端 1.59.6 的经典界面和 Nodes 2.0；官方 Desktop 未独立实测。
+
+基础诊断从 v0.7.0 提供。自动化回归、隔离纯文本执行、中英文／经典／Nodes 2.0 代表界面、保存恢复和正常刷新已通过验收；另补齐真实删除／撤销、快速提交种子与诊断对应，以及 ComfyUI 0.31.1／前端 1.48.7 的基本兼容。缓存回显已在该旧版组合及 ComfyUI 0.39.0／前端 1.53.10 验证，具体范围见[验收记录](testing/2026-10-07-focused-release-acceptance.md)。这不代表这些旧组合已实测「切回工作流」功能。
 
 ### 构图适配（v0.9.0）
 
