@@ -1,7 +1,7 @@
 // Structured shooting cards are separate from the v1 person/outfit card format.
 // This module never resolves random values, writes unrelated modules or runs a graph.
 export const SHOOT_PLAN_MODULES = Object.freeze(["场景", "摄影", "视觉表现"]);
-import { planNodeCardCollection, commitNodeCardOrganization } from "./card_organization.js";
+import { planNodeCardCollection, commitNodeCardOrganization } from "./card_organization.mjs";
 
 export const SHOOT_PLAN_STORE = "vividMuseShootPlanCards";
 const KIND = "vividmuse-shoot-plan-card";

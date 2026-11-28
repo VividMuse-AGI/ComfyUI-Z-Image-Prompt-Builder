@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 // Import the actual pure ES module without requiring a package.json type change.
-const source = fs.readFileSync(new URL("../web/js/card_organization.js", import.meta.url), "utf8");
+const source = fs.readFileSync(new URL("../web/js/lib/card_organization.mjs", import.meta.url), "utf8");
 const api = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
 const content = (name, module = "人物") => ({kind: "vividmuse-content-card", version: 1, module, name, values: {fixture: "kept"}});
 const shoot = name => ({kind: "vividmuse-shoot-plan-card", version: 1, name, modules: {摄影: {fixture: "kept"}}});

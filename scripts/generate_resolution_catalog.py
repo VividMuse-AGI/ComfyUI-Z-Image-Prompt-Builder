@@ -8,7 +8,7 @@ sys.path.insert(0, str(ROOT))
 import nodes as n
 import resolution as r
 
-TARGET = ROOT / "web/js/resolution_catalog.js"
+TARGET = ROOT / "web/js/lib/resolution_catalog.mjs"
 
 
 def render_catalog():
@@ -24,4 +24,5 @@ def render_catalog():
 
 
 if __name__ == "__main__":
+    TARGET.parent.mkdir(parents=True, exist_ok=True)
     TARGET.write_text(render_catalog(), encoding="utf-8", newline="\n")

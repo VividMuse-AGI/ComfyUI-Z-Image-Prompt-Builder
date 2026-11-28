@@ -22,7 +22,7 @@ class ResultCardTests(unittest.TestCase):
             for seed in (0, 42, core.MAX_SEED)]
         self.assertEqual(len(outputs), 297)
         digest = hashlib.sha256(json.dumps(outputs, sort_keys=True, ensure_ascii=True).encode()).hexdigest()
-        self.assertEqual(digest, "2006e8d3530daa9430a6f29f568a82cb3bd40eee44b196063be18f5f66df2092")
+        self.assertEqual(digest, "6f18a5757f7f7ca9b80c237b9c1b8157bfd01d43663bf5149de9f05776cf7b2a")
 
     def execute(self, cls=core.ZImageChinesePromptBuilder, **inputs):
         method = cls.FUNCTION

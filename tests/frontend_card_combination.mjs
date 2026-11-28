@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
 import {execFileSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
+import {createVmContext, loadLibModule} from "./vm_loader.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const fixture = JSON.parse(execFileSync(process.env.PYTHON || "python", ["-c", `
@@ -11,18 +10,10 @@ print(json.dumps({k:c.INPUT_TYPES() for k,c in {**n.NODE_CLASS_MAPPINGS, **m.NOD
 `], {cwd: root, encoding: "utf8", env: {...process.env, PYTHONUTF8: "1", PYTHONIOENCODING: "utf-8"}}));
 const extensions = [];
 const app = {registerExtension(extension) { extensions.push(extension); }, graph: {setDirtyCanvas() {}}};
-const ctx = vm.createContext({console, app, setTimeout() {}, clearTimeout() {}});
+const ctx = createVmContext({app, setTimeout() {}, clearTimeout() {}});
 ctx.modules = {};
 function load(name) {
-  if (ctx.modules[name]) return ctx.modules[name];
-  const raw = fs.readFileSync(new URL(`../web/js/${name}.js`, import.meta.url), "utf8");
-  const exports = [...raw.matchAll(/export (?:async )?(?:function|const) (\w+)/g)].map(m => m[1]);
-  const code = raw.replace('import { app } from "../../scripts/app.js";', "")
-    .replace(/import\s*\{([^}]+)\}\s*from\s*["']\.\/([\w_]+)\.js["'];/g, (_, names, file) => {
-      load(file); return `const {${names}} = globalThis.modules.${file};`;
-    }).replaceAll("export async function ", "async function ").replaceAll("export function ", "function ").replaceAll("export const ", "const ");
-  vm.runInContext(`(()=>{${code}\nglobalThis.modules.${name}={${exports.join(",")}};})()`, ctx, {filename: name});
-  return ctx.modules[name];
+  return (ctx.modules[name] ??= loadLibModule(name, ctx));
 }
 load("preset_sync"); load("modular_nodes");
 const cards = load("workflow_tools"), shoot = load("shoot_plan_core"), api = load("card_combination_core");

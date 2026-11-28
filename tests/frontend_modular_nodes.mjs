@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 
-const sourcePath = new URL("../web/js/modular_nodes.js", import.meta.url);
 let registeredExtension = null;
 globalThis.__modularTestApp = {
   graph: { setDirtyCanvas() {} },
@@ -33,11 +31,7 @@ globalThis.__vividMuseZImagePromptData = {
   },
 };
 
-const source = fs.readFileSync(sourcePath, "utf8").replace(
-  'import { app } from "../../scripts/app.js";',
-  "const app = globalThis.__modularTestApp;",
-);
-vm.runInThisContext(source, { filename: sourcePath.pathname });
+loadLibModule("modular_nodes", null, { appExpr: "globalThis.__modularTestApp" });
 assert.ok(registeredExtension);
 
 const SPECIAL_VALUES = ["跟随预设", "随机抽取", "不使用"];

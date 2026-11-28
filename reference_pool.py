@@ -56,9 +56,9 @@ class ReferencePool:
         scene = self.by_option.get(("背景环境", resolved.get("背景环境")))
         if pose:
             allowed = set(pose.get("shots", ACTION_SHOTS))
-        if scene and scene["id"] == "C19":
-            cabin = {"腰部以上", "胸部以上", "坐姿半身"}
-            allowed = cabin if allowed is None else allowed & cabin
+        if scene and scene.get("camera_shots"):
+            scoped_shots = set(scene["camera_shots"])
+            allowed = scoped_shots if allowed is None else allowed & scoped_shots
         return [b for b in bundles if allowed is None or b["景别"] in allowed]
 
     def prepare_request(self, requested):
@@ -131,8 +131,8 @@ class ReferencePool:
                     return False
             if "景别" not in automatic and resolved.get("景别", empty) in ("面部特写", "头肩近景", "胸部以上"):
                 return False
-            if (entry["id"] == "C19" and "景别" not in automatic
-                    and resolved.get("景别", empty) not in (empty, "腰部以上", "坐姿半身")):
+            if (entry.get("camera_shots") and "景别" not in automatic
+                    and resolved.get("景别", empty) not in (empty, *entry["camera_shots"])):
                 return False
         elif entry["module"] == "发型":
             style = resolved.get("发型造型", empty)
@@ -179,7 +179,7 @@ class ReferencePool:
             proposed.update({name: c["EMPTY_CHOICE"] for name in group})
         if module == "场景" and set(c["POSE_OUTPUT_FIELDS"]).issubset(automatic):
             proposed.update({name: c["EMPTY_CHOICE"] for name in c["POSE_OUTPUT_FIELDS"]})
-            pose_id = {"C19": "C06a", "C32": "B008Q2"}.get(entry["id"])
+            pose_id = entry.get("default_pose_id")
             proposed["基础姿态"] = self.by_id[pose_id]["label"] if pose_id else "自然站立"
         proposed[field] = entry["label"]
         proposed.update(entry.get("set", {}))

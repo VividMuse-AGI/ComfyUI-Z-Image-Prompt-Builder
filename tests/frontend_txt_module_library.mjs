@@ -1,25 +1,20 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 
-const sourcePath = new URL("../web/js/txt_module_library.js", import.meta.url);
 let extension = null;
 globalThis.__txtModuleTestApp = {
   graph: { setDirtyCanvas() {} },
   registerExtension(value) { extension = value; },
 };
-let source = fs.readFileSync(sourcePath, "utf8").replace(
-  'import { app } from "../../scripts/app.js";',
-  "const app = globalThis.__txtModuleTestApp;",
-);
-source += `
-globalThis.__txtModuleLibraryApi = {
-  parseTxtModuleLibrary, importTxtModuleFile, applySelectedModuleEntry,
-  clearCurrentModule, clearModuleLibrary,
-};
-`;
-vm.runInThisContext(source, { filename: sourcePath.pathname });
-const api = globalThis.__txtModuleLibraryApi;
+const api = loadLibModule("txt_module_library", null, {
+  appExpr: "globalThis.__txtModuleTestApp",
+  expose: [
+    "parseTxtModuleLibrary", "importTxtModuleFile", "applySelectedModuleEntry",
+    "clearCurrentModule", "clearModuleLibrary",
+  ],
+});
+globalThis.__txtModuleLibraryApi = api;
 assert.ok(extension);
 
 const modules = ["画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现", "自定义"];

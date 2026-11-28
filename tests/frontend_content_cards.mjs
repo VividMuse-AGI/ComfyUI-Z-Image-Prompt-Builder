@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
-import {withCardOrganizationImports} from './card_organization_vm.mjs';
 import {execFileSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
+import {createVmContext, loadLibModule} from "./vm_loader.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const fixture = JSON.parse(execFileSync(process.env.PYTHON || "python", ["-c", `
@@ -13,14 +11,14 @@ print(json.dumps({k:c.INPUT_TYPES() for k,c in classes.items()}))
 `], {cwd:root, encoding:"utf8"}));
 const extensions = [];
 const app = {registerExtension(e) {extensions.push(e);}, graph:{setDirtyCanvas(){}}};
-const context = vm.createContext({console, app, setTimeout(){}, clearTimeout(){}});
-for (const file of ["preset_sync", "modular_nodes", "workflow_tools"]) {
-  const source = withCardOrganizationImports(fs.readFileSync(new URL(`../web/js/${file}.js`, import.meta.url), "utf8"), context)
-    .replace('import { app } from "../../scripts/app.js";', "").replaceAll("export function ", "function ");
-  const extra = file === "workflow_tools" ? "globalThis.cards={captureCard,validateCard,saveCard,applyCard,setModuleLock,availableCardModules,openCardsPanel};"
-    : file === "preset_sync" ? "globalThis.randomFull=prepareRandomCombination;" : "globalThis.randomModule=prepareModuleRandomCombination;";
-  vm.runInContext(`(()=>{${source}\n${extra}})()`, context);
-}
+const context = createVmContext({app, setTimeout(){}, clearTimeout(){}});
+const preset = loadLibModule("preset_sync", context, {expose: ["prepareRandomCombination"]});
+context.randomFull = preset.prepareRandomCombination;
+const modular = loadLibModule("modular_nodes", context, {expose: ["prepareModuleRandomCombination"]});
+context.randomModule = modular.prepareModuleRandomCombination;
+context.cards = loadLibModule("workflow_tools", context, {
+  expose: ["captureCard", "validateCard", "saveCard", "applyCard", "setModuleLock", "availableCardModules", "openCardsPanel"],
+});
 const api = context.cards;
 const create = async key => {
   const node = {comfyClass:key, widgets:[], properties:{}, inputs:[], size:[360,400],

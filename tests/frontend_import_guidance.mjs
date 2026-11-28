@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 
-const source = fs.readFileSync(new URL('../web/js/import_guidance.js', import.meta.url), 'utf8');
+const source = fs.readFileSync(new URL('../web/js/lib/import_guidance.mjs', import.meta.url), 'utf8');
 const api = await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 let count = 0;
 const check = (name, fn) => { fn(); count++; };

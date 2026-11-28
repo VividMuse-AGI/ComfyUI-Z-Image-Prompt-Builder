@@ -16,13 +16,23 @@ class PromptDiagnosticsTests(unittest.TestCase):
             **dict.fromkeys(core.FIELD_ORDER, core.RANDOM_CHOICE),
         }) for p, d, s in cases]
         digest = lambda value: hashlib.sha256(json.dumps(value, ensure_ascii=False).encode()).hexdigest()
-        self.assertEqual(digest(outputs), "1bb6833cd2997b1989bf85329cc392004a21c4ca7a8409958ca868cbe92e3b43")
+        resolved = [
+            core.resolve_fields(
+                p, core.RANDOM_SCOPES[2], s, dict.fromkeys(core.FIELD_ORDER, core.RANDOM_CHOICE)
+            )
+            for p in core.PRESET_OPTIONS for s in (0, 123456)
+        ]
+        self.assertEqual(
+            hashlib.sha256(json.dumps(resolved, ensure_ascii=False, sort_keys=True).encode()).hexdigest(),
+            "8930f442aa44db1ad9b683b37cd5cfe3f53edee9df23ae922d868fa7a7156c99",
+        )
+        self.assertEqual(digest(outputs), "9b708879e82d5d1cbd9b1a340fc333be21b9d1f25f976f2072d8ff1a0862254f")
         outputs = [cls().build_module(**{
             "预设": core.PRESET_OPTIONS[1], "随机种子": 123456,
             **dict.fromkeys(modules.MODULE_FIELD_GROUPS[cls.MODULE_NAME], core.RANDOM_CHOICE),
         }) for cls in modules.NODE_CLASS_MAPPINGS.values()
             if issubclass(cls, modules.ZImageModuleNodeBase)]
-        self.assertEqual(digest(outputs), "90bbbbb512c6f96531a1aba8da2416b4d4e7ec50e5c972ff4ceff2e848c9f466")
+        self.assertEqual(digest(outputs), "c86dda2cd5f4e4045bae67034d3a237ab5ad99c88340a6aea0098501010d35ab")
 
     def test_diagnostic_path_matches_all_presets_densities_and_scopes(self):
         for preset in core.PRESET_OPTIONS:
@@ -109,6 +119,55 @@ class PromptDiagnosticsTests(unittest.TestCase):
                     after = core.compose_prompt_text(fields, density, separate_modules=separate, module_fragments=collected)
                     self.assertEqual(before, after)
                     self.assertTrue(all(name in collected for name in modules.MODULE_FIELD_GROUPS))
+
+    def test_fast_diagnostics_parity_and_latency(self):
+        import time
+        from prompt_diagnostics import execution_result
+
+        builder = core.ZImageChinesePromptBuilder()
+        all_random = dict.fromkeys(core.FIELD_ORDER, core.RANDOM_CHOICE)
+        for preset in core.PRESET_OPTIONS:
+            for density in core.PROMPT_DENSITIES:
+                inputs = {
+                    "预设": preset, "提示词密度": density,
+                    "随机范围": core.RANDOM_SCOPES[2], "随机种子": 123456,
+                    "输出排版": "按模块分段", **all_random,
+                }
+                fast_out = builder.build_prompt(unique_id="1", **inputs)
+                fast_statuses = {
+                    row["field"]: row["status"]
+                    for row in fast_out["ui"]["vividmuse_prompt_diagnostics"][0]["random_fields"]
+                }
+                fields = core.resolve_fields(preset, core.RANDOM_SCOPES[2], 123456, all_random)
+                fragments = {}
+                zh = core.compose_prompt_text(fields, density, separate_modules=True, module_fragments=fragments)
+                en = core.compose_english_prompt_text(fields, density)
+                en_fragments = {
+                    name: core.render_english_module_fragment(name, fields, density)
+                    for name in modules.MODULE_FIELD_GROUPS
+                }
+                brute = execution_result(
+                    fast_out["result"], core=core, scope="全部模块", seed=123456,
+                    settings=inputs, fields=fields, fragments=fragments,
+                    english_fragments=en_fragments,
+                    render_pair=lambda resolved: (
+                        core.compose_prompt_text(resolved, density, separate_modules=True),
+                        core.compose_english_prompt_text(resolved, density),
+                    ),
+                )
+                brute_statuses = {
+                    row["field"]: row["status"]
+                    for row in brute["ui"]["vividmuse_prompt_diagnostics"][0]["random_fields"]
+                }
+                self.assertEqual(fast_statuses, brute_statuses, (preset, density))
+
+        # Latency check: 92 random fields with unique_id should be well under 10 ms per call
+        sample_inputs = {"预设": core.PRESET_OPTIONS[0], "提示词密度": "标准", "随机范围": core.RANDOM_SCOPES[2], "输出排版": "按模块分段", **all_random}
+        t0 = time.perf_counter()
+        for s in range(10):
+            builder.build_prompt(unique_id="1", 随机种子=s, **sample_inputs)
+        avg_ms = (time.perf_counter() - t0) / 10 * 1000
+        self.assertLess(avg_ms, 10.0, f"Diagnostics took {avg_ms:.2f} ms/call")
 
 
 if __name__ == "__main__":

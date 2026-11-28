@@ -1,8 +1,8 @@
-import { app } from "../../scripts/app.js";
-import { EN_CATALOG } from "./i18n_catalog.js";
-import { LIBRARY_CATALOG } from "./library_catalog.js";
-import { filterRecords, makeTxtRecords, LibraryPreferences } from "./library_discovery_core.js";
-import { readImportData, createImportSession } from "./import_guidance.js";
+import { app } from "../../../scripts/app.js";
+import { PROMPT_SCHEMA } from "./prompt_schema_catalog.mjs";
+import { filterRecords, makeTxtRecords, LibraryPreferences } from "./library_discovery_core.mjs";
+import { readImportData, createImportSession } from "./import_guidance.mjs";
+import { widgetByName, addHelperWidget, installCompactWidgetSerialization, moveWidgetBefore, refreshNode2Widgets } from "./widget_utils.mjs";
 
 const FULL = "VividMuse_ZImageChinesePromptBuilder";
 const MODULES = {
@@ -11,15 +11,47 @@ const MODULES = {
   VividMuse_ZImagePoseModule: "姿态动作", VividMuse_ZImageSceneModule: "场景",
   VividMuse_ZImageCameraModule: "摄影", VividMuse_ZImageVisualModule: "视觉表现",
 };
+const TARGET_CLASSES = new Set([
+  FULL,
+  ...Object.keys(MODULES),
+  "VividMuse_ZImageTxtPromptLibrary",
+  "VividMuse_ZImageTxtModuleLibrary",
+]);
 const classOf = node => node.comfyClass || node.constructor?.type;
-const widget = (node, name) => node.widgets?.find(w => w.name === name);
 const text = (zh, en) => globalThis.__vividMuseZImageI18n?.activeLanguage() === "en" ? en : zh;
 const english = () => globalThis.__vividMuseZImageI18n?.activeLanguage() === "en";
-const moduleLabel = name => english() ? EN_CATALOG.moduleLabels[name] || name : name;
+const enCatalog = () => globalThis.__vividMuseZImageI18n?.getCatalog?.() || {};
+const moduleLabel = name => english() ? enCatalog().moduleLabels?.[name] || name : name;
 const buttonName = "🔎 素材搜索与收藏";
 let preferences;
 let currentDialog;
 let dialogOwner;
+let libraryCatalogCache = globalThis.__vividMuseTestLibraryCatalog || null;
+let libraryCatalogPromise = null;
+
+export async function ensureLibraryCatalog() {
+  const existing = libraryCatalogCache || globalThis.__vividMuseTestLibraryCatalog;
+  if (existing) {
+    libraryCatalogCache = existing;
+    return existing;
+  }
+  if (!libraryCatalogPromise) {
+    libraryCatalogPromise = (async () => {
+      const url = new URL("../data/library_catalog.json", import.meta.url);
+      const response = await globalThis.fetch(url);
+      if (!response?.ok) {
+        throw new Error(`Failed to load library catalog (${response?.status})`);
+      }
+      libraryCatalogCache = await response.json();
+      return libraryCatalogCache;
+    })().catch((error) => {
+      libraryCatalogPromise = null;
+      throw error;
+    });
+  }
+  return libraryCatalogPromise;
+}
+
 function prefs() {
   if (!preferences) {
     let storage;
@@ -29,23 +61,25 @@ function prefs() {
   return preferences;
 }
 
-export function builtinRecords(node) {
+export function builtinRecords(node, catalog = libraryCatalogCache || globalThis.__vividMuseTestLibraryCatalog) {
+  if (!catalog) return [];
   const module = MODULES[classOf(node)] || node.__vividMuseModuleWidget?.value || "画面基础";
-  return (LIBRARY_CATALOG.modules[module] || []).flatMap(field => {
-    const w = widget(node, field);
+  const en = enCatalog();
+  return (catalog.modules[module] || []).flatMap(field => {
+    const w = widgetByName(node, field);
     if (!w || w.hidden || w.options?.hidden) return [];
-    return (LIBRARY_CATALOG.fields[field] || []).filter(item => w.options?.values?.includes(item.value)).map(item => ({
+    return (catalog.fields[field] || []).filter(item => w.options?.values?.includes(item.value)).map(item => ({
       ...item, id: `b:${encodeURIComponent(field)}:${encodeURIComponent(item.value)}`,
-      kind: "builtin", module, moduleEn: EN_CATALOG.moduleLabels[module], field,
-      fieldEn: EN_CATALOG.widgetLabels[field], title: item.value,
-      titleEn: EN_CATALOG.optionLabels[field]?.[item.value] || item.en, tags: [],
+      kind: "builtin", module, moduleEn: en.moduleLabels?.[module], field,
+      fieldEn: en.widgetLabels?.[field], title: item.value,
+      titleEn: en.optionLabels?.[field]?.[item.value] || item.en, tags: [],
     }));
   });
 }
 
 export function applyRecord(node, record) {
   if (record.kind === "builtin") {
-    const w = widget(node, record.field);
+    const w = widgetByName(node, record.field);
     if (!w || w.hidden || !w.options?.values?.includes(record.value)) return false;
     w.value = record.value;
     w.callback?.(record.value);
@@ -65,6 +99,9 @@ function element(tag, content, style) {
 }
 
 export async function openDiscovery(node) {
+  if (english() && !globalThis.__vividMuseZImageI18n?.getCatalog?.()) {
+    await globalThis.__vividMuseZImageI18n?.ensureCatalog?.();
+  }
   currentDialog?.close();
   const dialog = element("dialog", null,
     "width:min(820px,92vw);max-height:88vh;overflow:auto;background:#242424;color:#eee;border:1px solid #777;border-radius:10px;padding:18px;box-sizing:border-box");
@@ -119,7 +156,6 @@ export async function openDiscovery(node) {
   const exportButton = element("button", text("导出收藏", "Export Favorites"));
   const importButton = element("button", text("导入收藏", "Import Favorites"));
   footer.append(apply, reset, exportButton, importButton); dialog.append(list, preview, footer);
-  // Contain edit and navigation events so ComfyUI shortcuts cannot act on the canvas.
   dialog.addEventListener("keydown", event => {
     event.stopPropagation();
     if (event.key === "Escape" && !event.isComposing && event.keyCode !== 229) {
@@ -127,7 +163,6 @@ export async function openDiscovery(node) {
     }
   });
   dialog.addEventListener("keyup", event => event.stopPropagation());
-  // Native text clipboard actions must not reach ComfyUI's graph clipboard handler.
   for (const name of ["copy", "cut", "paste"]) dialog.addEventListener(name, event => event.stopPropagation());
   dialog.addEventListener("wheel", event => event.stopPropagation());
   dialog.onclose = () => {
@@ -194,8 +229,10 @@ export async function openDiscovery(node) {
     const kind = source.value;
     try {
       let next;
-      if (kind === "builtin") next = builtinRecords(node);
-      else {
+      if (kind === "builtin") {
+        const catalog = await ensureLibraryCatalog();
+        next = builtinRecords(node, catalog);
+      } else {
         const adapter = kind === "prompt" ? node.__vividMusePromptDiscovery : node.__vividMuseModuleDiscovery;
         next = await makeTxtRecords(kind, adapter.fileName(), adapter.entries());
       }
@@ -206,15 +243,13 @@ export async function openDiscovery(node) {
       const values = [...new Set(records.map(record => kind === "builtin" ? record.field : record.module).filter(Boolean))];
       const standaloneModule = classOf(node) === "VividMuse_ZImageTxtModuleLibrary";
       const currentModule = kind === "module" && standaloneModule ? node.__vividMuseModuleDiscovery.module() : "";
-      // A native select drops a value without an option. Keep an empty module
-      // selectable so its scope never silently expands to the whole library.
       if (currentModule && !values.includes(currentModule)) values.push(currentModule);
+      const catalogLabels = enCatalog();
       for (const value of values) {
-        const label = kind === "builtin" ? (english() ? EN_CATALOG.widgetLabels[value] : value) : moduleLabel(value);
+        const label = kind === "builtin" ? (english() ? catalogLabels.widgetLabels?.[value] || value : value) : moduleLabel(value);
         const option = element("option", label); option.value = value; category.append(option);
       }
       category.hidden = kind === "prompt";
-      // Standalone TXT modules always search the current module; changing a filter must not change node inputs.
       category.disabled = kind === "module" && standaloneModule;
       if (category.disabled) category.value = currentModule;
       const allTags = [...new Set(records.flatMap(record => record.tags || []))].sort();
@@ -238,7 +273,6 @@ export async function openDiscovery(node) {
         "条目已失效，或当前为随机模式。请更新选择；手动应用前切换为手动选择。",
         "Entry unavailable, or sampling mode is active. Refresh the selection; switch to manual mode before applying."); return; }
       p.used(selected.id); warning();
-      // Refresh after dependencies change, while keeping the dialog available for further choices.
       refresh();
     } catch (_) { status.textContent = text("无法应用条目，请重新选择。", "Could not apply the entry. Select it again."); }
   };
@@ -270,9 +304,8 @@ export async function openDiscovery(node) {
 
 function install(node) {
   const cls = classOf(node);
-  if (!Object.hasOwn(EN_CATALOG.nodeTitles, cls) || node.__vividMuseDiscoveryButton) return;
-  const button = node.addWidget("button", buttonName, null, () => openDiscovery(node), {serialize: false});
-  button.serialize = false; button.options ??= {}; button.options.serialize = false;
+  if (!TARGET_CLASSES.has(cls) || node.__vividMuseDiscoveryButton) return;
+  const button = addHelperWidget(node, "button", buttonName, null, () => openDiscovery(node));
   node.__vividMuseDiscoveryButton = button;
   const onRemoved = node.onRemoved;
   node.onRemoved = function() {
@@ -284,27 +317,20 @@ function install(node) {
     if (dialogOwner === this) currentDialog?.close();
     return onConfigure?.apply(this, arguments);
   };
-  // Each target already has its own serialization guard; this covers extension load order as well.
-  const onSerialize = node.onSerialize;
-  node.onSerialize = function(info) {
-    const result = onSerialize?.apply(this, arguments);
-    if (Array.isArray(info.widgets_values) && info.widgets_values.length === node.widgets.length) {
-      info.widgets_values = info.widgets_values.filter((_, index) => node.widgets[index].serialize !== false);
-    }
-    return result;
-  };
+  installCompactWidgetSerialization(node);
   const position = () => {
-    const anchor = node.__vividMuseModuleWidget || widget(node, "自由提示词") || widget(node, "模块提示词")
-      || node.widgets.find(w => (LIBRARY_CATALOG.modules[MODULES[cls]] || []).includes(w.name));
-    if (anchor) {
-      node.widgets.splice(node.widgets.indexOf(button), 1);
-      node.widgets.splice(node.widgets.indexOf(anchor), 0, button);
-    }
-    const marker = {}; node.widgets.push(marker); node.widgets.pop();
+    const moduleFields = PROMPT_SCHEMA.MODULE_NODE_FIELDS[cls] || [];
+    const anchor = node.__vividMuseModuleWidget || widgetByName(node, "自由提示词") || widgetByName(node, "模块提示词")
+      || node.widgets.find(w => moduleFields.includes(w.name));
+    if (anchor) moveWidgetBefore(node, button, anchor);
+    refreshNode2Widgets(node);
     globalThis.__vividMuseZImageI18n?.localizeNode(node);
   };
   position(); setTimeout(position, 0);
 }
 
-app.registerExtension({name: "VividMuse.ZImagePromptBuilder.LibraryDiscovery", nodeCreated: install,
-  loadedGraphNode: install});
+app.registerExtension({
+  name: "VividMuse.ZImagePromptBuilder.LibraryDiscovery",
+  nodeCreated: install,
+  loadedGraphNode: install,
+});

@@ -1,14 +1,14 @@
-import { app } from "../../scripts/app.js";
-import { createOrganizationControls, createCardPackPicker } from "./card_organization_ui.js";
-import { readImportData } from "./import_guidance.js";
-import { cardSummaryText, createCardSummaryElement } from "./card_summary_view.js";
+import { app } from "../../../scripts/app.js";
+import { createOrganizationControls, createCardPackPicker } from "./card_organization_ui.mjs";
+import { readImportData } from "./import_guidance.mjs";
+import { cardSummaryText, createCardSummaryElement } from "./card_summary_view.mjs";
 import {
   registerShootPlanSchema, availableShootPlanModules, captureShootPlan,
   listShootPlans, shootPlanCollectionStamp, saveShootPlan, renameShootPlan,
   deleteShootPlan, planShootPlanApply, commitShootPlanApply,
   captureResultShootPlan, validateShootPlan, validateShootPlanPack,
   planShootPlanImport, commitShootPlanImport,
-} from "./shoot_plan_core.js";
+} from "./shoot_plan_core.mjs";
 
 const MODULES = ["场景", "摄影", "视觉表现"];
 const text = (zh, en) => globalThis.__vividMuseZImageI18n?.activeLanguage() === "en" ? en : zh;

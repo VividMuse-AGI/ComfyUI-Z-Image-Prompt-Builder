@@ -167,8 +167,8 @@ class ReferencePoolTests(unittest.TestCase):
         self.assertEqual(original, blank())
 
     def test_generated_english_catalog_contains_all_new_choices(self):
-        source = (Path(n.__file__).parent / "web/js/i18n_catalog.js").read_text(encoding="utf-8")
-        catalog = json.loads(source.split("export const EN_CATALOG = ", 1)[1].rstrip(";\n"))
+        catalog_path = Path(n.__file__).parent / "web/js/data/i18n_catalog.json"
+        catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
         for entry in n.REFERENCE_POOL.entries:
             for field in entry["fields"]:
                 value = catalog["optionLabels"][field][entry["label"]]

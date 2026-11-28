@@ -1,9 +1,8 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { loadJsonData, loadLibModule } from "./vm_loader.mjs";
 
-const catalogPath = new URL("../web/js/i18n_catalog.js", import.meta.url);
-const sourcePath = new URL("../web/js/i18n.js", import.meta.url);
+const catalog = loadJsonData("i18n_catalog.json");
+globalThis.__vividMuseTestEnCatalog = catalog;
 let extension = null;
 let languageSetting = null;
 const graph = { _nodes: [], setDirtyCanvas() {} };
@@ -44,19 +43,10 @@ globalThis.__i18nTestApp = {
   },
 };
 
-const catalogSource = fs.readFileSync(catalogPath, "utf8").replace(
-  "export const EN_CATALOG =",
-  "const EN_CATALOG =",
-) + "\nglobalThis.__i18nTestCatalog = EN_CATALOG;";
-const extensionSource = fs.readFileSync(sourcePath, "utf8")
-  .replace('import { app } from "../../scripts/app.js";', "const app = globalThis.__i18nTestApp;")
-  .replace('import { EN_CATALOG } from "./i18n_catalog.js";', "");
-vm.runInThisContext(`${catalogSource}\n${extensionSource}`, {
-  filename: sourcePath.pathname,
-});
+loadLibModule("i18n", null, { appExpr: "globalThis.__i18nTestApp" });
+globalThis.__i18nTestCatalog = catalog;
 
 assert.ok(extension);
-const catalog = globalThis.__i18nTestCatalog;
 const translatedOptionCount = Object.values(catalog.optionLabels)
   .reduce((total, values) => total + Object.keys(values).length, 0);
 assert.ok(translatedOptionCount > 1800);

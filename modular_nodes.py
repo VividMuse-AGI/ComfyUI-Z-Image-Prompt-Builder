@@ -134,20 +134,7 @@ def render_module_fragment(
         density = "标准"
 
     if module_name == "画面基础":
-        base_fields = ("画面比例", "成像媒介", "写真主题")
-        if density == "详细":
-            parts = [
-                core.FIELD_TEXT[field_name][fields[field_name]]
-                for field_name in base_fields
-                if fields.get(field_name, core.EMPTY_CHOICE) != core.EMPTY_CHOICE
-            ]
-        else:
-            parts = [
-                core._brief_text(fields, field_name)
-                for field_name in base_fields
-                if fields.get(field_name, core.EMPTY_CHOICE) != core.EMPTY_CHOICE
-            ]
-        return _finish_fragment("，".join(parts))
+        return _finish_fragment(core._base_prompt_text(fields, density))
 
     if module_name == "人物":
         parts = (

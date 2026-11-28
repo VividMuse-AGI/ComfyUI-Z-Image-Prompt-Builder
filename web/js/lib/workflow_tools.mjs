@@ -1,9 +1,9 @@
-import { app } from "../../scripts/app.js";
-import { planNodeCardCollection, commitNodeCardOrganization } from "./card_organization.js";
-import { createOrganizationControls, createCardPackPicker } from "./card_organization_ui.js";
-import { commitCardFields } from "./card_apply_transaction.js";
-import { readImportData, createImportSession } from "./import_guidance.js";
-import { cardSummaryText, createCardSummaryElement } from "./card_summary_view.js";
+import { app } from "../../../scripts/app.js";
+import { planNodeCardCollection, commitNodeCardOrganization } from "./card_organization.mjs";
+import { createOrganizationControls, createCardPackPicker } from "./card_organization_ui.mjs";
+import { commitCardFields } from "./card_apply_transaction.mjs";
+import { readImportData, createImportSession } from "./import_guidance.mjs";
+import { cardSummaryText, createCardSummaryElement } from "./card_summary_view.mjs";
 
 const STORE = "vividMuseUserPresets";
 const LOCKS = "vividMuseRandomLocks";

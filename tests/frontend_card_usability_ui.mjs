@@ -1,9 +1,8 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {webcrypto} from 'node:crypto';
+import {createVmContext, loadJsonData, loadLibModule} from './vm_loader.mjs';
 
 // Real extension modules and real input schemas; DOM simulation, not browser QA.
 const root=fileURLToPath(new URL('..',import.meta.url));
@@ -34,25 +33,18 @@ const summaries=p=>flatten(p).filter(e=>e.attributes['data-vividmuse-card-summar
 const extensions=[],registry=new Map(),storage=new Map();
 let language='zh',confirmHook=null,confirmed=true,changes=0;
 const app={registerExtension:e=>extensions.push(e),graph:{setDirtyCanvas(){},beforeChange(){changes++;},afterChange(){}}};
-const ctx=vm.createContext({console,app,Blob,TextEncoder,crypto:webcrypto,setTimeout(){},clearTimeout(){},
+const ctx=createVmContext({app,Blob,TextEncoder,crypto:webcrypto,setTimeout(){},clearTimeout(){},
   localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},
   document:{createElement:t=>new Element(t),createTextNode:s=>Object.assign(new Element('text'),{textContent:s}),body:new Element('body')},
   window:{confirm(){confirmHook?.();return confirmed;}}});
 ctx.modules={};
 function load(name){
-  if(ctx.modules[name])return ctx.modules[name];
-  const raw=fs.readFileSync(new URL(`../web/js/${name}.js`,import.meta.url),'utf8');
-  const names=[...raw.matchAll(/export (?:async )?(?:function|const|class) (\w+)/g)].map(m=>m[1]);
-  const code=raw.replace('import { app } from "../../scripts/app.js";','')
-    .replace(/import\s*\{([^}]+)\}\s*from\s*["']\.\/([\w_]+)\.js["'];/g,(_,names,file)=>{load(file);return `const {${names}}=globalThis.modules.${file};`;})
-    .replaceAll('export async function ','async function ').replaceAll('export function ','function ').replaceAll('export const ','const ').replaceAll('export class ','class ');
-  vm.runInContext(`(()=>{${code}\nglobalThis.modules.${name}={${names.join(',')}};})()`,ctx,{filename:name});
-  return ctx.modules[name];
+  return (ctx.modules[name] ??= loadLibModule(name, ctx));
 }
 load('preset_sync');load('modular_nodes');
 const cards=load('workflow_tools'),shoot=load('shoot_plan_core'),shootUI=load('shoot_plan_cards'),combo=load('card_combination_ui'),discovery=load('library_discovery');
-const catalog=load('i18n_catalog').EN_CATALOG;
-ctx.__vividMuseZImageI18n={activeLanguage:()=>language,localizeNode(){},translateMessage:s=>language==='en'?catalog.widgetLabels[s]||catalog.uiLabels[s]||catalog.moduleLabels[s]||s:s};
+const catalog=loadJsonData('i18n_catalog.json');
+ctx.__vividMuseZImageI18n={activeLanguage:()=>language,getCatalog:()=>catalog,localizeNode(){},translateMessage:s=>language==='en'?catalog.widgetLabels[s]||catalog.uiLabels[s]||catalog.moduleLabels[s]||s:s};
 for(const [name,input] of Object.entries(schemas)){
   const Type=class{};registry.set(name,Type);for(const ext of extensions)ext.beforeRegisterNodeDef?.(Type,{name,input});
 }

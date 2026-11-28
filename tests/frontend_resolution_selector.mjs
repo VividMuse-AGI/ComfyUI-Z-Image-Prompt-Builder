@@ -1,12 +1,9 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
-import {withCardOrganizationImports} from './card_organization_vm.mjs';
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createVmContext, loadJsonData, loadLibModule } from "./vm_loader.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-const read = file => fs.readFileSync(new URL("../" + file, import.meta.url), "utf8");
 const fixture = JSON.parse(execFileSync(process.env.PYTHON || "python", ["-c", `
 import json, nodes as n, modular_nodes as m, resolution as r
 classes = {"VividMuse_ZImageChinesePromptBuilder": n.ZImageChinesePromptBuilder, "VividMuse_ZImageCanvasModule": m.ZImageCanvasModule}
@@ -22,23 +19,23 @@ function makeContext(resolutionFirst) {
     ui: { settings: { settingsLookup: {}, getSettingValue(_id, fallback) { return fallback; },
       addSetting(setting) { app.languageSetting = setting; } } },
     registerExtension(extension) { extensions.push(extension); } };
-  const context = vm.createContext({ console, app, setTimeout(fn) { scheduled.push(fn); }, clearTimeout() {} });
-  const evaluate = source => vm.runInContext("(() => {\n" + source + "\n})()", context);
-  evaluate(read("web/js/resolution_catalog.js").replace("export const RESOLUTION_CATALOG =", "globalThis.resolutionCatalog ="));
-  evaluate(read("web/js/i18n_catalog.js").replace("export const EN_CATALOG =", "globalThis.englishCatalog ="));
-  const resolutionSource = read("web/js/resolution_selector.js")
-    .replace('import { app } from "../../scripts/app.js";', "")
-    .replace('import { RESOLUTION_CATALOG as CATALOG } from "./resolution_catalog.js";', "const CATALOG = globalThis.resolutionCatalog;")
-    .replaceAll("export function ", "function ");
-  const loadResolution = () => evaluate(resolutionSource + "\nglobalThis.resolutionTest = {calculateResolution, calculatePixelResolution, roundEven, previewResolution, visible};");
+  const context = createVmContext({ app, setTimeout(fn) { scheduled.push(fn); }, clearTimeout() {} });
+  const catalog = loadLibModule("resolution_catalog", context);
+  context.resolutionCatalog = catalog.RESOLUTION_CATALOG;
+  const english = loadJsonData("i18n_catalog.json");
+  context.englishCatalog = english;
+  context.__vividMuseTestEnCatalog = english;
+  const loadResolution = () => {
+    context.resolutionTest = loadLibModule("resolution_selector", context, {
+      expose: ["calculateResolution", "calculatePixelResolution", "roundEven", "previewResolution", "visible"],
+    });
+  };
   if (resolutionFirst) loadResolution();
   for (const file of ["preset_sync", "modular_nodes", "workflow_tools", "i18n"]) {
-    let source = withCardOrganizationImports(read("web/js/" + file + ".js"), context)
-      .replace('import { app } from "../../scripts/app.js";', "")
-      .replace('import { EN_CATALOG } from "./i18n_catalog.js";', "const EN_CATALOG = globalThis.englishCatalog;")
-      .replaceAll("export function ", "function ");
-    if (file === "workflow_tools") source += "\nglobalThis.workflowTest = {capturePreset,applyUserPreset,validatePreset};";
-    evaluate(source);
+    const mod = loadLibModule(file, context, {
+      expose: file === "workflow_tools" ? ["capturePreset", "applyUserPreset", "validatePreset"] : [],
+    });
+    if (file === "workflow_tools") context.workflowTest = mod;
   }
   if (!resolutionFirst) loadResolution();
   for (const extension of extensions) extension.init?.();
@@ -81,7 +78,7 @@ for (const resolutionFirst of [false, true]) {
       api.visible(widget, true);
       assert.equal(widget.type, "combo");
       assert.equal(widget.hidden, false);
-      assert.equal(widget.options.hidden, false);
+      assert.equal(Boolean(widget.options.hidden), false);
       assert.equal(widget.computeSize, originalSize,
         "expanding must restore native height instead of retaining the hidden height");
     }
@@ -128,7 +125,7 @@ for (const resolutionFirst of [false, true]) {
     assert.equal(state.backing["目标总像素（万）"].options.min, 10);
     assert.equal(state.backing["目标总像素（万）"].options.max, 1600);
     assert.equal(state.proxies["尺寸对齐倍数"].hidden, false);
-    assert.equal(state.proxies["尺寸对齐倍数"].value, 8);
+    assert.equal(state.proxies["尺寸对齐倍数"].value, 16);
     assert.equal(node.widgets.some(w => w.name === "分辨率高级设置"), false);
     for (const w of Object.values(state.backing)) {
       assert.equal(w.type, "hidden"); assert.equal(w.options.hidden, true);

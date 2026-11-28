@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
 import {execFileSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
+import {createVmContext, loadJsonData, loadLibModule} from "./vm_loader.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const fixture = JSON.parse(execFileSync(process.env.PYTHON || "python", ["-c", `
@@ -10,7 +9,6 @@ import json, nodes as n, modular_nodes as m
 classes = {**n.NODE_CLASS_MAPPINGS, **{k:c for k,c in m.NODE_CLASS_MAPPINGS.items() if issubclass(c,m.ZImageModuleNodeBase)}}
 print(json.dumps({k:c.INPUT_TYPES() for k,c in classes.items()}))
 `], {cwd:root, encoding:"utf8"}));
-const read = file => fs.readFileSync(new URL(`../web/js/${file}.js`, import.meta.url), "utf8");
 
 for (const diagnosticsFirst of [true, false]) {
   const scheduled = [], extensions = [];
@@ -18,16 +16,12 @@ for (const diagnosticsFirst of [true, false]) {
     settingsLookup: {}, getSettingValue(_id, fallback) {return fallback;},
     addSetting(setting) {app.languageSetting = setting;},
   }}, registerExtension(ext) {extensions.push(ext);}};
-  const context = vm.createContext({console, app, confirm: () => true, api: {addEventListener() {}},
+  const context = createVmContext({app, confirm: () => true, api: {addEventListener() {}},
     setTimeout(fn) {scheduled.push(fn);}, clearTimeout() {}});
-  const evaluate = source => vm.runInContext(`(()=>{${source}\n})();`, context);
-  evaluate(read("i18n_catalog").replace("export const EN_CATALOG =", "globalThis.englishCatalog ="));
+  context.__vividMuseTestEnCatalog = loadJsonData("i18n_catalog.json");
   const files = ["preset_sync", "modular_nodes", "txt_library", "txt_module_library", "i18n"];
   diagnosticsFirst ? files.unshift("prompt_diagnostics") : files.push("prompt_diagnostics");
-  for (const file of files) evaluate(read(file)
-    .replace('import { app } from "../../scripts/app.js";', "")
-    .replace('import { api } from "../../scripts/api.js";', "")
-    .replace('import { EN_CATALOG } from "./i18n_catalog.js";', "const EN_CATALOG = globalThis.englishCatalog;"));
+  for (const file of files) loadLibModule(file, context);
   for (const ext of extensions) ext.init?.();
   const flush = () => {let count = 0; while (scheduled.length) {
     assert.ok(++count < 200, "Refresh must not recurse indefinitely"); scheduled.shift()();

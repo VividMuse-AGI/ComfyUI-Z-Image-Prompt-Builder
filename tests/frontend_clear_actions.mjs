@@ -3,6 +3,7 @@ import fs from "node:fs";
 import vm from "node:vm";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createDefaultFetch, loadJsonData, loadLibModule, rewriteImports, stripExports } from "./vm_loader.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const read = file => fs.readFileSync(new URL("../" + file, import.meta.url), "utf8");
@@ -29,15 +30,29 @@ function setup(language, reverse = false, source = null) {
   const extensions = [], scheduled = [], confirmations = [];
   const app = {graph:{setDirtyCanvas(){}}, registerExtension(e){extensions.push(e);},
     ui:{settings:{getSettingValue(_id, fallback){return fallback;}}}};
-  const context = vm.createContext({console, app, document:{body:new Element("body"),createElement:t=>new Element(t)},
+  const context = vm.createContext({console, app, fetch: createDefaultFetch(), URL, Blob,
+    document:{body:new Element("body"),createElement:t=>new Element(t)},
     setTimeout:fn=>scheduled.push(fn), clearTimeout(){}, confirm:message=>{confirmations.push(message);return false;}});
-  const evaluate = source => vm.runInContext(`(()=>{${source}\n})()`, context);
-  const load = file => evaluate((source && file === "preset_sync" ? source : read(`web/js/${file}.js`))
-    .replace('import { app } from "../../scripts/app.js";', "const app=globalThis.app;")
-    + (file === "preset_sync" ? "\nglobalThis.actions={FIELD_NAMES,MODULE_FIELD_GROUPS,prepareRandomCombination};" : ""));
-  evaluate(read("web/js/i18n_catalog.js").replace("export const EN_CATALOG =", "globalThis.catalog ="));
-  evaluate(read("web/js/i18n.js").replace('import { app } from "../../scripts/app.js";', "const app=globalThis.app;")
-    .replace('import { EN_CATALOG } from "./i18n_catalog.js";', "const EN_CATALOG=globalThis.catalog;"));
+  const catalog = loadJsonData("i18n_catalog.json");
+  context.catalog = catalog;
+  context.__vividMuseTestEnCatalog = catalog;
+  loadLibModule("i18n", context);
+  const load = file => {
+    if (source && file === "preset_sync") {
+      const rewritten = stripExports(rewriteImports(source, context, {
+        appExpr: "globalThis.app",
+        moduleUrl: new URL("../web/js/lib/preset_sync.mjs", import.meta.url),
+      }));
+      vm.runInContext(`(()=>{${rewritten}\nglobalThis.actions={FIELD_NAMES,MODULE_FIELD_GROUPS,prepareRandomCombination};})()`, context);
+      return context.actions;
+    }
+    const mod = loadLibModule(file, context, {
+      appExpr: "globalThis.app",
+      expose: file === "preset_sync" ? ["FIELD_NAMES", "MODULE_FIELD_GROUPS", "prepareRandomCombination"] : [],
+    });
+    if (file === "preset_sync") context.actions = mod;
+    return mod;
+  };
   const localize = context.__vividMuseZImageI18n.localizeNode;
   context.__vividMuseZImageI18n.activeLanguage = () => language;
   // The production translator uses its internal language state; this narrow
@@ -167,6 +182,7 @@ for (const language of ["zh","en"]) for (const reverse of [false,true]) {
 for(const baseline of randomBaseline.cases) {
   const current=setup("zh");
   vm.runInContext("Math.random=()=>0.125",current.context);
+  current.find("尺寸对齐倍数").value=8;
   current.find("随机范围").value=baseline.scope;
   current.node.properties.vividMuseRandomLocks=["年龄阶段","鞋履"];
   current.find("🎲 生成随机组合").callback();

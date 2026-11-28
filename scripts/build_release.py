@@ -11,22 +11,58 @@ import zipfile
 
 PACKAGE = "ComfyUI-Z-Image-Prompt-Builder"
 REQUIRED = {
-    "__init__.py", "nodes.py", "modular_nodes.py", "resolution.py",
-    "reference_pool.py", "txt_selection.py", "web/js/txt_selection.js",
-    "prompt_diagnostics.py", "framing.py", "combination_coherence.py", "web/js/prompt_diagnostics.js",
-    "phrase_library/reference_expansion_v1.json",
-    "pyproject.toml", "LICENSE", "README.md", "README.en.md",
-    "phrase_library/core_v1.json", "web/js/preset_sync.js",
-    "web/js/i18n_catalog.js", "web/js/resolution_catalog.js",
-    "web/js/library_discovery.js", "web/js/library_discovery_core.js",
-    "web/js/library_catalog.js",
-    "web/js/shoot_plan_core.js", "web/js/shoot_plan_cards.js",
-    "web/js/card_organization.js", "web/js/card_organization_ui.js",
-    "web/js/card_combination_core.js", "web/js/card_combination_ui.js", "web/js/workflow_tools.js",
-    "web/js/card_apply_transaction.js",
-    "web/js/import_guidance.js", "web/js/card_summary.js", "web/js/card_summary_view.js",
+    "__init__.py",
+    "nodes.py",
+    "prompt_catalog.py",
+    "prompt_resolver.py",
+    "prompt_render_zh.py",
+    "prompt_render_en.py",
+    "modular_nodes.py",
+    "resolution.py",
+    "reference_pool.py",
+    "txt_selection.py",
+    "prompt_diagnostics.py",
+    "framing.py",
+    "combination_coherence.py",
+    "pyproject.toml",
+    "LICENSE",
+    "README.md",
+    "README.en.md",
     "docs/card-quick-combination.md",
+    "phrase_library/core_v1.json",
+    "phrase_library/reference_expansion_v1.json",
+    "web/js/index.js",
+    "web/js/data/i18n_catalog.json",
+    "web/js/data/library_catalog.json",
+    "web/js/lib/widget_utils.mjs",
+    "web/js/lib/submission_observer.mjs",
+    "web/js/lib/prompt_schema_catalog.mjs",
+    "web/js/lib/resolution_catalog.mjs",
+    "web/js/lib/preset_sync.mjs",
+    "web/js/lib/modular_nodes.mjs",
+    "web/js/lib/resolution_selector.mjs",
+    "web/js/lib/txt_library.mjs",
+    "web/js/lib/txt_module_library.mjs",
+    "web/js/lib/txt_selection.mjs",
+    "web/js/lib/prompt_diagnostics.mjs",
+    "web/js/lib/workflow_tools.mjs",
+    "web/js/lib/shoot_plan_core.mjs",
+    "web/js/lib/shoot_plan_cards.mjs",
+    "web/js/lib/card_organization.mjs",
+    "web/js/lib/card_organization_ui.mjs",
+    "web/js/lib/card_combination_core.mjs",
+    "web/js/lib/card_combination_ui.mjs",
+    "web/js/lib/card_apply_transaction.mjs",
+    "web/js/lib/import_guidance.mjs",
+    "web/js/lib/card_summary.mjs",
+    "web/js/lib/card_summary_view.mjs",
+    "web/js/lib/library_discovery.mjs",
+    "web/js/lib/library_discovery_core.mjs",
+    "web/js/lib/output_layout.mjs",
+    "web/js/lib/i18n.mjs",
 }
+DEV_TOP_LEVEL_DIRS = {".github", ".superpowers", "prototype", "scripts", "tests"}
+DEV_DOC_SUBDIRS = {"plans", "testing", "superpowers"}
 
 
 def tag_version(tag):
@@ -44,8 +80,12 @@ def validate_archive(data, tag):
             raise ValueError("Archive contains duplicate paths")
         for name in names:
             parts = PurePosixPath(name).parts
+            is_dev_path = (
+                (len(parts) >= 2 and parts[1] in DEV_TOP_LEVEL_DIRS)
+                or (len(parts) >= 3 and parts[1] == "docs" and parts[2] in DEV_DOC_SUBDIRS)
+            )
             if (not name.startswith(prefix) or "\\" in name or ".." in parts
-                    or ".git" in parts or "__pycache__" in parts):
+                    or ".git" in parts or "__pycache__" in parts or is_dev_path):
                 raise ValueError("Unexpected archive path: " + name)
         required = REQUIRED | {f"docs/releases/{tag}.md"}
         missing = {prefix + name for name in required} - set(names)

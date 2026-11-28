@@ -1,18 +1,12 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 
-const sourcePath = new URL("../web/js/txt_library.js", import.meta.url);
 let extension = null;
 globalThis.__txtLifecycleApp = {
   graph: { setDirtyCanvas() {} },
   registerExtension(value) { extension = value; },
 };
-const source = fs.readFileSync(sourcePath, "utf8").replace(
-  'import { app } from "../../scripts/app.js";',
-  "const app = globalThis.__txtLifecycleApp;",
-);
-vm.runInThisContext(source, { filename: sourcePath.pathname });
+loadLibModule("txt_library", null, { appExpr: "globalThis.__txtLifecycleApp" });
 assert.ok(extension);
 
 const node = {

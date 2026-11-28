@@ -124,6 +124,14 @@ class FramingTests(unittest.TestCase):
         camera = modules.ZImageCameraModule().build_module(前置提示词=clothing[0], 景别="面部特写")
         self.assertTrue(str(camera[0]).startswith(str(clothing[0])), "A later camera cannot rewrite earlier text")
 
+    def test_upper_shots_omit_foot_weight_distribution(self):
+        inputs = {**self.fixture(shot="面部特写", density="详细"), "身体重心": "双脚均衡承重"}
+        actual = self.execute({**inputs, "构图适配": FRAMING_MODES[1], "unique_id": "99"})
+        self.assertNotIn("双脚均衡承重", actual["result"][0])
+        self.assertNotIn("both feet", actual["result"][-1])
+        omitted = {row["field"] for row in actual["ui"]["vividmuse_prompt_diagnostics"][0]["framing"]["omitted"]}
+        self.assertIn("身体重心", omitted)
+
     def test_schema_is_optional_appended_and_limited_to_relevant_nodes(self):
         for cls in (core.ZImageChinesePromptBuilder, modules.ZImageClothingModule, modules.ZImagePoseModule):
             optional = cls.INPUT_TYPES()["optional"]

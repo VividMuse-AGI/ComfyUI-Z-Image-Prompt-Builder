@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
-import {withCardOrganizationImports} from './card_organization_vm.mjs';
 import {execFileSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
+import {createVmContext, loadLibModule} from "./vm_loader.mjs";
 
 // Exercise real registered schemas and scoped refresh hooks, without a host,
 // image queue, browser storage, or duplicated lists of selectable values.
@@ -17,22 +15,12 @@ print(json.dumps({"schemas": {k:c.INPUT_TYPES() for k,c in classes.items()},
 `], {cwd: root, encoding: "utf8", env: pythonEnv}));
 const extensions = [];
 const app = {registerExtension(extension) { extensions.push(extension); }, graph: {setDirtyCanvas() {}}};
-const ctx = vm.createContext({console, app, setTimeout() {}, clearTimeout() {}});
-const exported = [
-  "registerShootPlanSchema", "availableShootPlanModules", "validateShootPlan", "captureShootPlan",
-  "saveShootPlan", "listShootPlans", "shootPlanCollectionStamp", "renameShootPlan", "deleteShootPlan",
-  "planShootPlanApply", "commitShootPlanApply", "captureResultShootPlan", "validateShootPlanPack",
-  "planShootPlanImport", "commitShootPlanImport",
-];
-for (const file of ["preset_sync", "modular_nodes", "shoot_plan_core"]) {
-  const source = withCardOrganizationImports(fs.readFileSync(new URL(`../web/js/${file}.js`, import.meta.url), "utf8"), ctx)
-    .replace('import { app } from "../../scripts/app.js";', "")
-    .replaceAll("export function ", "function ").replaceAll("export const ", "const ");
-  const bridge = file === "shoot_plan_core" ? `globalThis.shootPlan={${exported.join(",")}};`
-    : file === "preset_sync" ? "globalThis.randomFull=prepareRandomCombination;"
-    : "globalThis.randomModule=prepareModuleRandomCombination;";
-  vm.runInContext(`(()=>{${source}\n${bridge}})();`, ctx, {filename: file});
-}
+const ctx = createVmContext({app, setTimeout() {}, clearTimeout() {}});
+loadLibModule("preset_sync", ctx, {expose: ["prepareRandomCombination"]});
+ctx.randomFull = ctx.__testLibModules.preset_sync.prepareRandomCombination;
+loadLibModule("modular_nodes", ctx, {expose: ["prepareModuleRandomCombination"]});
+ctx.randomModule = ctx.__testLibModules.modular_nodes.prepareModuleRandomCombination;
+ctx.shootPlan = loadLibModule("shoot_plan_core", ctx);
 const api = ctx.shootPlan;
 for (const [name, input] of Object.entries(fixture.schemas)) api.registerShootPlanSchema({name, input});
 const json = value => JSON.parse(JSON.stringify(value));

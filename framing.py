@@ -9,6 +9,7 @@ FRAMING_INPUT = (FRAMING_MODES, {
 _LOWER_CLOTHING = ("下装类型", "下装颜色", "下装材质", "下装图案")
 _UPPER_SHOTS = ("面部特写", "头肩近景", "胸部以上", "腰部以上")
 _FULL_SHOTS = ("全身构图", "带环境全身", "动态全身")
+_FOOT_WEIGHTS = frozenset(("双脚均衡承重", "重心落左腿", "重心落右腿"))
 
 
 def framing_view(fields, mode=FRAMING_MODES[0], *, shot=None,
@@ -37,7 +38,12 @@ def framing_view(fields, mode=FRAMING_MODES[0], *, shot=None,
     omitted = {}
     if shot in _UPPER_SHOTS:
         omitted["服装"] = (*_LOWER_CLOTHING, "袜装", "鞋履")
-        omitted["姿态动作"] = ("腿部动作",)
+        omitted["姿态动作"] = (
+            ("腿部动作", "身体重心")
+            if shot in ("面部特写", "头肩近景", "胸部以上")
+            and fields.get("身体重心") in _FOOT_WEIGHTS
+            else ("腿部动作",)
+        )
     elif shot == "坐姿半身":
         omitted["服装"] = ("袜装", "鞋履")
     for module, names in omitted.items():

@@ -1,8 +1,8 @@
-import { app } from "../../scripts/app.js";
-import { supportsCardCombination, planCardCombination, commitCardCombination } from "./card_combination_core.js";
-import { validateShootPlan } from "./shoot_plan_core.js";
-import { validateCard, hiddenCardField } from "./workflow_tools.js";
-import { cardSummaryText, createCardSummaryElement } from "./card_summary_view.js";
+import { app } from "../../../scripts/app.js";
+import { supportsCardCombination, planCardCombination, commitCardCombination } from "./card_combination_core.mjs";
+import { validateShootPlan } from "./shoot_plan_core.mjs";
+import { validateCard, hiddenCardField } from "./workflow_tools.mjs";
+import { cardSummaryText, createCardSummaryElement } from "./card_summary_view.mjs";
 
 const text = (zh, en) => globalThis.__vividMuseZImageI18n?.activeLanguage() === "en" ? en : zh;
 const moduleLabel = name => text(name, {人物: "Person", 发型: "Hair", 服装: "Clothing", 姿态动作: "Pose / Action", 场景: "Scene", 摄影: "Camera", 视觉表现: "Visual"}[name] || name);

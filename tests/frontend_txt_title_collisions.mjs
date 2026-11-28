@@ -1,19 +1,19 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
+import { createVmContext, rewriteImports, stripExports } from "./vm_loader.mjs";
 
 for (const modular of [false, true]) {
-  const file = modular ? "txt_module_library.js" : "txt_library.js";
+  const file = modular ? "txt_module_library.mjs" : "txt_library.mjs";
   const parser = modular ? "parseTxtModuleLibrary" : "parseTxtPromptLibrary";
   const reader = modular ? "moduleEntries" : "libraryEntries";
   const apply = modular ? "applySelectedModuleEntry" : "applySelectedTxtPrompt";
-  let source = fs.readFileSync(new URL("../web/js/" + file, import.meta.url), "utf8")
-    .replace('import { app } from "../../scripts/app.js";', "");
+  const context = createVmContext({ app: { registerExtension() {}, graph: { setDirtyCanvas() {} } } });
+  const moduleUrl = new URL(`../web/js/lib/${file}`, import.meta.url);
+  let source = stripExports(rewriteImports(fs.readFileSync(moduleUrl, "utf8"), context, { moduleUrl }));
   // Only omit repainting: exercise the real parser, stored-library reader and Apply action.
   source += "\n" + (modular ? "syncModuleLibraryControls" : "syncTxtLibraryControls") + " = () => {};";
   source += "\nglobalThis.api = { parse:" + parser + ", read:" + reader + ", apply:" + apply + ", key: LIBRARY_PROPERTY };";
-  const context = { app: { registerExtension() {}, graph: { setDirtyCanvas() {} } } };
-  vm.createContext(context);
   vm.runInContext(source, context);
   const api = context.api;
   const titles = ["A", "A", "A（2）", "A（3）", "A（2）", "A（2）（2）"];

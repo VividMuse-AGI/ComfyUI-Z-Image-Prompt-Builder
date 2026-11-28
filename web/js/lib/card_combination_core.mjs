@@ -1,7 +1,7 @@
 // Plan all selected cards before writing any field. No UI, persistence or queue calls.
-import { validateCard, cardDifference, findConflicts } from "./workflow_tools.js";
-import { validateShootPlan, planShootPlanApply } from "./shoot_plan_core.js";
-import { commitCardFields } from "./card_apply_transaction.js";
+import { validateCard, cardDifference, findConflicts } from "./workflow_tools.mjs";
+import { validateShootPlan, planShootPlanApply } from "./shoot_plan_core.mjs";
+import { commitCardFields } from "./card_apply_transaction.mjs";
 
 const FULL = "VividMuse_ZImageChinesePromptBuilder";
 const LOCKS = "vividMuseRandomLocks";

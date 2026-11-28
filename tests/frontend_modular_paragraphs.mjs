@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 let extension;
-const source = fs.readFileSync(new URL("../web/js/output_layout.js", import.meta.url), "utf8")
-  .replace('import { app } from "../../scripts/app.js";', "");
-vm.runInNewContext(source, { app: { registerExtension(value) { extension = value; } } });
+const source = loadLibModule("output_layout", null, {
+  appExpr: "({ registerExtension(value) { return value; } })",
+});
+globalThis.app = { registerExtension(value) { extension = value; } };
+delete globalThis.__testLibModules?.output_layout;
+loadLibModule("output_layout");
 for (const name of ["ChinesePromptBuilder", "CanvasModule", "PersonModule", "HairModule", "ClothingModule",
   "PoseModule", "SceneModule", "CameraModule", "VisualModule", "TxtPromptLibrary", "TxtModuleLibrary"]) {
   class Node { onConfigure() { this.called = true; } }

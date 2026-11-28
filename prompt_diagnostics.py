@@ -166,8 +166,10 @@ def shoot_plan_candidates(core, groups, fields, fragments, english_fragments, re
 
 
 def execution_result(result, *, core, scope, seed, settings, fields, fragments,
-                     english_fragments, render_pair, replacements=None, context=None,
-                    request_trace=None, framing=None, sampling_trace=None, coherence=None):
+                     english_fragments, render_pair, render_module_pair=None,
+                     cross_module_fields=("景别", "妆容模式", "穿搭结构"),
+                     replacements=None, context=None,
+                     request_trace=None, framing=None, sampling_trace=None, coherence=None):
     """Measure text effects by rendering resolved fields, never resolving again.
 
     Removing one field is a text-sensitivity check, not a candidate-count estimate
@@ -178,9 +180,12 @@ def execution_result(result, *, core, scope, seed, settings, fields, fragments,
     replacements = replacements or {}
     field_modules = {field: name for name, group in selected_groups.items() for field in group}
     baseline = None
+    module_baselines = {}
     random_fields = []
     request_trace = request_trace or settings
     framing_omitted = {row["field"] for row in (framing or {}).get("omitted", [])}
+    control_only = set(getattr(core, "CONTROL_ONLY_FIELDS", ()))
+    cross_fields = set(cross_module_fields)
     for field, name in field_modules.items():
         configured = settings.get(field) == core.RANDOM_CHOICE
         normalized_random = request_trace.get(field) == core.RANDOM_CHOICE
@@ -195,6 +200,14 @@ def execution_result(result, *, core, scope, seed, settings, fields, fragments,
             status = "empty"
         elif field in framing_omitted:
             status = "framing_omitted"
+        elif render_module_pair is not None and field not in cross_fields:
+            if field in control_only:
+                status = "not_in_text"
+            else:
+                if name not in module_baselines:
+                    module_baselines[name] = render_module_pair(name, fields)
+                without = {**fields, field: core.EMPTY_CHOICE}
+                status = "text_affecting" if render_module_pair(name, without) != module_baselines[name] else "not_in_text"
         else:
             if baseline is None:
                 baseline = render_pair(fields)

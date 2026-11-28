@@ -1,14 +1,13 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 
-const sourcePath = new URL("../web/js/preset_sync.js", import.meta.url);
-let source = fs.readFileSync(sourcePath, "utf8").replace(
-  'import { app } from "../../scripts/app.js";',
-  "const app = { graph: { setDirtyCanvas() {} }, registerExtension() {} };",
-);
-source += "\nglobalThis.__layoutApi = { placeStructuredActionsBeforePromptLibraries };\n";
-vm.runInThisContext(source, { filename: sourcePath.pathname });
+globalThis.app = { graph: { setDirtyCanvas() {} }, registerExtension() {} };
+const preset = loadLibModule("preset_sync", null, {
+  expose: ["placeStructuredActionsBeforePromptLibraries"],
+});
+globalThis.__layoutApi = {
+  placeStructuredActionsBeforePromptLibraries: preset.placeStructuredActionsBeforePromptLibraries,
+};
 
 const named = (name) => ({ name });
 const field = named("当前模块最后一个字段");

@@ -1,14 +1,13 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { createVmContext, loadLibModule } from "./vm_loader.mjs";
 
 const definitions = [];
 const listeners = new Map();
 const nodes = new Map();
 const timers = [];
 let serializePrompt = prompt => prompt;
-const sandbox = {
-  console, setTimeout(callback) { timers.push(callback); },
+const sandbox = createVmContext({
+  setTimeout(callback) { timers.push(callback); },
   __app: { graph: { get nodes() { return [...nodes.values()]; },
     getNodeById: id => nodes.get(String(id)), setDirtyCanvas() {} },
     async graphToPrompt() { return serializePrompt({workflow: {nodes: []}, output: Object.fromEntries(
@@ -18,13 +17,15 @@ const sandbox = {
     async queuePrompt(_number, _data, options) {
       return options.response ? options.response(_number, _data, options) : {prompt_id: options.promptId};
     } },
+});
+const diagTools = loadLibModule("prompt_diagnostics", sandbox, {
+  expose: ["details", "summary", "acceptResult", "currentState", "submissions", "earlyResults", "terminalIds"],
+});
+const tools = {
+  ...diagTools,
+  earlyResults: sandbox.__testLibModules.submission_observer.earlyResults,
+  submissions: sandbox.__testLibModules.submission_observer.submissions,
 };
-vm.createContext(sandbox);
-const source = fs.readFileSync(new URL("../web/js/prompt_diagnostics.js", import.meta.url), "utf8")
-  .replace('import { app } from "../../scripts/app.js";', "const app = globalThis.__app;")
-  .replace('import { api } from "../../scripts/api.js";', "const api = globalThis.__api;");
-vm.runInContext(`${source}\nglobalThis.testApi = {details, summary, acceptResult, currentState, submissions, earlyResults, terminalIds};`, sandbox);
-const { testApi: tools } = sandbox;
 const ext = definitions[0];
 ext.init?.();
 const kinds = ["ChinesePromptBuilder", "CanvasModule", "PersonModule", "HairModule", "ClothingModule",
@@ -447,9 +448,8 @@ assert.equal(replacement.__vividMusePromptHistory.length, 0);
 
 // Reopening/reloading creates a fresh extension and node, without any history.
 const freshDefinitions = [];
-const freshSandbox = {console, __app: {registerExtension(ext) {freshDefinitions.push(ext);}}, __api: {}};
-vm.createContext(freshSandbox);
-vm.runInContext(source, freshSandbox);
+const freshSandbox = createVmContext({__app: {registerExtension(ext) {freshDefinitions.push(ext);}}, __api: {}});
+loadLibModule("prompt_diagnostics", freshSandbox);
 const freshNode = {comfyClass: "VividMuse_ZImageHairModule", widgets: [],
   addWidget(type, name, value, callback, options) {const w = {type, name, value, callback, options}; this.widgets.push(w); return w;},
   onExecuted(message) {this.originalExecution = message;}, setDirtyCanvas() {}};

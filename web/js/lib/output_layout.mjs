@@ -1,4 +1,4 @@
-import { app } from "../../scripts/app.js";
+import { app } from "../../../scripts/app.js";
 
 const TARGETS = new Set([
   "ChinesePromptBuilder", "CanvasModule", "PersonModule", "HairModule", "ClothingModule", "PoseModule",
@@ -18,7 +18,7 @@ function restoreLegacyLayout(node, info) {
 }
 
 app.registerExtension({
-  name: "VividMuse.ZImageModuleOutputLayout",
+  name: "VividMuse.ZImagePromptBuilder.OutputLayout",
   async beforeRegisterNodeDef(nodeType, nodeData) {
     if (!TARGETS.has(nodeData.name)) return;
     const original = nodeType.prototype.onConfigure;

@@ -1,5 +1,6 @@
 import io
 from pathlib import Path
+import subprocess
 import sys
 import unittest
 import warnings
@@ -39,12 +40,19 @@ class ReleasePackageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Missing release files"):
             validate_archive(self.archive(omit="combination_coherence.py"), "v0.5.0")
 
+    def test_split_python_modules_are_required(self):
+        for name in ("prompt_catalog.py", "prompt_resolver.py", "prompt_render_zh.py", "prompt_render_en.py"):
+            with self.subTest(name=name):
+                self.assertIn(name, REQUIRED)
+                with self.assertRaisesRegex(ValueError, "Missing release files"):
+                    validate_archive(self.archive(omit=name), "v0.5.0")
+
     def test_version_mismatch(self):
         with self.assertRaisesRegex(ValueError, "project version"):
             validate_archive(self.archive(version="0.4.2"), "v0.5.0")
 
     def test_shoot_plan_runtime_dependencies_are_required(self):
-        for name in ("web/js/shoot_plan_core.js", "web/js/shoot_plan_cards.js"):
+        for name in ("web/js/lib/shoot_plan_core.mjs", "web/js/lib/shoot_plan_cards.mjs"):
             with self.subTest(name=name):
                 self.assertIn(name, REQUIRED)
                 with self.assertRaisesRegex(ValueError, "Missing release files"):
@@ -56,28 +64,40 @@ class ReleasePackageTests(unittest.TestCase):
                 validate_archive(self.archive(omit=name), "v0.5.0")
 
     def test_card_organization_runtime_dependencies_are_required(self):
-        for name in ("web/js/card_organization.js", "web/js/card_organization_ui.js"):
+        for name in ("web/js/lib/card_organization.mjs", "web/js/lib/card_organization_ui.mjs"):
             with self.subTest(name=name):
                 self.assertIn(name, REQUIRED)
                 with self.assertRaisesRegex(ValueError, "Missing release files"):
                     validate_archive(self.archive(omit=name), "v0.5.0")
 
     def test_card_combination_runtime_dependencies_are_required(self):
-        for name in ("web/js/card_combination_core.js", "web/js/card_combination_ui.js", "web/js/workflow_tools.js",
-                     "web/js/shoot_plan_core.js"):
+        for name in (
+            "web/js/lib/card_combination_core.mjs",
+            "web/js/lib/card_combination_ui.mjs",
+            "web/js/lib/workflow_tools.mjs",
+            "web/js/lib/shoot_plan_core.mjs",
+        ):
             with self.subTest(name=name):
                 self.assertIn(name, REQUIRED)
                 with self.assertRaisesRegex(ValueError, "Missing release files"):
                     validate_archive(self.archive(omit=name), "v0.5.0")
 
     def test_unsafe_or_unwanted_paths(self):
-        for name in ["other/file", f"{PACKAGE}/../escape", f"{PACKAGE}/.git/config",
-                     f"{PACKAGE}/__pycache__/nodes.pyc", f"{PACKAGE}/..\\escape"]:
+        for name in [
+            "other/file",
+            f"{PACKAGE}/../escape",
+            f"{PACKAGE}/.git/config",
+            f"{PACKAGE}/__pycache__/nodes.pyc",
+            f"{PACKAGE}/..\\escape",
+            f"{PACKAGE}/tests/test_release_package.py",
+            f"{PACKAGE}/scripts/build_release.py",
+            f"{PACKAGE}/docs/plans/plan.md",
+        ]:
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, "Unexpected"):
                 validate_archive(self.archive(extra=name), "v0.5.0")
 
     def test_card_application_transaction_is_required(self):
-        name = "web/js/card_apply_transaction.js"
+        name = "web/js/lib/card_apply_transaction.mjs"
         self.assertIn(name, REQUIRED)
         with self.assertRaisesRegex(ValueError, "Missing release files"):
             validate_archive(self.archive(omit=name), "v0.5.0")
@@ -87,11 +107,32 @@ class ReleasePackageTests(unittest.TestCase):
             validate_archive(self.archive(extra=f"{PACKAGE}/nodes.py"), "v0.5.0")
 
     def test_card_usability_runtime_dependencies_are_required(self):
-        for name in ("web/js/import_guidance.js", "web/js/card_summary.js", "web/js/card_summary_view.js"):
+        for name in (
+            "web/js/lib/import_guidance.mjs",
+            "web/js/lib/card_summary.mjs",
+            "web/js/lib/card_summary_view.mjs",
+            "web/js/index.js",
+            "web/js/data/i18n_catalog.json",
+            "web/js/data/library_catalog.json",
+            "web/js/lib/widget_utils.mjs",
+            "web/js/lib/submission_observer.mjs",
+            "web/js/lib/prompt_schema_catalog.mjs",
+        ):
             with self.subTest(name=name):
                 self.assertIn(name, REQUIRED)
                 with self.assertRaisesRegex(ValueError, "Missing release files"):
                     validate_archive(self.archive(omit=name), "v0.5.0")
+
+    def test_git_archive_excludes_dev_paths_via_gitattributes(self):
+        repo = Path(__file__).resolve().parents[1]
+        gitattributes = (repo / ".gitattributes").read_text(encoding="utf-8")
+        for pattern in ("tests/ export-ignore", "scripts/ export-ignore", ".github/ export-ignore", "docs/plans/ export-ignore"):
+            self.assertIn(pattern, gitattributes)
+        head_archive = subprocess.check_output(["git", "archive", "--format=zip", f"--prefix={PACKAGE}/", "HEAD"], cwd=repo)
+        with zipfile.ZipFile(io.BytesIO(head_archive)) as archive:
+            names = set(archive.namelist())
+            # Uncommitted changes on HEAD may still sit in index/worktree; check .gitattributes-filtered entries on HEAD if committed.
+            self.assertIn(f"{PACKAGE}/pyproject.toml", names)
 
 
 if __name__ == "__main__":

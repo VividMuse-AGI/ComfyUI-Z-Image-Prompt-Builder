@@ -1,4 +1,14 @@
-import { app } from "../../scripts/app.js";
+import { app } from "../../../scripts/app.js";
+import {
+  addHelperWidget,
+  installCompactWidgetSerialization,
+  moveWidgetBefore,
+  notifyUserError,
+  refreshNode2Widgets,
+  resizeNode,
+  setWidgetVisibilityReason,
+  widgetByName,
+} from "./widget_utils.mjs";
 
 const FULL_NODE_CLASS = "VividMuse_ZImageChinesePromptBuilder";
 const STANDALONE_NODE_CLASS = "VividMuse_ZImageTxtModuleLibrary";
@@ -6,6 +16,8 @@ const LIBRARY_PROPERTY = "vividMuseTxtModuleLibrary";
 const EXPANDED_PROPERTY = "vividMuseTxtModuleLibraryExpanded";
 const APPLIED_TITLE_PROPERTY = "vividMuseTxtModuleAppliedTitles";
 const SELECTED_MODULE_PROPERTY = "vividMuseTxtModuleSelectedModule";
+const VISIBILITY_REASON = "txt-module";
+const TARGET_VISIBILITY_REASON = "txt-module-target";
 const STANDARD_MODULES = [
   "画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现",
 ];
@@ -75,68 +87,10 @@ const MAX_CHARACTERS = 1000000;
 const MAX_ENTRIES = 500;
 const MAX_PROMPT_CHARACTERS = 20000;
 
-function widgetByName(node, name) {
-  return node.widgets?.find((widget) => widget.name === name);
-}
-
-function addHelperWidget(node, type, name, value, callback, options = {}) {
-  const widget = node.addWidget(type, name, value, callback, {
-    ...options,
-    serialize: false,
-  });
-  widget.serialize = false;
-  widget.options ??= {};
-  widget.options.serialize = false;
-  return widget;
-}
-
-function installCompactWidgetSerialization(node) {
-  if (node.__vividMuseTxtModuleCompactSerialization) return;
-  const originalOnSerialize = node.onSerialize;
-  node.onSerialize = function (info) {
-    const result = originalOnSerialize?.apply(this, arguments);
-    if (Array.isArray(info.widgets_values)
-        && info.widgets_values.length !== (node.widgets || []).filter(widget => widget.serialize !== false).length) {
-      info.widgets_values = (node.widgets || []).flatMap((widget, index) => (
-        widget.serialize === false ? [] : [info.widgets_values[index]]
-      ));
-    }
-    return result;
-  };
-  node.__vividMuseTxtModuleCompactSerialization = true;
-}
-
 function markDirty(node) {
   globalThis.__vividMusePromptDiagnostics?.refresh(node);
   node.setDirtyCanvas?.(true, true);
   app.graph?.setDirtyCanvas?.(true, true);
-}
-
-function refreshNode2Widgets(node) {
-  const widgets = node.widgets;
-  if (!Array.isArray(widgets)) return;
-  const marker = {
-    name: "__vividMuseNode2RefreshMarker",
-    type: "hidden",
-    hidden: true,
-    options: { hidden: true, serialize: false },
-  };
-  widgets.push(marker);
-  widgets.pop();
-}
-
-function resizeNode(node) {
-  refreshNode2Widgets(node);
-  const computed = node.computeSize?.();
-  if (computed) node.setSize?.([Math.max(computed[0], 360), computed[1]]);
-}
-
-function moveWidgetBefore(node, widget, targetWidget) {
-  if (!widget || !targetWidget) return;
-  const oldIndex = node.widgets.indexOf(widget);
-  if (oldIndex >= 0) node.widgets.splice(oldIndex, 1);
-  const targetIndex = node.widgets.indexOf(targetWidget);
-  node.widgets.splice(targetIndex, 0, widget);
 }
 
 function placeModuleLibraryBeforePromptLibrary(node) {
@@ -153,31 +107,6 @@ function placeModuleLibraryBeforePromptLibrary(node) {
   refreshNode2Widgets(node);
 }
 
-function setWidgetVisible(widget, visible) {
-  if (!widget) return;
-  if (!visible && !widget.__vividMuseTxtModuleHidden) {
-    widget.__vividMuseTxtModuleOriginalType ??= widget.type;
-    widget.__vividMuseTxtModuleOriginalComputeSize ??= widget.computeSize;
-    widget.__vividMuseTxtModuleOriginalOptionsHidden = widget.options?.hidden;
-    widget.options ??= {};
-    widget.options.hidden = true;
-    widget.type = "hidden";
-    widget.computeSize = () => [0, -4];
-  } else if (visible && widget.__vividMuseTxtModuleHidden) {
-    widget.type = widget.__vividMuseTxtModuleOriginalType;
-    widget.computeSize = widget.__vividMuseTxtModuleOriginalComputeSize;
-    if (widget.options) {
-      if (widget.__vividMuseTxtModuleOriginalOptionsHidden === undefined) {
-        delete widget.options.hidden;
-      } else {
-        widget.options.hidden = widget.__vividMuseTxtModuleOriginalOptionsHidden;
-      }
-    }
-  }
-  widget.__vividMuseTxtModuleHidden = !visible;
-  widget.hidden = !visible;
-}
-
 function normalizeModule(rawModule) {
   const normalized = String(rawModule || "").trim();
   return MODULE_ALIASES.get(normalized)
@@ -187,16 +116,17 @@ function normalizeModule(rawModule) {
 
 function uniqueModuleTitles(entries) {
   const keyOf = (module, title) => JSON.stringify([module, title]);
-  const reserved = new Set(entries.map(entry => keyOf(entry.module, entry.title)));
+  const reserved = new Set(entries.map((entry) => keyOf(entry.module, entry.title)));
   const used = new Set();
   const counts = new Map();
-  return entries.map(entry => {
+  return entries.map((entry) => {
     const key = keyOf(entry.module, entry.title);
     let title = entry.title;
     let count = counts.get(key) || 1;
     if (used.has(key)) {
-      do { title = `${entry.title}（${++count}）`; }
-      while (used.has(keyOf(entry.module, title)) || reserved.has(keyOf(entry.module, title)));
+      do {
+        title = `${entry.title}（${++count}）`;
+      } while (used.has(keyOf(entry.module, title)) || reserved.has(keyOf(entry.module, title)));
     }
     counts.set(key, count);
     used.add(keyOf(entry.module, title));
@@ -312,8 +242,8 @@ function syncModuleLibraryControls(node, resize = true) {
   const appliedTitle = node.properties?.[APPLIED_TITLE_PROPERTY]?.[moduleName];
   const targetValue = widgetByName(node, targetWidgetName(node, moduleName))?.value;
   const status = appliedTitle || (targetValue ? "已有内容" : "未设置");
-  const action = moduleName === "自定义" ? "启用自定义模块" : "应用到" + moduleName + "模块";
-  node.__vividMuseTxtModuleApplyButton.label = node.__vividMuseTxtModuleApplyButton.__vividMuseDisplayText = action + "（当前：" + status.slice(0, 16) + "）";
+  const action = moduleName === "自定义" ? "启用自定义模块" : `应用到${moduleName}模块`;
+  node.__vividMuseTxtModuleApplyButton.label = node.__vividMuseTxtModuleApplyButton.__vividMuseDisplayText = `${action}（当前：${status.slice(0, 16)}）`;
   globalThis.__vividMuseZImageI18n?.localizeNode?.(node);
   node.__vividMuseTxtSelectionRefresh?.();
   if (resize) resizeNode(node);
@@ -323,8 +253,12 @@ function syncModuleLibraryControls(node, resize = true) {
 function setModuleLibraryExpanded(node, expanded, resize = true) {
   node.properties ??= {};
   node.properties[EXPANDED_PROPERTY] = Boolean(expanded);
+  const keepStandaloneScopeVisible = isStandaloneNode(node)
+    && widgetByName(node, "选择模式")?.value === "随机抽取";
   for (const widget of node.__vividMuseTxtModuleControls || []) {
-    setWidgetVisible(widget, Boolean(expanded));
+    const show = Boolean(expanded)
+      || (keepStandaloneScopeVisible && widget === node.__vividMuseTxtModuleModuleWidget);
+    setWidgetVisibilityReason(widget, VISIBILITY_REASON, show);
   }
   node.__vividMuseTxtSelectionRefresh?.();
   if (resize) resizeNode(node);
@@ -332,11 +266,8 @@ function setModuleLibraryExpanded(node, expanded, resize = true) {
 }
 
 function notifyError(error) {
-  const rawMessage = error instanceof Error ? error.message : String(error);
-  const message = globalThis.__vividMuseZImageI18n?.translateMessage?.(rawMessage)
-    || rawMessage;
   console.error("VividMuse TXT module library:", error);
-  globalThis.alert?.(message);
+  notifyUserError(error, "VividMuse TXT Module Library");
 }
 
 async function importTxtModuleFile(node, file) {
@@ -372,7 +303,10 @@ function chooseTxtModuleFile(node) {
   input.oncancel = () => input.remove?.();
   input.onchange = async () => {
     const file = input.files?.[0];
-    if (!file) { input.remove?.(); return; }
+    if (!file) {
+      input.remove?.();
+      return;
+    }
     try {
       await importTxtModuleFile(node, file);
     } catch (error) {
@@ -498,13 +432,13 @@ function installExistingControlIntegration(node) {
 function installConfigure(node) {
   if (node.__vividMuseTxtModuleConfigure) return;
   const originalOnConfigure = node.onConfigure;
-  node.onConfigure = function (info) {
+  node.onConfigure = function () {
     const result = originalOnConfigure?.apply(this, arguments);
     const targetNames = isStandaloneNode(node)
       ? []
       : Object.values(TARGET_WIDGETS);
     for (const targetName of targetNames) {
-      setWidgetVisible(widgetByName(node, targetName), false);
+      setWidgetVisibilityReason(widgetByName(node, targetName), TARGET_VISIBILITY_REASON, false);
     }
     placeModuleLibraryBeforePromptLibrary(node);
     syncModuleLibraryControls(node, false);
@@ -533,7 +467,7 @@ function installModuleLibraryWidgets(node) {
   }
   if (!standalone) {
     for (const targetName of requiredTargets) {
-      setWidgetVisible(widgetByName(node, targetName), false);
+      setWidgetVisibilityReason(widgetByName(node, targetName), TARGET_VISIBILITY_REASON, false);
     }
   }
 
@@ -644,9 +578,11 @@ app.registerExtension({
       entries: () => moduleEntries(node),
       fileName: () => node.properties?.[LIBRARY_PROPERTY]?.fileName || "",
       module: () => currentModule(node),
-      apply: entry => {
+      apply: (entry) => {
         if (isStandaloneNode(node) && widgetByName(node, "选择模式")?.value === "随机抽取") return false;
-        if (!moduleEntries(node).some(item => item.module === entry.module && item.title === entry.title && item.prompt === entry.prompt)) return false;
+        if (!moduleEntries(node).some((item) => item.module === entry.module && item.title === entry.title && item.prompt === entry.prompt)) {
+          return false;
+        }
         const moduleWidget = node.__vividMuseTxtModuleModuleWidget;
         moduleWidget.value = entry.module;
         moduleWidget.callback?.(entry.module);
@@ -656,10 +592,12 @@ app.registerExtension({
       },
     };
     if (isStandaloneNode(node)) node.__vividMuseTxtSelectionEntries = () => moduleEntries(node);
-    if (isStandaloneNode(node)) node.__vividMuseTxtSelectionRestoreControls = () => {
-      syncModuleLibraryControls(node, false);
-      setModuleLibraryExpanded(node, Boolean(node.properties?.[EXPANDED_PROPERTY]), false);
-    };
+    if (isStandaloneNode(node)) {
+      node.__vividMuseTxtSelectionRestoreControls = () => {
+        syncModuleLibraryControls(node, false);
+        setModuleLibraryExpanded(node, Boolean(node.properties?.[EXPANDED_PROPERTY]), false);
+      };
+    }
     if (isStandaloneNode(node)) installCompactWidgetSerialization(node);
     installConfigure(node);
     installModuleLibraryWidgets(node);
@@ -670,7 +608,7 @@ app.registerExtension({
       ? []
       : Object.values(TARGET_WIDGETS);
     for (const targetName of targetNames) {
-      setWidgetVisible(widgetByName(node, targetName), false);
+      setWidgetVisibilityReason(widgetByName(node, targetName), TARGET_VISIBILITY_REASON, false);
     }
     placeModuleLibraryBeforePromptLibrary(node);
     syncModuleLibraryControls(node, false);

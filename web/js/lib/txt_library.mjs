@@ -1,4 +1,13 @@
-import { app } from "../../scripts/app.js";
+import { app } from "../../../scripts/app.js";
+import {
+  addHelperWidget,
+  installCompactWidgetSerialization,
+  moveWidgetBefore,
+  notifyUserError,
+  resizeNode,
+  setWidgetVisibilityReason,
+  widgetByName,
+} from "./widget_utils.mjs";
 
 const NODE_CLASSES = new Set([
   "VividMuse_ZImageChinesePromptBuilder",
@@ -13,8 +22,10 @@ function isTargetNode(node) {
 function isStandaloneNode(node) {
   return (node.comfyClass || node.constructor?.type) === STANDALONE_NODE_CLASS;
 }
+
 const LIBRARY_PROPERTY = "vividMuseTxtPromptLibrary";
 const EXPANDED_PROPERTY = "vividMuseTxtLibraryExpanded";
+const VISIBILITY_REASON = "txt-library";
 const MAX_FILE_BYTES = 1024 * 1024;
 const MAX_CHARACTERS = 1000000;
 const MAX_ENTRIES = 500;
@@ -22,107 +33,25 @@ const MAX_PROMPT_CHARACTERS = 20000;
 const EMPTY_VALUE = "请先导入TXT词库";
 const INSERT_MODES = ["添加到后面", "添加到前面", "替换自由提示词"];
 
-function widgetByName(node, name) {
-  return node.widgets?.find((widget) => widget.name === name);
-}
-
-function addHelperWidget(node, type, name, value, callback, options = {}) {
-  const widget = node.addWidget(type, name, value, callback, {
-    ...options,
-    serialize: false,
-  });
-  widget.serialize = false;
-  widget.options ??= {};
-  widget.options.serialize = false;
-  return widget;
-}
-
-function installCompactWidgetSerialization(node) {
-  if (node.__vividMuseTxtCompactSerialization) return;
-  const originalOnSerialize = node.onSerialize;
-  node.onSerialize = function (info) {
-    const result = originalOnSerialize?.apply(this, arguments);
-    if (Array.isArray(info.widgets_values)
-        && info.widgets_values.length !== (node.widgets || []).filter(widget => widget.serialize !== false).length) {
-      info.widgets_values = (node.widgets || []).flatMap((widget, index) => (
-        widget.serialize === false ? [] : [info.widgets_values[index]]
-      ));
-    }
-    return result;
-  };
-  node.__vividMuseTxtCompactSerialization = true;
-}
-
 function markDirty(node) {
   globalThis.__vividMusePromptDiagnostics?.refresh(node);
   node.setDirtyCanvas?.(true, true);
   app.graph?.setDirtyCanvas?.(true, true);
 }
 
-function refreshNode2Widgets(node) {
-  const widgets = node.widgets;
-  if (!Array.isArray(widgets)) return;
-  const marker = {
-    name: "__vividMuseNode2RefreshMarker",
-    type: "hidden",
-    hidden: true,
-    options: { hidden: true, serialize: false },
-  };
-  widgets.push(marker);
-  widgets.pop();
-}
-
-function resizeNode(node) {
-  refreshNode2Widgets(node);
-  const computed = node.computeSize?.();
-  if (computed) node.setSize?.([Math.max(computed[0], 360), computed[1]]);
-}
-
-function moveWidgetBefore(node, widget, targetWidget) {
-  if (!widget || !targetWidget) return;
-  const oldIndex = node.widgets.indexOf(widget);
-  if (oldIndex >= 0) node.widgets.splice(oldIndex, 1);
-  const targetIndex = node.widgets.indexOf(targetWidget);
-  node.widgets.splice(targetIndex, 0, widget);
-}
-
-function setWidgetVisible(widget, visible) {
-  if (!widget) return;
-  if (!visible && !widget.__vividMuseTxtHidden) {
-    widget.__vividMuseTxtOriginalType ??= widget.type;
-    widget.__vividMuseTxtOriginalComputeSize ??= widget.computeSize;
-    widget.__vividMuseTxtOriginalOptionsHidden = widget.options?.hidden;
-    widget.options ??= {};
-    widget.options.hidden = true;
-    widget.type = "hidden";
-    widget.computeSize = () => [0, -4];
-  } else if (visible && widget.__vividMuseTxtHidden) {
-    widget.type = widget.__vividMuseTxtOriginalType;
-    widget.computeSize = widget.__vividMuseTxtOriginalComputeSize;
-    if (widget.options) {
-      if (widget.__vividMuseTxtOriginalOptionsHidden === undefined) {
-        delete widget.options.hidden;
-      } else {
-        widget.options.hidden = widget.__vividMuseTxtOriginalOptionsHidden;
-      }
-    }
-  }
-  widget.__vividMuseTxtHidden = !visible;
-  widget.hidden = !visible;
-}
-
 function uniqueTitles(entries) {
-  const baseTitle = entry => entry.title || "未命名提示词";
+  const baseTitle = (entry) => entry.title || "未命名提示词";
   const reserved = new Set(entries.map(baseTitle));
   const used = new Set();
   const counts = new Map();
-  return entries.map(entry => {
+  return entries.map((entry) => {
     const base = baseTitle(entry);
     let title = base;
     let count = counts.get(base) || 1;
     if (used.has(title)) {
-      do { title = `${base}（${++count}）`; }
-      while (used.has(title) || reserved.has(title));
+      do {
+        title = `${base}（${++count}）`;
+      } while (used.has(title) || reserved.has(title));
     }
     counts.set(base, count);
     used.add(title);
@@ -233,7 +162,7 @@ function setTxtLibraryExpanded(node, expanded, resize = true) {
   node.properties ??= {};
   node.properties[EXPANDED_PROPERTY] = Boolean(expanded);
   for (const widget of node.__vividMuseTxtLibraryControls || []) {
-    setWidgetVisible(widget, Boolean(expanded));
+    setWidgetVisibilityReason(widget, VISIBILITY_REASON, Boolean(expanded));
   }
   node.__vividMuseTxtSelectionRefresh?.();
   if (resize) resizeNode(node);
@@ -241,11 +170,8 @@ function setTxtLibraryExpanded(node, expanded, resize = true) {
 }
 
 function notifyError(error) {
-  const rawMessage = error instanceof Error ? error.message : String(error);
-  const message = globalThis.__vividMuseZImageI18n?.translateMessage?.(rawMessage)
-    || rawMessage;
   console.error("VividMuse TXT prompt library:", error);
-  globalThis.alert?.(message);
+  notifyUserError(error, "VividMuse TXT Prompt Library");
 }
 
 async function importTxtPromptFile(node, file) {
@@ -281,7 +207,10 @@ function chooseTxtPromptFile(node) {
   input.oncancel = () => input.remove?.();
   input.onchange = async () => {
     const file = input.files?.[0];
-    if (!file) { input.remove?.(); return; }
+    if (!file) {
+      input.remove?.();
+      return;
+    }
     try {
       await importTxtPromptFile(node, file);
     } catch (error) {
@@ -345,7 +274,7 @@ function clearFreePrompt(node) {
 function installTxtLibraryConfigure(node) {
   if (node.__vividMuseTxtLibraryConfigure) return;
   const originalOnConfigure = node.onConfigure;
-  node.onConfigure = function (info) {
+  node.onConfigure = function () {
     const result = originalOnConfigure?.apply(this, arguments);
     syncTxtLibraryControls(node, false);
     setTxtLibraryExpanded(
@@ -434,9 +363,11 @@ app.registerExtension({
     node.__vividMusePromptDiscovery = {
       entries: () => libraryEntries(node),
       fileName: () => node.properties?.[LIBRARY_PROPERTY]?.fileName || "",
-      apply: entry => {
+      apply: (entry) => {
         if (isStandaloneNode(node) && widgetByName(node, "选择模式")?.value === "随机抽取") return false;
-        if (!libraryEntries(node).some(item => item.title === entry.title && item.prompt === entry.prompt)) return false;
+        if (!libraryEntries(node).some((item) => item.title === entry.title && item.prompt === entry.prompt)) {
+          return false;
+        }
         node.__vividMuseTxtLibraryEntryWidget.value = entry.title;
         return applySelectedTxtPrompt(node);
       },

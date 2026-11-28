@@ -1,23 +1,19 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {withCardOrganizationImports} from './card_organization_vm.mjs';
+import {createVmContext, loadLibModule} from './vm_loader.mjs';
 
-const source=fs.readFileSync(new URL('../web/js/card_summary.js',import.meta.url),'utf8');
+const source=fs.readFileSync(new URL('../web/js/lib/card_summary.mjs',import.meta.url),'utf8');
 const summary=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 const root=fileURLToPath(new URL('..',import.meta.url));
 const fixture=JSON.parse(execFileSync(process.env.PYTHON||'python',['-B','-c',
   'import json,nodes,modular_nodes; print(json.dumps({k:c.INPUT_TYPES() for k,c in {**nodes.NODE_CLASS_MAPPINGS,**modular_nodes.NODE_CLASS_MAPPINGS}.items()}))'],
   {cwd:root,encoding:'utf8',env:{...process.env,PYTHONUTF8:'1',PYTHONIOENCODING:'utf-8'}}));
 const extensions=[];
-const ctx=vm.createContext({console,app:{registerExtension(e){extensions.push(e);}},setTimeout(){},clearTimeout(){}});
+const ctx=createVmContext({app:{registerExtension(e){extensions.push(e);}},setTimeout(){},clearTimeout(){}});
 for(const name of ['preset_sync','modular_nodes','workflow_tools','shoot_plan_core']) {
-  const raw=withCardOrganizationImports(fs.readFileSync(new URL(`../web/js/${name}.js`,import.meta.url),'utf8'),ctx);
-  const exports=[...raw.matchAll(/export (?:function|const) (\w+)/g)].map(m=>m[1]);
-  const code=raw.replace('import { app } from "../../scripts/app.js";','').replaceAll('export function ','function ').replaceAll('export const ','const ');
-  vm.runInContext(`(()=>{${code}\nglobalThis.${name}={${exports.join(',')}};})()`,ctx);
+  ctx[name] = loadLibModule(name, ctx);
 }
 for(const [name,input] of Object.entries(fixture)) {
   ctx.shoot_plan_core.registerShootPlanSchema({name,input});

@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
-import {withCardOrganizationImports} from './card_organization_vm.mjs';
 import {execFileSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
+import {createVmContext, loadLibModule} from "./vm_loader.mjs";
 
 const root=fileURLToPath(new URL("..",import.meta.url));
 const fixture=JSON.parse(execFileSync(process.env.PYTHON||"python",["-c",`
@@ -35,16 +33,13 @@ for(const diagnosticsFirst of [true,false]){
   const graph={get nodes(){return [...nodes.values()];},getNodeById(id){return nodes.get(String(id));},setDirtyCanvas(){}};
   const app={graph,registerExtension(e){extensions.push(e);},async graphToPrompt(){return {output:Object.fromEntries([...nodes].map(([id,n])=>[id,{class_type:n.comfyClass}]))};}};
   const api={addEventListener(k,fn){listeners.set(k,fn);},async queuePrompt(_number,_prompt,extra){return {prompt_id:extra.id};}};
-  const ctx=vm.createContext({console,app,api,setTimeout(){},clearTimeout(){},document:{createElement:t=>new Element(t),body:new Element("body")},window:{confirm:()=>confirm()}});
+  const ctx=createVmContext({app,api,setTimeout(){},clearTimeout(){},document:{createElement:t=>new Element(t),body:new Element("body")},window:{confirm:()=>confirm()}});
   const files=["preset_sync","modular_nodes","workflow_tools","shoot_plan_core","shoot_plan_cards"];
   diagnosticsFirst?files.unshift("prompt_diagnostics"):files.push("prompt_diagnostics");
-  for(const file of files){const original=fs.readFileSync(new URL(`../web/js/${file}.js`,import.meta.url),"utf8");
-    let source=withCardOrganizationImports(original,ctx).replace(/import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];/g,"")
-      .replaceAll("export function ","function ").replaceAll("export const ","const ");
-    const names=[...original.matchAll(/export (?:function|const) (\w+)/g)].map(m=>m[1]);
-    if(file==="shoot_plan_core")source+=`\nglobalThis.shootCore={${names.join(",")}};`;
-    if(file==="shoot_plan_cards")source=`const {${Object.keys(ctx.shootCore).join(",")}}=globalThis.shootCore;\n${source}`;
-    vm.runInContext(`(()=>{${source}\n})();`,ctx);}
+  for(const file of files){
+    const mod = loadLibModule(file, ctx);
+    if(file==="shoot_plan_core") ctx.shootCore = mod;
+  }
   ctx.__vividMuseZImageI18n={activeLanguage:()=>lang,translateMessage:v=>v};
   for(const e of extensions)e.init?.();
   for(const [name,input] of Object.entries(fixture.schemas))for(const e of extensions)e.beforeRegisterNodeDef?.(class {},{name,input});

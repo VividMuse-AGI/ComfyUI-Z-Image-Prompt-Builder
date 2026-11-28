@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {createVmContext, loadJsonData, loadLibModule} from './vm_loader.mjs';
 
 const root=fileURLToPath(new URL('..',import.meta.url));
 const fixture=JSON.parse(execFileSync(process.env.PYTHON||'python',['-B','-X','utf8','-c',`
@@ -40,13 +39,13 @@ const find=(p,label)=>flatten(p).find(e=>e.attrs['aria-label']===label);
 const extensions=[],listeners=new Map(),nodes=[];
 let language='zh',mutations=0;
 const app={graph:{nodes,getNodeById:id=>nodes.find(n=>String(n.id)===String(id)),beforeChange(){mutations++;},afterChange(){mutations++;}},registerExtension:e=>extensions.push(e)};
-const ctx=vm.createContext({app,api:{addEventListener:(name,fn)=>listeners.set(name,fn)},console,
+const ctx=createVmContext({app,api:{addEventListener:(name,fn)=>listeners.set(name,fn)},
  setTimeout:fn=>fn(),document:{createElement:t=>new Element(t),body:new Element('body')},
  __vividMuseZImageI18n:{activeLanguage:()=>language,translateMessage:s=>s}});
-let source=fs.readFileSync(new URL('../web/js/prompt_diagnostics.js',import.meta.url),'utf8')
- .replace('import { app } from "../../scripts/app.js";','').replace('import { api } from "../../scripts/api.js";','');
-vm.runInContext(`${source}\nglobalThis.tools={parseRandomExplanation,randomExplanationLines,executionImpactLines,currentConfigurationLines,details,acceptResult,showDetails,resultSnapshot,DRAW_GROUPS,parseCoherenceExplanation,coherenceExplanationLines,coherenceSummaryLines,COHERENCE_POSE_FIELDS,stale};`,ctx);
-const t=ctx.tools;
+const t = loadLibModule('prompt_diagnostics', ctx, {
+ expose: ['parseRandomExplanation','randomExplanationLines','executionImpactLines','currentConfigurationLines','details','acceptResult','showDetails','resultSnapshot','DRAW_GROUPS','parseCoherenceExplanation','coherenceExplanationLines','coherenceSummaryLines','COHERENCE_POSE_FIELDS','stale'],
+});
+ctx.tools = t;
 assert.deepEqual(copy(Object.fromEntries(Object.entries(t.DRAW_GROUPS).map(([key,v])=>[key,v.fields]))),fixture.groups);
 function make(kind,schema){
  const node={id:nodes.length+1,comfyClass:kind,widgets:[],properties:{},size:[360,420],inputs:[],
@@ -161,9 +160,7 @@ assert.equal(mutations,0);
 
 // Public-node coherence payloads, including true module-chain executions.
 assert.deepEqual(copy(t.COHERENCE_POSE_FIELDS),fixture.pose_fields);
-const catalogCtx=vm.createContext({});
-vm.runInContext(fs.readFileSync(new URL('../web/js/i18n_catalog.js',import.meta.url),'utf8').replace('export const EN_CATALOG =','globalThis.catalog ='),catalogCtx);
-const catalog=catalogCtx.catalog;
+const catalog=loadJsonData('i18n_catalog.json');
 const translations={};
 const collect=obj=>{for(const [k,v] of Object.entries(obj)){if(typeof v==='string')translations[k]=v;else if(v && typeof v==='object')collect(v);}};
 collect(catalog);

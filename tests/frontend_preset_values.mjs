@@ -1,17 +1,13 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 
-const sourcePath = new URL("../web/js/preset_sync.js", import.meta.url);
-let source = fs.readFileSync(sourcePath, "utf8");
-source = source.replace(
-  'import { app } from "../../scripts/app.js";',
-  "const app = { registerExtension() {} };",
-);
-source += "globalThis.__legacyAgeStages = LEGACY_AGE_STAGES;\n";
-source += "\nglobalThis.__presetValues = PRESETS;\nglobalThis.__legacyPresetNames = LEGACY_PRESET_NAMES;\n";
-source += "globalThis.__sceneLocationsByCategory = SCENE_LOCATIONS_BY_CATEGORY;\n";
-vm.runInThisContext(source, { filename: sourcePath.pathname });
+globalThis.app = { registerExtension() {} };
+const schema = loadLibModule("prompt_schema_catalog");
+loadLibModule("preset_sync");
+globalThis.__legacyAgeStages = schema.PROMPT_SCHEMA.LEGACY_AGE_STAGES;
+globalThis.__presetValues = schema.PROMPT_SCHEMA.PRESETS;
+globalThis.__legacyPresetNames = schema.PROMPT_SCHEMA.LEGACY_PRESET_NAMES;
+globalThis.__sceneLocationsByCategory = schema.PROMPT_SCHEMA.SCENE_LOCATIONS_BY_CATEGORY;
 
 const presets = globalThis.__presetValues;
 const legacyAgeStages = globalThis.__legacyAgeStages;

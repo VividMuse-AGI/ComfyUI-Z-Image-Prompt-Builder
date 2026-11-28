@@ -1,14 +1,11 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { createVmContext, loadLibModule } from "./vm_loader.mjs";
 
-let source = fs.readFileSync(new URL("../web/js/preset_sync.js", import.meta.url), "utf8");
-source = source.replace('import { app } from "../../scripts/app.js";',
-  "const app = { registerExtension() {} };");
-source += "\nensureConfiguredNode = () => {}; globalThis.install = installCompactWidgetConfigure;";
-const context = { };
-vm.createContext(context);
-vm.runInContext(source, context);
+const context = createVmContext({ app: { registerExtension() {} } });
+const preset = loadLibModule("preset_sync", context, {
+  expose: ["installCompactWidgetConfigure"],
+});
+context.install = preset.installCompactWidgetConfigure;
 const layout = { name: "输出排版", value: "按模块分段" };
 const node = { widgets: [
   { name: "预设", value: "自定义组合" },

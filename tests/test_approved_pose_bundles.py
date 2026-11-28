@@ -36,7 +36,7 @@ class ApprovedPoseBundleTests(unittest.TestCase):
                             n.ZImageChinesePromptBuilder().build_prompt(预设=p, 提示词密度=d)))
                 for p in n.PRESET_OPTIONS[:-1] for d in n.PROMPT_DENSITIES]
         digest = hashlib.sha256(json.dumps(rows, ensure_ascii=False).encode()).hexdigest()
-        self.assertEqual(digest, "c9ec4ae4dfc7d662fd316d25a2e92f83b9d5d9f1ac621ecf1fb2795ba485c6bf")
+        self.assertEqual(digest, "bb641b805dd578a8f0625fd4e68e8bb1995f32eb1260d648b1669e85e03fee54")
 
     def test_every_new_chain_is_reachable_in_all_random_scopes(self):
         for preset, bundle_id in n.APPROVED_PRESET_POSE_IDS.items():

@@ -1,66 +1,112 @@
-import { app } from "../../scripts/app.js";
-import { api } from "../../scripts/api.js";
+import { app } from "../../../scripts/app.js";
+import { api } from "../../../scripts/api.js";
+import { PROMPT_SCHEMA } from "./prompt_schema_catalog.mjs";
+import { earlyResults, registerSubmissionConsumer, rootGraph, nodeAtPath } from "./submission_observer.mjs";
+import { notifyUserError, refreshNode2Widgets } from "./widget_utils.mjs";
 
 // Observes execution UI messages; saving a result card is an explicit action.
 // Never queues prompts, changes seeds/fields or serializes diagnostic history.
 const FULL = "VividMuse_ZImageChinesePromptBuilder";
 const MODULES = new Set(["Canvas", "Person", "Hair", "Clothing", "Pose", "Scene", "Camera", "Visual"]
-  .map(name => `VividMuse_ZImage${name}Module`));
+  .map((name) => `VividMuse_ZImage${name}Module`));
 const HISTORY_LIMIT = 5;
 const ORDERS_LIMIT = 128;
+const TOKEN_WARNING_THRESHOLD = 480;
 const submissions = new Map();
-const promptOwners = new WeakMap();
-const earlyResults = new Map();
 const terminalIds = new Set();
-let pendingRequests = 0;
 let nextOrder = 0;
-const widget = (node, name) => node.widgets?.find(w => w.name === name);
-const target = node => node && (node.comfyClass === FULL || MODULES.has(node.comfyClass)
+
+const widget = (node, name) => node.widgets?.find((w) => w.name === name);
+const target = (node) => node && (node.comfyClass === FULL || MODULES.has(node.comfyClass)
   || node.constructor?.type === FULL || MODULES.has(node.constructor?.type));
 const language = () => globalThis.__vividMuseZImageI18n?.activeLanguage?.() || "zh";
-const text = (zh, en) => language() === "en" ? en : zh;
-const tr = value => globalThis.__vividMuseZImageI18n?.translateMessage?.(value) || value;
+const text = (zh, en) => (language() === "en" ? en : zh);
+const tr = (value) => globalThis.__vividMuseZImageI18n?.translateMessage?.(value) || value;
 const displayValue = (node, name, value) => widget(node, name)?.options?.getOptionLabel?.(value) || tr(value);
+
 // Sampling-point whitelist only; no candidate selection logic is duplicated here.
 const DRAW_GROUPS = {
-  scene: {module: "场景", fields: ["场景大类", "场景地点", "时间切片", "天气状态", "前景框景", "背景环境", "环境细节", "空间材质", "空间层次"], labels: ["场景套组", "Scene bundle"]},
-  camera: {module: "摄影", fields: ["景别", "画面布局", "等效焦段", "拍摄距离", "机位", "景深", "对焦位置"], labels: ["摄影套组", "Camera bundle"]},
-  lighting: {module: "视觉表现", fields: ["主光来源", "光线方向", "光线质地", "照明落点", "阴影表现"], labels: ["光线", "Lighting"]},
-  color_finish: {module: "视觉表现", fields: ["主配色", "色温倾向", "画面对比", "影像风格", "细节质地", "高光处理", "颗粒质感"], labels: ["配色／质感", "Color / finish"]},
+  scene: { module: "场景", fields: ["场景大类", "场景地点", "时间切片", "天气状态", "前景框景", "背景环境", "环境细节", "空间材质", "空间层次"], labels: ["场景套组", "Scene bundle"] },
+  camera: { module: "摄影", fields: ["景别", "画面布局", "等效焦段", "拍摄距离", "机位", "景深", "对焦位置"], labels: ["摄影套组", "Camera bundle"] },
+  lighting: { module: "视觉表现", fields: ["主光来源", "光线方向", "光线质地", "照明落点", "阴影表现"], labels: ["光线", "Lighting"] },
+  color_finish: { module: "视觉表现", fields: ["主配色", "色温倾向", "画面对比", "影像风格", "细节质地", "高光处理", "颗粒质感"], labels: ["配色／质感", "Color / finish"] },
 };
-const MODULE_NAMES = {Canvas: "画面基础", Person: "人物", Hair: "发型", Clothing: "服装", Pose: "姿态动作", Scene: "场景", Camera: "摄影", Visual: "视觉表现"};
-const MODULE_EN = {画面基础: "Canvas", 人物: "Person", 发型: "Hair", 服装: "Clothing", 姿态动作: "Pose / action", 场景: "Scene", 摄影: "Camera", 视觉表现: "Visual"};
-const moduleText = name => language() === "en" ? MODULE_EN[name] : name;
-const nodeScope = node => {
+const MODULE_NAMES = { Canvas: "画面基础", Person: "人物", Hair: "发型", Clothing: "服装", Pose: "姿态动作", Scene: "场景", Camera: "摄影", Visual: "视觉表现" };
+const MODULE_EN = { 画面基础: "Canvas", 人物: "Person", 发型: "Hair", 服装: "Clothing", 姿态动作: "Pose / action", 场景: "Scene", 摄影: "Camera", 视觉表现: "Visual" };
+const moduleText = (name) => (language() === "en" ? MODULE_EN[name] : name);
+const nodeScope = (node) => {
   const kind = node.comfyClass || node.constructor?.type;
   return kind === FULL ? "全部模块" : MODULE_NAMES[kind?.replace(/^VividMuse_ZImage|Module$/g, "")];
 };
 
+export function estimatePromptTokens(textValue) {
+  const value = String(textValue || "").trim();
+  if (!value) return 0;
+  const cjkMatches = value.match(/[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\u3000-\u303f\uff00-\uffef]/gu);
+  const cjkCount = cjkMatches ? cjkMatches.length : 0;
+  const remainder = value.replace(/[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\u3000-\u303f\uff00-\uffef]/gu, " ");
+  const nonCjkTokens = remainder.match(/[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*|[^\sA-Za-z0-9]/gu);
+  const nonCjkCount = nonCjkTokens ? nonCjkTokens.length : 0;
+  return Math.ceil(cjkCount * 0.75 + nonCjkCount * 1.3);
+}
+
+export function formatPromptMetrics(zh, en, lang = language()) {
+  const isEn = lang === "en";
+  const zhText = String(zh || "");
+  const enText = String(en || "");
+  const zhTokens = estimatePromptTokens(zhText);
+  const enTokens = estimatePromptTokens(enText);
+  return {
+    zhChars: zhText.length,
+    enChars: enText.length,
+    zhTokens,
+    enTokens,
+    zhLabel: isEn
+      ? `${zhText.length} chars · ~${zhTokens} tokens`
+      : `${zhText.length} 字符 · 约 ${zhTokens} tokens`,
+    enLabel: isEn
+      ? `${enText.length} chars · ~${enTokens} tokens`
+      : `${enText.length} 字符 · 约 ${enTokens} tokens`,
+    exceedsLimit: zhTokens > TOKEN_WARNING_THRESHOLD || enTokens > TOKEN_WARNING_THRESHOLD,
+    warningText: isEn
+      ? "Warning: Estimated tokens exceed 480 and may hit Z-Image's default 512-token truncation limit. Consider switching Prompt Density to Standard or Short, or trimming custom text."
+      : "注意：估算 Token 数已接近或超过 480，可能触发 Z-Image 默认 512 tokens 截断。建议将描述密度调为「标准」或「精简」，或精简自定义文本。",
+  };
+}
+
 // Only the root graph on a capable host is
 // eligible. Ownership of incoming live results is still checked by routeResult.
 const switchResults = (() => {
-  let store, graph, loading, awaitingActivation;
+  let store;
+  let graph;
+  let loading;
+  let awaitingActivation;
   let snapshots = new WeakMap();
-  const staged = new Map(), successful = new Map();
+  const staged = new Map();
+  const successful = new Map();
   const clearPending = () => { staged.clear(); successful.clear(); };
   const invalidate = () => {
-    snapshots = new WeakMap(); loading = null; awaitingActivation = null; clearPending();
+    snapshots = new WeakMap();
+    loading = null;
+    awaitingActivation = null;
+    clearPending();
   };
-  const trackerOf = workflow => {
+  const trackerOf = (workflow) => {
     const tracker = workflow?.changeTracker;
     return tracker && typeof tracker === "object" ? tracker : null;
   };
   const compatible = () => store && graph === app.rootGraphOrUndefined && Array.isArray(store.openWorkflows);
   const current = () => {
     if (!compatible()) return null;
-    const workflow = store.activeWorkflow, tracker = trackerOf(workflow);
+    const workflow = store.activeWorkflow;
+    const tracker = trackerOf(workflow);
     if (!tracker || !store.openWorkflows.includes(workflow)) return null;
-    if (store.openWorkflows.filter(item => trackerOf(item) === tracker).length !== 1) return null;
+    if (store.openWorkflows.filter((item) => trackerOf(item) === tracker).length !== 1) return null;
     return tracker;
   };
-  const keyOf = node => node?.id != null && target(node)
-    && graph?.getNodeById?.(node.id) === node ? String(node.id) : null;
-  const keyOfRemoved = node => node?.id != null && target(node) ? String(node.id) : null;
+  const keyOf = (node) => (node?.id != null && target(node)
+    && graph?.getNodeById?.(node.id) === node ? String(node.id) : null);
+  const keyOfRemoved = (node) => (node?.id != null && target(node) ? String(node.id) : null);
   const forget = (tracker, key) => {
     snapshots.get(tracker)?.delete(key);
     for (const [id, entries] of staged) {
@@ -68,7 +114,7 @@ const switchResults = (() => {
       if (!entries.size) staged.delete(id);
     }
   };
-  const forgetWorkflow = tracker => {
+  const forgetWorkflow = (tracker) => {
     snapshots.delete(tracker);
     for (const [id, entries] of staged) {
       for (const [key, entry] of entries) if (entry.tracker === tracker) entries.delete(key);
@@ -76,18 +122,24 @@ const switchResults = (() => {
     }
     for (const [id, owner] of successful) if (owner === tracker) successful.delete(id);
   };
-  const recordType = node => node.comfyClass || node.constructor?.type;
-  const remove = event => {
+  const recordType = (node) => node.comfyClass || node.constructor?.type;
+  const remove = (event) => {
     const key = keyOfRemoved(event.detail?.node);
     if (key == null) return;
-    if (loading || awaitingActivation) { invalidate(); return; }
+    if (loading || awaitingActivation) {
+      invalidate();
+      return;
+    }
     forget(current(), key);
   };
   const commit = ({ tracker, node, key, generation, record }) => {
     if (loading || current() !== tracker || keyOf(node) !== key
         || node.__vividMuseDiagnosticsGeneration !== generation) return;
     let records = snapshots.get(tracker);
-    if (!records) { records = new Map(); snapshots.set(tracker, records); }
+    if (!records) {
+      records = new Map();
+      snapshots.set(tracker, records);
+    }
     const previous = records.get(key);
     if (!previous || record.order > previous.record.order) {
       records.set(key, { type: recordType(node), record: JSON.parse(JSON.stringify(record)) });
@@ -96,7 +148,8 @@ const switchResults = (() => {
   return {
     setup() {
       if (store) return;
-      const candidate = app.extensionManager?.workflow, root = app.rootGraphOrUndefined;
+      const candidate = app.extensionManager?.workflow;
+      const root = app.rootGraphOrUndefined;
       if (!api?.addEventListener || !Array.isArray(candidate?.openWorkflows)
           || typeof candidate?.$onAction !== "function" || typeof candidate?.onUserActivation !== "function"
           || typeof root?.getNodeById !== "function" || typeof root?.events?.addEventListener !== "function") return;
@@ -111,7 +164,7 @@ const switchResults = (() => {
           });
           onError(() => { awaitingActivation = null; });
         }, true);
-        candidate.onUserActivation(workflow => {
+        candidate.onUserActivation((workflow) => {
           const plan = awaitingActivation;
           awaitingActivation = null;
           const tracker = current();
@@ -126,32 +179,49 @@ const switchResults = (() => {
           }
         });
         root.events.addEventListener("node:removed", remove);
-        store = candidate; graph = root;
-      } catch { store = undefined; }
+        store = candidate;
+        graph = root;
+      } catch {
+        store = undefined;
+      }
     },
     beforeLoad() {
-      if (loading || !compatible()) { invalidate(); return; }
-      awaitingActivation = null; clearPending();
+      if (loading || !compatible()) {
+        invalidate();
+        return;
+      }
+      awaitingActivation = null;
+      clearPending();
       loading = {
-        from: current(), before: new Set(store.openWorkflows.map(trackerOf).filter(Boolean)),
+        from: current(),
+        before: new Set(store.openWorkflows.map(trackerOf).filter(Boolean)),
         configured: false,
       };
     },
     beforeConfigure() {
-      if (!loading || !compatible() || loading.configured) { invalidate(); return; }
+      if (!loading || !compatible() || loading.configured) {
+        invalidate();
+        return;
+      }
       loading.configured = true;
     },
     afterConfigure() {
-      if (!loading?.configured || !compatible() || loading.finished) { invalidate(); return; }
+      if (!loading?.configured || !compatible() || loading.finished) {
+        invalidate();
+        return;
+      }
       loading.finished = true;
     },
     afterLoad() {
-      if (!loading?.finished || !compatible()) { invalidate(); return; }
+      if (!loading?.finished || !compatible()) {
+        invalidate();
+        return;
+      }
       const outgoing = loading;
       loading = null;
       const to = current();
       if (!to || !outgoing.from || to === outgoing.from || !outgoing.before.has(to)
-          || !store.openWorkflows.some(workflow => trackerOf(workflow) === outgoing.from)) {
+          || !store.openWorkflows.some((workflow) => trackerOf(workflow) === outgoing.from)) {
         if (to) snapshots.delete(to);
         return;
       }
@@ -161,42 +231,57 @@ const switchResults = (() => {
     forgetReconfigured(node) {
       if (loading) return;
       const key = keyOf(node);
-      if (key != null) { awaitingActivation = null; forget(current(), key); }
+      if (key != null) {
+        awaitingActivation = null;
+        forget(current(), key);
+      }
     },
     accepted(node, record) {
       if (loading || record.promptId == null) return;
-      const tracker = current(), key = keyOf(node);
+      const tracker = current();
+      const key = keyOf(node);
       if (!tracker || key == null || record.executionNode !== key) return;
       const entry = { tracker, node, key, record, generation: node.__vividMuseDiagnosticsGeneration };
-      if (successful.get(record.promptId) === tracker) { commit(entry); return; }
+      if (successful.get(record.promptId) === tracker) {
+        commit(entry);
+        return;
+      }
       let entries = staged.get(record.promptId);
-      if (!entries) { entries = new Map(); bounded(staged, record.promptId, entries); }
+      if (!entries) {
+        entries = new Map();
+        bounded(staged, record.promptId, entries);
+      }
       entries.set(key, entry);
     },
-    success(id) {
+    success(id, { inFlight = false } = {}) {
       const tracker = current();
       if (loading || !tracker || terminalIds.has(id)
-          || !(submissions.has(id) || pendingRequests)) return;
+          || !(submissions.has(id) || inFlight)) return;
       bounded(successful, id, tracker);
       const entries = staged.get(id);
       staged.delete(id);
       for (const entry of entries?.values() || []) commit(entry);
     },
-    terminal(id) { staged.delete(id); successful.delete(id); },
+    terminal(id) {
+      staged.delete(id);
+      successful.delete(id);
+    },
   };
 })();
 
 function parseRandomExplanation(raw, scope) {
-  if (raw === undefined) return {status: "missing"};
-  const object = value => value && typeof value === "object" && !Array.isArray(value);
-  const allowed = module => Object.hasOwn(MODULE_EN, module) && (scope === "全部模块" || scope === module);
-  const count = value => Number.isSafeInteger(value) && value > 0;
+  if (raw === undefined) return { status: "missing" };
+  const object = (value) => value && typeof value === "object" && !Array.isArray(value);
+  const allowed = (module) => Object.hasOwn(MODULE_EN, module) && (scope === "全部模块" || scope === module);
+  const count = (value) => Number.isSafeInteger(value) && value > 0;
   if (!object(raw) || raw.version !== 1 || raw.coverage !== "partial" || typeof raw.truncated !== "boolean"
       || !Array.isArray(raw.draws) || raw.draws.length > 16 || !Array.isArray(raw.unmeasured)
-      || raw.unmeasured.length > 8) return {status: "invalid"};
-  const draws = [], unmeasured = [], seenModules = new Set();
+      || raw.unmeasured.length > 8) return { status: "invalid" };
+  const draws = [];
+  const unmeasured = [];
+  const seenModules = new Set();
   for (const row of raw.draws) {
-    if (!object(row) || !Object.hasOwn(DRAW_GROUPS, row.group)) return {status: "invalid"};
+    if (!object(row) || !Object.hasOwn(DRAW_GROUPS, row.group)) return { status: "invalid" };
     const group = DRAW_GROUPS[row.group];
     if (!allowed(row.module) || row.module !== group.module || !["initial", "after_reference", "after_coherence"].includes(row.stage)
         || (row.stage !== "initial" && !["camera", "lighting"].includes(row.group))
@@ -204,39 +289,63 @@ function parseRandomExplanation(raw, scope) {
         || !["retained", "overwritten", "unknown"].includes(row.effect)
         || !Array.isArray(row.active_fields) || !row.active_fields.length || row.active_fields.length > group.fields.length
         || new Set(row.active_fields).size !== row.active_fields.length
-        || row.active_fields.some(field => !group.fields.includes(field))) return {status: "invalid"};
-    draws.push({module: row.module, group: row.group, stage: row.stage, entry_count: row.entry_count,
-      distinct_active_count: row.distinct_active_count, active_fields: [...row.active_fields], effect: row.effect});
+        || row.active_fields.some((field) => !group.fields.includes(field))) return { status: "invalid" };
+    draws.push({
+      module: row.module,
+      group: row.group,
+      stage: row.stage,
+      entry_count: row.entry_count,
+      distinct_active_count: row.distinct_active_count,
+      active_fields: [...row.active_fields],
+      effect: row.effect,
+    });
   }
   for (const row of raw.unmeasured) {
     if (!object(row) || !allowed(row.module) || seenModules.has(row.module)
-        || !["no_random_fields", "not_instrumented", "reference_replacement", "coherence_replacement"].includes(row.reason)) return {status: "invalid"};
-    seenModules.add(row.module); unmeasured.push({module: row.module, reason: row.reason});
+        || !["no_random_fields", "not_instrumented", "reference_replacement", "coherence_replacement"].includes(row.reason)) {
+      return { status: "invalid" };
+    }
+    seenModules.add(row.module);
+    unmeasured.push({ module: row.module, reason: row.reason });
   }
-  return {status: "valid", data: {version: 1, coverage: "partial", truncated: raw.truncated, draws, unmeasured}};
+  return { status: "valid", data: { version: 1, coverage: "partial", truncated: raw.truncated, draws, unmeasured } };
 }
 
 function randomExplanationLines(record) {
   if (!record) return [text("待执行后查看实际抽取说明。", "Run to see actual sampling details.")];
-  if (record.explanationStatus === "invalid") return [text("本条记录的候选信息无效，已忽略；原输出仍可查看。", "Invalid candidate metadata was ignored; the original result remains available.")];
+  if (record.explanationStatus === "invalid") {
+    return [text("本条记录的候选信息无效，已忽略；原输出仍可查看。", "Invalid candidate metadata was ignored; the original result remains available.")];
+  }
   const parsed = parseRandomExplanation(record.data.random_explanation, record.data.scope);
-  if (parsed.status === "missing") return [text("此记录未提供候选统计，不代表只有一套。", "This record has no candidate statistics; that does not mean there is only one option.")];
-  if (parsed.status !== "valid") return [text("本条记录的候选信息无效，已忽略；原输出仍可查看。", "Invalid candidate metadata was ignored; the original result remains available.")];
-  const lines = [text("仅说明所选执行的采样环节，不是当前配置预览或模块总组合数。上游随机上下文变化时，候选也可能改变。",
-    "Sampling steps from the selected execution only, not a live preview or whole-module combination count. Candidates may change with randomized upstream context.")];
+  if (parsed.status === "missing") {
+    return [text("此记录未提供候选统计，不代表只有一套。", "This record has no candidate statistics; that does not mean there is only one option.")];
+  }
+  if (parsed.status !== "valid") {
+    return [text("本条记录的候选信息无效，已忽略；原输出仍可查看。", "Invalid candidate metadata was ignored; the original result remains available.")];
+  }
+  const lines = [text(
+    "仅说明所选执行的采样环节，不是当前配置预览或模块总组合数。上游随机上下文变化时，候选也可能改变。",
+    "Sampling steps from the selected execution only, not a live preview or whole-module combination count. Candidates may change with randomized upstream context.",
+  )];
   if (parsed.data.truncated) lines.push(text("记录已截断，只展示部分采样证据。", "Truncated record: only partial sampling evidence is shown."));
   for (const row of parsed.data.draws) {
     const label = text(...DRAW_GROUPS[row.group].labels);
-    const stage = row.stage === "initial" ? text("初次抽取", "Initial draw")
-      : row.stage === "after_coherence" ? text("协调后重抽", "Draw after coherence update") : text("联动后重抽", "Draw after reference update");
-    const amount = text(`${row.entry_count} 个候选条目 / ${row.distinct_active_count} 种随机字段组合`,
-      `${row.entry_count} candidate entries / ${row.distinct_active_count} distinct active-field combinations`);
+    const stage = row.stage === "initial"
+      ? text("初次抽取", "Initial draw")
+      : row.stage === "after_coherence"
+        ? text("协调后重抽", "Draw after coherence update")
+        : text("联动后重抽", "Draw after reference update");
+    const amount = text(
+      `${row.entry_count} 个候选条目 / ${row.distinct_active_count} 种随机字段组合`,
+      `${row.entry_count} candidate entries / ${row.distinct_active_count} distinct active-field combinations`,
+    );
     const effect = row.effect === "overwritten"
       ? text("后续已覆盖：这是早期采样信息，不代表最终候选。", "Later overwritten: this earlier sampling evidence does not describe final candidates.")
-      : row.effect === "unknown" ? text("最终影响未确定。", "Final effect is unknown.")
-      : row.distinct_active_count === 1
-        ? text("该次采样环节只有一种字段组合；不保证整个模块或正文不变。", "This sampling step has one field combination; this does not imply unchanged module or prompt output.")
-        : text("不同种子仍可能抽到相同结果。", "Different seeds may still select the same result.");
+      : row.effect === "unknown"
+        ? text("最终影响未确定。", "Final effect is unknown.")
+        : row.distinct_active_count === 1
+          ? text("该次采样环节只有一种字段组合；不保证整个模块或正文不变。", "This sampling step has one field combination; this does not imply unchanged module or prompt output.")
+          : text("不同种子仍可能抽到相同结果。", "Different seeds may still select the same result.");
     lines.push(`${label} · ${stage}: ${amount}\n${effect}`);
   }
   const reasons = {
@@ -250,56 +359,70 @@ function randomExplanationLines(record) {
 }
 
 const COHERENCE_POSE_FIELDS = ["画面瞬间", "基础姿态", "身体方向", "身体重心", "肩颈状态", "手部动作", "腿部动作", "头部方向", "视线", "表情"];
-const COHERENCE_RULES = {
-  crossed_legs_stool_support: {modules: ["姿态动作"], fields: COHERENCE_POSE_FIELDS, labels: ["盘腿与高脚椅支撑", "Crossed legs / stool support"]},
-  standing_seated_legs: {modules: ["姿态动作"], fields: COHERENCE_POSE_FIELDS, labels: ["站姿与坐姿腿部动作", "Standing / seated leg action"]},
-  standing_pigeon_legs: {modules: ["姿态动作"], fields: COHERENCE_POSE_FIELDS, labels: ["站姿与鸽子式伸展", "Standing / pigeon stretch"]},
-  pool_pose_classroom_location: {modules: ["姿态动作", "场景"], fields: [...COHERENCE_POSE_FIELDS, ...DRAW_GROUPS.scene.fields], labels: ["泳池动作与教室场景", "Pool pose / classroom location"]},
-  camera_context: {modules: ["摄影"], fields: DRAW_GROUPS.camera.fields, labels: ["摄影上下文联动", "Camera context update"]},
-  lighting_context: {modules: ["视觉表现"], fields: DRAW_GROUPS.lighting.fields, labels: ["光线上下文联动", "Lighting context update"]},
-};
+const COHERENCE_RULES = PROMPT_SCHEMA.COHERENCE_RULES_META;
+
 function parseCoherenceExplanation(raw, scope) {
-  if (raw === undefined) return {status: "missing"};
-  const object = v => v && typeof v === "object" && !Array.isArray(v);
+  if (raw === undefined) return { status: "missing" };
+  const object = (v) => v && typeof v === "object" && !Array.isArray(v);
   if (!["全部模块", "姿态动作", "场景"].includes(scope) || !object(raw) || raw.version !== 1
       || !["standard", "coherent"].includes(raw.mode) || raw.coverage !== "partial"
       || typeof raw.fallback !== "boolean" || typeof raw.truncated !== "boolean"
       || !Array.isArray(raw.events) || raw.events.length > 16
-      || (raw.mode === "standard" && raw.events.length)) return {status: "invalid"};
+      || (raw.mode === "standard" && raw.events.length)) return { status: "invalid" };
   const events = [];
   for (const row of raw.events) {
-    if (!object(row) || !Object.hasOwn(COHERENCE_RULES, row.rule_id)) return {status: "invalid"};
+    if (!object(row) || !Object.hasOwn(COHERENCE_RULES, row.rule_id)) return { status: "invalid" };
     const rule = COHERENCE_RULES[row.rule_id];
-    const moduleFields = row.module === "姿态动作" ? COHERENCE_POSE_FIELDS
-      : row.module === "场景" ? DRAW_GROUPS.scene.fields
-      : row.module === "摄影" ? DRAW_GROUPS.camera.fields : DRAW_GROUPS.lighting.fields;
+    const moduleFields = row.module === "姿态动作"
+      ? COHERENCE_POSE_FIELDS
+      : row.module === "场景"
+        ? DRAW_GROUPS.scene.fields
+        : row.module === "摄影"
+          ? DRAW_GROUPS.camera.fields
+          : DRAW_GROUPS.lighting.fields;
     if (!rule.modules.includes(row.module) || (scope !== "全部模块" && scope !== row.module)
         || !["adjusted", "retained", "preserved_explicit", "no_candidate", "unknown_context", "unsupported_source"].includes(row.status)
         || !Number.isSafeInteger(row.candidate_count) || row.candidate_count < 0
         || !Array.isArray(row.fields) || row.fields.length > rule.fields.length
-        || new Set(row.fields).size !== row.fields.length || row.fields.some(f => !rule.fields.includes(f) || !moduleFields.includes(f))
-        || !object(row.before) || !object(row.after)) return {status: "invalid"};
+        || new Set(row.fields).size !== row.fields.length || row.fields.some((f) => !rule.fields.includes(f) || !moduleFields.includes(f))
+        || !object(row.before) || !object(row.after)) return { status: "invalid" };
     for (const values of [row.before, row.after]) {
-      if (Object.keys(values).length !== row.fields.length || row.fields.some(f =>
-        !Object.hasOwn(values, f) || typeof values[f] !== "string" || values[f].length > 256)) return {status: "invalid"};
+      if (Object.keys(values).length !== row.fields.length || row.fields.some((f) => (
+        !Object.hasOwn(values, f) || typeof values[f] !== "string" || values[f].length > 256
+      ))) return { status: "invalid" };
     }
-    events.push({rule_id: row.rule_id, module: row.module, status: row.status, candidate_count: row.candidate_count,
-      fields: [...row.fields], before: {...row.before}, after: {...row.after}});
+    events.push({
+      rule_id: row.rule_id,
+      module: row.module,
+      status: row.status,
+      candidate_count: row.candidate_count,
+      fields: [...row.fields],
+      before: { ...row.before },
+      after: { ...row.after },
+    });
   }
-  return {status: "valid", data: {version: 1, mode: raw.mode, fallback: raw.fallback, coverage: "partial", truncated: raw.truncated, events}};
+  return { status: "valid", data: { version: 1, mode: raw.mode, fallback: raw.fallback, coverage: "partial", truncated: raw.truncated, events } };
 }
+
 function coherenceExplanationLines(record, node) {
   const parsed = parseCoherenceExplanation(record?.data.coherence_explanation, nodeScope(node));
-  if (record?.coherenceStatus === "invalid" || parsed.status === "invalid") return [text(
-    "协调说明无效，已忽略；原输出仍可查看。", "Invalid coherence metadata was ignored; the original output remains available.")];
+  if (record?.coherenceStatus === "invalid" || parsed.status === "invalid") {
+    return [text("协调说明无效，已忽略；原输出仍可查看。", "Invalid coherence metadata was ignored; the original output remains available.")];
+  }
   if (parsed.status === "missing") return [text("此记录未提供组合协调说明。", "This record has no coherence details.")];
-  const {mode, fallback, truncated, events} = parsed.data;
+  const { mode, fallback, truncated, events } = parsed.data;
   const lines = [text("本次组合协调：", "Coherence for This Execution: ") + (mode === "coherent" ? text("协调优先", "Coherence First") : text("默认组合", "Standard"))];
   if (fallback) lines.push(text("未知模式已回退到默认组合。", "Unknown mode fell back to Standard."));
   if (mode === "standard") lines.push(text("未启用新增协调，原有联动仍然生效。", "Additional coherence is off; existing dependencies still apply."));
-  else if (!events.length) lines.push(text("未发现已覆盖规则中的明确冲突；不代表所有组合均合理。", "No explicit conflict found within covered rules; this is not a guarantee for all combinations."));
+  else if (!events.length) {
+    lines.push(text(
+      "未发现已覆盖规则中的明确冲突；不代表所有组合均合理。",
+      "No explicit conflict found within covered rules; this is not a guarantee for all combinations.",
+    ));
+  }
   const reasons = {
-    adjusted: ["已调整随机字段", "Random fields adjusted"], retained: ["联动复核后值未变", "Rechecked; values unchanged"],
+    adjusted: ["已调整随机字段", "Random fields adjusted"],
+    retained: ["联动复核后值未变", "Rechecked; values unchanged"],
     preserved_explicit: ["指定内容或上游内容保持不变", "Explicit or upstream content preserved"],
     no_candidate: ["原候选范围内无可用替代，保留原组合", "No eligible replacement in the original pool; original combination retained"],
     unknown_context: ["上下文不足或含自定义内容，保守跳过", "Insufficient or custom context; conservatively skipped"],
@@ -307,9 +430,12 @@ function coherenceExplanationLines(record, node) {
   };
   for (const row of events) {
     lines.push(`${text(...COHERENCE_RULES[row.rule_id].labels)}: ${text(...reasons[row.status])}`);
-    if (row.candidate_count || ["adjusted", "retained", "no_candidate"].includes(row.status))
+    if (row.candidate_count || ["adjusted", "retained", "no_candidate"].includes(row.status)) {
       lines.push(text(`可用替代候选：${row.candidate_count}`, `Eligible replacement candidates: ${row.candidate_count}`));
-    for (const field of row.fields) lines.push(`${tr(field)}: ${displayValue(node, field, row.before[field])} → ${displayValue(node, field, row.after[field])}`);
+    }
+    for (const field of row.fields) {
+      lines.push(`${tr(field)}: ${displayValue(node, field, row.before[field])} → ${displayValue(node, field, row.after[field])}`);
+    }
   }
   if (truncated) lines.push(text("记录已截断，仅展示部分协调证据。", "Truncated record: only partial coherence evidence is shown."));
   return lines;
@@ -323,7 +449,7 @@ function coherenceSummaryLines(record, node) {
   const groups = new Map();
   for (const row of parsed.data.events) {
     const key = `${row.module}:${row.status}`;
-    if (!groups.has(key)) groups.set(key, {module: row.module, status: row.status, fields: new Set()});
+    if (!groups.has(key)) groups.set(key, { module: row.module, status: row.status, fields: new Set() });
     const group = groups.get(key);
     for (const f of row.fields) if (row.before[f] !== row.after[f]) group.fields.add(f);
   }
@@ -337,7 +463,8 @@ function coherenceSummaryLines(record, node) {
   for (const group of groups.values()) {
     if (group.status === "adjusted") {
       lines.push(`${moduleText(group.module)}: ` + (group.fields.size
-        ? text(`已调整 ${group.fields.size} 个随机字段`, `${group.fields.size} random ${group.fields.size === 1 ? "field" : "fields"} adjusted`) + ` (${[...group.fields].map(tr).join(", ")})`
+        ? text(`已调整 ${group.fields.size} 个随机字段`, `${group.fields.size} random ${group.fields.size === 1 ? "field" : "fields"} adjusted`)
+          + ` (${[...group.fields].map(tr).join(", ")})`
         : text("记录中没有实际变化的字段", "No changed fields in this record")));
     } else lines.push(`${moduleText(group.module)}: ${text(...reasons[group.status])}`);
   }
@@ -359,148 +486,114 @@ function executionImpactLines(record) {
   };
   const lines = [];
   for (const [status, label] of Object.entries(labels)) {
-    const count = rows.filter(row => row?.status === status).length;
+    const count = rows.filter((row) => row?.status === status).length;
     if (count) lines.push(`${text(...label)}: ${count}`);
   }
   return lines;
 }
-const fields = node => (node.widgets || []).filter(w => w.serialize !== false
+
+const fields = (node) => (node.widgets || []).filter((w) => w.serialize !== false
   && Array.isArray(w.options?.values) && w.options.values.includes("跟随预设"));
 
 function canonical(value) {
   if (Array.isArray(value)) return value.map(canonical);
   if (!value || typeof value !== "object") return value;
-  return Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])]));
+  return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonical(value[key])]));
 }
 const same = (a, b) => JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
-const linked = (node, name) => node.inputs?.some(input => input.name === name && input.link != null);
-
-const rootGraph = () => app.rootGraph || app.graph;
-function nodeAtPath(graph, path) {
-  const parts = String(path).split(":");
-  for (let i = 0; graph && i < parts.length; i++) {
-    const node = graph.getNodeById?.(parts[i]);
-    if (i === parts.length - 1) return node;
-    graph = node?.subgraph;
-  }
-  return null;
-}
-
-function captureOwners(graph) {
-  const owners = new Map();
-  const counts = new Map();
-  function visit(current, prefix = "", ancestors = new Set()) {
-    if (!current || ancestors.has(current)) return;
-    const next = new Set(ancestors).add(current);
-    for (const node of current.nodes || current._nodes || []) {
-      const path = prefix ? `${prefix}:${node.id}` : String(node.id);
-      if (target(node)) {
-        owners.set(path, { node, graph, generation: node.__vividMuseDiagnosticsGeneration || 0 });
-        counts.set(node, (counts.get(node) || 0) + 1);
-      }
-      if (node.subgraph) visit(node.subgraph, path, next);
-    }
-  }
-  visit(graph);
-  // Shared subgraph definitions can represent several instances with one node
-  // object. A single node panel cannot safely present these as one result.
-  for (const [path, owner] of owners) if (counts.get(owner.node) > 1) owners.delete(path);
-  return owners;
-}
+const linked = (node, name) => node.inputs?.some((input) => input.name === name && input.link != null);
 
 function bounded(map, key, value) {
   map.set(key, value);
   if (map.size > ORDERS_LIMIT) map.delete(map.keys().next().value);
 }
 
-function routeResult(detail) {
-  if (!detail?.output?.vividmuse_prompt_diagnostics?.[0] || detail.prompt_id == null) return;
-  const id = String(detail.prompt_id);
-  if (terminalIds.has(id)) return;
-  const submission = submissions.get(id);
-  if (!submission) {
-    // WebSocket output may beat the HTTP response. Buffer only while a local
-    // submission is in flight, and replay only after its returned ID is known.
-    if (pendingRequests) {
-      let messages = earlyResults.get(id);
-      if (!messages) { messages = new Map(); bounded(earlyResults, id, messages); }
-      bounded(messages, String(detail.display_node ?? detail.node), detail);
-    }
-    return;
-  }
-  const path = String(detail.display_node ?? detail.node);
-  const owner = submission.owners.get(path);
-  if (!owner || owner.graph !== rootGraph() || nodeAtPath(owner.graph, path) !== owner.node
-      || owner.generation !== (owner.node.__vividMuseDiagnosticsGeneration || 0)) return;
-  acceptResult(owner.node, detail.output.vividmuse_prompt_diagnostics[0], id, path);
-}
-
+let observerRegistered = false;
 function observeSubmissions() {
-  if (typeof app.graphToPrompt === "function" && !app.graphToPrompt.__vividMuseDiagnosticsObserver) {
-    const original = app.graphToPrompt;
-    const observed = async function () {
-      // Capture before serialization awaits: switching tabs during an async
-      // widget export must not attach the serialized prompt to the new graph.
-      const owners = captureOwners(arguments[0] || rootGraph());
-      const prompt = await original.apply(this, arguments);
-      if (prompt && typeof prompt === "object") promptOwners.set(prompt, owners);
-      return prompt;
-    };
-    observed.__vividMuseDiagnosticsObserver = true;
-    app.graphToPrompt = observed;
-  }
-  if (typeof api?.queuePrompt === "function" && !api.queuePrompt.__vividMuseDiagnosticsObserver) {
-    const original = api.queuePrompt;
-    const observed = async function (_number, prompt) {
-      const owners = promptOwners.get(prompt);
-      if (!owners?.size) return original.apply(this, arguments);
-      const submission = { owners: new Map([...owners].filter(([path]) => prompt.output?.[path])),
-        order: ++nextOrder };
-      pendingRequests++;
-      try {
-        const response = await original.apply(this, arguments);
-        if (response?.prompt_id != null) {
-          const id = String(response.prompt_id);
-          bounded(submissions, id, submission);
-          const messages = earlyResults.get(id);
-          earlyResults.delete(id);
-          for (const detail of messages?.values() || []) routeResult(detail);
-        }
-        return response;
-      } finally {
-        if (--pendingRequests === 0) earlyResults.clear();
+  if (observerRegistered) return;
+  observerRegistered = true;
+  registerSubmissionConsumer({
+    matchNode: target,
+    generation: (node) => node.__vividMuseDiagnosticsGeneration || 0,
+    onSubmitted(promptId, submission) {
+      const order = submission?.order ?? ++nextOrder;
+      bounded(submissions, promptId, { order });
+    },
+    onExecuted(detail, { promptId, path, order, owner }) {
+      if (!detail?.output?.vividmuse_prompt_diagnostics?.[0]) return;
+      if (!submissions.has(promptId)) {
+        bounded(submissions, promptId, { order: order ?? ++nextOrder });
       }
-    };
-    observed.__vividMuseDiagnosticsObserver = true;
-    api.queuePrompt = observed;
-  }
+      acceptResult(owner.node, detail.output.vividmuse_prompt_diagnostics[0], promptId, path);
+    },
+    onSuccess(promptId, extra) {
+      switchResults.success(promptId, extra);
+    },
+    onTerminal(promptId) {
+      terminalIds.add(promptId);
+      if (terminalIds.size > ORDERS_LIMIT) terminalIds.delete(terminalIds.values().next().value);
+      switchResults.terminal(promptId);
+    },
+  });
 }
 
 function currentState(node) {
-  const rows = fields(node).map(w => ({ field: w.name, value: w.value,
-    mode: linked(node, w.name) ? "connected" : w.value === "随机抽取" ? "random" : w.value === "跟随预设" ? "preset"
-      : w.value === "不使用" ? "empty" : "fixed" }));
-  const replaced = (node.widgets || []).filter(w => /^用户.+片段$/u.test(w.name)
-    && !linked(node, w.name) && typeof w.value === "string" && w.value.trim()).map(w => w.name.slice(2, -2));
+  const rows = fields(node).map((w) => ({
+    field: w.name,
+    value: w.value,
+    mode: linked(node, w.name)
+      ? "connected"
+      : w.value === "随机抽取"
+        ? "random"
+        : w.value === "跟随预设"
+          ? "preset"
+          : w.value === "不使用"
+            ? "empty"
+            : "fixed",
+  }));
+  const replaced = (node.widgets || []).filter((w) => /^用户.+片段$/u.test(w.name)
+    && !linked(node, w.name) && typeof w.value === "string" && w.value.trim()).map((w) => w.name.slice(2, -2));
   const locks = node.properties?.vividMuseRandomLocks;
-  const locked = Array.isArray(locks) ? [...new Set(locks.filter(name => rows.some(row => row.field === name)))] : [];
-  return { rows, randomCount: rows.filter(row => row.mode === "random").length, replaced, locked };
+  const locked = Array.isArray(locks) ? [...new Set(locks.filter((name) => rows.some((row) => row.field === name)))] : [];
+  return { rows, randomCount: rows.filter((row) => row.mode === "random").length, replaced, locked };
 }
 
 function currentConfigurationLines(node) {
   const state = currentState(node);
   const lines = [text("当前配置（不是历史执行状态）", "Current Configuration (Not Historical Execution State)")];
   const coherence = widget(node, "组合协调");
-  if (coherence) lines.push(text("当前组合协调：", "Current Combination Coherence: ") + (linked(node, "组合协调")
-    ? text("使用连接输入", "Connected input") : displayValue(node, "组合协调", coherence.value)));
-  const count = mode => state.rows.filter(row => row.mode === mode).length;
-  lines.push(text(`随机 ${count("random")} 项；指定值 ${count("fixed")} 项；跟随预设 ${count("preset")} 项；不使用 ${count("empty")} 项。`,
-    `Random: ${count("random")}; fixed: ${count("fixed")}; follow preset: ${count("preset")}; omit: ${count("empty")}.`));
-  if (node.inputs?.some(input => input.link != null)) lines.push(text("存在连接输入，控件不能代表全部实际输入；以下历史说明以实际执行为准。", "Connected inputs exist; widgets do not represent all executed inputs. Historical explanations use actual execution data."));
-  else if (!state.randomCount) lines.push(text("改变种子不会启用随机；请使用已有随机按钮，或将需要变化的字段设为随机抽取。", "Changing the seed does not enable randomness. Use the existing randomize button or set desired fields to Random."));
-  if (state.locked.length) lines.push(text(`当前 ${state.locked.length} 个字段受随机按钮锁定保护。解锁不自动启用随机；手动编辑、切换预设和清空仍然有效。此状态不能解释历史结果。`,
-    `${state.locked.length} current fields are protected from randomize buttons. Unlocking does not enable randomization. Manual edits, preset changes and clearing remain available. This current state does not explain historical results.`));
-  if (nodeScope(node) !== "全部模块") lines.push(text("独立模块使用同主题候选范围，不提供完整节点的随机范围切换。", "Standalone modules use same-theme candidates, without the full builder's random-scope selector."));
+  if (coherence) {
+    lines.push(text("当前组合协调：", "Current Combination Coherence: ") + (linked(node, "组合协调")
+      ? text("使用连接输入", "Connected input") : displayValue(node, "组合协调", coherence.value)));
+  }
+  const count = (mode) => state.rows.filter((row) => row.mode === mode).length;
+  lines.push(text(
+    `随机 ${count("random")} 项；指定值 ${count("fixed")} 项；跟随预设 ${count("preset")} 项；不使用 ${count("empty")} 项。`,
+    `Random: ${count("random")}; fixed: ${count("fixed")}; follow preset: ${count("preset")}; omit: ${count("empty")}.`,
+  ));
+  if (node.inputs?.some((input) => input.link != null)) {
+    lines.push(text(
+      "存在连接输入，控件不能代表全部实际输入；以下历史说明以实际执行为准。",
+      "Connected inputs exist; widgets do not represent all executed inputs. Historical explanations use actual execution data.",
+    ));
+  } else if (!state.randomCount) {
+    lines.push(text(
+      "改变种子不会启用随机；请使用已有随机按钮，或将需要变化的字段设为随机抽取。",
+      "Changing the seed does not enable randomness. Use the existing randomize button or set desired fields to Random.",
+    ));
+  }
+  if (state.locked.length) {
+    lines.push(text(
+      `当前 ${state.locked.length} 个字段受随机按钮锁定保护。解锁不自动启用随机；手动编辑、切换预设和清空仍然有效。此状态不能解释历史结果。`,
+      `${state.locked.length} current fields are protected from randomize buttons. Unlocking does not enable randomization. Manual edits, preset changes and clearing remain available. This current state does not explain historical results.`,
+    ));
+  }
+  if (nodeScope(node) !== "全部模块") {
+    lines.push(text(
+      "独立模块使用同主题候选范围，不提供完整节点的随机范围切换。",
+      "Standalone modules use same-theme candidates, without the full builder's random-scope selector.",
+    ));
+  }
   return lines;
 }
 
@@ -519,10 +612,10 @@ function stale(node, record) {
 function comparison(previous, current) {
   if (!previous || previous.scope !== current.scope || !same(previous.settings, current.settings)
       || !same(previous.context, current.context)) return null;
-  return current.modules.filter(module => {
-    const before = previous.modules.find(item => item.name === module.name);
+  return current.modules.filter((module) => {
+    const before = previous.modules.find((item) => item.name === module.name);
     return !before || before.zh !== module.zh || before.en !== module.en || before.source !== module.source;
-  }).map(module => module.name);
+  }).map((module) => module.name);
 }
 
 function acceptResult(node, data, promptId = null, executionNode = null) {
@@ -535,16 +628,23 @@ function acceptResult(node, data, promptId = null, executionNode = null) {
   if (previous && promptId != null && previous.promptId === String(promptId)) return false;
   const scope = nodeScope(node);
   const explanation = data.random_explanation !== undefined && data.scope !== scope
-    ? {status: "invalid"} : parseRandomExplanation(data.random_explanation, scope);
-  const stored = {...data};
+    ? { status: "invalid" } : parseRandomExplanation(data.random_explanation, scope);
+  const stored = { ...data };
   const coherence = data.coherence_explanation !== undefined && data.scope !== scope
-    ? {status: "invalid"} : parseCoherenceExplanation(data.coherence_explanation, scope);
+    ? { status: "invalid" } : parseCoherenceExplanation(data.coherence_explanation, scope);
   delete stored.coherence_explanation;
   if (coherence.status === "valid") stored.coherence_explanation = coherence.data;
   delete stored.random_explanation;
   if (explanation.status === "valid") stored.random_explanation = explanation.data;
-  const record = { data: stored, coherenceStatus: coherence.status, explanationStatus: explanation.status, promptId: promptId == null ? null : String(promptId),
-    executionNode, order: order ?? ++nextOrder, changed: comparison(previous?.data, data) };
+  const record = {
+    data: stored,
+    coherenceStatus: coherence.status,
+    explanationStatus: explanation.status,
+    promptId: promptId == null ? null : String(promptId),
+    executionNode,
+    order: order ?? ++nextOrder,
+    changed: comparison(previous?.data, data),
+  };
   node.__vividMusePromptHistory ??= [];
   node.__vividMusePromptHistory.push(record);
   if (node.__vividMusePromptHistory.length > HISTORY_LIMIT) node.__vividMusePromptHistory.shift();
@@ -560,56 +660,85 @@ function summary(node, lang = language()) {
   const countText = `${randomCount} ${randomCount === 1 ? "field" : "fields"}`;
   const record = node.__vividMusePromptHistory?.at(-1);
   if (stale(node, record)) return en ? "Settings changed · View last result" : "设置已修改 · 查看上次结果";
-  if (!record) return randomCount
-    ? (en ? `Random: ${countText} · Not run` : `已启用随机：${randomCount} 项 · 待运行`)
-    : (en ? "Random off · Details" : "随机未启用 · 查看详情");
+  if (!record) {
+    return randomCount
+      ? (en ? `Random: ${countText} · Not run` : `已启用随机：${randomCount} 项 · 待运行`)
+      : (en ? "Random off · Details" : "随机未启用 · 查看详情");
+  }
   return en ? `Random: ${countText} · Last result` : `随机 ${randomCount} 项 · 查看上次结果`;
 }
 
 function details(node, record = node.__vividMusePromptHistory?.at(-1), includeOutputs = true) {
   const state = currentState(node);
   const history = node.__vividMusePromptHistory || [];
-  const lines = [text("随机状态与实际执行结果", "Random Status and Actual Execution Result"), summary(node), "",
-    ...currentConfigurationLines(node), "",
-    text("此面板为打开时的快照；运行或修改后请关闭并重新打开。",
-      "This panel is a snapshot. Close and reopen after running or editing."),
-    text("运行只抽取已设为随机抽取的字段；改变种子不会启用随机。",
-      "Run samples only fields set to Random. Changing the seed does not enable randomization."),
-    ...(nodeScope(node) === "全部模块" ? [text("随机范围控制随机按钮启用哪些字段，也影响已随机字段的候选池；指定值、跟随预设、不使用均保持固定。",
-      "Random Scope controls which fields the randomize button enables and affects random candidate pools. Fixed, Follow Preset and Omit stay fixed.")] : []),
-    text("输入框的种子可能已变为下一次种子；下方记录的是实际提交种子。",
-      "The editor may show the next seed. The record below uses the actual submitted seed.")];
-  const hasConnections = node.inputs?.some(input => input.link != null);
-  if (hasConnections) lines.push(text("连接输入以实际执行值为准；本面板未核对上游修改，控件随机数量不包含连接输入。",
-    "Connected inputs use executed values. Upstream changes are not checked here; the random count excludes connected inputs."));
-  if (!state.randomCount && !hasConnections) lines.push(text("随机未启用，改变种子不会改变本节点的结构化内容。",
-    "Random is off: changing the seed will not change this node's structured content."));
-  if (state.replaced.length) lines.push(text("用户文本替代内置模块：", "User text replaces built-in modules: ")
-    + state.replaced.map(tr).join(", "));
+  const lines = [
+    text("随机状态与实际执行结果", "Random Status and Actual Execution Result"),
+    summary(node),
+    "",
+    ...currentConfigurationLines(node),
+    "",
+    text("此面板为打开时的快照；运行或修改后请关闭并重新打开。", "This panel is a snapshot. Close and reopen after running or editing."),
+    text("运行只抽取已设为随机抽取的字段；改变种子不会启用随机。", "Run samples only fields set to Random. Changing the seed does not enable randomization."),
+    ...(nodeScope(node) === "全部模块" ? [text(
+      "随机范围控制随机按钮启用哪些字段，也影响已随机字段的候选池；指定值、跟随预设、不使用均保持固定。",
+      "Random Scope controls which fields the randomize button enables and affects random candidate pools. Fixed, Follow Preset and Omit stay fixed.",
+    )] : []),
+    text("输入框的种子可能已变为下一次种子；下方记录的是实际提交种子。", "The editor may show the next seed. The record below uses the actual submitted seed."),
+  ];
+  const hasConnections = node.inputs?.some((input) => input.link != null);
+  if (hasConnections) {
+    lines.push(text(
+      "连接输入以实际执行值为准；本面板未核对上游修改，控件随机数量不包含连接输入。",
+      "Connected inputs use executed values. Upstream changes are not checked here; the random count excludes connected inputs.",
+    ));
+  }
+  if (!state.randomCount && !hasConnections) {
+    lines.push(text(
+      "随机未启用，改变种子不会改变本节点的结构化内容。",
+      "Random is off: changing the seed will not change this node's structured content.",
+    ));
+  }
+  if (state.replaced.length) {
+    lines.push(text("用户文本替代内置模块：", "User text replaces built-in modules: ") + state.replaced.map(tr).join(", "));
+  }
   lines.push("", text("当前字段状态", "Current Field States"));
-  const modes = { random: text("随机", "Random"), fixed: text("指定值", "Fixed"),
-    preset: text("跟随预设", "Follow Preset"), empty: text("省略", "Omit"), connected: text("连接输入（待执行确定）", "Connected Input (Determined on Run)") };
-  for (const row of state.rows) lines.push(`${tr(row.field)}: ${modes[row.mode]}`
-    + (row.mode === "connected" ? "" : ` — ${displayValue(node, row.field, row.value)}`));
+  const modes = {
+    random: text("随机", "Random"),
+    fixed: text("指定值", "Fixed"),
+    preset: text("跟随预设", "Follow Preset"),
+    empty: text("省略", "Omit"),
+    connected: text("连接输入（待执行确定）", "Connected Input (Determined on Run)"),
+  };
+  for (const row of state.rows) {
+    lines.push(`${tr(row.field)}: ${modes[row.mode]}` + (row.mode === "connected" ? "" : ` — ${displayValue(node, row.field, row.value)}`));
+  }
   if (!record) return lines.join("\n");
   const { data, changed } = record;
   lines.push("", text("所选实际执行（不是实时预览）", "Selected Actual Execution (Not a Live Preview)"));
-  if (stale(node, record)) lines.push(text("当前设置与所选记录不同，历史结果仅供参考。", "Current settings differ from the selected record; this historical result is for reference only."));
+  if (stale(node, record)) {
+    lines.push(text("当前设置与所选记录不同，历史结果仅供参考。", "Current settings differ from the selected record; this historical result is for reference only."));
+  }
   lines.push(`${tr("随机种子")}: ${data.seed}`, `${text("执行范围", "Execution Scope")}: ${data.scope === "全部模块" ? text("全部模块", "All Modules") : tr(data.scope)}`);
   if (record.promptId) lines.push(`${text("执行标识", "Execution ID")}: ${record.promptId}`);
   if (record.executionNode) lines.push(`${text("节点执行路径", "Node Execution Path")}: ${record.executionNode}`);
   lines.push("", text("本次抽取说明", "Sampling Details for This Execution"), ...executionImpactLines(record), ...randomExplanationLines(record), "");
-  lines.push(changed === null ? text("首次记录或设置／上下文不同：不比较变化。",
-    "First record or different settings/context: changes are not comparable.")
+  lines.push(changed === null
+    ? text("首次记录或设置／上下文不同：不比较变化。", "First record or different settings/context: changes are not comparable.")
     : text(`相对上次可比较执行：${changed.length} 个模块变化。`, `Compared with the last comparable execution: ${changed.length} modules changed.`));
   if (changed?.length) lines.push(changed.map(tr).join(", "));
   if (changed?.length === 0) {
     if (!data.random_fields.length) lines.push(text("没有随机字段，固定输出相同。", "No random fields: fixed output is unchanged."));
-    else if (data.random_fields.every(row => row.status !== "text_affecting")) lines.push(text(
-      "随机字段被用户文本替代、本次为空或未影响当前文本；查看下面逐项记录。",
-      "Random fields were replaced, empty or did not affect the current text; see individual records below."));
-    else lines.push(text("本次输出相同：输入与种子相同时可复现（也可缓存重放）；不同种子也可能抽到相同结果。不据此推断候选数量。",
-      "Output is unchanged: identical inputs and seed are reproducible (including cached replay); different seeds can also draw the same result. This does not establish candidate counts."));
+    else if (data.random_fields.every((row) => row.status !== "text_affecting")) {
+      lines.push(text(
+        "随机字段被用户文本替代、本次为空或未影响当前文本；查看下面逐项记录。",
+        "Random fields were replaced, empty or did not affect the current text; see individual records below.",
+      ));
+    } else {
+      lines.push(text(
+        "本次输出相同：输入与种子相同时可复现（也可缓存重放）；不同种子也可能抽到相同结果。不据此推断候选数量。",
+        "Output is unchanged: identical inputs and seed are reproducible (including cached replay); different seeds can also draw the same result. This does not establish candidate counts.",
+      ));
+    }
   }
   const statuses = {
     framing_omitted: text("被构图适配省略（原选择保留）", "Omitted by framing adaptation (selection preserved)"),
@@ -627,14 +756,24 @@ function details(node, record = node.__vividMusePromptHistory?.at(-1), includeOu
       unsupported_shot: text("此景别的可见范围不明确，保留原描述", "Visibility is ambiguous for this shot; original descriptions kept"),
     };
     lines.push("", text("构图适配", "Framing Adaptation"), reasons[data.framing.status] || data.framing.status);
-    for (const row of data.framing.omitted || []) lines.push(`${tr(row.module)} / ${tr(row.field)}: ${displayValue(node, row.field, row.value)} — `
-      + text("按景别省略，原选择保留", "omitted for framing; selection preserved"));
-    lines.push(text("仅过滤明确画外的独立字段；不拆分整套造型或复合动作，不改写自由文本与 TXT。", "Only clearly out-of-frame standalone fields are filtered. Compound outfits/poses, free text and TXT content are not rewritten."));
+    for (const row of data.framing.omitted || []) {
+      lines.push(`${tr(row.module)} / ${tr(row.field)}: ${displayValue(node, row.field, row.value)} — `
+        + text("按景别省略，原选择保留", "omitted for framing; selection preserved"));
+    }
+    lines.push(text(
+      "仅过滤明确画外的独立字段；不拆分整套造型或复合动作，不改写自由文本与 TXT。",
+      "Only clearly out-of-frame standalone fields are filtered. Compound outfits/poses, free text and TXT content are not rewritten.",
+    ));
   }
-  lines.push("", text("已配置随机字段的解析与文本影响", "Resolved Random Fields and Text Effects"),
-    text("文本影响通过移除单字段后重渲染检查；不等于候选数量或生图效果。", "Text effects are measured by rendering without one field, not candidate counts or image quality."));
-  for (const row of data.random_fields) lines.push(`${tr(row.module)} / ${tr(row.field)}: ${displayValue(node, row.field, row.value)} — ${statuses[row.status] || row.status}`
-    + (row.configured === false ? text("（由兼容映射启用）", " (enabled by compatibility mapping)") : ""));
+  lines.push(
+    "",
+    text("已配置随机字段的解析与文本影响", "Resolved Random Fields and Text Effects"),
+    text("文本影响通过移除单字段后重渲染检查；不等于候选数量或生图效果。", "Text effects are measured by rendering without one field, not candidate counts or image quality."),
+  );
+  for (const row of data.random_fields) {
+    lines.push(`${tr(row.module)} / ${tr(row.field)}: ${displayValue(node, row.field, row.value)} — ${statuses[row.status] || row.status}`
+      + (row.configured === false ? text("（由兼容映射启用）", " (enabled by compatibility mapping)") : ""));
+  }
   lines.push("", text("实际解析字段（未保证每项写入正文）", "Actual Resolved Fields (Not All Necessarily Rendered)"));
   for (const [field, value] of Object.entries(data.resolved)) lines.push(`${tr(field)}: ${displayValue(node, field, value)}`);
   if (includeOutputs) lines.push("", tr("中文提示词"), data.zh, "", tr("英文提示词"), data.en);
@@ -648,17 +787,26 @@ function details(node, record = node.__vividMusePromptHistory?.at(-1), includeOu
 function resultSnapshot(node, record) {
   // Content only: resolved fields are not an executable set of widget inputs.
   return JSON.parse(JSON.stringify({
-    kind: "vividmuse-prompt-result", version: 1,
-    source: { node_type: node.comfyClass || node.constructor?.type,
-      prompt_id: record.promptId, execution_node: record.executionNode },
-    scope: record.data.scope, seed: String(record.data.seed),
-    zh: record.data.zh, en: record.data.en,
-    resolved: record.data.resolved, modules: record.data.modules,
-    ...(record.data.shoot_plan_candidates ? {shoot_plan_candidates: record.data.shoot_plan_candidates} : {}),
+    kind: "vividmuse-prompt-result",
+    version: 1,
+    source: {
+      node_type: node.comfyClass || node.constructor?.type,
+      prompt_id: record.promptId,
+      execution_node: record.executionNode,
+    },
+    scope: record.data.scope,
+    seed: String(record.data.seed),
+    zh: record.data.zh,
+    en: record.data.en,
+    resolved: record.data.resolved,
+    modules: record.data.modules,
+    ...(record.data.shoot_plan_candidates ? { shoot_plan_candidates: record.data.shoot_plan_candidates } : {}),
     framing: record.data.framing || null,
     limitations: {
-      content_snapshot_only: true, executable_workflow: false,
-      includes_upstream_workflow: false, resolved_fields_may_not_appear_in_text: true,
+      content_snapshot_only: true,
+      executable_workflow: false,
+      includes_upstream_workflow: false,
+      resolved_fields_may_not_appear_in_text: true,
     },
   }));
 }
@@ -666,7 +814,10 @@ function resultSnapshot(node, record) {
 function showDetails(node) {
   const bodyText = details(node);
   const configurationText = currentConfigurationLines(node).join("\n");
-  if (!globalThis.document?.createElement) { globalThis.alert?.(bodyText); return; }
+  if (!globalThis.document?.createElement) {
+    notifyUserError(bodyText, "VividMuse Prompt Diagnostics");
+    return;
+  }
   node.__vividMusePromptDialog?.close();
   // Freeze the panel at open time, including records evicted by a later run.
   const records = JSON.parse(JSON.stringify(node.__vividMusePromptHistory || [])).reverse();
@@ -675,17 +826,25 @@ function showDetails(node) {
   const dialog = document.createElement("dialog");
   dialog.style.cssText = "width:min(760px,90vw);max-height:85vh;overflow:auto;padding:20px;background:var(--comfy-menu-bg,#252525);color:var(--input-text,#eee);border:1px solid #777;border-radius:10px";
   const el = (tag, content = "") => {
-    const item = document.createElement(tag); item.textContent = content; return item;
+    const item = document.createElement(tag);
+    item.textContent = content;
+    return item;
   };
   const button = (zh, en, action) => {
-    const item = el("button", text(zh, en)); item.type = "button"; item.onclick = action; return item;
+    const item = el("button", text(zh, en));
+    item.type = "button";
+    item.onclick = action;
+    return item;
   };
   const title = el("h3", text("实际执行结果", "Actual Execution Results"));
   dialog.setAttribute("aria-label", title.textContent);
-  const note = el("p", text("仅保留本次会话最近 5 条。此面板为打开时的快照；运行后请重新打开。导出是只读结果快照，不包含可执行或上游工作流。",
-    "The latest 5 records are kept in this session only. Reopen after running to refresh. Export is a read-only result snapshot, not an executable or upstream workflow."));
+  const note = el("p", text(
+    "仅保留本次会话最近 5 条。此面板为打开时的快照；运行后请重新打开。导出是只读结果快照，不包含可执行或上游工作流。",
+    "The latest 5 records are kept in this session only. Reopen after running to refresh. Export is a read-only result snapshot, not an executable or upstream workflow.",
+  ));
   const close = button("关闭", "Close", () => dialog.close());
-  const configuration = el("p", configurationText); configuration.style.whiteSpace = "pre-wrap";
+  const configuration = el("p", configurationText);
+  configuration.style.whiteSpace = "pre-wrap";
   configuration.setAttribute("aria-label", text("当前配置摘要", "Current Configuration Summary"));
   dialog.append(title, close);
   const selector = el("select");
@@ -693,11 +852,13 @@ function showDetails(node) {
   selector.style.cssText = "display:block;max-width:100%;margin:12px 0";
   records.forEach((record, index) => {
     const option = el("option", `${records.length - index} · ${text("实际种子", "Actual Seed")}: ${record.data.seed} · ${record.promptId || "—"}`);
-    option.value = String(index); selector.append(option);
+    option.value = String(index);
+    selector.append(option);
   });
   selector.value = "0";
   const info = el("p");
-  const changes = el("p"); changes.style.whiteSpace = "pre-wrap";
+  const changes = el("p");
+  changes.style.whiteSpace = "pre-wrap";
   const sampling = el("pre");
   sampling.setAttribute("aria-label", text("本次抽取说明", "Sampling Details for This Execution"));
   sampling.style.cssText = "font-family:inherit;font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;max-height:24vh;overflow:auto";
@@ -707,14 +868,29 @@ function showDetails(node) {
   coordination.style.cssText = sampling.style.cssText;
   coordination.tabIndex = 0;
   coordination.hidden = !["全部模块", "姿态动作", "场景"].includes(nodeScope(node));
-  const coordinationDetails = el("details"), coordinationBody = el("pre");
+  const coordinationDetails = el("details");
+  const coordinationBody = el("pre");
   coordinationDetails.setAttribute("aria-label", text("协调详情", "Coherence Details"));
   coordinationDetails.append(el("summary", text("查看协调详情", "View Coherence Details")), coordinationBody);
   coordinationDetails.style.cssText = "font-size:14px;line-height:1.6";
   coordinationBody.style.cssText = sampling.style.cssText;
   coordinationBody.tabIndex = 0;
-  const status = el("p"); status.setAttribute("role", "status");
-  const zhBody = el("pre"), enBody = el("pre"), diagnosticBody = el("pre");
+  const status = el("p");
+  status.setAttribute("role", "status");
+  const zhMetrics = el("p");
+  zhMetrics.setAttribute("aria-label", text("中文长度与 Token 估算", "Chinese Length and Token Estimate"));
+  zhMetrics.style.cssText = "font-size:12px;opacity:0.85;margin:4px 0";
+  const enMetrics = el("p");
+  enMetrics.setAttribute("aria-label", text("英文长度与 Token 估算", "English Length and Token Estimate"));
+  enMetrics.style.cssText = "font-size:12px;opacity:0.85;margin:4px 0";
+  const tokenWarning = el("p");
+  tokenWarning.setAttribute("role", "note");
+  tokenWarning.setAttribute("aria-label", text("Token 上限提示", "Token Limit Warning"));
+  tokenWarning.style.cssText = "color:#ffcc66;background:#3a2d12;border:1px solid #8a6a1f;border-radius:6px;padding:8px 10px;font-size:13px";
+  tokenWarning.hidden = true;
+  const zhBody = el("pre");
+  const enBody = el("pre");
+  const diagnosticBody = el("pre");
   for (const body of [zhBody, enBody, diagnosticBody]) {
     // textContent only: output may contain literal HTML or user fragments.
     body.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere;max-height:32vh;overflow:auto;user-select:text";
@@ -723,11 +899,15 @@ function showDetails(node) {
   zhBody.setAttribute("aria-label", text("中文结果正文", "Chinese Result Text"));
   enBody.setAttribute("aria-label", text("英文结果正文", "English Result Text"));
   const selected = () => records[Number(selector.value)];
-  let active = true, composing = false;
+  let active = true;
+  let composing = false;
   let copyAttempt = 0;
-  const manualCopyArea = el("section"); manualCopyArea.hidden = true;
-  const manualCopyLabel = el("p"), manualCopyText = el("textarea");
-  manualCopyText.readOnly = true; manualCopyText.rows = 6;
+  const manualCopyArea = el("section");
+  manualCopyArea.hidden = true;
+  const manualCopyLabel = el("p");
+  const manualCopyText = el("textarea");
+  manualCopyText.readOnly = true;
+  manualCopyText.rows = 6;
   manualCopyText.style.cssText = "box-sizing:border-box;width:100%;resize:vertical;min-height:100px;user-select:text";
   manualCopyText.setAttribute("aria-label", text("手动复制正文", "Manual Copy Text"));
   manualCopyArea.append(manualCopyLabel, manualCopyText);
@@ -737,16 +917,18 @@ function showDetails(node) {
       ? text("中文正文：已全选，请按 Ctrl+C（Mac：⌘C），然后粘贴。", "Chinese text selected. Press Ctrl+C (Mac: ⌘C), then paste.")
       : text("英文正文：已全选，请按 Ctrl+C（Mac：⌘C），然后粘贴。", "English text selected. Press Ctrl+C (Mac: ⌘C), then paste.");
     manualCopyArea.hidden = false;
-    manualCopyText.focus(); manualCopyText.select();
+    manualCopyText.focus();
+    manualCopyText.select();
   };
-  const manualCopy = key => {
-    const record = selected(); if (!record) return;
+  const manualCopy = (key) => {
+    const record = selected();
+    if (!record) return;
     copyAttempt++;
     more.open = false;
     prepareManualCopy(key, record);
     status.textContent = text("正文已选中，尚未复制；请按 Ctrl+C（Mac：⌘C）。", "Text selected, not yet copied. Press Ctrl+C (Mac: ⌘C).");
   };
-  const copy = async key => {
+  const copy = async (key) => {
     const record = selected();
     if (!record) return;
     const attempt = ++copyAttempt;
@@ -775,12 +957,16 @@ function showDetails(node) {
     const record = selected();
     if (!record) return;
     more.open = false;
-    let url, link;
+    let url;
+    let link;
     try {
       const json = JSON.stringify(resultSnapshot(node, record), null, 2);
-      url = URL.createObjectURL(new Blob([json], {type: "application/json;charset=utf-8"}));
-      link = el("a"); link.href = url; link.download = "vividmuse-prompt-result.json";
-      dialog.append(link); link.click();
+      url = URL.createObjectURL(new Blob([json], { type: "application/json;charset=utf-8" }));
+      link = el("a");
+      link.href = url;
+      link.download = "vividmuse-prompt-result.json";
+      dialog.append(link);
+      link.click();
       status.textContent = text("已请求下载结果快照；这不是工作流文件。", "Result snapshot download requested; this is not a workflow file.");
     } catch {
       status.textContent = text("无法导出，请检查浏览器下载权限；仍可复制正文。", "Export failed. Check browser download permissions; the result text can still be copied.");
@@ -789,147 +975,228 @@ function showDetails(node) {
       if (url) globalThis.setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
   };
-  const actions = el("div"); actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+  const actions = el("div");
+  actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
   actions.setAttribute("aria-label", text("结果操作", "Result Actions"));
   const more = el("details");
   more.setAttribute("aria-label", text("更多结果操作", "More Result Actions"));
   more.append(el("summary", text("更多…", "More…")));
-  const moreActions = el("div"); moreActions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:8px 0";
-  moreActions.append(button("导出结果 JSON", "Export Result JSON", exportResult),
+  const moreActions = el("div");
+  moreActions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:8px 0";
+  moreActions.append(
+    button("导出结果 JSON", "Export Result JSON", exportResult),
     button("手动复制中文", "Manual Copy Chinese", () => manualCopy("zh")),
-    button("手动复制英文", "Manual Copy English", () => manualCopy("en")));
+    button("手动复制英文", "Manual Copy English", () => manualCopy("en")),
+  );
   more.append(moreActions, el("p", text("导出为只读结果快照，不是工作流或可导入卡片。", "Export is a read-only result snapshot, not a workflow or importable card.")));
-  actions.append(button("复制中文", "Copy Chinese", () => copy("zh")),
-    button("复制英文", "Copy English", () => copy("en")), more);
+  actions.append(
+    button("复制中文", "Copy Chinese", () => copy("zh")),
+    button("复制英文", "Copy English", () => copy("en")),
+    more,
+  );
   const cardArea = el("section");
-  const cardActions = el("div"); cardActions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:10px 0";
-  const cardAvailability = el("p"); cardAvailability.style.whiteSpace = "pre-wrap";
-  const cardEditor = el("div"); cardEditor.hidden = true;
-  const cardName = el("input"); cardName.maxLength = 80;
+  const cardActions = el("div");
+  cardActions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin:10px 0";
+  const cardAvailability = el("p");
+  cardAvailability.style.whiteSpace = "pre-wrap";
+  const cardEditor = el("div");
+  cardEditor.hidden = true;
+  const cardName = el("input");
+  cardName.maxLength = 80;
   cardName.setAttribute("aria-label", text("卡片名称", "Card name"));
-  const cardInfo = el("p"); cardInfo.style.whiteSpace = "pre-wrap";
+  const cardInfo = el("p");
+  cardInfo.style.whiteSpace = "pre-wrap";
   const cardPreview = el("pre");
   cardPreview.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere;max-height:26vh;overflow:auto";
   const cardNotice = el("p", text(
     "只保存所选模块在该次执行中的完整解析值，包括未写入正文的省略字段；不包含其他模块或上游工作流。基础发色模式下进阶染发选项可能已解析为“不使用”。保存不会应用卡片或新增锁定，换景别或密度后正文可能变化。",
-    "Save only the selected module's complete resolved values from this execution, including fields omitted from the text, not other modules or upstream workflows. Basic hair color mode may have resolved advanced dye options to Unused. Saving does not apply or lock the card; framing or density can change the text."));
+    "Save only the selected module's complete resolved values from this execution, including fields omitted from the text, not other modules or upstream workflows. Basic hair color mode may have resolved advanced dye options to Unused. Saving does not apply or lock the card; framing or density can change the text.",
+  ));
   let cardDraft = null;
-  const cardTypes = {人物: ["人物", "Person", "Person"], 发型: ["发型", "Hair", "Hair"],
-    服装: ["穿搭", "Outfit", "Clothing"], 姿态动作: ["姿态动作", "Pose / Action", "Pose"]};
+  const cardTypes = {
+    人物: ["人物", "Person", "Person"],
+    发型: ["发型", "Hair", "Hair"],
+    服装: ["穿搭", "Outfit", "Clothing"],
+    姿态动作: ["姿态动作", "Pose / Action", "Pose"],
+  };
   const nodeType = node.comfyClass || node.constructor?.type;
-  const cardModules = Object.keys(cardTypes).filter(module => nodeType === FULL
+  const cardModules = Object.keys(cardTypes).filter((module) => nodeType === FULL
     || nodeType === `VividMuse_ZImage${cardTypes[module][2]}Module`);
-  const checkCardOwner = record => {
-    if (record?.restoredAcrossWorkflow) throw new Error(text(
-      "此历史结果可复制或导出；如需制成卡片，请先运行当前节点。",
-      "Copy or export this restored result. To create a card, run the current node first."));
+  const checkCardOwner = (record) => {
+    if (record?.restoredAcrossWorkflow) {
+      throw new Error(text(
+        "此历史结果可复制或导出；如需制成卡片，请先运行当前节点。",
+        "Copy or export this restored result. To create a card, run the current node first.",
+      ));
+    }
     if (!active || rootGraph() !== graph || generation !== (node.__vividMuseDiagnosticsGeneration || 0)
         || record?.promptId == null || record?.executionNode == null
-        || nodeAtPath(graph, record.executionNode) !== node)
-      throw new Error(text("无法确认该记录所属的节点会话，请重新打开面板或执行节点。",
-        "Cannot confirm this record's node session. Reopen the panel or run the node again."));
+        || nodeAtPath(graph, record.executionNode) !== node) {
+      throw new Error(text(
+        "无法确认该记录所属的节点会话，请重新打开面板或执行节点。",
+        "Cannot confirm this record's node session. Reopen the panel or run the node again.",
+      ));
+    }
   };
   const captureResult = (record, moduleName, name) => {
     checkCardOwner(record);
     const cards = globalThis.__vividMuseContentCards;
-    if (!cards?.captureResultCard || !cards?.saveCard) throw new Error(text(
-      "卡片功能尚未加载，请刷新页面后重试。", "Card tools are not loaded. Refresh the page and retry."));
+    if (!cards?.captureResultCard || !cards?.saveCard) {
+      throw new Error(text("卡片功能尚未加载，请刷新页面后重试。", "Card tools are not loaded. Refresh the page and retry."));
+    }
     return cards.captureResultCard(node, record.data, moduleName, name);
   };
-  const guardedCardAction = action => () => {
+  const guardedCardAction = (action) => () => {
     if (!active || composing) return;
-    try { action(); } catch (error) { if (active) status.textContent = error.message; }
+    try {
+      action();
+    } catch (error) {
+      if (active) status.textContent = error.message;
+    }
   };
-  const clearCardDraft = () => { cardDraft = null; cardEditor.hidden = true; };
-  const cardButtons = cardModules.map(moduleName => {
+  const clearCardDraft = () => {
+    cardDraft = null;
+    cardEditor.hidden = true;
+  };
+  const cardButtons = cardModules.map((moduleName) => {
     const [zhName, enName] = cardTypes[moduleName];
     const item = button(`保存为${zhName}卡`, `Save as ${enName} Card`, guardedCardAction(() => {
-        const record = selected();
-        const name = `${text(zhName, enName)} · ${record.data.seed}`;
-        const entry = captureResult(record, moduleName, name);
-        clearShootDraft();
-        cardDraft = {record, moduleName}; cardName.value = name;
-        cardInfo.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n`
-          + `${text("执行记录", "Execution Record")}: ${record.promptId}`;
-        cardPreview.textContent = Object.entries(entry.values).map(([key, value]) =>
-          `${tr(key)}: ${displayValue(node, key, value)}`).join("\n");
-        cardEditor.hidden = false; status.textContent = ""; cardName.focus();
-      }));
+      const record = selected();
+      const name = `${text(zhName, enName)} · ${record.data.seed}`;
+      const entry = captureResult(record, moduleName, name);
+      clearShootDraft();
+      cardDraft = { record, moduleName };
+      cardName.value = name;
+      cardInfo.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n`
+        + `${text("执行记录", "Execution Record")}: ${record.promptId}`;
+      cardPreview.textContent = Object.entries(entry.values).map(([key, value]) => (
+        `${tr(key)}: ${displayValue(node, key, value)}`
+      )).join("\n");
+      cardEditor.hidden = false;
+      status.textContent = "";
+      cardName.focus();
+    }));
     cardActions.append(item);
-    return {item, moduleName};
+    return { item, moduleName };
   });
   const confirmCard = button("确认保存卡片", "Confirm Save Card", guardedCardAction(() => {
-    if (!cardDraft || cardDraft.record !== selected()) throw new Error(text(
-      "执行记录已变化，请重新选择要保存的卡片。", "The selected record changed. Choose the card to save again."));
-    const {record, moduleName} = cardDraft;
+    if (!cardDraft || cardDraft.record !== selected()) {
+      throw new Error(text("执行记录已变化，请重新选择要保存的卡片。", "The selected record changed. Choose the card to save again."));
+    }
+    const { record, moduleName } = cardDraft;
     const entry = captureResult(record, moduleName, cardName.value);
     const saved = node.properties?.vividMuseContentCards;
-    const exists = Array.isArray(saved) && saved.some(card => card.module === entry.module && card.name === entry.name);
+    const exists = Array.isArray(saved) && saved.some((card) => card.module === entry.module && card.name === entry.name);
     if (exists && !window.confirm(text("覆盖同类型同名卡片？", "Replace this card of the same type and name?"))) return;
     checkCardOwner(record);
     globalThis.__vividMuseContentCards.saveCard(node, entry, exists);
     clearCardDraft();
-    status.textContent = text("已保存到此节点的卡片库；请保存工作流以保留。当前选项与锁定未改变。",
-      "Saved in this node's card library; save the workflow to keep it. Current options and locks are unchanged.");
+    status.textContent = text(
+      "已保存到此节点的卡片库；请保存工作流以保留。当前选项与锁定未改变。",
+      "Saved in this node's card library; save the workflow to keep it. Current options and locks are unchanged.",
+    );
   }));
-  cardEditor.append(cardInfo, cardNotice, cardName, cardPreview, confirmCard,
-    button("取消保存", "Cancel Save", clearCardDraft));
+  cardEditor.append(cardInfo, cardNotice, cardName, cardPreview, confirmCard, button("取消保存", "Cancel Save", clearCardDraft));
   cardArea.hidden = !cardModules.length;
   cardArea.append(cardActions, cardAvailability, cardEditor);
-  const shootArea = el("section"), shootChoices = el("div"), shootAvailability = el("p");
-  const shootEditor = el("div"), shootName = el("input"), shootPreview = el("pre");
-  shootEditor.hidden = true; shootName.maxLength = 80;
+  const shootArea = el("section");
+  const shootChoices = el("div");
+  const shootAvailability = el("p");
+  const shootEditor = el("div");
+  const shootName = el("input");
+  const shootPreview = el("pre");
+  shootEditor.hidden = true;
+  shootName.maxLength = 80;
   shootName.setAttribute("aria-label", text("拍摄方案卡名称", "Shoot plan card name"));
   shootPreview.style.cssText = "white-space:pre-wrap;max-height:26vh;overflow:auto";
   shootAvailability.style.whiteSpace = "pre-wrap";
   const shootType = node.comfyClass || node.constructor?.type;
-  const shootModules = shootType === FULL ? ["场景", "摄影", "视觉表现"]
-    : ({VividMuse_ZImageSceneModule: ["场景"], VividMuse_ZImageCameraModule: ["摄影"],
-      VividMuse_ZImageVisualModule: ["视觉表现"]}[shootType] || []);
-  const shootLabel = module => text(module, {"场景":"Scene", "摄影":"Camera", "视觉表现":"Visual"}[module]);
+  const shootModules = shootType === FULL
+    ? ["场景", "摄影", "视觉表现"]
+    : ({
+      VividMuse_ZImageSceneModule: ["场景"],
+      VividMuse_ZImageCameraModule: ["摄影"],
+      VividMuse_ZImageVisualModule: ["视觉表现"],
+    }[shootType] || []);
+  const shootLabel = (module) => text(module, { 场景: "Scene", 摄影: "Camera", 视觉表现: "Visual" }[module]);
   const shootChecks = [];
   let shootDraft = null;
-  const clearShootDraft = () => { shootDraft = null; shootEditor.hidden = true; };
+  const clearShootDraft = () => {
+    shootDraft = null;
+    shootEditor.hidden = true;
+  };
   const shootTools = () => {
     const tools = globalThis.__vividMuseShootPlanCards;
-    if (!tools?.captureResult || !tools?.saveCard) throw new Error(text(
-      "拍摄方案卡功能尚未加载，请刷新页面。", "Shoot plan tools are not loaded. Refresh the page."));
+    if (!tools?.captureResult || !tools?.saveCard) {
+      throw new Error(text("拍摄方案卡功能尚未加载，请刷新页面。", "Shoot plan tools are not loaded. Refresh the page."));
+    }
     return tools;
   };
   const captureShootResult = (record, modules, name) => {
-    checkCardOwner(record); return shootTools().captureResult(node, record.data, modules, name);
+    checkCardOwner(record);
+    return shootTools().captureResult(node, record.data, modules, name);
   };
-  const selectedShootModules = () => shootChecks.filter(c => c.check.checked && !c.check.disabled).map(c => c.module);
+  const selectedShootModules = () => shootChecks.filter((c) => c.check.checked && !c.check.disabled).map((c) => c.module);
   const startShoot = button("保存为拍摄方案卡", "Save as Shoot Plan Card", guardedCardAction(() => {
-    const record = selected(), modules = selectedShootModules();
+    const record = selected();
+    const modules = selectedShootModules();
     const name = `${text("拍摄方案", "Shoot Plan")} · ${record.data.seed}`;
     const card = captureShootResult(record, modules, name);
-    clearCardDraft(); shootDraft = {record, modules}; shootName.value = name;
+    clearCardDraft();
+    shootDraft = { record, modules };
+    shootName.value = name;
     shootPreview.textContent = `${text("执行记录", "Execution Record")}: ${record.promptId}\n`
       + `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}\n\n`
-      + Object.entries(card.modules).map(([module, values]) => `${shootLabel(module)}\n`
-        + Object.entries(values).map(([key, value]) => `${tr(key)}: ${displayValue(node, key, value)}`).join("\n")).join("\n\n");
-    shootEditor.hidden = false; status.textContent = ""; shootName.focus();
+      + Object.entries(card.modules).map(([module, values]) => (
+        `${shootLabel(module)}\n` + Object.entries(values).map(([key, value]) => (
+          `${tr(key)}: ${displayValue(node, key, value)}`
+        )).join("\n")
+      )).join("\n\n");
+    shootEditor.hidden = false;
+    status.textContent = "";
+    shootName.focus();
   }));
   for (const module of shootModules) {
-    const label = el("label"), check = el("input"); check.type = "checkbox"; check.value = module;
+    const label = el("label");
+    const check = el("input");
+    check.type = "checkbox";
+    check.value = module;
     label.style.cssText = "display:inline-block;margin:8px";
-    label.append(check, el("span", shootLabel(module))); shootChoices.append(label); shootChecks.push({module, check});
-    check.onchange = () => { clearShootDraft(); startShoot.disabled = !selectedShootModules().length; };
+    label.append(check, el("span", shootLabel(module)));
+    shootChoices.append(label);
+    shootChecks.push({ module, check });
+    check.onchange = () => {
+      clearShootDraft();
+      startShoot.disabled = !selectedShootModules().length;
+    };
   }
-  shootEditor.append(el("p", text(
-    "仅保存所选历史记录的完整模块字段，包含未输出的省略字段；不会读取当前配置补填，也不会自动应用或锁定。",
-    "Save complete fields from the selected historical record, including omitted fields. Current settings are never used to fill gaps; saving does not apply or lock.")),
-    shootName, shootPreview, button("确认保存拍摄方案卡", "Confirm Save Shoot Plan", guardedCardAction(() => {
-      if (!shootDraft || shootDraft.record !== selected()) throw new Error(text("执行记录已变化，请重新预览。", "The record changed. Preview again."));
-      const draft = shootDraft, card = captureShootResult(draft.record, draft.modules, shootName.value), tools = shootTools();
-      const base = tools.collectionStamp(node), exists = tools.listCards(node).some(c => c.name === card.name);
+  shootEditor.append(
+    el("p", text(
+      "仅保存所选历史记录的完整模块字段，包含未输出的省略字段；不会读取当前配置补填，也不会自动应用或锁定。",
+      "Save complete fields from the selected historical record, including omitted fields. Current settings are never used to fill gaps; saving does not apply or lock.",
+    )),
+    shootName,
+    shootPreview,
+    button("确认保存拍摄方案卡", "Confirm Save Shoot Plan", guardedCardAction(() => {
+      if (!shootDraft || shootDraft.record !== selected()) {
+        throw new Error(text("执行记录已变化，请重新预览。", "The record changed. Preview again."));
+      }
+      const draft = shootDraft;
+      const card = captureShootResult(draft.record, draft.modules, shootName.value);
+      const tools = shootTools();
+      const base = tools.collectionStamp(node);
+      const exists = tools.listCards(node).some((c) => c.name === card.name);
       if (exists && !window.confirm(text("覆盖同名拍摄方案卡？", "Replace this shoot plan card?"))) return;
       checkCardOwner(draft.record);
-      if (shootDraft !== draft || selected() !== draft.record) throw new Error(text("执行记录已变化，请重新预览。", "The record changed. Preview again."));
-      tools.saveCard(node, card, exists, base); clearShootDraft();
+      if (shootDraft !== draft || selected() !== draft.record) {
+        throw new Error(text("执行记录已变化，请重新预览。", "The record changed. Preview again."));
+      }
+      tools.saveCard(node, card, exists, base);
+      clearShootDraft();
       status.textContent = text("拍摄方案卡已保存，请保存工作流；当前字段和锁定不变。", "Shoot plan saved. Save the workflow; current fields and locks are unchanged.");
-    })), button("取消保存拍摄方案", "Cancel Shoot Plan Save", clearShootDraft));
+    })),
+    button("取消保存拍摄方案", "Cancel Shoot Plan Save", clearShootDraft),
+  );
   shootArea.hidden = !shootModules.length;
   shootArea.append(shootChoices, shootAvailability, startShoot, shootEditor);
   const diagnostic = el("details");
@@ -938,40 +1205,70 @@ function showDetails(node) {
   const savedCards = el("details");
   savedCards.setAttribute("aria-label", text("保存为卡片", "Save as Card"));
   savedCards.hidden = !cardModules.length && !shootModules.length;
-  savedCards.append(el("summary", text("保存为卡片", "Save as Card")),
-    el("p", text("保存所选执行结果，不是当前编辑器设置。", "Save the selected execution result, not current editor settings.")), cardArea, shootArea);
+  savedCards.append(
+    el("summary", text("保存为卡片", "Save as Card")),
+    el("p", text("保存所选执行结果，不是当前编辑器设置。", "Save the selected execution result, not current editor settings.")),
+    cardArea,
+    shootArea,
+  );
   const explanation = el("details");
   explanation.setAttribute("aria-label", text("随机与组合说明", "Randomness and Combination"));
-  explanation.append(el("summary", text("随机与组合说明", "Randomness and Combination")),
-    el("h4", text("当前设置", "Current Settings")), configuration,
-    el("h4", text("所选执行记录", "Selected Execution")), changes, sampling, coordination, coordinationDetails);
+  explanation.append(
+    el("summary", text("随机与组合说明", "Randomness and Combination")),
+    el("h4", text("当前设置", "Current Settings")),
+    configuration,
+    el("h4", text("所选执行记录", "Selected Execution")),
+    changes,
+    sampling,
+    coordination,
+    coordinationDetails,
+  );
   const render = () => {
-    const record = selected(); status.textContent = "";
-    copyAttempt++; more.open = false; manualCopyArea.hidden = true; manualCopyText.value = "";
+    const record = selected();
+    status.textContent = "";
+    copyAttempt++;
+    more.open = false;
+    manualCopyArea.hidden = true;
+    manualCopyText.value = "";
     clearCardDraft();
     clearShootDraft();
     const shootReasons = [];
-    for (const {module, check} of shootChecks) {
-      try { captureShootResult(record, [module], "preview"); check.disabled = false; check.checked = true; }
-      catch (error) {
-        check.disabled = true; check.checked = false;
+    for (const { module, check } of shootChecks) {
+      try {
+        captureShootResult(record, [module], "preview");
+        check.disabled = false;
+        check.checked = true;
+      } catch (error) {
+        check.disabled = true;
+        check.checked = false;
         // Module-specific capture errors already carry this label; shared errors do not.
         const prefix = `${shootLabel(module)}: `;
         shootReasons.push(error.message.startsWith(prefix) ? error.message : prefix + error.message);
       }
     }
-    shootAvailability.textContent = shootReasons.join("\n"); startShoot.disabled = !selectedShootModules().length;
+    shootAvailability.textContent = shootReasons.join("\n");
+    startShoot.disabled = !selectedShootModules().length;
     const unavailable = [];
-    for (const {item, moduleName} of cardButtons) {
+    for (const { item, moduleName } of cardButtons) {
       try {
-        captureResult(record, moduleName, "preview"); item.disabled = false; item.title = "";
+        captureResult(record, moduleName, "preview");
+        item.disabled = false;
+        item.title = "";
       } catch (error) {
-        item.disabled = true; item.title = error.message;
+        item.disabled = true;
+        item.title = error.message;
         unavailable.push(`${text(cardTypes[moduleName][0], cardTypes[moduleName][1])}: ${error.message}`);
       }
     }
     cardAvailability.textContent = unavailable.join("\n");
-    if (!record) { diagnosticBody.textContent = bodyText; return; }
+    if (!record) {
+      zhMetrics.textContent = "";
+      enMetrics.textContent = "";
+      tokenWarning.hidden = true;
+      tokenWarning.textContent = "";
+      diagnosticBody.textContent = bodyText;
+      return;
+    }
     sampling.textContent = [...executionImpactLines(record), ...randomExplanationLines(record)].join("\n");
     coordination.textContent = coordination.hidden ? "" : coherenceSummaryLines(record, node).join("\n");
     const coherence = parseCoherenceExplanation(record.data.coherence_explanation, nodeScope(node));
@@ -979,36 +1276,69 @@ function showDetails(node) {
     coordinationDetails.hidden = coordination.hidden || record.coherenceStatus === "invalid"
       || coherence.status !== "valid" || !coherence.data.events.length;
     coordinationBody.textContent = coordinationDetails.hidden ? "" : coherenceExplanationLines(record, node).join("\n");
-    changes.textContent = (record.changed === null ? text("首次记录或设置／上下文不同，不比较变化。", "First record or different settings/context; changes are not comparable.")
-        : text(`相对前次可比较执行：${record.changed.length} 个模块变化`, `Compared with the previous comparable execution: ${record.changed.length} modules changed`)
-          + (record.changed.length ? ` (${record.changed.map(tr).join(", ")})` : ""));
+    changes.textContent = record.changed === null
+      ? text("首次记录或设置／上下文不同，不比较变化。", "First record or different settings/context; changes are not comparable.")
+      : text(`相对前次可比较执行：${record.changed.length} 个模块变化`, `Compared with the previous comparable execution: ${record.changed.length} modules changed`)
+        + (record.changed.length ? ` (${record.changed.map(tr).join(", ")})` : "");
     info.textContent = `${text("实际提交种子", "Actual Submitted Seed")}: ${record.data.seed}`
       + (record.restoredAcrossWorkflow ? text("\n切回工作流时找回的上次运行结果。", "\nLast result restored when you returned to this workflow.") : "")
       + (stale(node, record) ? text("\n当前设置与此记录不同；这是历史结果。", "\nCurrent settings differ from this historical result.") : "");
     info.style.whiteSpace = "pre-wrap";
-    if (record.data.framing?.status && record.data.framing.status !== "disabled") changes.textContent += text(
-      `\n构图适配省略 ${record.data.framing.omitted.length} 项，原因见字段与诊断详情。`,
-      `\nFraming adaptation omitted ${record.data.framing.omitted.length} fields; see Fields and Diagnostics for reasons.`);
-    zhBody.textContent = record.data.zh || ""; enBody.textContent = record.data.en || "";
+    if (record.data.framing?.status && record.data.framing.status !== "disabled") {
+      changes.textContent += text(
+        `\n构图适配省略 ${record.data.framing.omitted.length} 项，原因见字段与诊断详情。`,
+        `\nFraming adaptation omitted ${record.data.framing.omitted.length} fields; see Fields and Diagnostics for reasons.`,
+      );
+    }
+    const metrics = formatPromptMetrics(record.data.zh, record.data.en);
+    zhMetrics.textContent = metrics.zhLabel;
+    enMetrics.textContent = metrics.enLabel;
+    tokenWarning.hidden = !metrics.exceedsLimit;
+    tokenWarning.textContent = metrics.exceedsLimit ? metrics.warningText : "";
+    zhBody.textContent = record.data.zh || "";
+    enBody.textContent = record.data.en || "";
     diagnosticBody.textContent = details(node, record, false);
   };
   selector.onchange = render;
-  if (records.length) dialog.append(selector, info, actions, status, manualCopyArea,
-    el("h4", text("中文提示词", "Chinese Prompt")), zhBody, el("h4", text("英文提示词", "English Prompt")), enBody,
-    el("p", text("运行后重新打开可查看最新结果。", "Reopen after running to view the latest result.")), savedCards, explanation);
-  else dialog.append(el("p", text("暂无实际执行记录，请先运行节点。", "No execution record yet. Run the node first.")));
-  dialog.append(diagnostic); render();
+  if (records.length) {
+    dialog.append(
+      selector,
+      info,
+      actions,
+      status,
+      manualCopyArea,
+      tokenWarning,
+      el("h4", text("中文提示词", "Chinese Prompt")),
+      zhMetrics,
+      zhBody,
+      el("h4", text("英文提示词", "English Prompt")),
+      enMetrics,
+      enBody,
+      el("p", text("运行后重新打开可查看最新结果。", "Reopen after running to view the latest result.")),
+      savedCards,
+      explanation,
+    );
+  } else {
+    dialog.append(el("p", text("暂无实际执行记录，请先运行节点。", "No execution record yet. Run the node first.")));
+  }
+  dialog.append(diagnostic);
+  render();
   dialog.addEventListener("compositionstart", () => { composing = true; });
   dialog.addEventListener("compositionend", () => { composing = false; });
-  dialog.addEventListener("cancel", event => { if (composing) event.preventDefault(); });
-  dialog.addEventListener("keydown", event => {
+  dialog.addEventListener("cancel", (event) => { if (composing) event.preventDefault(); });
+  dialog.addEventListener("keydown", (event) => {
     event.stopPropagation();
     if (event.key === "Escape" && !composing && !event.isComposing && event.keyCode !== 229) {
-      event.preventDefault(); dialog.close();
+      event.preventDefault();
+      dialog.close();
     }
   });
-  for (const name of ["keyup", "copy", "cut", "paste", "wheel"]) dialog.addEventListener(name, event => event.stopPropagation());
-  dialog.onclose = () => { active = false; dialog.remove(); if (node.__vividMusePromptDialog === dialog) node.__vividMusePromptDialog = null; };
+  for (const name of ["keyup", "copy", "cut", "paste", "wheel"]) dialog.addEventListener(name, (event) => event.stopPropagation());
+  dialog.onclose = () => {
+    active = false;
+    dialog.remove();
+    if (node.__vividMusePromptDialog === dialog) node.__vividMusePromptDialog = null;
+  };
   document.body.append(dialog);
   node.__vividMusePromptDialog = dialog;
   dialog.showModal();
@@ -1024,9 +1354,7 @@ function refresh(node) {
   if (changed) {
     // Node 2.0's widget-state map watches structural changes. Keep the helper
     // name stable and use the same synchronous refresh marker as existing UI.
-    node.widgets.push({ name: "__vividMuseDiagnosticsRefresh", type: "hidden", hidden: true,
-      options: { hidden: true, serialize: false } });
-    node.widgets.pop();
+    refreshNode2Widgets(node);
   }
 }
 
@@ -1037,7 +1365,7 @@ function install(node) {
     node.__vividMuseDiagnosticsGeneration = 0;
     const button = node.addWidget("button", "随机状态与执行结果", null, () => showDetails(node), { serialize: false });
     button.serialize = false;
-    button.__vividMuseDynamicLabel = lang => lang === "en" ? "View Results" : "查看结果";
+    button.__vividMuseDynamicLabel = (lang) => (lang === "en" ? "View Results" : "查看结果");
     node.__vividMusePromptStatusButton = button;
     const before = node.onConfigure;
     node.onConfigure = function () {
@@ -1075,7 +1403,11 @@ function install(node) {
   for (const w of node.widgets || []) {
     if (w.serialize === false || w.__vividMuseDiagnosticsWrapped) continue;
     const before = w.callback;
-    w.callback = function () { const result = before?.apply(this, arguments); refresh(node); return result; };
+    w.callback = function () {
+      const result = before?.apply(this, arguments);
+      refresh(node);
+      return result;
+    };
     w.__vividMuseDiagnosticsWrapped = true;
   }
   // Keep one short helper by the existing random button, never a tall DOM widget.
@@ -1087,20 +1419,6 @@ function install(node) {
   }
   refresh(node);
 }
-
-api?.addEventListener?.("executed", event => routeResult(event.detail));
-api?.addEventListener?.("execution_success", event => {
-  const id = event.detail?.prompt_id;
-  if (id != null) switchResults.success(String(id));
-});
-for (const name of ["execution_error", "execution_interrupted"]) api?.addEventListener?.(name, event => {
-  const id = event.detail?.prompt_id;
-  if (id == null) return;
-  terminalIds.add(String(id));
-  if (terminalIds.size > ORDERS_LIMIT) terminalIds.delete(terminalIds.values().next().value);
-  earlyResults.delete(String(id));
-  switchResults.terminal(String(id));
-});
 
 globalThis.__vividMusePromptDiagnostics = { refresh, install };
 app.registerExtension({

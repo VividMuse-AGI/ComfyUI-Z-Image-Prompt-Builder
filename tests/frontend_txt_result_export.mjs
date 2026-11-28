@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {createVmContext, loadLibModule} from './vm_loader.mjs';
 
 const root=fileURLToPath(new URL('..',import.meta.url));
 // Real backend metadata; index 4 with count 1 is deliberately legal.
@@ -39,12 +38,14 @@ function harness(reverse=false) {
   }};
   const api={addEventListener(k,fn){if(!listeners.has(k))listeners.set(k,[]);listeners.get(k).push(fn);},
     async queuePrompt(_n,_p,options={}){queueCount++;return options.response?options.response():{prompt_id:options.id};}};
-  const ctx=vm.createContext({app,api,console,Blob,URL:{createObjectURL(b){blob=b;return 'blob:fixture';},revokeObjectURL:u=>revoked.push(u)},
+  const ctx=createVmContext({app,api,Blob,URL:{createObjectURL(b){blob=b;return 'blob:fixture';},revokeObjectURL:u=>revoked.push(u)},
     navigator:{clipboard:{writeText:s=>copyImpl(s)}},setTimeout:(fn,ms)=>ms===3000?statusTimers.push(fn):fn(),document:{createElement:t=>new Element(t),body:new Element('body')}});
   for(const name of reverse?['txt_selection','prompt_diagnostics']:['prompt_diagnostics','txt_selection']) {
-    const code=fs.readFileSync(new URL(`../web/js/${name}.js`,import.meta.url),'utf8')
-      .replace('import { app } from "../../scripts/app.js";','').replace('import { api } from "../../scripts/api.js";','');
-    vm.runInContext(`(()=>{${code}\n${name==='txt_selection'?'globalThis.txt={selectionSnapshot,showResult,submissions,early};':''}})()`,ctx);
+    const mod = loadLibModule(name, ctx, name === 'txt_selection' ? { expose: ['selectionSnapshot', 'showResult'] } : {});
+    if (name === 'txt_selection') {
+      const obs = ctx.__testLibModules.submission_observer;
+      ctx.txt = { ...mod, submissions: obs.submissions, early: obs.earlyResults };
+    }
   }
   extensions.forEach(e=>e.init?.());
   const graph=nodes=>({nodes,getNodeById:id=>nodes.find(n=>String(n.id)===String(id)),setDirtyCanvas(){}});

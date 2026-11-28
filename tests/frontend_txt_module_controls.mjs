@@ -1,18 +1,12 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 
-const sourcePath = new URL("../web/js/txt_module_library.js", import.meta.url);
 let extension = null;
 globalThis.__txtModuleControlsApp = {
   graph: { setDirtyCanvas() {} },
   registerExtension(value) { extension = value; },
 };
-const source = fs.readFileSync(sourcePath, "utf8").replace(
-  'import { app } from "../../scripts/app.js";',
-  "const app = globalThis.__txtModuleControlsApp;",
-);
-vm.runInThisContext(source, { filename: sourcePath.pathname });
+loadLibModule("txt_module_library", null, { appExpr: "globalThis.__txtModuleControlsApp" });
 
 const modules = ["画面基础", "人物", "发型", "服装", "姿态动作", "场景", "摄影", "视觉表现"];
 const targets = [

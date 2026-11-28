@@ -1,17 +1,18 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { createVmContext, loadLibModule } from "./vm_loader.mjs";
 
 function load(file, exports, extra = {}) {
-  let source = fs.readFileSync(new URL(file, import.meta.url), "utf8");
-  source = source.replace('import { app } from "../../scripts/app.js";',
-    "const app = { registerExtension() {} };");
-  const context = vm.createContext({ ...extra });
-  vm.runInContext(source + "\nglobalThis.testApi = {" + exports + "};", context);
+  const context = createVmContext({
+    app: { registerExtension() {} },
+    ...extra,
+  });
+  context.testApi = loadLibModule(file, context, {
+    expose: exports.split(",").map((s) => s.trim()).filter(Boolean),
+  });
   return context;
 }
-const full = load("../web/js/preset_sync.js", "syncSceneLocationOptions, SCENE_LOCATIONS_BY_CATEGORY, SCENE_LOCATION_VALUES");
-const modular = load("../web/js/modular_nodes.js", "syncSceneOptions", {
+const full = load("preset_sync", "syncSceneLocationOptions, SCENE_LOCATIONS_BY_CATEGORY, SCENE_LOCATION_VALUES");
+const modular = load("modular_nodes", "syncSceneOptions", {
   __vividMuseZImagePromptData: full.__vividMuseZImagePromptData,
 });
 const categories = full.testApi.SCENE_LOCATIONS_BY_CATEGORY;

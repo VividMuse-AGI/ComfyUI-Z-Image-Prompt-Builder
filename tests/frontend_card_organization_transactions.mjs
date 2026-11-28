@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-const source = fs.readFileSync(new URL('../web/js/card_organization.js', import.meta.url), 'utf8');
+const source = fs.readFileSync(new URL('../web/js/lib/card_organization.mjs', import.meta.url), 'utf8');
 const api = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 const P = api.CARD_ORGANIZATION_PROPERTY, C = api.CONTENT_CARD_STORE, S = api.SHOOT_CARD_STORE;
 const card = name => ({kind:'vividmuse-content-card',version:1,module:'人物',name,values:{fixture:'keep'}});

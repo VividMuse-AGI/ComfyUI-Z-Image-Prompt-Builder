@@ -1,7 +1,7 @@
 import {
   CARD_ORGANIZATION_PROPERTY, cardIdentity, nodeOrganizationCards, readCardOrganization,
   organizeCards, planNodeFavorite, planNodeOrganizationReset, commitNodeCardOrganization,
-} from "./card_organization.js";
+} from "./card_organization.mjs";
 
 // Panel-local controls. No view preferences are serialized into workflow/cards.
 export function createOrganizationControls({node, parent, el, text, button, guarded,

@@ -1,11 +1,7 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
 import { test } from "node:test";
+import { createVmContext, loadLibModule } from "./vm_loader.mjs";
 
-const code = fs.readFileSync(new URL("../web/js/prompt_diagnostics.js", import.meta.url), "utf8")
-  .replace('import { app } from "../../scripts/app.js";', "")
-  .replace('import { api } from "../../scripts/api.js";', "");
 const zh = "第一段正文。\n\n第二段保留空行。";
 const en = "First paragraph.\n\nKeep the blank line.";
 const full = "VividMuse_ZImageChinesePromptBuilder";
@@ -42,8 +38,8 @@ function host({ compatible = true } = {}) {
       return { prompt_id: id };
     },
   };
-  const runtime = vm.createContext({ app, api, setTimeout: fn => timers.push(fn) });
-  vm.runInContext(`${code}\nglobalThis.qa = { resultSnapshot, details };`, runtime);
+  const runtime = createVmContext({ app, api, setTimeout: fn => timers.push(fn) });
+  runtime.qa = loadLibModule("prompt_diagnostics", runtime, { expose: ["resultSnapshot", "details"] });
   ext.init(); ext.setup();
   const event = (type, id, data = {}) => apiListeners.get(type)?.({ detail: { prompt_id: id, ...data } });
   const queue = async (id, early) => api.queuePrompt(0, await app.graphToPrompt(), {id, early});

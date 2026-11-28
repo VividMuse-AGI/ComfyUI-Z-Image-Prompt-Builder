@@ -200,9 +200,42 @@ class EnglishOutputTests(unittest.TestCase):
         self.assertEqual(
             outputs,
             {
-                "environment details: floating bubbles, aquatic plants, "
+                "featuring floating bubbles, aquatic plants, "
                 "and refracted light patterns."
             },
+        )
+
+    def test_english_grammar_scene_dedup_and_visual_conciseness(self):
+        builder = nodes.ZImageChinesePromptBuilder()
+        for preset in nodes.PRESET_OPTIONS[:-1]:
+            zh, _, _, en = builder.build_prompt(
+                预设=preset, 提示词密度="标准", 输出排版="按模块分段"
+            )
+            self.assertNotIn("a edge", en)
+            self.assertNotIn("illuminating face", en)
+            self.assertNotIn("from the side ", en)
+            self.assertNotIn("conditions", en)
+            visual_para = en.split("\n\n")[-1]
+            self.assertLessEqual(len(re.findall(r"\bwith\b", visual_para)), 3, (preset, visual_para))
+        hanfu_en = builder.build_prompt(
+            预设="古风汉服园林柔光写真", 提示词密度="标准", 输出排版="按模块分段"
+        )[3]
+        self.assertEqual(hanfu_en.count("Jiangnan garden"), 1)
+        beauty_zh = builder.build_prompt(
+            预设="影棚水光妆美容特写", 提示词密度="标准", 输出排版="按模块分段"
+        )[0]
+        self.assertTrue(beauty_zh.startswith("4:5竖构图，中画幅数码摄影，"))
+        self.assertNotIn("双脚均衡承重", beauty_zh)
+        collected = {}
+        standard_para = nodes.compose_prompt_text(
+            nodes.PRESETS[nodes.PRESET_OPTIONS[0]],
+            "标准",
+            separate_modules=True,
+            module_fragments=collected,
+        )
+        self.assertEqual(
+            standard_para.split("\n\n")[4].rstrip("。"),
+            collected["姿态动作"],
         )
 
 

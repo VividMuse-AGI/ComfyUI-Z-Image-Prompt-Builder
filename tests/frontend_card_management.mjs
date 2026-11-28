@@ -1,7 +1,5 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import vm from 'node:vm';
-import {withCardOrganizationImports} from './card_organization_vm.mjs';
+import {loadLibModule} from './vm_loader.mjs';
 import {organizationPanelCases} from './card_organization_ui_cases.mjs';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
@@ -27,14 +25,16 @@ class Element {
   close(){this.open=false;return this.fire('close');}
 }
 let confirmed=true, confirmHook=null, blob;
-const ctx = vm.createContext({console, app, setTimeout(fn){fn();}, clearTimeout(){}, Blob,
+import {createVmContext} from './vm_loader.mjs';
+const ctx = createVmContext({app, setTimeout(fn){fn();}, clearTimeout(){}, Blob,
   URL:{createObjectURL(b){blob=b;return 'blob:test';},revokeObjectURL(){}},
   document:{createElement:t=>new Element(t),body:new Element('body')},
   window:{confirm(){confirmHook?.();return confirmed;}}});
-for(const file of ['preset_sync','modular_nodes','workflow_tools']){
-  const code=withCardOrganizationImports(fs.readFileSync(new URL(`../web/js/${file}.js`,import.meta.url),'utf8'),ctx).replace('import { app } from "../../scripts/app.js";','').replaceAll('export function ','function ');
-  vm.runInContext(`(()=>{${code}\n${file==='workflow_tools'?'globalThis.cards={captureCard,saveCard,applyCard,filterCards,renameCard,cardDifference,validateCardPack,planCardPack,commitCardPack,openCardsPanel};':''}})()`,ctx);
-}
+loadLibModule('preset_sync', ctx);
+loadLibModule('modular_nodes', ctx);
+ctx.cards = loadLibModule('workflow_tools', ctx, {
+  expose: ['captureCard','saveCard','applyCard','filterCards','renameCard','cardDifference','validateCardPack','planCardPack','commitCardPack','openCardsPanel'],
+});
 const api=ctx.cards, json=x=>JSON.parse(JSON.stringify(x));
 for(const [name,input] of Object.entries(schemas))for(const ext of extensions)ext.beforeRegisterNodeDef?.(class {},{name,input});
 const create=async(kind='ChinesePromptBuilder')=>{

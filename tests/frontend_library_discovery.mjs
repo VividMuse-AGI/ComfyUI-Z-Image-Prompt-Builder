@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
 import {webcrypto} from "node:crypto";
-import {withCardOrganizationImports} from './card_organization_vm.mjs';
+import {createDefaultFetch, loadJsonData, loadLibModule} from './vm_loader.mjs';
 
-const read = name => fs.readFileSync(new URL(`../web/js/${name}.js`, import.meta.url), "utf8");
-const context = vm.createContext({crypto: webcrypto, TextEncoder, console, Blob});
-vm.runInContext(read("library_discovery_core").replaceAll("export ", "")
-  + "\nglobalThis.core={filterRecords,makeTxtRecords,LibraryPreferences,PREFERENCE_KEY};", context);
-const {filterRecords, makeTxtRecords, LibraryPreferences, PREFERENCE_KEY} = context.core;
+const read = name => fs.readFileSync(new URL(`../web/js/lib/${name}.mjs`, import.meta.url), "utf8");
+const context = vm.createContext({crypto: webcrypto, TextEncoder, console, Blob, URL, fetch: createDefaultFetch()});
+const core = loadLibModule("library_discovery_core", context);
+context.core = core;
+const {filterRecords, makeTxtRecords, LibraryPreferences, PREFERENCE_KEY} = core;
 const asJson = x => JSON.parse(JSON.stringify(x));
 const data = [
   {id:"b:pose:a", module:"姿态动作",field:"手部动作", title:"托腮",titleEn:"Resting cheek",zh:"手掌轻托脸颊",en:"hand supporting cheek",aliases:["托下巴"],tags:["柔和"]},
@@ -70,11 +70,16 @@ assert.equal(filterRecords(records,{view:"favorites",favorites:["b:obsolete:valu
 
 // Exercise real catalog and widget callbacks, not a second implementation of the mapper.
 context.app = {registerExtension(ext){this.extension=ext}};
-vm.runInContext(read("i18n_catalog").replace("export const EN_CATALOG", "globalThis.EN_CATALOG"),context);
-vm.runInContext(read("library_catalog").replace("export const LIBRARY_CATALOG", "globalThis.LIBRARY_CATALOG"),context);
+context.EN_CATALOG = loadJsonData("i18n_catalog.json");
+context.LIBRARY_CATALOG = loadJsonData("library_catalog.json");
+context.__vividMuseTestEnCatalog = context.EN_CATALOG;
+context.__vividMuseTestLibraryCatalog = context.LIBRARY_CATALOG;
 context.setTimeout = () => {};
-vm.runInContext(withCardOrganizationImports(read("library_discovery"),context).replace(/^import .*;\r?\n/gmu, "").replaceAll("export ","")
-  + "\nglobalThis.discovery={builtinRecords,applyRecord};",context);
+const discovery = loadLibModule("library_discovery", context, {
+  expose: ["builtinRecords", "applyRecord", "openDiscovery"],
+});
+context.discovery = discovery;
+context.openDiscovery = discovery.openDiscovery;
 for (const [module, fields] of Object.entries(context.LIBRARY_CATALOG.modules)) {
   const node={comfyClass:"VividMuse_ZImageChinesePromptBuilder", __vividMuseModuleWidget:{value:module},widgets:[]};
   let callbacks=0;

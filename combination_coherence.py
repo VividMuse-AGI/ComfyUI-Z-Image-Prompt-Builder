@@ -22,6 +22,33 @@ MODES = ('默认组合', '协调优先')
 INPUT = (list(MODES), {'default': MODES[0], 'tooltip':
     '仅协调允许随机变化的内置字段。指定内容保持原样；自定义文本不参与判断。切换模式可能改变相同种子的结果。'})
 
+RULE_METADATA = {
+    'crossed_legs_stool_support': {
+        'modules': ['姿态动作'],
+        'labels': ['盘腿与高脚椅支撑', 'Crossed legs / stool support'],
+    },
+    'standing_seated_legs': {
+        'modules': ['姿态动作'],
+        'labels': ['站姿与坐姿腿部动作', 'Standing / seated leg action'],
+    },
+    'standing_pigeon_legs': {
+        'modules': ['姿态动作'],
+        'labels': ['站姿与鸽子式伸展', 'Standing / pigeon stretch'],
+    },
+    'pool_pose_classroom_location': {
+        'modules': ['姿态动作', '场景'],
+        'labels': ['泳池动作与教室场景', 'Pool pose / classroom location'],
+    },
+    'camera_context': {
+        'modules': ['摄影'],
+        'labels': ['摄影上下文联动', 'Camera context update'],
+    },
+    'lighting_context': {
+        'modules': ['视觉表现'],
+        'labels': ['光线上下文联动', 'Lighting context update'],
+    },
+}
+
 
 def explanation(mode, coordination, scope):
     events = []

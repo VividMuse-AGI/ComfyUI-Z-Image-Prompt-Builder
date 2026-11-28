@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 
 function backendWidget(name, value = "") {
   return {
@@ -40,28 +39,28 @@ function widget(node, name) {
   return found;
 }
 
-async function loadScript(fileName, appName, apiSource) {
-  const sourcePath = new URL(`../web/js/${fileName}`, import.meta.url);
+async function loadScript(fileName, appName, exposeNames) {
+  const moduleName = fileName.replace(/\.(?:m?js)$/, "");
   let extension = null;
   globalThis[appName] = {
     graph: { setDirtyCanvas() {} },
     registerExtension(value) { extension = value; },
   };
-  let source = fs.readFileSync(sourcePath, "utf8").replace(
-    'import { app } from "../../scripts/app.js";',
-    `const app = globalThis.${appName};`,
-  );
-  source = `(function () {\n${source}\n${apiSource}\n})();`;
-  vm.runInThisContext(source, { filename: sourcePath.pathname });
+  delete globalThis.__testLibModules?.[moduleName];
+  const exports = loadLibModule(moduleName, null, {
+    appExpr: `globalThis.${appName}`,
+    expose: exposeNames,
+  });
   assert.ok(extension);
-  return extension;
+  return { extension, exports };
 }
 
-const txtExtension = await loadScript(
-  "txt_library.js",
+const { extension: txtExtension, exports: standaloneTxtApi } = await loadScript(
+  "txt_library.mjs",
   "__standaloneTxtApp",
-  `globalThis.__standaloneTxtApi = { importTxtPromptFile, applySelectedTxtPrompt, clearFreePrompt };`,
+  ["importTxtPromptFile", "applySelectedTxtPrompt", "clearFreePrompt"],
 );
+globalThis.__standaloneTxtApi = standaloneTxtApi;
 const txtNode = makeNode("VividMuse_ZImageTxtPromptLibrary", [
   backendWidget("自由提示词"),
   backendWidget("拼接位置", "添加到前置提示词后"),
@@ -99,13 +98,12 @@ assert.equal(widget(txtNode, "词库条目").value, oldTitle);
 assert.equal(widget(txtNode, "自由提示词").value, promptEntry.prompt);
 mode.value = "手动选择";
 
-const moduleExtension = await loadScript(
-  "txt_module_library.js",
+const { extension: moduleExtension, exports: standaloneModuleApi } = await loadScript(
+  "txt_module_library.mjs",
   "__standaloneModuleApp",
-  `globalThis.__standaloneModuleApi = {
-    importTxtModuleFile, applySelectedModuleEntry, clearCurrentModule, clearModuleLibrary,
-  };`,
+  ["importTxtModuleFile", "applySelectedModuleEntry", "clearCurrentModule", "clearModuleLibrary"],
 );
+globalThis.__standaloneModuleApi = standaloneModuleApi;
 const moduleNode = makeNode("VividMuse_ZImageTxtModuleLibrary", [
   backendWidget("模块类型", "人物"),
   backendWidget("模块提示词"),

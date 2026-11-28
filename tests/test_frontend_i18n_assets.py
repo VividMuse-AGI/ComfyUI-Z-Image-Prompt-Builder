@@ -26,6 +26,22 @@ class FrontendI18nAssetTests(unittest.TestCase):
         self.assertEqual([], missing, f"Missing English help documents: {missing}")
         self.assertEqual([], empty, f"Empty English help documents: {empty}")
 
+    def test_every_public_node_has_chinese_help(self):
+        node_keys = set(nodes.NODE_CLASS_MAPPINGS) | set(modular_nodes.NODE_CLASS_MAPPINGS)
+        self.assertEqual(11, len(node_keys))
+
+        missing = []
+        empty = []
+        for node_key in sorted(node_keys):
+            help_path = ROOT / "web" / "js" / "docs" / node_key / "zh.md"
+            if not help_path.is_file():
+                missing.append(str(help_path.relative_to(ROOT)))
+            elif not help_path.read_text(encoding="utf-8").strip():
+                empty.append(str(help_path.relative_to(ROOT)))
+
+        self.assertEqual([], missing, f"Missing Chinese help documents: {missing}")
+        self.assertEqual([], empty, f"Empty Chinese help documents: {empty}")
+
     def test_english_readme_limits_chinese_to_legacy_reference(self):
         readme = (ROOT / "README.en.md").read_text(encoding="utf-8")
         cjk = re.compile(r"[\u3400-\u9fff]")
@@ -50,7 +66,10 @@ class FrontendI18nAssetTests(unittest.TestCase):
 
     def test_generated_catalog_and_english_examples_exist(self):
         required = (
-            ROOT / "web" / "js" / "i18n_catalog.js",
+            ROOT / "web" / "js" / "data" / "i18n_catalog.json",
+            ROOT / "web" / "js" / "data" / "library_catalog.json",
+            ROOT / "web" / "js" / "lib" / "prompt_schema_catalog.mjs",
+            ROOT / "web" / "js" / "index.js",
             ROOT / "examples" / "TXT-prompt-library-example.en.txt",
             ROOT / "examples" / "TXT-module-library-example.en.txt",
         )

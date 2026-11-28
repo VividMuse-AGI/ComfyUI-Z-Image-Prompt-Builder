@@ -1,5 +1,6 @@
-import { app } from "../../scripts/app.js";
-import { RESOLUTION_CATALOG as CATALOG } from "./resolution_catalog.js";
+import { app } from "../../../scripts/app.js";
+import { RESOLUTION_CATALOG as CATALOG } from "./resolution_catalog.mjs";
+import { addHelperWidget, setWidgetVisibilityReason, refreshNode2Widgets, widgetByName } from "./widget_utils.mjs";
 
 const FULL = "VividMuse_ZImageChinesePromptBuilder";
 const CANVAS = "VividMuse_ZImageCanvasModule";
@@ -7,20 +8,16 @@ const EXPANDED = "vividMuseResolutionExpanded";
 const DEFAULTS = CATALOG.defaults;
 const PIXEL_MODE = CATALOG.pixelMode;
 const BUDGET_FIELD = "目标总像素（万）";
-// Display choices are independent of the persisted backend identifiers.
-// Fixed saved sizes remain readable but are no longer a selectable mode.
 const MODE_LABELS = {
   "原推荐尺寸": "使用已保存尺寸",
   "按总像素计算": "按像素计算",
   [PIXEL_MODE]: "保持比例计算（推荐）",
 };
 const SELECTABLE_MODES = [PIXEL_MODE, "按总像素计算"];
-const byName = (node, name) => node.widgets?.find(w => w.name === name);
 const typeOf = node => node.comfyClass || node.constructor?.type;
 const language = () => globalThis.__vividMuseZImageI18n?.activeLanguage() || "zh";
 const text = (zh, en, lang = language()) => lang === "en" ? en : zh;
 
-// Python uses ties-to-even; Math.round alone would disagree at exact halves.
 export function roundEven(value) {
   const floor = Math.floor(value);
   return value - floor === 0.5 ? floor + floor % 2 : Math.round(value);
@@ -56,19 +53,18 @@ export function calculatePixelResolution(aspect, budget, multiple) {
 
 export function previewResolution(node) {
   const backing = node.__vividMuseResolution?.backing;
-  const value = name => (backing?.[name] || byName(node, name))?.value ?? DEFAULTS[name];
+  const value = name => (backing?.[name] || widgetByName(node, name))?.value ?? DEFAULTS[name];
   if ((node.inputs || []).some(input => input.link != null &&
       ["画面比例", "预设", ...Object.keys(DEFAULTS)].includes(input.name))) return { status: "linked" };
-  let aspect = byName(node, "画面比例")?.value;
+  let aspect = widgetByName(node, "画面比例")?.value;
   if (aspect === "随机抽取") return { status: "random" };
-  let preset = byName(node, "预设")?.value || CATALOG.defaultPreset;
+  let preset = widgetByName(node, "预设")?.value || CATALOG.defaultPreset;
   preset = CATALOG.legacyPresets[preset] || preset;
   let fallback = false;
   if (aspect === "跟随预设" || aspect == null) {
     aspect = CATALOG.presetAspects[preset] || CATALOG.presetAspects[CATALOG.defaultPreset];
   } else if (!Object.hasOwn(CATALOG.sizes, aspect)) {
     fallback = true;
-    // Preserve each node's existing empty-canvas resolution contract.
     aspect = CATALOG.presetAspects[typeOf(node) === CANVAS ? CATALOG.defaultPreset : preset]
       || CATALOG.presetAspects[CATALOG.defaultPreset];
   }
@@ -96,30 +92,12 @@ function previewLabel(node, lang) {
     (preview.fallback ? text("（预设比例兜底）", " (preset fallback)", lang) : "") + suffix;
 }
 
-function visible(widget, show) {
-  if (!widget) return false;
-  const hidden = !show;
-  if (widget.__resolutionHidden === hidden) return false;
-  // Native widgets legitimately have no computeSize hook. Capture that undefined
-  // once; using ??= on show would save the temporary hidden-size hook instead.
-  if (!Object.hasOwn(widget, "__resolutionOriginalSize")) {
-    widget.__resolutionOriginalType = widget.type;
-    widget.__resolutionOriginalSize = widget.computeSize;
-  }
-  widget.options ??= {};
-  widget.hidden = hidden;
-  widget.options.hidden = hidden;
-  widget.type = hidden ? "hidden" : widget.__resolutionOriginalType;
-  widget.computeSize = hidden ? () => [0, -4] : widget.__resolutionOriginalSize;
-  widget.__resolutionHidden = hidden;
-  return true;
+export function visible(widget, show) {
+  return setWidgetVisibilityReason(widget, "resolution", show);
 }
 
 function invalidate(node, resize) {
-  const marker = { name: "__resolutionRefresh", type: "hidden", hidden: true,
-    options: { hidden: true, serialize: false } };
-  node.widgets.push(marker);
-  node.widgets.pop();
+  refreshNode2Widgets(node);
   if (resize) {
     const size = node.computeSize?.();
     if (size) node.setSize?.([Math.max(size[0], typeOf(node) === FULL ? 360 : 300), size[1]]);
@@ -140,8 +118,6 @@ export function refreshResolution(node, resize = true) {
   let changed = false;
   for (const [name, widget] of Object.entries(state.backing)) {
     changed = visible(widget, false) || changed;
-    // Old workflows keep their calculation until the user edits the budget.
-    // Keep serialized budgets in the old unit (10,000 pixels); only the UI uses MP.
     state.proxies[name].value = name === BUDGET_FIELD
       ? (mode !== PIXEL_MODE && preview.status === "ready"
         ? preview.size[0] * preview.size[1] / 1000000 : widget.value / 100)
@@ -160,21 +136,13 @@ export function refreshResolution(node, resize = true) {
   }
 }
 
-function helper(node, type, name, value, callback, options = {}) {
-  const widget = node.addWidget(type, name, value, callback, { ...options, serialize: false });
-  widget.serialize = false;
-  widget.options ??= {};
-  widget.options.serialize = false;
-  return widget;
-}
-
 export function installResolution(node) {
   if (![FULL, CANVAS].includes(typeOf(node)) || node.__vividMuseResolution) return;
-  const backing = Object.fromEntries(Object.keys(DEFAULTS).map(name => [name, byName(node, name)]));
+  const backing = Object.fromEntries(Object.keys(DEFAULTS).map(name => [name, widgetByName(node, name)]));
   if (Object.values(backing).some(w => !w)) return;
   node.properties ??= {};
   const proxies = {};
-  const toggle = helper(node, "button", "分辨率设置", null, () => {
+  const toggle = addHelperWidget(node, "button", "分辨率设置", null, () => {
     node.properties[EXPANDED] = !node.properties[EXPANDED];
     refreshResolution(node);
   });
@@ -195,7 +163,6 @@ export function installResolution(node) {
     } else if (name === "目标总像素") {
       options.tooltip = "用于按像素计算，每单位为 1024×1024 像素；宽高分别按整除倍数取整。需要严格保持比例时，请使用保持比例计算。";
     } else if (name === BUDGET_FIELD) {
-      // Scale both classic (step) and Node 2.0 (step2) number-widget options.
       for (const key of ["min", "max", "step", "step2", "default"]) {
         if (typeof options[key] === "number") options[key] /= 100;
       }
@@ -203,9 +170,9 @@ export function installResolution(node) {
       options.round = 0.01;
       options.tooltip = "1 MP = 100 万像素，输入 1、2、3 或 0.5。范围 0.1–16 MP；修改此项使用保持比例计算，整除后实际像素可能略有偏差。";
     } else if (name === "尺寸对齐倍数") {
-      options.tooltip = "宽度和高度都能被此数整除，例如 8、16、32、64。默认 8，支持 8–128 内的 4 的倍数；倍数越大，总像素偏差可能越大。修改已保存尺寸的此项会启用保持比例计算。";
+      options.tooltip = "宽度和高度都能被此数整除，例如 8、16、32、64。默认 16（适配 Z-Image 16 像素对齐），支持 8–128 内的 4 的倍数；倍数越大，总像素偏差可能越大。修改已保存尺寸的此项会启用保持比例计算。";
     }
-    proxies[name] = helper(node, type, display,
+    proxies[name] = addHelperWidget(node, type, display,
       name === BUDGET_FIELD ? backing[name].value / 100
         : name === "分辨率模式" ? MODE_LABELS[backing[name].value] : backing[name].value, value => {
       if (name === "分辨率模式") {
@@ -217,7 +184,6 @@ export function installResolution(node) {
         return;
       }
       if (name === "尺寸对齐倍数" && backing["分辨率模式"].value === "原推荐尺寸") {
-        // Editing a divisor must take effect even on legacy fixed-size workflows.
         const previous = previewResolution(node);
         if (previous.status === "ready")
           backing[BUDGET_FIELD].value = previous.size[0] * previous.size[1] / 10000;
@@ -232,22 +198,18 @@ export function installResolution(node) {
     proxies[name].tooltip = options.tooltip || backing[name].tooltip;
     if (name === "分辨率模式") proxies[name].__vividMuseLocalizedValue = lang => {
       const mode = backing[name].value;
-      // Nodes 2.0 renders unmatched values verbatim; the saved-size status is
-      // intentionally absent from the menu, so translate this helper value too.
       return mode === "原推荐尺寸" ? text("使用已保存尺寸", "Use Saved Dimensions", lang)
         : MODE_LABELS[mode] || mode;
     };
   }
   node.__vividMuseResolution = { backing, proxies, toggle };
-  // Only helpers move. Serialized inputs stay appended to preserve
-  // old positional widgets_values and the existing serialization guards.
-  const anchor = byName(node, "成像媒介");
+  const anchor = widgetByName(node, "成像媒介");
   if (anchor) for (const widget of [proxies[BUDGET_FIELD], proxies["尺寸对齐倍数"], toggle, proxies["分辨率模式"], proxies["目标总像素"]]) {
     node.widgets.splice(node.widgets.indexOf(widget), 1);
     node.widgets.splice(node.widgets.indexOf(anchor), 0, widget);
   }
   for (const name of ["画面比例", "预设", ...Object.keys(DEFAULTS)]) {
-    const widget = byName(node, name);
+    const widget = widgetByName(node, name);
     if (!widget) continue;
     const original = widget.callback;
     widget.callback = function () {
@@ -278,7 +240,7 @@ export function installResolution(node) {
 
 globalThis.__vividMuseResolution = { refresh: refreshResolution, defaults: DEFAULTS };
 app.registerExtension({
-  name: "VividMuse.ZImageResolutionSelector",
+  name: "VividMuse.ZImagePromptBuilder.ResolutionSelector",
   nodeCreated: installResolution,
   loadedGraphNode(node) { installResolution(node); refreshResolution(node); },
 });

@@ -23,6 +23,10 @@ class ResolutionSelectorTests(unittest.TestCase):
             optional = cls.INPUT_TYPES()["optional"]
             self.assertEqual(optional["分辨率模式"][1]["default"], r.PIXEL_BUDGET_MODE)
             self.assertEqual(optional["目标总像素（万）"][1]["default"], 100.0)
+            self.assertEqual(optional["尺寸对齐倍数"][1]["default"], 16)
+        for aspect in r.ASPECT_RESOLUTIONS:
+            w, h = r.calculate_pixel_resolution(aspect, 100.0, 16)
+            self.assertEqual((w % 16, h % 16), (0, 0), aspect)
         self.assertEqual(r.calculate_pixel_resolution("1:1方形构图"), (1000, 1000))
         for budget, expected in ((100, (896, 1120)), (200, (1280, 1600)), (300, (1536, 1920))):
             self.assertEqual(r.calculate_pixel_resolution("4:5竖构图", budget), expected)

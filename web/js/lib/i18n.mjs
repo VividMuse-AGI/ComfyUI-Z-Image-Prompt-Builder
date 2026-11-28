@@ -1,8 +1,6 @@
-import { app } from "../../scripts/app.js";
-import { EN_CATALOG } from "./i18n_catalog.js";
+import { app } from "../../../scripts/app.js";
 
 const SETTING_ID = "VividMuse.ZImagePromptBuilder.InterfaceLanguage";
-const TARGET_CLASSES = new Set(Object.keys(EN_CATALOG.nodeTitles));
 const NODE_TITLES_ZH = {
   VividMuse_ZImageChinesePromptBuilder: "Z-Image 中文提示词生成器",
   VividMuse_ZImageCanvasModule: "Z-Image 画面基础",
@@ -16,8 +14,11 @@ const NODE_TITLES_ZH = {
   VividMuse_ZImageTxtPromptLibrary: "Z-Image TXT提示词库",
   VividMuse_ZImageTxtModuleLibrary: "Z-Image TXT模块词库",
 };
+const TARGET_CLASSES = new Set(Object.keys(NODE_TITLES_ZH));
 
 let selectedLanguage = "auto";
+let catalogCache = globalThis.__vividMuseTestEnCatalog || null;
+let catalogPromise = null;
 const knownDefinitions = new Map();
 const knownNodeTypes = new Map();
 let libraryDefinitions = null;
@@ -38,6 +39,35 @@ function activeLanguage() {
     comfySetting("Comfy.Locale", globalThis.navigator?.language || "en"),
   ).toLowerCase();
   return comfyLocale.startsWith("zh") ? "zh" : "en";
+}
+
+function getCatalog() {
+  return catalogCache || globalThis.__vividMuseTestEnCatalog || null;
+}
+
+async function ensureCatalog() {
+  const existing = getCatalog();
+  if (existing) {
+    catalogCache = existing;
+    return existing;
+  }
+  if (!catalogPromise) {
+    catalogPromise = (async () => {
+      if (typeof globalThis.fetch !== "function") return null;
+      const url = new URL("../data/i18n_catalog.json", import.meta.url);
+      const response = await globalThis.fetch(url);
+      if (!response?.ok) {
+        throw new Error(`Failed to load i18n catalog (${response?.status})`);
+      }
+      catalogCache = await response.json();
+      return catalogCache;
+    })().catch((error) => {
+      catalogPromise = null;
+      console.warn("VividMuse i18n: unable to load English catalog", error);
+      return null;
+    });
+  }
+  return catalogPromise;
 }
 
 function nodeClass(node) {
@@ -68,7 +98,7 @@ function translateStatus(status) {
   return status;
 }
 
-function englishDynamicWidgetLabel(name) {
+function englishDynamicWidgetLabel(name, catalog) {
   let match = /^📚 TXT用户词库（(.+) · (\d+)条）$/u.exec(name);
   if (match) {
     const fileName = match[1] === "未命名" ? "Untitled" : match[1];
@@ -83,7 +113,7 @@ function englishDynamicWidgetLabel(name) {
 
   match = /^应用到(.+)模块（当前：(.+)）$/u.exec(name);
   if (match) {
-    const moduleLabel = EN_CATALOG.moduleLabels[match[1]] || match[1];
+    const moduleLabel = catalog?.moduleLabels?.[match[1]] || match[1];
     return `Apply to ${moduleLabel} Module (Current: ${translateStatus(match[2])})`;
   }
 
@@ -94,14 +124,14 @@ function englishDynamicWidgetLabel(name) {
   return undefined;
 }
 
-function englishWidgetLabel(widget) {
+function englishWidgetLabel(widget, catalog) {
   if (widget.serialize === false && typeof widget.__vividMuseDisplayText === "string") {
     const text = widget.__vividMuseDisplayText;
-    return EN_CATALOG.uiLabels[text] || englishDynamicWidgetLabel(text) || text;
+    return catalog?.uiLabels?.[text] || englishDynamicWidgetLabel(text, catalog) || text;
   }
-  return EN_CATALOG.widgetLabels[widget.name]
-    || EN_CATALOG.uiLabels[widget.name]
-    || englishDynamicWidgetLabel(widget.name)
+  return catalog?.widgetLabels?.[widget.name]
+    || catalog?.uiLabels?.[widget.name]
+    || englishDynamicWidgetLabel(widget.name, catalog)
     || widget.name;
 }
 
@@ -116,11 +146,12 @@ function installOptionLabeler(widget) {
     widget.__vividMuseI18nOptionLabeler = true;
   }
   const language = activeLanguage();
+  const catalog = getCatalog();
   widget.options.getOptionLabel = (value) => {
     const raw = value === null || value === undefined ? "" : String(value);
     const original = widget.__vividMuseI18nOriginalOptionLabeler;
-    if (language === "en") {
-      const translated = EN_CATALOG.optionLabels[widget.name]?.[raw];
+    if (language === "en" && catalog) {
+      const translated = catalog.optionLabels?.[widget.name]?.[raw];
       if (translated) return translated;
     }
     if (typeof original === "function") {
@@ -134,18 +165,17 @@ function installOptionLabeler(widget) {
   };
 }
 
-function localizeWidget(widget, language) {
+function localizeWidget(widget, language, catalog) {
   if (!widget) return;
-  // Some host dropdowns bypass getOptionLabel for a non-selectable saved value.
-  // Only non-serialized display helpers may localize the value itself.
-  if (widget.serialize === false && typeof widget.__vividMuseLocalizedValue === "function")
+  if (widget.serialize === false && typeof widget.__vividMuseLocalizedValue === "function") {
     widget.value = widget.__vividMuseLocalizedValue(language);
+  }
   remember(widget, "__vividMuseI18nOriginalTooltip", widget.tooltip);
   widget.label = widget.__vividMuseDynamicLabel?.(language)
-    ?? (language === "en" ? englishWidgetLabel(widget)
+    ?? (language === "en" && catalog ? englishWidgetLabel(widget, catalog)
       : (widget.serialize === false ? widget.__vividMuseDisplayText : undefined) ?? widget.name);
-  if (language === "en" && EN_CATALOG.tooltips[widget.name]) {
-    widget.tooltip = EN_CATALOG.tooltips[widget.name];
+  if (language === "en" && catalog?.tooltips?.[widget.name]) {
+    widget.tooltip = catalog.tooltips[widget.name];
   } else if (language === "zh") {
     widget.tooltip = widget.__vividMuseI18nOriginalTooltip;
   }
@@ -154,8 +184,7 @@ function localizeWidget(widget, language) {
   if (inputEl && typeof inputEl.placeholder === "string") {
     remember(inputEl, "__vividMuseI18nOriginalPlaceholder", inputEl.placeholder);
     const original = inputEl.__vividMuseI18nOriginalPlaceholder;
-    // Translate built-in hints only, never user text or third-party custom hints.
-    const translated = EN_CATALOG.widgetLabels[original] || EN_CATALOG.uiLabels[original];
+    const translated = catalog?.widgetLabels?.[original] || catalog?.uiLabels?.[original];
     if (translated) inputEl.placeholder = language === "en" ? translated : original;
   }
 }
@@ -176,34 +205,39 @@ function refreshNode2Widgets(node) {
 function localizeNode(node) {
   if (!isTargetNode(node)) return;
   const language = activeLanguage();
+  const catalog = getCatalog();
+  if (language === "en" && !catalog) {
+    ensureCatalog().then((loaded) => {
+      if (loaded) localizeAllNodes();
+    });
+    return;
+  }
   const className = nodeClass(node);
   const zhTitle = NODE_TITLES_ZH[className];
-  const enTitle = EN_CATALOG.nodeTitles[className];
+  const enTitle = catalog?.nodeTitles?.[className];
 
-  const canonicalTitles = new Set([zhTitle, enTitle]);
+  const canonicalTitles = new Set([zhTitle, enTitle].filter(Boolean));
   if (canonicalTitles.has(node.title)) {
-    node.title = language === "en" ? enTitle : zhTitle;
+    node.title = language === "en" && enTitle ? enTitle : zhTitle;
   }
 
-  for (const widget of node.widgets || []) localizeWidget(widget, language);
+  for (const widget of node.widgets || []) localizeWidget(widget, language, catalog);
   let slotsChanged = false;
   for (const input of node.inputs || []) {
     const label = language === "en"
-      ? EN_CATALOG.widgetLabels[input.name] || input.name
+      ? catalog?.widgetLabels?.[input.name] || input.name
       : input.name;
     slotsChanged ||= input.label !== label;
     input.label = label;
   }
   for (const output of node.outputs || []) {
     const label = language === "en"
-      ? EN_CATALOG.outputLabels[output.name] || output.name
+      ? catalog?.outputLabels?.[output.name] || output.name
       : output.name;
     slotsChanged ||= output.label !== label;
     output.label = label;
   }
 
-  // Nodes 2.0 uses shallow slot arrays; its rename event refreshes their labels
-  // without replacing slot objects, changing indices, or touching connections.
   if (slotsChanged && node.graph && node.id != null) {
     node.graph.trigger?.("node:slot-label:changed", { nodeId: node.id });
   }
@@ -236,10 +270,6 @@ function localizeAllNodes() {
     nodeType.title = definition.display_name;
     nodeType.category = definition.category;
   }
-  // The Vue library copies V1 definitions, so changing the registration-hook
-  // object alone cannot refresh search results. Keep all definitions (including
-  // other packs) and use the frontend's existing registry refresh when available.
-  // This method is version-dependent: never reload/re-register nodes as fallback.
   if (libraryDefinitions && typeof app.updateVueAppNodeDefs === "function") {
     app.updateVueAppNodeDefs(Object.fromEntries(
       libraryDefinitions.map((definition) => [definition.name, definition]),
@@ -258,15 +288,22 @@ function inputSpecs(nodeData) {
 function localizeDefinition(nodeData) {
   if (!nodeData || !TARGET_CLASSES.has(nodeData.name)) return;
   const language = activeLanguage();
+  const catalog = getCatalog();
+  if (language === "en" && !catalog) {
+    ensureCatalog().then((loaded) => {
+      if (loaded) localizeAllNodes();
+    });
+    return;
+  }
   remember(nodeData, "__vividMuseI18nOriginalDisplayName", nodeData.display_name);
   remember(nodeData, "__vividMuseI18nOriginalDescription", nodeData.description);
   remember(nodeData, "__vividMuseI18nOriginalCategory", nodeData.category);
 
-  if (language === "en") {
-    nodeData.display_name = EN_CATALOG.nodeTitles[nodeData.name];
-    nodeData.description = EN_CATALOG.nodeDescriptions[nodeData.name]
+  if (language === "en" && catalog) {
+    nodeData.display_name = catalog.nodeTitles?.[nodeData.name] || nodeData.__vividMuseI18nOriginalDisplayName;
+    nodeData.description = catalog.nodeDescriptions?.[nodeData.name]
       || nodeData.description;
-    nodeData.category = EN_CATALOG.categoryLabels[nodeData.category]
+    nodeData.category = catalog.categoryLabels?.[nodeData.category]
       || nodeData.category;
   } else {
     nodeData.display_name = nodeData.__vividMuseI18nOriginalDisplayName;
@@ -279,9 +316,9 @@ function localizeDefinition(nodeData) {
     spec[1] ??= {};
     remember(spec[1], "__vividMuseI18nOriginalDisplayName", spec[1].display_name);
     remember(spec[1], "__vividMuseI18nOriginalTooltip", spec[1].tooltip);
-    if (language === "en") {
-      spec[1].display_name = EN_CATALOG.widgetLabels[name] || name;
-      if (EN_CATALOG.tooltips[name]) spec[1].tooltip = EN_CATALOG.tooltips[name];
+    if (language === "en" && catalog) {
+      spec[1].display_name = catalog.widgetLabels?.[name] || name;
+      if (catalog.tooltips?.[name]) spec[1].tooltip = catalog.tooltips[name];
     } else {
       spec[1].display_name = spec[1].__vividMuseI18nOriginalDisplayName;
       spec[1].tooltip = spec[1].__vividMuseI18nOriginalTooltip;
@@ -291,9 +328,10 @@ function localizeDefinition(nodeData) {
 
 function translateMessage(message) {
   if (activeLanguage() !== "en") return String(message);
+  const catalog = getCatalog();
   const text = String(message);
-  const catalogLabel = EN_CATALOG.widgetLabels[text] || EN_CATALOG.uiLabels[text]
-    || EN_CATALOG.moduleLabels[text];
+  const catalogLabel = catalog?.widgetLabels?.[text] || catalog?.uiLabels?.[text]
+    || catalog?.moduleLabels?.[text];
   if (catalogLabel) return catalogLabel;
   const exact = {
     "当前范围没有候选": "No candidates in the current scope",
@@ -333,6 +371,8 @@ function translateMessage(message) {
 
 globalThis.__vividMuseZImageI18n = {
   activeLanguage,
+  getCatalog,
+  ensureCatalog,
   localizeNode,
   localizeAllNodes,
   translateMessage,
@@ -358,16 +398,30 @@ app.registerExtension({
         defaultValue: "auto",
         onChange(value) {
           selectedLanguage = String(value || "auto");
+          if (activeLanguage() === "en" && !getCatalog()) {
+            return ensureCatalog().then(() => localizeAllNodes());
+          }
           localizeAllNodes();
+          return undefined;
         },
       });
     }
+    if (activeLanguage() === "en") {
+      if (!getCatalog()) {
+        return ensureCatalog().then(() => localizeAllNodes());
+      }
+      localizeAllNodes();
+    }
+    return undefined;
   },
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (!TARGET_CLASSES.has(nodeData?.name)) return;
     knownDefinitions.set(nodeData.name, nodeData);
     knownNodeTypes.set(nodeData.name, nodeType);
     localizeDefinition(nodeData);
+    if (activeLanguage() === "en" && !getCatalog()) {
+      ensureCatalog().then(() => localizeAllNodes());
+    }
   },
   beforeRegisterVueAppNodeDefs(definitions) {
     libraryDefinitions = definitions;
@@ -376,11 +430,17 @@ app.registerExtension({
   nodeCreated(node) {
     if (!isTargetNode(node)) return;
     localizeNode(node);
+    if (activeLanguage() === "en" && !getCatalog()) {
+      ensureCatalog().then(() => localizeAllNodes());
+    }
     globalThis.setTimeout?.(() => localizeNode(node), 0);
   },
   loadedGraphNode(node) {
     if (!isTargetNode(node)) return;
     localizeNode(node);
+    if (activeLanguage() === "en" && !getCatalog()) {
+      ensureCatalog().then(() => localizeAllNodes());
+    }
     globalThis.setTimeout?.(() => localizeNode(node), 0);
   },
 });

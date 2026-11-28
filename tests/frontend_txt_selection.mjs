@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 
 const definitions = [];
 globalThis.__txtSelectionApp = {
@@ -17,15 +16,18 @@ async function deliver(node, record) {
   resultListeners.get('executed')({detail:{prompt_id,node:'1',output:{vividmuse_txt_selection:[{
     algorithm:'python-random-v1',kind:node.comfyClass.includes('TxtModule')?'module':'prompt',mode:'随机抽取',index:0,...record}]}}});
 }
-function load(file, exports = "") {
-  let code = fs.readFileSync(new URL(`../web/js/${file}`, import.meta.url), "utf8")
-    .replace('import { app } from "../../scripts/app.js";', 'const app = globalThis.__txtSelectionApp;')
-    .replace('import { api } from "../../scripts/api.js";', 'const api = globalThis.__txtSelectionApi;');
-  vm.runInThisContext(`(function(){${code}\n${exports}})();`, { filename: file });
-}
-load("txt_library.js", "globalThis.__promptTools = { importTxtPromptFile, clearTxtPromptLibrary, applySelectedTxtPrompt, clearFreePrompt }; ");
-load("txt_module_library.js", "globalThis.__moduleTools = { importTxtModuleFile, clearModuleLibrary, applySelectedModuleEntry, clearCurrentModule }; ");
-load("txt_selection.js");
+globalThis.__promptTools = loadLibModule("txt_library", null, {
+  appExpr: "globalThis.__txtSelectionApp",
+  expose: ["importTxtPromptFile", "clearTxtPromptLibrary", "applySelectedTxtPrompt", "clearFreePrompt"],
+});
+globalThis.__moduleTools = loadLibModule("txt_module_library", null, {
+  appExpr: "globalThis.__txtSelectionApp",
+  expose: ["importTxtModuleFile", "clearModuleLibrary", "applySelectedModuleEntry", "clearCurrentModule"],
+});
+loadLibModule("txt_selection", null, {
+  appExpr: "globalThis.__txtSelectionApp",
+  apiExpr: "globalThis.__txtSelectionApi",
+});
 function make(kind, reverse = false) {
   const node = {
     comfyClass: kind === "module" ? "VividMuse_ZImageTxtModuleLibrary" : "VividMuse_ZImageTxtPromptLibrary",
@@ -91,7 +93,7 @@ for (const reverse of [false, true]) {
     set(node, "随机种子", Number.MAX_SAFE_INTEGER);
     assert.equal(w(node, body).value, "手动草稿");
     assert.equal(w(node, body).hidden, true);
-    assert.equal(w(node, "随机种子").hidden, undefined);
+    assert.equal(Boolean(w(node, "随机种子").hidden), false);
     const apply = kind === "prompt" ? __promptTools.applySelectedTxtPrompt : __moduleTools.applySelectedModuleEntry;
     assert.equal(apply(node), false);
     assert.equal((kind === "prompt" ? __promptTools.clearFreePrompt : __moduleTools.clearCurrentModule)(node), false);
@@ -140,7 +142,7 @@ for (const reverse of [false, true]) {
     assert.equal(JSON.parse(apiSnapshot).entries.length, 2); // Frozen queued input.
     set(node, "选择模式", "手动选择");
     assert.equal(w(node, body).value, "手动草稿");
-    assert.equal(w(node, body).hidden, undefined);
+    assert.equal(Boolean(w(node, body).hidden), false);
     if (kind === "module") assert.equal(w(node, "模块类型").value, "人物");
     assert.equal(w(node, "随机种子").hidden, true);
     // Restore a pre-output-layout workflow, with a saved legacy properties library.

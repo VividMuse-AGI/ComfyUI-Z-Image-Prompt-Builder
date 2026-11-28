@@ -102,7 +102,5 @@ class ContentExpansionTests(unittest.TestCase):
         self.assertEqual(len(locations), len(set(locations)))
         self.assertTrue(set(locations).issubset(n.FIELD_OPTIONS["场景地点"]))
         source = TARGET.read_text(encoding="utf-8")
-        start = source.index("const SCENE_LOCATIONS_BY_CATEGORY = ")
-        end = source.index("const PRESETS = ", start)
-        self.assertEqual(source[start:end], render_catalog())
+        self.assertEqual(source, render_catalog())
         self.assertIn("临街咖啡馆窗景", n.FIELD_OPTIONS["场景地点"])

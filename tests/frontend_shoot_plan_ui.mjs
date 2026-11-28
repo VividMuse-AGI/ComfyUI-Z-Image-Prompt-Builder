@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import vm from "node:vm";
-import {withCardOrganizationImports} from './card_organization_vm.mjs';
-import {organizationPanelCases} from './card_organization_ui_cases.mjs';
 import {execFileSync} from "node:child_process";
 import {fileURLToPath} from "node:url";
+import {createVmContext, loadJsonData, loadLibModule} from "./vm_loader.mjs";
+import {organizationPanelCases} from "./card_organization_ui_cases.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const schemas = JSON.parse(execFileSync(process.env.PYTHON || "python", ["-c", `
@@ -38,7 +37,7 @@ class Element {
   close() { this.open = false; return this.fire("close"); }
 }
 let language = "zh", confirmed = true, confirmHook = null;
-const ctx = vm.createContext({console, app, Blob,
+const ctx = createVmContext({app, Blob,
   URL: {createObjectURL(blob) {const url = `blob:${blobs.size}`; blobs.set(url, blob); return url;}, revokeObjectURL(url) {blobs.delete(url);}},
   setTimeout(fn) { fn(); }, clearTimeout() {},
   document: {createElement: tag => new Element(tag), createTextNode: text => Object.assign(new Element("text"), {textContent: text}), body: new Element("body")},
@@ -46,14 +45,10 @@ const ctx = vm.createContext({console, app, Blob,
 });
 ctx.__vividMuseZImageI18n = {activeLanguage: () => language, localizeNode() {}, translateMessage: value => value};
 for (const file of ["preset_sync", "modular_nodes", "workflow_tools", "shoot_plan_core", "shoot_plan_cards"]) {
-  const original = fs.readFileSync(new URL(`../web/js/${file}.js`, import.meta.url), "utf8");
+  const original = fs.readFileSync(new URL(`../web/js/lib/${file}.mjs`, import.meta.url), "utf8");
   if (file === "shoot_plan_cards") assert.ok(!/\.innerHTML\s*=|insertAdjacentHTML\s*\(/.test(original));
-  let code = withCardOrganizationImports(original, ctx).replace(/import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];/g, "")
-    .replaceAll("export function ", "function ").replaceAll("export const ", "const ");
-  const names = [...original.matchAll(/export (?:function|const) (\w+)/g)].map(match => match[1]);
-  if (file === "shoot_plan_cards") code = `const {${Object.keys(ctx.shootCore).join(",")}} = globalThis.shootCore;\n${code}`;
-  const expose = file === "shoot_plan_core" ? `globalThis.shootCore = {${names.join(",")}};` : "";
-  vm.runInContext(`(()=>{${code}\n${expose}})()`, ctx, {filename: file});
+  const mod = loadLibModule(file, ctx);
+  if (file === "shoot_plan_core") ctx.shootCore = mod;
 }
 for (const [name, input] of Object.entries(schemas)) {
   const Type = class {};
@@ -238,11 +233,9 @@ for (const corrupt of [{unexpected: "not an array"}, [{kind: "broken"}]]) {
   assert.equal(state(node), before);
 }
 // Load the real translation catalog and extension, not a fake English label map.
-const catalogSource = fs.readFileSync(new URL("../web/js/i18n_catalog.js", import.meta.url), "utf8").replace("export const EN_CATALOG", "const EN_CATALOG");
-vm.runInContext(`(()=>{${catalogSource}\nglobalThis.testEnglishCatalog = EN_CATALOG;})()`, ctx);
-const i18nSource = fs.readFileSync(new URL("../web/js/i18n.js", import.meta.url), "utf8")
-  .replace(/import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];/g, "");
-vm.runInContext(`(()=>{const EN_CATALOG = globalThis.testEnglishCatalog;\n${i18nSource}})()`, ctx);
+ctx.testEnglishCatalog = loadJsonData("i18n_catalog.json");
+ctx.__vividMuseTestEnCatalog = ctx.testEnglishCatalog;
+loadLibModule("i18n", ctx);
 // English action names, field labels and values use the same handlers and persistence.
 language = "en"; const english = await create(); panel = open(english);
 input(panel, "Card name (up to 80 characters)").value = "English plan";

@@ -1,22 +1,10 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 
-const sourcePath = new URL("../web/js/preset_sync.js", import.meta.url);
-let source = fs.readFileSync(sourcePath, "utf8").replace(
-  'import { app } from "../../scripts/app.js";',
-  "const app = { graph: { setDirtyCanvas() {} }, registerExtension() {} };",
-);
-source += [
-  "",
-  "globalThis.__dependentOptionsApi = {",
-  "  syncThemeOptions,",
-  "  syncEthnicityBranchOptions,",
-  "  syncSceneLocationOptions,",
-  "};",
-  "",
-].join("\n");
-vm.runInThisContext(source, { filename: sourcePath.pathname });
+globalThis.app = { graph: { setDirtyCanvas() {} }, registerExtension() {} };
+globalThis.__dependentOptionsApi = loadLibModule("preset_sync", null, {
+  expose: ["syncThemeOptions", "syncEthnicityBranchOptions", "syncSceneLocationOptions"],
+});
 
 const cases = [
   {

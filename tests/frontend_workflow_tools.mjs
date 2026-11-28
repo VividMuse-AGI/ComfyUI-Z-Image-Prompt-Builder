@@ -1,13 +1,11 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import vm from "node:vm";
-import {withCardOrganizationImports} from './card_organization_vm.mjs';
+import {createVmContext, loadLibModule} from './vm_loader.mjs';
 
-const context = vm.createContext({console, setTimeout, clearTimeout});
+const context = createVmContext({setTimeout, clearTimeout});
 context.app = {registerExtension(e) { this.extension = e; }, graph: {setDirtyCanvas() {}}};
-const toolsSource=withCardOrganizationImports(fs.readFileSync(new URL("../web/js/workflow_tools.js",import.meta.url),"utf8"),context)
-  .replace('import { app } from "../../scripts/app.js";',"").replaceAll("export function ","function ");
-vm.runInContext(toolsSource + "\nglobalThis.api={capturePreset,validatePreset,applyUserPreset,lockFields,findConflicts};",context);
+context.api = loadLibModule("workflow_tools", context, {
+  expose: ["capturePreset", "validatePreset", "applyUserPreset", "lockFields", "findConflicts"],
+});
 const api=context.api;
 const widget=(name,value,choices)=>({name,value,options:choices?{values:choices}:{}});
 const node={comfyClass:"VividMuse_ZImageChinesePromptBuilder",properties:{},
@@ -42,11 +40,11 @@ api.lockFields(node,["写真主题"]);
 assert.equal(node.widgets[4].value,"树林");
 
 // Real full-node randomization must preserve locked fields and free text.
-const fullContext=vm.createContext({console,Math,Set,Map});
+const fullContext=createVmContext({Math,Set,Map});
 fullContext.app={registerExtension(){},graph:{setDirtyCanvas(){}}};
-let fullSource=fs.readFileSync(new URL("../web/js/preset_sync.js",import.meta.url),"utf8")
-  .replace('import { app } from "../../scripts/app.js";',"");
-vm.runInContext(fullSource+"\nglobalThis.randomApi={prepareRandomCombination,FIELD_NAMES};",fullContext);
+fullContext.randomApi = loadLibModule("preset_sync", fullContext, {
+  expose: ["prepareRandomCombination", "FIELD_NAMES"],
+});
 const randomNode={properties:{vividMuseRandomLocks:["鞋履"]},widgets:[
   widget("随机范围","跨风格混搭（全部字段）"),widget("随机种子",1),widget("自由提示词","keep me"),
   ...fullContext.randomApi.FIELD_NAMES.map(name=>widget(name,"不使用",["不使用","随机抽取","靴子"]))

@@ -1,30 +1,25 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import vm from "node:vm";
+import { loadLibModule } from "./vm_loader.mjs";
 
-const sourcePath = new URL("../web/js/txt_library.js", import.meta.url);
 let registeredExtension = null;
 globalThis.__txtTestApp = {
   graph: { setDirtyCanvas() {} },
   registerExtension(extension) { registeredExtension = extension; },
 };
-let source = fs.readFileSync(sourcePath, "utf8").replace(
-  'import { app } from "../../scripts/app.js";',
-  "const app = globalThis.__txtTestApp;",
-);
-source += `
-globalThis.__txtLibraryApi = {
-  parseTxtPromptLibrary,
-  installTxtLibraryWidgets,
-  importTxtPromptFile,
-  applySelectedTxtPrompt,
-  setTxtLibraryExpanded,
-  clearFreePrompt,
-  clearTxtPromptLibrary,
-};
-`;
-vm.runInThisContext(source, { filename: sourcePath.pathname });
-const api = globalThis.__txtLibraryApi;
+const api = loadLibModule("txt_library", null, {
+  appExpr: "globalThis.__txtTestApp",
+  expose: [
+    "parseTxtPromptLibrary",
+    "installTxtLibraryWidgets",
+    "importTxtPromptFile",
+    "applySelectedTxtPrompt",
+    "setTxtLibraryExpanded",
+    "clearFreePrompt",
+    "clearTxtPromptLibrary",
+  ],
+});
+globalThis.__txtLibraryApi = api;
 assert.ok(registeredExtension);
 
 function makeNode() {
